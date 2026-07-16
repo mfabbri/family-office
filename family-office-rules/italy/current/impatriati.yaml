@@ -1,0 +1,27 @@
+id: italy.impatriati.current
+jurisdiction: IT
+description: Regime impatriati modellato come evento fiscale parametrico. Non calcola IRPEF.
+source:
+  title: D.Lgs. 27 dicembre 2023, n. 209, art. 5
+  url: https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticolo?art.codiceRedazionale=23G00222&art.dataPubblicazioneGazzetta=2023-12-28&art.flagTipoArticolo=0&art.idArticolo=5&art.idGruppo=2&art.idSottoArticolo=1&art.idSottoArticolo1=10&art.progressivo=0&art.versione=1
+regimes:
+  legacy_pre_2024:
+    description: Regime previgente salvaguardato per trasferimenti anagrafici entro il 31 dicembre 2023. Parametri personali da validare nel workspace.
+    default_taxable_income_share: 0.30
+    status: planning_assumption_requires_validation
+  new_2024:
+    description: Nuovo regime art. 5 D.Lgs. 209/2023 per trasferimenti dal periodo d'imposta 2024.
+    default_taxable_income_share: 0.50
+    favorable_family_taxable_income_share: 0.40
+    annual_income_cap: 600000
+    ordinary_duration_years: 5
+    status: statutory_model
+inputs:
+  - gross_income
+  - tax_year
+  - regime
+  - taxable_income_share
+outputs:
+  - taxable_income
+  - tax_event
+status: draft_requires_professional_validation

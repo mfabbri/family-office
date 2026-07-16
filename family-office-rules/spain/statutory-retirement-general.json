@@ -1,0 +1,219 @@
+{
+  "schema_version": "spanish-statutory-pension-rule-pack/v1",
+  "rule_pack_id": "es.seguridad-social.statutory-retirement.general.2026-baseline.v1",
+  "jurisdiction": "ES",
+  "currency": "EUR",
+  "status": "baseline_not_official_calculation",
+  "valid_from": "2026-01-01",
+  "valid_to": null,
+  "source_refs": [
+    {
+      "source_id": "boe.lgss.rdl-8-2015.consolidated",
+      "title": "Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724",
+      "retrieved_on": "2026-07-16",
+      "provisions": [
+        "Articulo 205",
+        "Articulo 210",
+        "Disposicion transitoria septima",
+        "Disposicion transitoria novena",
+        "Disposicion transitoria cuadragesima"
+      ]
+    }
+  ],
+  "scope": {
+    "benefit": "contributory_old_age_pension",
+    "scenario": "ordinary_retirement",
+    "regime": "general",
+    "included": [
+      "ordinary statutory retirement age",
+      "minimum contribution access requirements",
+      "base reguladora transition parameters",
+      "accrued pension percentage by contribution months"
+    ],
+    "excluded": [
+      "early retirement",
+      "deferred retirement",
+      "EU coordination",
+      "taxation",
+      "minimum and maximum pension caps",
+      "supplements",
+      "gap integration",
+      "base revaluation"
+    ]
+  },
+  "eligibility": {
+    "minimum_total_contribution_months": 180,
+    "specific_contribution_months_within_lookback": 24,
+    "specific_contribution_lookback_months": 180
+  },
+  "ordinary_retirement_age_schedule": [
+    {
+      "from_year": 2026,
+      "to_year": 2026,
+      "minimum_contribution_months_for_age_65": 459,
+      "age_if_minimum_met": {
+        "years": 65,
+        "months": 0
+      },
+      "standard_age": {
+        "years": 66,
+        "months": 10
+      },
+      "source_provision": "Disposicion transitoria septima"
+    },
+    {
+      "from_year": 2027,
+      "to_year": null,
+      "minimum_contribution_months_for_age_65": 462,
+      "age_if_minimum_met": {
+        "years": 65,
+        "months": 0
+      },
+      "standard_age": {
+        "years": 67,
+        "months": 0
+      },
+      "source_provision": "Disposicion transitoria septima"
+    }
+  ],
+  "base_reguladora_transition": [
+    {
+      "from_year": 2026,
+      "to_year": 2026,
+      "lookback_months": 304,
+      "selected_highest_bases": 302,
+      "divisor": "352.33",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2027,
+      "to_year": 2027,
+      "lookback_months": 308,
+      "selected_highest_bases": 304,
+      "divisor": "354.67",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2028,
+      "to_year": 2028,
+      "lookback_months": 312,
+      "selected_highest_bases": 306,
+      "divisor": "357.00",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2029,
+      "to_year": 2029,
+      "lookback_months": 316,
+      "selected_highest_bases": 308,
+      "divisor": "359.33",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2030,
+      "to_year": 2030,
+      "lookback_months": 320,
+      "selected_highest_bases": 310,
+      "divisor": "361.67",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2031,
+      "to_year": 2031,
+      "lookback_months": 324,
+      "selected_highest_bases": 312,
+      "divisor": "364.00",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2032,
+      "to_year": 2032,
+      "lookback_months": 328,
+      "selected_highest_bases": 314,
+      "divisor": "366.33",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2033,
+      "to_year": 2033,
+      "lookback_months": 332,
+      "selected_highest_bases": 316,
+      "divisor": "368.67",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2034,
+      "to_year": 2034,
+      "lookback_months": 336,
+      "selected_highest_bases": 318,
+      "divisor": "371.00",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2035,
+      "to_year": 2035,
+      "lookback_months": 340,
+      "selected_highest_bases": 320,
+      "divisor": "373.33",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    },
+    {
+      "from_year": 2036,
+      "to_year": 2036,
+      "lookback_months": 344,
+      "selected_highest_bases": 322,
+      "divisor": "375.67",
+      "source_provision": "Disposicion transitoria cuadragesima"
+    }
+  ],
+  "pension_percentage": {
+    "first_15_years_rate": "0.50",
+    "first_15_years_months": 180,
+    "additional_month_schedule": [
+      {
+        "from_year": 2023,
+        "to_year": 2026,
+        "segments": [
+          {
+            "from_additional_month": 1,
+            "to_additional_month": 49,
+            "monthly_rate": "0.0021"
+          },
+          {
+            "from_additional_month": 50,
+            "to_additional_month": 258,
+            "monthly_rate": "0.0019"
+          }
+        ],
+        "source_provision": "Disposicion transitoria novena"
+      },
+      {
+        "from_year": 2027,
+        "to_year": null,
+        "segments": [
+          {
+            "from_additional_month": 1,
+            "to_additional_month": 248,
+            "monthly_rate": "0.0019"
+          },
+          {
+            "from_additional_month": 249,
+            "to_additional_month": 264,
+            "monthly_rate": "0.0018"
+          }
+        ],
+        "source_provision": "Disposicion transitoria novena"
+      }
+    ],
+    "maximum_rate": "1.00",
+    "source_provision": "Articulo 210"
+  },
+  "limitations": [
+    "Baseline rule pack for deterministic loading and validation only; it does not estimate a pension amount.",
+    "Ordinary retirement only; early, deferred and special regimes are excluded.",
+    "Does not encode EU coordination, taxation, caps, supplements, gap integration or base revaluation.",
+    "Accrued pension percentage is encoded only for ordinary retirement and does not calculate the base reguladora or pension amount.",
+    "Not an official Seguridad Social calculation or legal advice."
+  ]
+}

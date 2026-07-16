@@ -1,0 +1,21 @@
+{
+  "personal": {
+    "current_age": 55,
+    "target_retirement_age": 62
+  },
+  "cashflow": {
+    "family_expenses_yearly": 80000,
+    "retirement_income_yearly": 0,
+    "net_salary_monthly": 5000,
+    "salary_months": 14,
+    "spouse_net_salary_monthly": 0,
+    "spouse_salary_months": 0,
+    "rental_income_monthly_net": 0
+  },
+  "returns": {
+    "scenario": "prudent",
+    "nominal_return": 0.03,
+    "nominal_volatility": 0.10
+  },
+  "notes": "Copiare in base-assumptions.json e compilare dati reali."
+}

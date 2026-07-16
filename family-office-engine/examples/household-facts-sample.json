@@ -1,0 +1,87 @@
+{
+  "as_of_date": "2026-01-01",
+  "data_gaps": [],
+  "economic_roles": [
+    {
+      "person_id": "person_self",
+      "role": "primary_earner",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "person_id": "person_spouse",
+      "role": "secondary_earner",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    }
+  ],
+  "household_id": "synthetic_household",
+  "persons": [
+    {
+      "birth_year": 1971,
+      "notes": "Synthetic fixture person.",
+      "person_id": "person_self",
+      "role": "self"
+    },
+    {
+      "birth_year": 1974,
+      "notes": "Synthetic fixture spouse.",
+      "person_id": "person_spouse",
+      "role": "spouse"
+    },
+    {
+      "birth_year": 2012,
+      "notes": "Synthetic fixture child.",
+      "person_id": "person_child",
+      "role": "child"
+    }
+  ],
+  "record_type": "HouseholdFacts",
+  "relationships": [
+    {
+      "from_person_id": "person_self",
+      "relationship_id": "rel_self_spouse",
+      "relationship_type": "spouse",
+      "to_person_id": "person_spouse",
+      "valid_from": "2000-01-01",
+      "valid_to": null
+    },
+    {
+      "from_person_id": "person_self",
+      "relationship_id": "rel_self_child",
+      "relationship_type": "parent",
+      "to_person_id": "person_child",
+      "valid_from": "2012-01-01",
+      "valid_to": null
+    }
+  ],
+  "relevant_dates": [
+    {
+      "date": "2033-01-01",
+      "date_id": "self_target_retirement",
+      "date_type": "target_retirement",
+      "person_id": "person_self"
+    }
+  ],
+  "schema_version": "household-facts/v1",
+  "tax_residences": [
+    {
+      "country": "IT",
+      "person_id": "person_self",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "country": "IT",
+      "person_id": "person_spouse",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "country": "IT",
+      "person_id": "person_child",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    }
+  ]
+}

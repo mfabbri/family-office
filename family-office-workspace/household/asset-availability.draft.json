@@ -1,0 +1,26 @@
+{
+  "as_of_date": null,
+  "classifications": [
+    {
+      "asset_class": null,
+      "asset_id": null,
+      "availability_as_of_date": null,
+      "classification_id": null,
+      "constraints": [
+        "unknown"
+      ],
+      "currency": null,
+      "first_available_date": null,
+      "jurisdiction": null,
+      "liquidity_tier": null,
+      "notes": null,
+      "provenance": null,
+      "risk_level": null,
+      "tax_treatment": "unknown"
+    }
+  ],
+  "data_gaps": [],
+  "household_id": null,
+  "record_type": "AssetAvailability",
+  "schema_version": "asset-availability/v1"
+}

@@ -1,0 +1,136 @@
+{
+  "as_of_date": "2026-01-01",
+  "assets": [
+    {
+      "asset_id": "asset_brokerage_self",
+      "asset_type": "financial_account",
+      "currency": "EUR",
+      "description": "Synthetic brokerage account owned by self.",
+      "jurisdiction": "IT",
+      "provenance": "synthetic fixture"
+    },
+    {
+      "asset_id": "asset_family_home",
+      "asset_type": "real_estate",
+      "currency": "EUR",
+      "description": "Synthetic family home with co-ownership.",
+      "jurisdiction": "IT",
+      "provenance": "synthetic fixture"
+    },
+    {
+      "asset_id": "asset_child_account",
+      "asset_type": "financial_account",
+      "currency": "EUR",
+      "description": "Synthetic account owned by child.",
+      "jurisdiction": "IT",
+      "provenance": "synthetic fixture"
+    }
+  ],
+  "beneficiaries": [
+    {
+      "beneficiary_id": "ben_brokerage_spouse",
+      "beneficiary_person_id": "person_spouse",
+      "beneficiary_type": "primary",
+      "provenance": "synthetic fixture",
+      "share_denominator": 1,
+      "share_numerator": 1,
+      "subject_id": "asset_brokerage_self",
+      "subject_type": "asset",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    }
+  ],
+  "data_gaps": [],
+  "debts": [
+    {
+      "currency": "EUR",
+      "debt_id": "debt_home_mortgage",
+      "description": "Synthetic mortgage linked to family home.",
+      "linked_asset_id": "asset_family_home",
+      "provenance": "synthetic fixture"
+    }
+  ],
+  "graph_context": {
+    "@vocab": "https://family-office.local/ontology/ownership#",
+    "asset": "ownership-beneficiary-graph/v1#asset",
+    "debt": "ownership-beneficiary-graph/v1#debt",
+    "person": "household-facts/v1#person"
+  },
+  "household_id": "synthetic_household",
+  "ownership_interests": [
+    {
+      "interest_type": "full_ownership",
+      "owner_person_id": "person_self",
+      "ownership_id": "own_brokerage_self",
+      "provenance": "synthetic fixture",
+      "share_denominator": 1,
+      "share_numerator": 1,
+      "subject_id": "asset_brokerage_self",
+      "subject_type": "asset",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "interest_type": "co_ownership",
+      "owner_person_id": "person_self",
+      "ownership_id": "own_home_self",
+      "provenance": "synthetic fixture",
+      "share_denominator": 2,
+      "share_numerator": 1,
+      "subject_id": "asset_family_home",
+      "subject_type": "asset",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "interest_type": "co_ownership",
+      "owner_person_id": "person_spouse",
+      "ownership_id": "own_home_spouse",
+      "provenance": "synthetic fixture",
+      "share_denominator": 2,
+      "share_numerator": 1,
+      "subject_id": "asset_family_home",
+      "subject_type": "asset",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "interest_type": "full_ownership",
+      "owner_person_id": "person_child",
+      "ownership_id": "own_child_account",
+      "provenance": "synthetic fixture",
+      "share_denominator": 1,
+      "share_numerator": 1,
+      "subject_id": "asset_child_account",
+      "subject_type": "asset",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "interest_type": "debtor",
+      "owner_person_id": "person_self",
+      "ownership_id": "debt_home_self",
+      "provenance": "synthetic fixture",
+      "share_denominator": 2,
+      "share_numerator": 1,
+      "subject_id": "debt_home_mortgage",
+      "subject_type": "debt",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "interest_type": "debtor",
+      "owner_person_id": "person_spouse",
+      "ownership_id": "debt_home_spouse",
+      "provenance": "synthetic fixture",
+      "share_denominator": 2,
+      "share_numerator": 1,
+      "subject_id": "debt_home_mortgage",
+      "subject_type": "debt",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    }
+  ],
+  "record_type": "OwnershipBeneficiaryGraph",
+  "schema_version": "ownership-beneficiary-graph/v1"
+}

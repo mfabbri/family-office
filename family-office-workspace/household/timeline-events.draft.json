@@ -1,0 +1,21 @@
+{
+  "as_of_date": null,
+  "data_gaps": [],
+  "events": [
+    {
+      "description": null,
+      "end_date": null,
+      "event_id": null,
+      "event_type": null,
+      "provenance": null,
+      "recurrence": null,
+      "related_asset_id": null,
+      "start_date": null,
+      "subject_person_id": null,
+      "timing_type": null
+    }
+  ],
+  "household_id": null,
+  "record_type": "TimelineEvents",
+  "schema_version": "timeline-events/v1"
+}

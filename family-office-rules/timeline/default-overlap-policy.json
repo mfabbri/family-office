@@ -1,0 +1,23 @@
+{
+  "description": "Technical policy for ordering and conflict checks in timeline-events/v1. This is not a tax, pension or legal rule pack.",
+  "event_type_priorities": {
+    "asset_availability": 50,
+    "contribution": 60,
+    "deadline": 10,
+    "extraordinary_expense": 70,
+    "other": 90,
+    "residence_change": 40,
+    "retirement": 30,
+    "succession": 80,
+    "tax_regime_end": 20
+  },
+  "exclusive_event_types": [
+    "retirement",
+    "tax_regime_end"
+  ],
+  "exclusive_period_event_types": [
+    "residence_change"
+  ],
+  "policy_id": "timeline.default-overlap-policy.v1",
+  "schema_version": "timeline-overlap-policy/v1"
+}

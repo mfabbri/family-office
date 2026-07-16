@@ -1,0 +1,68 @@
+{
+  "schema_version": "estate-rule-pack/v1",
+  "rule_pack_id": "it.estate-baseline.current.v1",
+  "jurisdiction": "IT",
+  "currency": "EUR",
+  "status": "current_simple_intestate_shares",
+  "valid_from": "1942-04-19",
+  "valid_to": null,
+  "source_refs": [
+    {
+      "source_id": "normattiva.codice-civile.successioni-legittime",
+      "title": "Codice civile, Libro II, successioni legittime",
+      "url": "https://www.normattiva.it/eli/id/1942/04/04/042U0262/CONSOLIDATED"
+    },
+    {
+      "source_id": "normattiva.dlgs-1990-346",
+      "title": "Decreto legislativo 31 ottobre 1990, n. 346",
+      "url": "https://www.normattiva.it/eli/id/1990/10/31/090G0380/CONSOLIDATED"
+    },
+    {
+      "source_id": "normattiva.dl-2006-262.art2",
+      "title": "Decreto-legge 3 ottobre 2006, n. 262, articolo 2",
+      "url": "https://www.normattiva.it/eli/id/2006/10/03/006G0285/CONSOLIDATED"
+    }
+  ],
+  "intestate_share_rules": [
+    {
+      "rule_id": "it.intestate.spouse-only.current",
+      "family_case": "spouse_only",
+      "spouse_share": "1",
+      "children_share": "0",
+      "source_articles": ["583"]
+    },
+    {
+      "rule_id": "it.intestate.children-only.current",
+      "family_case": "children_only",
+      "spouse_share": "0",
+      "children_share": "1",
+      "source_articles": ["566"]
+    },
+    {
+      "rule_id": "it.intestate.spouse-one-child.current",
+      "family_case": "spouse_one_child",
+      "spouse_share": "0.5",
+      "children_share": "0.5",
+      "source_articles": ["581"]
+    },
+    {
+      "rule_id": "it.intestate.spouse-multiple-children.current",
+      "family_case": "spouse_multiple_children",
+      "spouse_share": "0.3333333333",
+      "children_share": "0.6666666667",
+      "source_articles": ["581"]
+    }
+  ],
+  "liquidity_classes": {
+    "cash": "immediate",
+    "investment": "market_liquid",
+    "insurance": "beneficiary_review_required",
+    "pension": "restricted_or_beneficiary_review_required",
+    "real_estate": "illiquid"
+  },
+  "limitations": [
+    "This V1 rule pack covers only simple intestate theoretical shares for spouse and children.",
+    "It does not calculate inheritance tax, cadastral values, legitime, collation, reduction, wills, debt settlement or cross-border succession law.",
+    "Insurance policies, pension funds and foreign assets require human professional review."
+  ]
+}

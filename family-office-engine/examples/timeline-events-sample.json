@@ -1,0 +1,97 @@
+{
+  "as_of_date": "2026-01-01",
+  "data_gaps": [],
+  "events": [
+    {
+      "description": "Synthetic target retirement date for self.",
+      "end_date": null,
+      "event_id": "event_self_retirement",
+      "event_type": "retirement",
+      "provenance": "synthetic fixture",
+      "start_date": "2035-01-01",
+      "subject_person_id": "person_self",
+      "timing_type": "point"
+    },
+    {
+      "description": "Synthetic end of tax regime period.",
+      "end_date": null,
+      "event_id": "event_tax_regime_end",
+      "event_type": "tax_regime_end",
+      "provenance": "synthetic fixture",
+      "start_date": "2029-12-31",
+      "subject_person_id": "person_self",
+      "timing_type": "point"
+    },
+    {
+      "description": "Synthetic annual filing deadline marker.",
+      "end_date": null,
+      "event_id": "event_annual_deadline",
+      "event_type": "deadline",
+      "provenance": "synthetic fixture",
+      "recurrence": {
+        "count": 3,
+        "frequency": "annual",
+        "interval": 1
+      },
+      "start_date": "2026-06-30",
+      "timing_type": "recurring"
+    },
+    {
+      "description": "Synthetic monthly contribution to pension fund.",
+      "end_date": null,
+      "event_id": "event_pension_contribution",
+      "event_type": "contribution",
+      "provenance": "synthetic fixture",
+      "recurrence": {
+        "count": 3,
+        "frequency": "monthly",
+        "interval": 1
+      },
+      "related_asset_id": "asset_brokerage_self",
+      "start_date": "2026-01-31",
+      "subject_person_id": "person_self",
+      "timing_type": "recurring"
+    },
+    {
+      "description": "Synthetic one-off family expense.",
+      "end_date": null,
+      "event_id": "event_extraordinary_expense",
+      "event_type": "extraordinary_expense",
+      "provenance": "synthetic fixture",
+      "start_date": "2027-09-01",
+      "timing_type": "point"
+    },
+    {
+      "description": "Synthetic estate review date, not a succession calculation.",
+      "end_date": null,
+      "event_id": "event_succession_review",
+      "event_type": "succession",
+      "provenance": "synthetic fixture",
+      "start_date": "2030-01-01",
+      "timing_type": "point"
+    },
+    {
+      "description": "Synthetic period of Spanish residence.",
+      "end_date": "2025-12-31",
+      "event_id": "event_residence_spain",
+      "event_type": "residence_change",
+      "provenance": "synthetic fixture",
+      "start_date": "2020-01-01",
+      "subject_person_id": "person_self",
+      "timing_type": "period"
+    },
+    {
+      "description": "Synthetic family home availability marker.",
+      "end_date": null,
+      "event_id": "event_home_available",
+      "event_type": "asset_availability",
+      "provenance": "synthetic fixture",
+      "related_asset_id": "asset_family_home",
+      "start_date": "2026-07-01",
+      "timing_type": "point"
+    }
+  ],
+  "household_id": "synthetic_household",
+  "record_type": "TimelineEvents",
+  "schema_version": "timeline-events/v1"
+}

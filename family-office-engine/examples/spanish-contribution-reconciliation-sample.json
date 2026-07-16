@@ -1,0 +1,83 @@
+{
+  "anomalies": [
+    {
+      "code": "payroll_official_base_difference",
+      "difference": "-50.00",
+      "message": "Payroll and official contribution bases differ for 2024-01.",
+      "month": "2024-01",
+      "official_base_amount": "2500.00",
+      "payroll_base_amount": "2450.00"
+    }
+  ],
+  "data_gaps": [],
+  "months": [
+    {
+      "anomaly_codes": [
+        "payroll_official_base_difference"
+      ],
+      "covered_by_vida_laboral": true,
+      "data_gap_codes": [],
+      "month": "2024-01",
+      "official_bases": [
+        {
+          "base_amount": "2500.00",
+          "confidence": "high",
+          "currency": "EUR",
+          "employer": "SYNTHETIC EMPLOYER SA",
+          "month": "2024-01",
+          "source_document": "bases.pdf",
+          "source_type": "official_bases"
+        }
+      ],
+      "payroll_bases": [
+        {
+          "base_amount": "2450.00",
+          "confidence": "medium",
+          "currency": "EUR",
+          "employer": null,
+          "month": "2024-01",
+          "source_document": "nomina.pdf",
+          "source_type": "payroll"
+        }
+      ],
+      "periods": [
+        {
+          "employer": "SYNTHETIC EMPLOYER SA",
+          "end_date": "2024-01-31",
+          "regime": "GENERAL",
+          "source_document": "vida_laboral.pdf",
+          "start_date": "2024-01-01"
+        }
+      ],
+      "selected_base": {
+        "base_amount": "2500.00",
+        "component_count": 1,
+        "confidence": "high",
+        "currency": "EUR",
+        "month": "2024-01",
+        "source_documents": [
+          "bases.pdf"
+        ],
+        "source_type": "official_bases"
+      },
+      "usable_for_estimator": true
+    }
+  ],
+  "notes": "Spanish contribution reconciliation selects documentary monthly bases; official bases prevail over payroll. No pension, entitlement, tax, base reguladora or EU coordination calculation performed.",
+  "record_type": "SpanishContributionReconciliationSnapshot",
+  "schema_version": "spanish-contribution-reconciliation/v1",
+  "source": {
+    "path": "../family-office-workspace/snapshots/spanish-contribution-history.snapshot.json",
+    "schema_version": "spanish-contribution-history/v1",
+    "type": "spanish-contribution-history-snapshot"
+  },
+  "status": "complete",
+  "summary": {
+    "anomaly_count": 1,
+    "covered_month_count": 1,
+    "data_gap_count": 0,
+    "official_base_month_count": 1,
+    "payroll_base_month_count": 1,
+    "usable_month_count": 1
+  }
+}

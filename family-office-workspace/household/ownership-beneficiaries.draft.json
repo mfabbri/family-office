@@ -1,0 +1,22 @@
+{
+  "as_of_date": null,
+  "assets": [],
+  "beneficiaries": [],
+  "data_gaps": [
+    {
+      "code": "draft_not_completed",
+      "message": "Fill this private draft with explicit ownership and beneficiary facts before importing."
+    }
+  ],
+  "debts": [],
+  "graph_context": {
+    "@vocab": "https://family-office.local/ontology/ownership#",
+    "asset": "ownership-beneficiary-graph/v1#asset",
+    "debt": "ownership-beneficiary-graph/v1#debt",
+    "person": "household-facts/v1#person"
+  },
+  "household_id": null,
+  "ownership_interests": [],
+  "record_type": "OwnershipBeneficiaryGraph",
+  "schema_version": "ownership-beneficiary-graph/v1"
+}

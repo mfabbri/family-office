@@ -1,0 +1,177 @@
+# V4 Roadmap — Wealth Planning
+
+## Obiettivo
+
+Usare il Decision Core per confrontare strategie patrimoniali lecite e realistiche, ottimizzando rendimento netto, liquidità, fiscalità, protezione familiare e reversibilità.
+
+## Prerequisiti
+
+- Gate V3 completato.
+- Raccomandazioni spiegabili e metriche multi-obiettivo disponibili.
+- Rule pack fiscali versionati per gli anni simulati.
+
+## Incrementi
+
+### V4.1 — Goals and constraints model
+
+**Stato:** `planned`
+
+Formalizzare obiettivi, priorità, soglie minime, orizzonte, rischio, liquidità, eventi familiari e vincoli legali.
+
+- Repository: `engine`, `workspace`.
+- Output: `planning-goals/v1`.
+- Test: obiettivi incompatibili, priorità, soglie e campi mancanti.
+- Done quando: l'ottimizzazione usa vincoli dichiarati invece di preferenze implicite.
+
+### V4.2 — Liquidity buckets and emergency reserve
+
+**Stato:** `planned`
+
+Dividere gli asset in riserva, breve, medio e lungo termine tenendo conto di vincoli, volatilità e date di disponibilità.
+
+- Dipende da: V4.1 e V3.3.
+- Repository: `engine`, `rules`.
+- Output: `liquidity-plan/v1`.
+- Test: riserva insufficiente, asset vincolati, valuta estera, concentrazione.
+- Done quando: il piano non usa per spese correnti asset non liquidabili.
+
+### V4.3 — Retirement decumulation strategies
+
+**Stato:** `planned`
+
+Confrontare ordine dei prelievi, cash buffer, ribilanciamento, RITA, prestazioni pensionistiche e uso degli asset imponibili.
+
+- Dipende da: V4.2 e V3.5e.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `decumulation-strategy/v1`.
+- Test: diverse età, sequenza rendimenti, longevità, RITA sì/no.
+- Done quando: il sistema confronta più policy di decumulo con metriche nette.
+
+### V4.4 — Pension contribution optimizer
+
+**Stato:** `planned`
+
+Valutare contribuzioni future a previdenza complementare, TFR, deducibilità, liquidità persa e beneficio atteso.
+
+- Dipende da: V3.5e e rule engine fiscale.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `pension-contribution-options/v1`.
+- Test: plafond, contributo datore, orizzonti e aliquote marginali.
+- Done quando: ogni opzione mostra beneficio fiscale, costo opportunità e vincoli.
+
+### V4.5 — Tax-aware investment planning
+
+**Stato:** `planned`
+
+Confrontare regimi amministrato, gestito e dichiarativo, fiscal drag, minusvalenze, bollo/IVAFE e strumenti compatibili con gli obiettivi.
+
+- Dipende da: V4.1 e tax rules V1.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `tax-aware-portfolio/v1`.
+- Test: 26%, 12,5% ove applicabile, bollo/IVAFE, costi e turnover.
+- Done quando: il rendimento confrontato è netto di imposte e costi espliciti.
+
+### V4.6a — Italy–Spain pension tax classification
+
+**Stato:** `planned`
+
+Classificare la pensione spagnola e gli altri flussi previdenziali transfrontalieri secondo residenza fiscale, natura della prestazione, soggetto erogatore e convenzione applicabile.
+
+- Dipende da: V3.1, V3.5c–V3.5e e tax rules V1.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `it-es-pension-tax-classification/v1` con potestà impositiva, ritenute attese, documenti e warning.
+- Test: residente italiano, cambio di residenza, pensione pubblica/privata ove rilevante, classificazione incerta.
+- Done quando: il sistema distingue il calcolo lordo previdenziale dal trattamento fiscale e non applica automaticamente una regola convenzionale senza classificazione.
+
+### V4.6b — Net Spanish pension for an Italian tax resident
+
+**Stato:** `planned`
+
+Calcolare il flusso netto atteso della pensione spagnola per un residente fiscale italiano, includendo ritenute, imposte italiane, credito per imposte estere quando applicabile e periodicità.
+
+- Dipende da: V4.6a e rule pack fiscali versionati per gli anni simulati.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `spanish-pension-net-it-resident/v1` con lordo, imposte per Paese, credito, netto e confidence.
+- Test: assenza/presenza di ritenuta spagnola, credito capiente/non capiente, cambio di aliquote, dato incompleto.
+- Done quando: il pension income composer può usare un netto fiscale spiegabile senza confondere stima previdenziale e tassazione.
+
+### V4.6c — Italy–Spain foreign asset monitoring
+
+**Stato:** `planned`
+
+Integrare conti, fondi, piani pensionistici e immobili spagnoli con quadro RW, IVAFE/IVIE, tax events e relativi documenti.
+
+- Dipende da: V3.1, V3.2, V4.5 e classificazione delle fonti spagnole.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `it-es-foreign-assets/v1` con obblighi, esenzioni motivate, basi imponibili, warning e data gaps.
+- Test: conto, fondi, piano pensionistico, immobile, intermediario residente/non residente e dato non classificato.
+- Done quando: lo scenario mostra obblighi dichiarativi e impatti senza occultare titolarità e senza dedurre esenzioni non documentate.
+
+### V4.6d — Italy–Spain cross-border dossier
+
+**Stato:** `planned`
+
+Comporre pensione, attività finanziarie, monitoraggio e doppia imposizione in un dossier transfrontaliero unico e verificabile.
+
+- Dipende da: V4.6a–V4.6c.
+- Repository: `knowledge`, `rules`, `engine`, `workspace`.
+- Output: `cross-border-it-es/v1` con flussi, obblighi, tax events, documenti mancanti, rischi e azioni operative.
+- Test: pensione con asset spagnoli, sola pensione, soli asset, cambio di residenza e classificazione bloccante.
+- Done quando: il piano distingue diritti previdenziali, tassazione del reddito e monitoraggio patrimoniale, indicando chiaramente le verifiche professionali richieste.
+
+### V4.7 — Real-estate planning
+
+**Stato:** `planned`
+
+Modellare immobile, proprietà, locazione, imposte, manutenzione, vendita, successione e liquidità.
+
+- Dipende da: V3.2 e V3.4.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `real-estate-plan/v1`.
+- Test: locazione, vacancy, vendita, costi e titolarità del coniuge.
+- Done quando: mantenere, vendere o trasferire l'immobile può essere confrontato su basi omogenee.
+
+### V4.8 — Insurance and family protection
+
+**Stato:** `planned`
+
+Valutare polizze vita, beneficiari, coperture, riscatti, costi, eventi morte/inabilità e fabbisogno familiare.
+
+- Dipende da: V3.1–V3.3.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `protection-gap/v1`.
+- Test: beneficiario mancante, capitale insufficiente, polizza investimento vs protezione.
+- Done quando: coperture e gap sono separati dalla mera valorizzazione patrimoniale.
+
+### V4.9 — Succession and donation planning V2
+
+**Stato:** `planned`
+
+Estendere la V2 con quote di legittima, attribuzioni, liquidità per imposte, beneficiari, donazioni pregresse e alternative operative.
+
+- Dipende da: V2.8, V3.2 e V4.7–V4.8.
+- Repository: `knowledge`, `rules`, `engine`.
+- Output: `estate-plan/v2` e scenari comparati.
+- Test: coniuge e due figli, asset illiquidi, polizze, estero e dati incompleti.
+- Done quando: il piano segnala conflitti civilistici e non propone schermi opachi.
+
+### V4.10 — Strategy optimizer and implementation plan
+
+**Stato:** `planned`
+
+Combinare le opzioni V4 in pacchetti coerenti e produrre piano 90/180 giorni, costi, dipendenze, reversibilità e controlli.
+
+- Dipende da: V4.2–V4.5, V4.6a–V4.6d e V4.7–V4.9.
+- Repository: `engine`, `workspace`.
+- Output: `wealth-strategy/v1`, tabella comparativa e checklist operativa.
+- Test: vincoli, opzioni incompatibili, ranking, scenario avverso e gap bloccanti.
+- Done quando: il sistema propone 2–4 alternative comparabili e motivate, non una soluzione unica opaca.
+
+## Exit criteria V4
+
+- Le alternative sono confrontate al netto di imposte e costi.
+- Liquidità e protezione familiare sono vincoli espliciti.
+- Cross-border, successione e beneficiari sono tracciati.
+- La pensione spagnola è esposta separando importo previdenziale lordo, coordinamento UE, tassazione e netto per residente italiano.
+- Ogni strategia include iter operativo, documenti, rischi e reversibilità.
+- Le conclusioni ad alto impatto richiedono revisione professionale dichiarata.

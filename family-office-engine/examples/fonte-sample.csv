@@ -1,0 +1,6 @@
+date,description,amount,category
+2026-01-31,Employee monthly contribution,250.00,employee_contribution
+2026-01-31,Employer monthly contribution,125.00,employer_contribution
+2026-01-31,TFR contribution,300.00,tfr_contribution
+2026-01-31,Administrative fee,-2.00,fee
+2026-01-31,Statement balance,10000.00,balance

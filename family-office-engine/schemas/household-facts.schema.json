@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Household Facts",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "household_id",
+    "as_of_date",
+    "persons",
+    "relationships",
+    "tax_residences",
+    "economic_roles",
+    "relevant_dates"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "household-facts/v1"
+    },
+    "record_type": {
+      "const": "HouseholdFacts"
+    },
+    "household_id": {
+      "type": "string"
+    },
+    "as_of_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "persons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "person_id",
+          "role"
+        ],
+        "properties": {
+          "person_id": {
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "self",
+              "spouse",
+              "child",
+              "dependent",
+              "other"
+            ]
+          },
+          "birth_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "birth_year": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1900,
+            "maximum": 2100
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array"
+    },
+    "tax_residences": {
+      "type": "array"
+    },
+    "economic_roles": {
+      "type": "array"
+    },
+    "relevant_dates": {
+      "type": "array"
+    },
+    "data_gaps": {
+      "type": "array"
+    }
+  }
+}

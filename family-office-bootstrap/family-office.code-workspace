@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "path": "../family-office-bootstrap"
+    },
+    {
+      "path": "../family-office-engine"
+    },
+    {
+      "path": "../family-office-rules"
+    },
+    {
+      "path": "../family-office-knowledge"
+    },
+    {
+      "path": "../family-office-workspace"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/.pytest_cache": true
+    }
+  }
+}

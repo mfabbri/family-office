@@ -1,0 +1,21 @@
+{
+  "instructions": [
+    "Copy this draft to household-facts.json before entering real private data.",
+    "Replace null values with reviewed household facts.",
+    "Do not copy real household facts into family-office-engine tests or docs."
+  ],
+  "record_type": "HouseholdFactsDraft",
+  "schema_version": "household-facts-draft/v1",
+  "template": {
+    "as_of_date": null,
+    "data_gaps": [],
+    "economic_roles": [],
+    "household_id": null,
+    "persons": [],
+    "record_type": "HouseholdFacts",
+    "relationships": [],
+    "relevant_dates": [],
+    "schema_version": "household-facts/v1",
+    "tax_residences": []
+  }
+}

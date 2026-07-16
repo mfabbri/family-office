@@ -1,0 +1,11 @@
+[project]
+name="family-office-engine"
+version="0.1.0"
+description="Personal family office engine"
+requires-python=">=3.11"
+dependencies=[
+  "PyPDF2>=3"
+]
+
+[project.scripts]
+fo="family_office_engine.cli.main:main"

@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Asset Availability",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "household_id",
+    "as_of_date",
+    "classifications"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "asset-availability/v1"
+    },
+    "record_type": {
+      "const": "AssetAvailability"
+    },
+    "household_id": {
+      "type": "string"
+    },
+    "as_of_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "classifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "classification_id",
+          "asset_id",
+          "asset_class",
+          "risk_level",
+          "currency",
+          "jurisdiction",
+          "liquidity_tier",
+          "constraints",
+          "tax_treatment",
+          "first_available_date",
+          "availability_as_of_date",
+          "provenance"
+        ],
+        "properties": {
+          "classification_id": {
+            "type": "string"
+          },
+          "asset_id": {
+            "type": "string"
+          },
+          "asset_class": {
+            "enum": [
+              "cash",
+              "deposit",
+              "brokerage",
+              "pension_fund",
+              "insurance_policy",
+              "real_estate",
+              "company_share",
+              "other"
+            ]
+          },
+          "risk_level": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "illiquid",
+              "unknown"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "jurisdiction": {
+            "type": "string"
+          },
+          "liquidity_tier": {
+            "enum": [
+              "immediate",
+              "short_term",
+              "notice_required",
+              "locked_until_date",
+              "illiquid",
+              "unknown"
+            ]
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "none",
+                "pension_lock",
+                "policy_terms",
+                "mortgage_or_lien",
+                "co_ownership",
+                "foreign_reporting",
+                "sale_process",
+                "other",
+                "unknown"
+              ]
+            }
+          },
+          "tax_treatment": {
+            "enum": [
+              "ordinary_taxable",
+              "tax_deferred",
+              "pension_taxation",
+              "insurance_wrapper",
+              "real_estate_taxation",
+              "foreign_asset_reporting",
+              "unknown"
+            ]
+          },
+          "first_available_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "availability_as_of_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provenance": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "data_gaps": {
+      "type": "array"
+    }
+  }
+}

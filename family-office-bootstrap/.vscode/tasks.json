@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Validate workspace",
+      "type": "shell",
+      "command": "bash scripts/validate-workspace.sh",
+      "problemMatcher": []
+    }
+  ]
+}

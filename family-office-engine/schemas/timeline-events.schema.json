@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Timeline Events",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "household_id",
+    "as_of_date",
+    "events"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "timeline-events/v1"
+    },
+    "record_type": {
+      "const": "TimelineEvents"
+    },
+    "household_id": {
+      "type": "string"
+    },
+    "as_of_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "event_id",
+          "event_type",
+          "timing_type",
+          "start_date",
+          "provenance"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string"
+          },
+          "event_type": {
+            "enum": [
+              "retirement",
+              "tax_regime_end",
+              "deadline",
+              "contribution",
+              "extraordinary_expense",
+              "succession",
+              "residence_change",
+              "asset_availability",
+              "other"
+            ]
+          },
+          "timing_type": {
+            "enum": [
+              "point",
+              "period",
+              "recurring"
+            ]
+          },
+          "subject_person_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related_asset_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "start_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "end_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "recurrence": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "priority": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provenance": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "data_gaps": {
+      "type": "array"
+    }
+  }
+}

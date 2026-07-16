@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ownership Beneficiary Graph",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "household_id",
+    "as_of_date",
+    "assets",
+    "debts",
+    "ownership_interests",
+    "beneficiaries"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ownership-beneficiary-graph/v1"
+    },
+    "record_type": {
+      "const": "OwnershipBeneficiaryGraph"
+    },
+    "household_id": {
+      "type": "string"
+    },
+    "as_of_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "graph_context": {
+      "type": "object"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "asset_id",
+          "asset_type",
+          "provenance"
+        ],
+        "properties": {
+          "asset_id": {
+            "type": "string"
+          },
+          "asset_type": {
+            "enum": [
+              "financial_account",
+              "pension_fund",
+              "real_estate",
+              "insurance_policy",
+              "company_share",
+              "cash",
+              "other"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "jurisdiction": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provenance": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "debts": {
+      "type": "array"
+    },
+    "ownership_interests": {
+      "type": "array"
+    },
+    "beneficiaries": {
+      "type": "array"
+    },
+    "data_gaps": {
+      "type": "array"
+    }
+  }
+}

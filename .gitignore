@@ -1,0 +1,17 @@
+# Local environment and agent state
+.env
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+**/.pytest_cache/
+
+# Local/editor history
+.history/
+.agents/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

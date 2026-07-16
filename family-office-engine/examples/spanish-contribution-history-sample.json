@@ -1,0 +1,99 @@
+{
+  "data_gaps": [
+    {
+      "code": "missing_monthly_base",
+      "message": "No documented contribution base for 2024-02.",
+      "month": "2024-02"
+    }
+  ],
+  "documents": [
+    {
+      "data_gaps": [],
+      "document_type": "vida_laboral",
+      "filename": "vida_laboral.txt",
+      "monthly_bases": [],
+      "periods": [
+        {
+          "confidence": "high",
+          "contribution_days": 91,
+          "employer": "ACME SL",
+          "end_date": "2024-03-31",
+          "regime": "REGIMEN GENERAL",
+          "source_document": "vida_laboral.txt",
+          "source_type": "vida_laboral",
+          "start_date": "2024-01-01"
+        }
+      ],
+      "status": "extracted"
+    },
+    {
+      "data_gaps": [],
+      "document_type": "official_bases",
+      "filename": "bases.csv",
+      "monthly_bases": [
+        {
+          "base_amount": "2500.00",
+          "confidence": "high",
+          "currency": "EUR",
+          "month": "2024-01",
+          "source_document": "bases.csv",
+          "source_type": "official_bases"
+        },
+        {
+          "base_amount": "2700.00",
+          "confidence": "high",
+          "currency": "EUR",
+          "month": "2024-03",
+          "source_document": "bases.csv",
+          "source_type": "official_bases"
+        }
+      ],
+      "periods": [],
+      "status": "extracted"
+    }
+  ],
+  "extraction_status": "partial_extracted",
+  "monthly_bases": [
+    {
+      "base_amount": "2500.00",
+      "confidence": "high",
+      "currency": "EUR",
+      "month": "2024-01",
+      "source_document": "bases.csv",
+      "source_type": "official_bases"
+    },
+    {
+      "base_amount": "2700.00",
+      "confidence": "high",
+      "currency": "EUR",
+      "month": "2024-03",
+      "source_document": "bases.csv",
+      "source_type": "official_bases"
+    }
+  ],
+  "notes": "Spanish contribution documents parsed deterministically; no pension, entitlement, tax, base reguladora or reconciliation calculation performed.",
+  "periods": [
+    {
+      "confidence": "high",
+      "contribution_days": 91,
+      "employer": "ACME SL",
+      "end_date": "2024-03-31",
+      "regime": "REGIMEN GENERAL",
+      "source_document": "vida_laboral.txt",
+      "source_type": "vida_laboral",
+      "start_date": "2024-01-01"
+    }
+  ],
+  "record_type": "SpanishContributionHistorySnapshot",
+  "schema_version": "spanish-contribution-history/v1",
+  "source": {
+    "path": "../family-office-workspace/documents/pensione/spagna",
+    "type": "spanish-pension-document-directory"
+  },
+  "summary": {
+    "data_gap_count": 1,
+    "document_count": 2,
+    "monthly_base_count": 2,
+    "period_count": 1
+  }
+}

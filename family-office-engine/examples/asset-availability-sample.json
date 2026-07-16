@@ -1,0 +1,62 @@
+{
+  "as_of_date": "2026-01-01",
+  "classifications": [
+    {
+      "asset_class": "brokerage",
+      "asset_id": "asset_brokerage_self",
+      "availability_as_of_date": "2026-01-01",
+      "classification_id": "availability_brokerage_self",
+      "constraints": [
+        "none"
+      ],
+      "currency": "EUR",
+      "first_available_date": "2026-01-01",
+      "jurisdiction": "IT",
+      "liquidity_tier": "short_term",
+      "notes": "Synthetic brokerage account available after settlement.",
+      "provenance": "synthetic fixture",
+      "risk_level": "medium",
+      "tax_treatment": "ordinary_taxable"
+    },
+    {
+      "asset_class": "real_estate",
+      "asset_id": "asset_family_home",
+      "availability_as_of_date": "2026-01-01",
+      "classification_id": "availability_family_home",
+      "constraints": [
+        "co_ownership",
+        "mortgage_or_lien",
+        "sale_process"
+      ],
+      "currency": "EUR",
+      "first_available_date": "2026-07-01",
+      "jurisdiction": "IT",
+      "liquidity_tier": "illiquid",
+      "notes": "Synthetic co-owned home; sale process required.",
+      "provenance": "synthetic fixture",
+      "risk_level": "illiquid",
+      "tax_treatment": "real_estate_taxation"
+    },
+    {
+      "asset_class": "deposit",
+      "asset_id": "asset_child_account",
+      "availability_as_of_date": "2026-01-01",
+      "classification_id": "availability_child_account",
+      "constraints": [
+        "co_ownership"
+      ],
+      "currency": "EUR",
+      "first_available_date": "2026-01-01",
+      "jurisdiction": "IT",
+      "liquidity_tier": "immediate",
+      "notes": "Synthetic child account; ownership limits use by household planner.",
+      "provenance": "synthetic fixture",
+      "risk_level": "low",
+      "tax_treatment": "ordinary_taxable"
+    }
+  ],
+  "data_gaps": [],
+  "household_id": "synthetic_household",
+  "record_type": "AssetAvailability",
+  "schema_version": "asset-availability/v1"
+}

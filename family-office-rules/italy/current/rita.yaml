@@ -1,0 +1,40 @@
+{
+  "schema_version": "rita-rule-pack/v1",
+  "rule_pack_id": "it.rita.current.v1",
+  "jurisdiction": "IT",
+  "currency": "EUR",
+  "status": "current_minimum_requirements",
+  "valid_from": "2018-01-01",
+  "valid_to": null,
+  "source_refs": [
+    {
+      "source_id": "normattiva.dlgs-2005-252.art11",
+      "title": "Decreto legislativo 5 dicembre 2005, n. 252, articolo 11",
+      "url": "https://www.normattiva.it/eli/id/2005/12/13/005G0277/CONSOLIDATED"
+    },
+    {
+      "source_id": "normattiva.legge-2017-205.art1-commi-168-169",
+      "title": "Legge 27 dicembre 2017, n. 205, articolo 1 commi 168-169",
+      "url": "https://www.normattiva.it/eli/id/2017/12/29/17G00222/CONSOLIDATED"
+    }
+  ],
+  "requirements": {
+    "accepted_non_working_statuses": ["ceased", "unemployed", "not_employed"],
+    "minimum_complementary_pension_years": 5,
+    "ordinary": {
+      "rule_id": "it.rita.ordinary.current",
+      "max_years_to_public_pension": 5,
+      "minimum_mandatory_contribution_years": 20
+    },
+    "long_unemployment": {
+      "rule_id": "it.rita.long-unemployment.current",
+      "max_years_to_public_pension": 10,
+      "minimum_unemployed_months_exclusive": 24
+    }
+  },
+  "limitations": [
+    "This rule pack checks only minimum deterministic eligibility inputs for a RITA V1 estimate.",
+    "It does not calculate public pension entitlement, fund-specific procedures, taxation, fees, investment returns or legal advice.",
+    "The amount option is a gross straight-line drawdown over an explicit duration."
+  ]
+}

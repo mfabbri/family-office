@@ -1,0 +1,19 @@
+# Keep structure, ignore private payloads by default
+inbox/*
+documents/**/*
+assumptions/*.json
+assumptions/*.bak
+assumptions/*.json.bak
+config/*.json
+household/*.json
+graph/*
+snapshots/*
+reports/*
+exports/*
+backups/*
+spreadsheets/*
+!**/.gitkeep
+!assumptions/*.template.json
+!config/*.template.json
+!household/*.template.json
+!household/*.draft.json

@@ -1,0 +1,49 @@
+{
+  "schema_version": "tax-rule-pack/v1",
+  "rule_pack_id": "it.irpef-national.2026.v1",
+  "jurisdiction": "IT",
+  "currency": "EUR",
+  "description": "Italian national IRPEF gross tax brackets for tax year 2026. Gross national tax only, on taxable income already determined.",
+  "status": "versioned_rule_not_advice",
+  "knowledge_refs": [
+    "family-office-knowledge/taxation/irpef.md"
+  ],
+  "source_refs": [
+    {
+      "source_id": "gazzetta.legge-2024-207.art1-comma2",
+      "title": "Legge 30 dicembre 2024, n. 207, art. 1 comma 2",
+      "url": "https://www.gazzettaufficiale.it/eli/id/2024/12/31/24G00229/sg",
+      "published_on": "2024-12-31"
+    }
+  ],
+  "limitations": [
+    "Calculates only national gross IRPEF.",
+    "Taxable income must be determined upstream.",
+    "Does not calculate deductions, regional surtax, municipal surtax, tax credits, withholding balances or return filing outcomes."
+  ],
+  "rules": [
+    {
+      "rule_id": "it.irpef-national.gross.2026",
+      "tax_type": "personal_income_tax_gross_national",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "brackets": [
+        {
+          "from": "0.00",
+          "to": "28000.00",
+          "rate": "0.23"
+        },
+        {
+          "from": "28000.00",
+          "to": "50000.00",
+          "rate": "0.35"
+        },
+        {
+          "from": "50000.00",
+          "to": null,
+          "rate": "0.43"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": "tax-rule-pack/v1",
+  "rule_pack_id": "synthetic.progressive-tax.v1",
+  "jurisdiction": "SYNTH",
+  "currency": "EUR",
+  "description": "Synthetic progressive tax brackets for engine tests. Not a legal or fiscal rule.",
+  "status": "synthetic_fixture_not_for_real_tax",
+  "rules": [
+    {
+      "rule_id": "synthetic.progressive-tax.2026",
+      "tax_type": "personal_income_tax",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "brackets": [
+        {
+          "from": "0.00",
+          "to": "10000.00",
+          "rate": "0.10"
+        },
+        {
+          "from": "10000.00",
+          "to": "30000.00",
+          "rate": "0.20"
+        },
+        {
+          "from": "30000.00",
+          "to": null,
+          "rate": "0.30"
+        }
+      ]
+    }
+  ]
+}
