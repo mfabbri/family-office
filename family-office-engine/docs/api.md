@@ -215,6 +215,73 @@ Funzioni principali:
 
 Il rule pack `../family-office-rules/spain/statutory-retirement-general.json` e' un baseline tecnico, basato su fonte BOE, per abilitare il futuro estimatore V3.5c. Non calcola pensione, diritto finale, importi, coordinamento UE o fiscalita'. Il loader rifiuta rule pack senza fonti ufficiali, limitazioni esplicite, requisiti minimi, eta' ordinaria, parametri della base reguladora e progressione percentuale completa.
 
+## Spanish Statutory Pension
+
+Modulo:
+
+```text
+family_office_engine.services.spanish_statutory_pension
+```
+
+Funzione principale:
+
+- `estimate_spanish_statutory_pension(reconciliation_snapshot_path, rule_pack_path, output_path, retirement_year, retirement_month=12, scenario="ordinary")`: legge `spanish-contribution-reconciliation/v1`, applica `spanish-statutory-pension-rule-pack/v1` e scrive `spanish-statutory-pension/v1`.
+
+`spanish-statutory-pension/v1` produce una stima interna lorda della pensione ordinaria spagnola: verifica requisiti contributivi codificati, seleziona le migliori basi ufficiali nella finestra base reguladora, applica divisor, percentuale maturata e periodicita' annua versionata. Se mancano basi ufficiali sufficienti o requisiti minimi, lo stato e' `blocked_missing_inputs` e non viene prodotto alcun importo.
+
+Il servizio non calcola pensione ufficiale, anticipo, differimento, caps, minimi, supplementi, rivalutazione basi, integrazione lagune, fiscalita' o coordinamento UE.
+
+## EU Pension Coordination Italy-Spain
+
+Modulo:
+
+```text
+family_office_engine.services.eu_pension_coordination
+```
+
+Funzioni principali:
+
+- `load_rule_pack(rule_pack_path)`: carica e valida `eu-pension-coordination-rule-pack/v1`.
+- `coordinate_it_es_pensions(inps_snapshot_path, spanish_pension_snapshot_path, rule_pack_path, output_path, italian_contribution_months=None)`: legge `inps-pension/v1` e `spanish-statutory-pension/v1`, applica il metodo UE e scrive `eu-pension-coordination-it-es/v1`.
+
+`eu-pension-coordination-it-es/v1` mantiene separate le prestazioni nazionali Italia e Spagna, registra i periodi normalizzati disponibili, espone i rapporti di periodo quando calcolabili e dichiara il pro-rata come non calcolabile finche' manca un importo teorico nazionale. La totalizzazione e' rappresentata solo come criterio di diritto/diagnostica: i contributi non vengono trasferiti o fusi.
+
+Il servizio non calcola pensione INPS da regole normative, non produce P1 ufficiale, non calcola fiscalita', netto, cambio valuta, domande amministrative o coordinamento di pensioni complementari.
+
+## Pension Income
+
+Modulo:
+
+```text
+family_office_engine.services.pension_income
+```
+
+Funzione principale:
+
+- `compose_pension_income(inps_snapshot_path, spanish_pension_snapshot_path, output_path, rita_options_snapshot_path=None, eu_coordination_snapshot_path=None, include_rita=True)`: legge snapshot pensionistici disponibili e scrive `pension-income/v1`.
+
+`pension-income/v1` compone flussi separati per fonte: INPS come proiezione documentale, pensione pubblica spagnola come stima interna, RITA come opzione ponte finita. Ogni flusso mantiene paese, payer, tipo prestazione, decorrenza, periodicita', importi lordi, stato del netto, confidence e gap.
+
+Il composer non calcola pensioni, fiscalita', netto, cambi valuta o annualizzazioni mancanti. Il riepilogo `gross_annual_recurring_total` somma solo importi lordi annuali ricorrenti, espliciti e in EUR; flussi mensili senza annuale documentato e flussi RITA finiti restano separati ed esclusi dal totale.
+
+Il simulatore `retirement-simulation/v1` puo' ricevere opzionalmente `pension-income/v1` e usa solo `summary.gross_annual_recurring_total` come offset lordo annuo dei prelievi post-pensionamento. Se lo snapshot non viene passato, il comportamento resta invariato.
+
+## Lifecycle Expenses
+
+Modulo:
+
+```text
+family_office_engine.services.lifecycle_expenses
+```
+
+Funzione principale:
+
+- `build_lifecycle_expenses(input_path, output_path, household_snapshot_path=None, timeline_snapshot_path=None)`: legge un piano spese esplicito e scrive `lifecycle-expenses/v1`.
+
+`lifecycle-expenses/v1` produce un cashflow annuo di spesa per categoria, fase di vita, owner household/persona, periodo e provenance. Le spese ricorrenti usano `start_year`, `end_year`, importo annuo e inflazione annua esplicita; le spese una tantum possono usare un anno dichiarato o un evento di `timeline-events/v1`.
+
+Il servizio usa solo importi espliciti in EUR. Non stima spese mancanti, costo sanitario, fiscalita', rendimenti, cambio valuta, inflazione implicita, scoring o raccomandazioni.
+
 ## Tax Reconciliation
 
 Modulo:

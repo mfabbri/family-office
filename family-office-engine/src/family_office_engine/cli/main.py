@@ -66,6 +66,22 @@ from family_office_engine.services.spanish_contribution_reconciliation import (
     SpanishContributionReconciliationError,
     reconcile_spanish_contributions,
 )
+from family_office_engine.services.spanish_statutory_pension import (
+    SpanishStatutoryPensionError,
+    estimate_spanish_statutory_pension,
+)
+from family_office_engine.services.eu_pension_coordination import (
+    EuPensionCoordinationError,
+    coordinate_it_es_pensions,
+)
+from family_office_engine.services.pension_income import (
+    PensionIncomeError,
+    compose_pension_income,
+)
+from family_office_engine.services.lifecycle_expenses import (
+    LifecycleExpensesError,
+    build_lifecycle_expenses,
+)
 from family_office_engine.services.rita_options import RitaOptionsError, optimize_rita_options
 from family_office_engine.services.estate_baseline import EstateBaselineError, build_estate_baseline
 from family_office_engine.services.household_facts import HouseholdFactsError, import_household_facts
@@ -170,6 +186,34 @@ def default_spanish_pension_output() -> Path:
 
 def default_spanish_contribution_reconciliation_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "spanish-contribution-reconciliation.snapshot.json"
+
+
+def default_spanish_statutory_pension_rule_pack() -> Path:
+    return resolve_repo("rules") / "spain" / "statutory-retirement-general.json"
+
+
+def default_spanish_statutory_pension_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "spanish-statutory-pension.snapshot.json"
+
+
+def default_eu_pension_coordination_rule_pack() -> Path:
+    return resolve_repo("rules") / "cross-border" / "eu-pension-coordination-it-es.json"
+
+
+def default_eu_pension_coordination_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "eu-pension-coordination-it-es.snapshot.json"
+
+
+def default_pension_income_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "pension-income.snapshot.json"
+
+
+def default_lifecycle_expenses_input() -> Path:
+    return resolve_repo("workspace") / "household" / "lifecycle-expenses.json"
+
+
+def default_lifecycle_expenses_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "lifecycle-expenses.snapshot.json"
 
 
 def default_investments_italy_input() -> Path:
@@ -589,6 +633,148 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=default_spanish_contribution_reconciliation_output(),
         help="Output Spanish contribution reconciliation snapshot JSON path",
+    )
+    spanish_estimate_parser = pension_subparsers.add_parser(
+        "estimate-spain",
+        help="Estimate ordinary Spanish statutory pension from reconciled contribution bases",
+    )
+    spanish_estimate_parser.add_argument(
+        "--reconciliation-snapshot",
+        type=Path,
+        default=default_spanish_contribution_reconciliation_output(),
+        help="Input Spanish contribution reconciliation snapshot JSON path",
+    )
+    spanish_estimate_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_spanish_statutory_pension_rule_pack(),
+        help="Input Spanish statutory pension rule pack JSON path",
+    )
+    spanish_estimate_parser.add_argument(
+        "--retirement-year",
+        type=int,
+        required=True,
+        help="Retirement year used to select statutory rules",
+    )
+    spanish_estimate_parser.add_argument(
+        "--retirement-month",
+        type=int,
+        default=12,
+        help="Retirement month used to select the base reguladora lookback window",
+    )
+    spanish_estimate_parser.add_argument(
+        "--scenario",
+        choices=["ordinary"],
+        default="ordinary",
+        help="Spanish statutory pension scenario to estimate",
+    )
+    spanish_estimate_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_spanish_statutory_pension_output(),
+        help="Output Spanish statutory pension estimate snapshot JSON path",
+    )
+    eu_coordination_parser = pension_subparsers.add_parser(
+        "coordinate-it-es",
+        help="Build an EU pension coordination dossier for Italy and Spain",
+    )
+    eu_coordination_parser.add_argument(
+        "--inps-snapshot",
+        type=Path,
+        default=default_inps_pension_output(),
+        help="Input INPS pension snapshot JSON path",
+    )
+    eu_coordination_parser.add_argument(
+        "--spanish-pension-snapshot",
+        type=Path,
+        default=default_spanish_statutory_pension_output(),
+        help="Input Spanish statutory pension estimate snapshot JSON path",
+    )
+    eu_coordination_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_eu_pension_coordination_rule_pack(),
+        help="Input EU pension coordination rule pack JSON path",
+    )
+    eu_coordination_parser.add_argument(
+        "--italian-contribution-months",
+        type=int,
+        help="Explicit normalized Italian contribution months for EU coordination",
+    )
+    eu_coordination_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_eu_pension_coordination_output(),
+        help="Output EU pension coordination snapshot JSON path",
+    )
+    pension_income_parser = pension_subparsers.add_parser(
+        "compose-income",
+        help="Compose pension income streams from available pension snapshots",
+    )
+    pension_income_parser.add_argument(
+        "--inps-snapshot",
+        type=Path,
+        default=default_inps_pension_output(),
+        help="Input INPS pension snapshot JSON path",
+    )
+    pension_income_parser.add_argument(
+        "--spanish-pension-snapshot",
+        type=Path,
+        default=default_spanish_statutory_pension_output(),
+        help="Input Spanish statutory pension estimate snapshot JSON path",
+    )
+    pension_income_parser.add_argument(
+        "--rita-options-snapshot",
+        type=Path,
+        default=default_rita_options_output(),
+        help="Input RITA options snapshot JSON path",
+    )
+    pension_income_parser.add_argument(
+        "--eu-coordination-snapshot",
+        type=Path,
+        default=default_eu_pension_coordination_output(),
+        help="Input EU pension coordination snapshot JSON path",
+    )
+    pension_income_parser.add_argument(
+        "--no-rita",
+        action="store_true",
+        help="Exclude RITA options from the composed pension income snapshot",
+    )
+    pension_income_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_pension_income_output(),
+        help="Output pension income snapshot JSON path",
+    )
+    expenses = subparsers.add_parser("expenses", help="Build expense planning snapshots")
+    expenses_subparsers = expenses.add_subparsers(dest="expenses_command")
+    lifecycle_expenses_parser = expenses_subparsers.add_parser(
+        "build-lifecycle",
+        help="Build lifecycle expense yearly cashflow from an explicit plan",
+    )
+    lifecycle_expenses_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_lifecycle_expenses_input(),
+        help="Input lifecycle expense plan JSON path",
+    )
+    lifecycle_expenses_parser.add_argument(
+        "--household-snapshot",
+        type=Path,
+        default=default_household_facts_output(),
+        help="Input household facts snapshot JSON path",
+    )
+    lifecycle_expenses_parser.add_argument(
+        "--timeline-snapshot",
+        type=Path,
+        default=default_timeline_events_output(),
+        help="Input timeline events snapshot JSON path",
+    )
+    lifecycle_expenses_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_lifecycle_expenses_output(),
+        help="Output lifecycle expenses snapshot JSON path",
     )
     investments = subparsers.add_parser("investments", help="Import investment statements")
     investments_subparsers = investments.add_subparsers(dest="investments_command")
@@ -1076,6 +1262,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_tax_events_output(),
     )
     simulate_parser.add_argument(
+        "--pension-income-snapshot",
+        type=Path,
+        default=None,
+        help="Optional pension-income/v1 snapshot used as gross recurring pension offset",
+    )
+    simulate_parser.add_argument(
         "--output",
         type=Path,
         default=default_retirement_simulation_output(),
@@ -1325,6 +1517,78 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['summary']['usable_month_count']} usable months, "
             f"{snapshot['summary']['data_gap_count']} gaps, "
             f"{snapshot['summary']['anomaly_count']} anomalies "
+            f"({args.output})"
+        )
+        return 0
+
+    if args.command == "pension" and args.pension_command == "estimate-spain":
+        try:
+            snapshot = estimate_spanish_statutory_pension(
+                args.reconciliation_snapshot,
+                args.rule_pack,
+                args.output,
+                args.retirement_year,
+                args.retirement_month,
+                args.scenario,
+            )
+        except SpanishStatutoryPensionError as exc:
+            print(f"pension: ERROR ({exc})")
+            return 1
+        if snapshot["status"] == "complete":
+            print(
+                "pension: "
+                f"{snapshot['status']} "
+                f"monthly={snapshot['gross_pension']['monthly_amount']} "
+                f"annual={snapshot['gross_pension']['annual_amount']} "
+                f"({args.output})"
+            )
+        else:
+            print(
+                "pension: "
+                f"{snapshot['status']} "
+                f"{len(snapshot['data_gaps'])} gaps "
+                f"({args.output})"
+            )
+        return 0
+
+    if args.command == "pension" and args.pension_command == "coordinate-it-es":
+        try:
+            snapshot = coordinate_it_es_pensions(
+                args.inps_snapshot,
+                args.spanish_pension_snapshot,
+                args.rule_pack,
+                args.output,
+                args.italian_contribution_months,
+            )
+        except EuPensionCoordinationError as exc:
+            print(f"pension: ERROR ({exc})")
+            return 1
+        print(
+            "pension: "
+            f"{snapshot['status']} "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if args.command == "pension" and args.pension_command == "compose-income":
+        try:
+            snapshot = compose_pension_income(
+                args.inps_snapshot,
+                args.spanish_pension_snapshot,
+                args.output,
+                rita_options_snapshot_path=args.rita_options_snapshot,
+                eu_coordination_snapshot_path=args.eu_coordination_snapshot,
+                include_rita=not args.no_rita,
+            )
+        except PensionIncomeError as exc:
+            print(f"pension: ERROR ({exc})")
+            return 1
+        print(
+            "pension: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['stream_count']} streams, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )
         return 0
@@ -1605,6 +1869,27 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
 
+    if args.command == "expenses" and args.expenses_command == "build-lifecycle":
+        try:
+            snapshot = build_lifecycle_expenses(
+                args.input,
+                args.output,
+                household_snapshot_path=args.household_snapshot,
+                timeline_snapshot_path=args.timeline_snapshot,
+            )
+        except LifecycleExpensesError as exc:
+            print(f"expenses: ERROR ({exc})")
+            return 1
+        print(
+            "expenses: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['entry_count']} entries, "
+            f"{snapshot['summary']['year_count']} years, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
     if args.command == "tax-documents" and args.tax_documents_command == "import":
         try:
             snapshot = import_tax_documents(
@@ -1644,6 +1929,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.assumptions_snapshot,
                 args.tax_events_snapshot,
                 args.output,
+                pension_income_snapshot_path=args.pension_income_snapshot,
             )
         except RetirementSimulationError as exc:
             print(f"retirement: ERROR ({exc})")

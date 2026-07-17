@@ -88,6 +88,7 @@ def _validate_rule_pack(data: dict[str, Any]) -> None:
         "ordinary_retirement_age_schedule",
         "base_reguladora_transition",
         "pension_percentage",
+        "payment_schedule",
         "limitations",
     )
     for field in required:
@@ -105,6 +106,7 @@ def _validate_rule_pack(data: dict[str, Any]) -> None:
     _validate_age_schedule(data["ordinary_retirement_age_schedule"])
     _validate_base_reguladora_transition(data["base_reguladora_transition"])
     _validate_percentage(data["pension_percentage"])
+    _validate_payment_schedule(data["payment_schedule"])
 
 
 def _validate_source_refs(source_refs: Any) -> None:
@@ -114,8 +116,11 @@ def _validate_source_refs(source_refs: Any) -> None:
         for field in ("source_id", "title", "url", "retrieved_on", "provisions"):
             if field not in source_ref:
                 raise SpanishPensionRulesError(f"Spanish pension source_ref missing field: {field}")
-        if not str(source_ref["url"]).startswith("https://www.boe.es/"):
-            raise SpanishPensionRulesError("Spanish pension source_ref must use an official BOE URL")
+        if not (
+            str(source_ref["url"]).startswith("https://www.boe.es/")
+            or str(source_ref["url"]).startswith("https://www.seg-social.es/")
+        ):
+            raise SpanishPensionRulesError("Spanish pension source_ref must use an official BOE or Seguridad Social URL")
         if not isinstance(source_ref["provisions"], list) or not source_ref["provisions"]:
             raise SpanishPensionRulesError("Spanish pension source_ref provisions must be a non-empty list")
 
@@ -193,6 +198,19 @@ def _validate_percentage(percentage: dict[str, Any]) -> None:
     if maximum_rate != Decimal("1.00"):
         raise SpanishPensionRulesError("Spanish pension maximum percentage must be encoded as 1.00")
     _validate_additional_percentage_schedule(percentage["additional_month_schedule"])
+
+
+def _validate_payment_schedule(payment_schedule: dict[str, Any]) -> None:
+    for field in ("ordinary_payments_per_year", "ordinary_monthly_payments", "extra_payment_months", "source_provision"):
+        if field not in payment_schedule:
+            raise SpanishPensionRulesError(f"Spanish pension payment schedule missing field: {field}")
+    if int(payment_schedule["ordinary_payments_per_year"]) != 14:
+        raise SpanishPensionRulesError("Spanish pension ordinary payments per year must be encoded as 14")
+    if int(payment_schedule["ordinary_monthly_payments"]) != 12:
+        raise SpanishPensionRulesError("Spanish pension ordinary monthly payments must be encoded as 12")
+    extra_months = payment_schedule["extra_payment_months"]
+    if not isinstance(extra_months, list) or sorted(int(month) for month in extra_months) != [6, 11]:
+        raise SpanishPensionRulesError("Spanish pension extra payment months must be June and November")
 
 
 def _validate_additional_percentage_schedule(schedule: Any) -> None:

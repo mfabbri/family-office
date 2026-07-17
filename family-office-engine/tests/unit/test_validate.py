@@ -9,6 +9,12 @@ from unittest.mock import patch
 
 from family_office_engine.cli.main import main, resolve_fonte_source_paths, resolve_repo, validate
 
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+SPAIN_RULE_PACK = REPOSITORY_ROOT / "family-office-rules" / "spain" / "statutory-retirement-general.json"
+EU_PENSION_COORDINATION_RULE_PACK = (
+    REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es.json"
+)
+
 VALID_ASSUMPTIONS = {
     "personal": {
         "current_age": 55,
@@ -377,6 +383,137 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(output_path.exists())
             self.assertIn("pension: complete 1 usable months", stdout.getvalue())
+
+    def test_main_pension_estimate_spain_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            reconciliation_path = root / "spanish-contribution-reconciliation.snapshot.json"
+            output_path = root / "spanish-statutory-pension.snapshot.json"
+            reconciliation_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "spanish-contribution-reconciliation/v1",
+                        "record_type": "SpanishContributionReconciliationSnapshot",
+                        "status": "complete",
+                        "summary": {
+                            "covered_month_count": 304,
+                            "usable_month_count": 304,
+                            "data_gap_count": 0,
+                            "anomaly_count": 0,
+                        },
+                        "months": _spanish_reconciled_months("2001-08", 304, "3000.00"),
+                        "data_gaps": [],
+                        "anomalies": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "pension",
+                        "estimate-spain",
+                        "--reconciliation-snapshot",
+                        str(reconciliation_path),
+                        "--rule-pack",
+                        str(SPAIN_RULE_PACK),
+                        "--retirement-year",
+                        "2026",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("pension: complete monthly=", stdout.getvalue())
+
+    def test_main_pension_coordinate_it_es_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            inps_path = root / "inps-pension.snapshot.json"
+            spanish_path = root / "spanish-statutory-pension.snapshot.json"
+            output_path = root / "eu-pension-coordination-it-es.snapshot.json"
+            inps_path.write_text(json.dumps(_synthetic_inps_pension_snapshot()), encoding="utf-8")
+            spanish_path.write_text(json.dumps(_synthetic_spanish_statutory_pension_snapshot()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "pension",
+                        "coordinate-it-es",
+                        "--inps-snapshot",
+                        str(inps_path),
+                        "--spanish-pension-snapshot",
+                        str(spanish_path),
+                        "--rule-pack",
+                        str(EU_PENSION_COORDINATION_RULE_PACK),
+                        "--italian-contribution-months",
+                        "240",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("pension: complete 0 gaps", stdout.getvalue())
+
+    def test_main_pension_compose_income_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            inps_path = root / "inps-pension.snapshot.json"
+            spanish_path = root / "spanish-statutory-pension.snapshot.json"
+            output_path = root / "pension-income.snapshot.json"
+            inps_path.write_text(json.dumps(_synthetic_inps_pension_snapshot()), encoding="utf-8")
+            spanish_path.write_text(json.dumps(_synthetic_spanish_statutory_pension_snapshot()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "pension",
+                        "compose-income",
+                        "--inps-snapshot",
+                        str(inps_path),
+                        "--spanish-pension-snapshot",
+                        str(spanish_path),
+                        "--no-rita",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("pension: partial 2 streams, 1 gaps", stdout.getvalue())
+
+    def test_main_expenses_build_lifecycle_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "lifecycle-expenses.json"
+            output_path = root / "lifecycle-expenses.snapshot.json"
+            input_path.write_text(json.dumps(_synthetic_lifecycle_expense_plan()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "expenses",
+                        "build-lifecycle",
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("expenses: complete 1 entries, 2 years, 0 gaps", stdout.getvalue())
 
     def test_main_investments_import_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -1327,6 +1464,101 @@ class ValidateCliTest(unittest.TestCase):
             resolved = resolve_fonte_source_paths(position_pdf, contributions_xlsx)
 
             self.assertEqual(resolved, (position_pdf, contributions_xlsx))
+
+
+def _spanish_reconciled_months(start_month: str, count: int, amount: str) -> list[dict]:
+    start_year, start_month_number = (int(part) for part in start_month.split("-"))
+    months: list[dict] = []
+    for offset in range(count):
+        index = start_year * 12 + start_month_number - 1 + offset
+        year = index // 12
+        month = index % 12 + 1
+        month_key = f"{year:04d}-{month:02d}"
+        months.append(
+            {
+                "month": month_key,
+                "covered_by_vida_laboral": True,
+                "periods": [{"source_document": "synthetic-vida-laboral.txt"}],
+                "official_bases": [{"base_amount": amount, "source_document": "synthetic-bases.csv"}],
+                "payroll_bases": [],
+                "selected_base": {
+                    "month": month_key,
+                    "base_amount": amount,
+                    "currency": "EUR",
+                    "source_type": "official_bases",
+                    "confidence": "high",
+                    "source_documents": ["synthetic-bases.csv"],
+                    "component_count": 1,
+                },
+                "usable_for_estimator": True,
+                "data_gap_codes": [],
+                "anomaly_codes": [],
+            }
+        )
+    return months
+
+
+def _synthetic_inps_pension_snapshot() -> dict:
+    return {
+        "schema_version": "inps-pension/v1",
+        "record_type": "InpsPensionSnapshot",
+        "extraction_status": "extracted",
+        "projection": {
+            "retirement_date": "2039-05-01",
+            "monthly_gross_pension": "3562.00",
+            "prices_year": "2026",
+        },
+        "contribution_position": {
+            "pension_contribution_weeks": "1040",
+            "separate_management_weeks": "0",
+        },
+        "data_gaps": [],
+    }
+
+
+def _synthetic_spanish_statutory_pension_snapshot() -> dict:
+    return {
+        "schema_version": "spanish-statutory-pension/v1",
+        "record_type": "SpanishStatutoryPensionEstimate",
+        "status": "complete",
+        "retirement_date": "2039-05",
+        "eligibility": {
+            "contribution_months": 300,
+            "status": "eligible_by_encoded_rules",
+        },
+        "gross_pension": {
+            "monthly_amount": "1500.00",
+            "annual_amount": "21000.00",
+            "currency": "EUR",
+            "payments_per_year": 14,
+        },
+        "data_gaps": [],
+    }
+
+
+def _synthetic_lifecycle_expense_plan() -> dict:
+    return {
+        "schema_version": "lifecycle-expenses/v1",
+        "record_type": "LifecycleExpensePlan",
+        "household_id": "synthetic_household",
+        "as_of_date": "2026-07-17",
+        "expense_entries": [
+            {
+                "entry_id": "expense_living",
+                "category": "living",
+                "phase": "working_life",
+                "owner_type": "household",
+                "frequency": "annual",
+                "start_year": 2026,
+                "end_year": 2027,
+                "amount": "24000.00",
+                "currency": "EUR",
+                "annual_inflation_rate": "0.02",
+                "provenance": "synthetic fixture",
+            }
+        ],
+        "data_gaps": [],
+    }
 
 
 if __name__ == "__main__":

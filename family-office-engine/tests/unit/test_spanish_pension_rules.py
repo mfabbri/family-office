@@ -22,6 +22,7 @@ class SpanishPensionRulesTest(unittest.TestCase):
         self.assertEqual(rule_pack["schema_version"], "spanish-statutory-pension-rule-pack/v1")
         self.assertEqual(rule_pack["jurisdiction"], "ES")
         self.assertEqual(rule_pack["source_refs"][0]["source_id"], "boe.lgss.rdl-8-2015.consolidated")
+        self.assertEqual(rule_pack["payment_schedule"]["ordinary_payments_per_year"], 14)
         self.assertIn("Ordinary retirement only", rule_pack["limitations"][1])
 
     def test_rejects_rule_pack_without_official_source(self):

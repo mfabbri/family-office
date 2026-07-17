@@ -17,6 +17,7 @@ Non copre:
 
 - BOE, Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social, testo consolidato consultato il 2026-07-16.
 - BOE, stesso testo consolidato, ultima actualizacion publicada il 2026-02-04, Articolo 210 e Disposizione transitoria nona per la percentuale maturata.
+- Seguridad Social, Gestion/Pago, Devengo/Abono, consultato il 2026-07-16, per periodicita' di pagamento delle pensioni ordinarie.
 
 ## Requisiti ordinari codificati nel baseline
 
@@ -47,6 +48,10 @@ La Disposizione transitoria nona codifica la progressione applicabile:
 - dal 2027: per i mesi aggiuntivi 1-248 si aggiunge lo 0,19% per mese; per i 16 mesi successivi si aggiunge lo 0,18% per mese.
 
 Il rule pack codifica queste percentuali come frazioni decimali mensili (`0.0021`, `0.0019`, `0.0018`) e applica un tetto massimo del 100%. Questa regola abilita il futuro estimatore a calcolare la percentuale maturata, ma non calcola ancora base reguladora, importo mensile, massimali, minimi o fiscalita'.
+
+## Periodicita' di pagamento
+
+Le pensioni ordinarie del sistema spagnolo sono corrisposte in 14 paghe annue: dodici mensilita' ordinarie e due paghe straordinarie nei mesi di giugno e novembre. Le pensioni derivanti da infortunio sul lavoro o malattia professionale seguono una periodicita' diversa e restano fuori dal baseline di pensione ordinaria.
 
 ## Uso operativo
 

@@ -126,9 +126,21 @@ Completare nel rule pack spagnolo la progressione percentuale maturata oltre i p
 - Test: rule pack valido, schedule deferred rigettata, 15 anni = 50%, 25 anni nel 2026 = 73,78%, cap al 100% dal 2027.
 - Done quando: V3.5c puo' calcolare la percentuale maturata da regole versionate, senza inventare progressioni normative.
 
+### V3.5c-c — Code audit cadence 2 before Spanish statutory pension estimator
+
+**Stato:** `done`
+
+Eseguire il secondo audit tecnico periodico dopo quattro incrementi funzionali V3 completati dall'ultimo audit (`V3.5a`, `V3.5b`, `V3.5c-a`, `V3.5c-b`) prima di procedere all'estimatore V3.5c.
+
+- Dipende da: V3.5c-b.
+- Repository: `bootstrap`, `engine`, `rules`, `knowledge`, con verifica di confine sul `workspace`.
+- Output: audit documentato in `current-next-increment.md`, eventuali follow-up in roadmap o decision log.
+- Test: regression suite engine, controllo privacy/dati personali, allineamento import-riconciliazione-rule pack-docs-test, data gaps ed error handling.
+- Done quando: i risultati dell'audit sono tracciati e V3.5c puo' procedere senza debiti impliciti.
+
 ### V3.5c — Spanish statutory pension estimator
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Stimare la pensione pubblica spagnola applicando rule pack versionati per data di pensionamento e distinguendo sempre risultato ufficiale, stima interna e assunzione.
 
@@ -143,11 +155,11 @@ Stimare la pensione pubblica spagnola applicando rule pack versionati per data d
   - confidence, regole applicate e dati mancanti.
 - Output: `spanish-statutory-pension/v1`.
 - Test: carriera completa, carriera breve, basi mancanti, transizione normativa, pensionamento in date differenti, scenario non calcolabile.
-- Done quando: ogni importo è riproducibile da basi, regole e data di riferimento; in assenza di basi sufficienti il risultato è `blocked_missing_inputs`, non una stima inventata.
+- Done quando: ogni importo ordinario è riproducibile da basi, regole e data di riferimento; in assenza di basi sufficienti il risultato è `blocked_missing_inputs`, non una stima inventata. Anticipo e differimento restano fuori finche' non esistono rule pack dedicati.
 
 ### V3.5d — EU pension coordination Italy–Spain
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Applicare il coordinamento previdenziale UE mantenendo separati i diritti nazionali e modellando, quando previsto, calcolo nazionale e pro-rata.
 
@@ -155,11 +167,11 @@ Applicare il coordinamento previdenziale UE mantenendo separati i diritti nazion
 - Repository: `knowledge`, `rules`, `engine`.
 - Output: `eu-pension-coordination-it-es/v1` con periodi italiani e spagnoli, totalizzazione ai soli fini del diritto, quote nazionali, decorrenze e warning.
 - Test: diritto autonomo in entrambi i Paesi, diritto maturato tramite totalizzazione, date di decorrenza differenti, sovrapposizioni e periodi non riconosciuti.
-- Done quando: il sistema non trasferisce o fonde contributi tra INPS e Seguridad Social, ma espone separatamente ogni prestazione e il criterio di coordinamento usato.
+- Done quando: il sistema non trasferisce o fonde contributi tra INPS e Seguridad Social, ma espone separatamente ogni prestazione e il criterio di coordinamento usato. Il pro-rata resta diagnostico/non calcolabile finche' mancano importi teorici nazionali e periodi normalizzati completi.
 
 ### V3.5e — Pension income composer
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Comporre le entrate pensionistiche da INPS, pensione spagnola, Fon.Te, RITA e altre prestazioni, mantenendo separati valori documentali, stime e assunzioni.
 
@@ -167,11 +179,11 @@ Comporre le entrate pensionistiche da INPS, pensione spagnola, Fon.Te, RITA e al
 - Repository: `knowledge`, `rules`, `engine`, `workspace`.
 - Output: `pension-income/v1` con flussi lordi/netti, Paese erogatore, decorrenza, periodicità, confidence e data gaps.
 - Test: sola INPS, INPS+Spagna, decorrenze differenti, RITA opzionale, prestazione non stimabile.
-- Done quando: il reddito pensionistico entra automaticamente negli scenari senza input manuale duplicato e senza sommare importi non omogenei o privi di fonte.
+- Done quando: il reddito pensionistico entra automaticamente negli scenari senza input manuale duplicato e senza sommare importi non omogenei o privi di fonte. In V1 il simulatore usa solo il totale lordo annuo ricorrente esplicito di `pension-income/v1`; netto, fiscalita', decorrenze mensili e annualizzazioni mancanti restano fuori perimetro.
 
 ### V3.6 — Lifecycle expense model
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Modellare spese per fase della vita, inflazione, figli, sanità, abitazione e spese straordinarie.
 
@@ -180,6 +192,18 @@ Modellare spese per fase della vita, inflazione, figli, sanità, abitazione e sp
 - Output: `lifecycle-expenses/v1` e cashflow annuo spiegabile.
 - Test: inflazione, periodi, spesa una tantum, categorie mancanti.
 - Done quando: le spese non sono più un unico importo costante per tutta la simulazione.
+
+### V3.6a — Code audit cadence 3 before scenario contract V2
+
+**Stato:** `planned`
+
+Eseguire il terzo audit tecnico periodico dopo quattro incrementi funzionali V3 completati dall'ultimo audit (`V3.5c`, `V3.5d`, `V3.5e`, `V3.6`) prima di procedere a V3.7.
+
+- Dipende da: V3.6.
+- Repository: `bootstrap`, `engine`, `rules`, `knowledge`, con verifica di confine sul `workspace`.
+- Output: audit documentato in `current-next-increment.md`, eventuali follow-up in roadmap o decision log.
+- Test: regression suite engine, controllo privacy/dati personali, allineamento pensioni-lifecycle-scenario readiness-docs-test, data gaps ed error handling.
+- Done quando: i risultati dell'audit sono tracciati e V3.7 può procedere senza debiti impliciti.
 
 ### V3.7 — Scenario contract V2 and composer
 

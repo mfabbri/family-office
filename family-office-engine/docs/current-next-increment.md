@@ -2,7 +2,7 @@
 
 ## ID e titolo
 
-V3.5c-b - Spanish pension accrued percentage rules.
+V3.6 - Lifecycle expense model.
 
 ## Stato
 
@@ -14,82 +14,79 @@ V3.5c-b - Spanish pension accrued percentage rules.
 
 ## Motivazione e dipendenze
 
-La roadmap V3 resta la prima roadmap non completata secondo `roadmap-index.md`. L'incremento corrente precedente, V3.5c-a, e' `done`; il prossimo incremento deducibile e' V3.5c - Spanish statutory pension estimator.
-
-V3.5c pero' richiede ancora una regola previdenziale essenziale: la percentuale maturata oltre i primi 15 anni. Il baseline V3.5c-a codifica solo il 50% iniziale e dichiara la progressione successiva come deferred. Questo micro-incremento abilita V3.5c senza stimare ancora importi pensionistici.
+La roadmap V3 resta la prima roadmap non completata secondo `roadmap-index.md`. L'incremento corrente precedente V3.5e e' `done`; il primo incremento `planned` con dipendenze soddisfatte e' V3.6.
 
 Dipendenze verificate:
 
-- V3.5b `spanish-contribution-reconciliation/v1` e' completato.
-- V3.5c-a `spanish-statutory-pension-rule-pack/v1` e' completato.
-- Il BOE, Real Decreto Legislativo 8/2015, testo consolidato aggiornato al 2026-02-04, espone Articolo 210 e Disposizione transitoria nona per la progressione percentuale.
+- V3.1 `household-facts/v1` e' `done` e fornisce il contesto familiare/personale a cui collegare spese per persona o nucleo.
+- V3.4 `timeline-events/v1` e' `done` e fornisce eventi puntuali, periodici e date di scenario.
+- V3.5e `pension-income/v1` e' `done` e non blocca il modello spese.
+- Ultimo audit: V3.5c-c. Dopo V3.5c, V3.5d e V3.5e ci sono tre incrementi funzionali completati; V3.6 e' il quarto, quindi l'audit e' necessario prima di procedere a V3.7.
 
 ## Repository coinvolti
 
-- `family-office-knowledge`: aggiornamento della nota spagnola con progressione percentuale e fonte.
-- `family-office-rules`: estensione del rule pack spagnolo con schedule percentuale transitoria.
-- `family-office-engine`: validazione e lookup/calcolo deterministico della percentuale maturata.
+- `family-office-engine`: contratto, servizio deterministico, CLI, test e documentazione.
+- `family-office-workspace`: solo come destinazione degli snapshot privati quando la CLI viene eseguita su dati reali.
 
 ## Input attesi e classificazione dati
 
-- Fonti normative pubbliche ufficiali: BOE, testo consolidato della Ley General de la Seguridad Social.
-- Nessun documento personale e nessun dato del workspace.
+- `household-facts/v1`: snapshot privato o sintetico per collegare persone e nucleo.
+- `timeline-events/v1`: snapshot privato o sintetico per applicare eventi una tantum o periodici.
+- Piano spese esplicito fornito come JSON privato nel workspace o fixture sintetica nei test.
+- Nessun dato personale reale nei repository software.
 
-## Output e contratti
+## Output e contratti prodotti o modificati
 
-- Rule pack `spanish-statutory-pension-rule-pack/v1` esteso con `additional_month_schedule`.
-- Servizio engine capace di:
-  - validare la schedule percentuale;
-  - rifiutare rule pack che dichiarano la progressione come deferred;
-  - calcolare la percentuale maturata da mesi contributivi e anno di pensionamento.
+- Nuovo snapshot `lifecycle-expenses/v1`.
+- Servizio che produce cashflow annuo di spesa per categoria, fase di vita, periodo, inflazione opzionale, persona/nucleo e provenance.
+- CLI `expenses build-lifecycle`.
+- Totali prudenti: il servizio usa solo importi espliciti in EUR, non stima spese mancanti, non calcola fiscalita', rendimenti, bisogni sanitari o inflazione implicita.
 
-## File previsti
+## File modificati
 
-- `family-office-knowledge/international/spain-pension.md`
-- `family-office-rules/spain/statutory-retirement-general.json`
-- `family-office-rules/spain/README.md`
-- `family-office-engine/src/family_office_engine/services/spanish_pension_rules.py`
-- `family-office-engine/tests/unit/test_spanish_pension_rules.py`
+- `family-office-engine/src/family_office_engine/services/lifecycle_expenses.py`
+- `family-office-engine/src/family_office_engine/cli/main.py`
+- `family-office-engine/tests/unit/test_lifecycle_expenses.py`
+- `family-office-engine/tests/unit/test_validate.py`
 - `family-office-engine/docs/api.md`
+- `family-office-engine/docs/cli.md`
 - `family-office-engine/docs/testing.md`
 - `family-office-engine/docs/roadmap/roadmap-v3-decision-core.md`
 - `family-office-engine/docs/decision-log.md`
+- `family-office-engine/docs/current-next-increment.md`
 
-## Test e verifiche
+## Test e verifiche eseguite
 
-- Done: unit test rule pack valido con schedule percentuale caricato con successo.
-- Done: unit test rule pack con progressione percentuale deferred rigettato.
-- Done: unit test percentuale 2026 con 15 anni = 50%.
-- Done: unit test percentuale 2026 con 25 anni = 73.78%.
-- Done: unit test percentuale 2027 con mesi oltre soglia e cap al 100%.
-- Done: `$env:PYTHONPATH='src'; python -m unittest tests.unit.test_spanish_pension_rules`
-- Done: `$env:PYTHONPATH='src'; python -m unittest discover -s tests/unit`
+- Spesa ricorrente con inflazione annua esplicita e importi annuali riproducibili.
+- Periodo limitato con start/end year e nessuna spesa fuori finestra.
+- Spesa una tantum agganciata a un anno evento.
+- Categorie mancanti o importi non validi generano gap/errori senza inventare valori.
+- CLI `expenses build-lifecycle` scrive snapshot e stampa stato, anni, totale e gap.
+- Test mirati: `Ran 7 tests in 0.034s - OK`.
+- Regression suite engine: `Ran 237 tests in 1.309s - OK`.
 
 ## Criteri di completamento
 
-- La progressione percentuale ordinaria e transitoria e' versionata nel rule pack, con fonte BOE esplicita.
-- Il loader rifiuta regole percentuali incomplete o non coperte da fonte.
-- Il calcolo della percentuale maturata e' deterministico, capped al 100% e non produce importi pensionistici.
-- La roadmap registra V3.5c-b come incremento abilitante tra V3.5c-a e V3.5c.
+- Il sistema produce `lifecycle-expenses/v1` da input espliciti senza duplicare spese manuali nel simulatore.
+- Le spese sono annualizzate e separate per categoria/fase/persona o nucleo, con provenance e data gaps.
+- L'inflazione e' applicata solo quando dichiarata nel piano spese.
+- Test mirati e regression suite passano.
+- Roadmap, current increment, decision log e documentazione sono aggiornati.
 
 ## Rischi, esclusioni e blocker
 
-- Fuori perimetro: base reguladora, rivalutazione basi, integrazione lagune, massimali/minimi, anticipo, differimento, supplementi, fiscalita', coordinamento UE, importi mensili o annuali.
-- Il rule pack non e' consulenza legale o previdenziale e non sostituisce calcoli ufficiali Seguridad Social.
-- La fonte BOE consolidata e' informativa; per uso legale va verificata la pubblicazione ufficiale applicabile.
+- Fuori perimetro: stima automatica delle spese familiari, fiscalita', costo sanitario attuariale, cambio valuta, ottimizzazione, scoring e raccomandazioni.
+- Gli importi sono input di scenario interni, non budget certificati o consulenza finanziaria.
 
 ## Risultati
 
 Incremento completato.
 
-- Esteso `spanish-statutory-pension-rule-pack/v1` con schedule percentuale ordinaria 2023-2026 e dal 2027.
-- Aggiornata knowledge note spagnola con Articolo 210, Disposizione transitoria nona e limiti operativi.
-- Implementato `accrued_pension_percentage` nel loader/validatore spagnolo.
-- Roadmap V3 aggiornata con micro-incremento V3.5c-b `done`.
-- Decision log aggiornato.
-- Test mirato: `Ran 9 tests in 0.015s - OK`.
-- Regression suite engine: `Ran 214 tests in 2.150s - OK`.
+- Implementato `lifecycle-expenses/v1` con servizio `build_lifecycle_expenses`.
+- Aggiunta CLI `expenses build-lifecycle`.
+- Aggiunti test unitari e smoke CLI con fixture sintetiche.
+- Aggiornate API, CLI docs, testing docs, roadmap V3 e decision log.
 
 ## Prossimo incremento deducibile
 
-Dopo V3.5c-b, il successivo incremento deducibile e' V3.5c - Spanish statutory pension estimator. Il primo passo di V3.5c potra' combinare basi riconciliate, parametri base reguladora e percentuale maturata, bloccando il risultato quando mancano basi o regole ancora fuori perimetro.
+Dopo V3.6, la cadenza audit richiede `V3.6a - Code audit cadence 3 before scenario contract V2` prima di procedere a V3.7.

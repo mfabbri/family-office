@@ -1,0 +1,60 @@
+{
+  "schema_version": "eu-pension-coordination-rule-pack/v1",
+  "rule_pack_id": "eu.it-es.pension-coordination.v1",
+  "jurisdictions": [
+    "IT",
+    "ES",
+    "EU"
+  ],
+  "currency": "EUR",
+  "status": "coordination_method_not_official_decision",
+  "source_refs": [
+    {
+      "source_id": "eurlex.reg-883-2004",
+      "title": "Regulation (EC) No 883/2004 on the coordination of social security systems",
+      "url": "https://eur-lex.europa.eu/eli/reg/2004/883/oj/eng",
+      "retrieved_on": "2026-07-16",
+      "provisions": [
+        "Article 50",
+        "Article 51",
+        "Article 52",
+        "Article 56"
+      ]
+    },
+    {
+      "source_id": "europa.your-europe.state-pensions-abroad",
+      "title": "Your Europe, State pensions abroad",
+      "url": "https://europa.eu/youreurope/citizens/work/retire-abroad/state-pensions-abroad/index_en.htm",
+      "retrieved_on": "2026-07-16",
+      "provisions": [
+        "Eligibility periods",
+        "How your pension is calculated"
+      ]
+    }
+  ],
+  "coordination_principles": {
+    "separate_national_entitlements": true,
+    "aggregation_for_entitlement_only": true,
+    "no_transfer_or_merger_of_contributions": true,
+    "compare_independent_and_pro_rata_when_calculable": true,
+    "separate_payment_by_country": true
+  },
+  "required_inputs": [
+    "italian_pension_source",
+    "spanish_pension_source",
+    "italian_periods_normalized_months",
+    "spanish_periods_normalized_months"
+  ],
+  "calculation_limits": [
+    "Does not calculate Italian statutory pension from first principles.",
+    "Does not create official P1 decisions.",
+    "Does not calculate tax, net amounts, exchange rates or application procedures.",
+    "Pro-rata amounts require a national theoretical amount and normalized periods."
+  ],
+  "limitations": [
+    "Internal coordination dossier only; not an official INPS or Seguridad Social decision.",
+    "Periods are aggregated only to test entitlement and explain pro-rata mechanics.",
+    "Contributions remain under their national schemes and are not transferred or merged.",
+    "Human review is required before administrative or legal use."
+  ]
+}

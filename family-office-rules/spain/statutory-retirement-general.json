@@ -19,6 +19,15 @@
         "Disposicion transitoria novena",
         "Disposicion transitoria cuadragesima"
       ]
+    },
+    {
+      "source_id": "seg-social.gestion-pago.devengo-abono",
+      "title": "Seguridad Social, Gestion/Pago, Devengo/Abono",
+      "url": "https://www.seg-social.es/wps/portal/wss/internet/Pensionistas/GestionPago/33468/38854",
+      "retrieved_on": "2026-07-16",
+      "provisions": [
+        "Devengo / Abono"
+      ]
     }
   ],
   "scope": {
@@ -29,7 +38,8 @@
       "ordinary statutory retirement age",
       "minimum contribution access requirements",
       "base reguladora transition parameters",
-      "accrued pension percentage by contribution months"
+      "accrued pension percentage by contribution months",
+      "ordinary annual payment count"
     ],
     "excluded": [
       "early retirement",
@@ -208,6 +218,19 @@
     ],
     "maximum_rate": "1.00",
     "source_provision": "Articulo 210"
+  },
+  "payment_schedule": {
+    "ordinary_payments_per_year": 14,
+    "ordinary_monthly_payments": 12,
+    "extra_payment_months": [
+      6,
+      11
+    ],
+    "excluded": [
+      "work accident pensions",
+      "occupational disease pensions"
+    ],
+    "source_provision": "Seguridad Social Devengo / Abono"
   },
   "limitations": [
     "Baseline rule pack for deterministic loading and validation only; it does not estimate a pension amount.",

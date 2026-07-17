@@ -252,6 +252,116 @@ Default:
 
 Il comando produce una griglia mensile con copertura Vida Laboral, basi ufficiali, basi da nomina, fonte selezionata, gap e anomalie. Le basi ufficiali prevalgono sulle nominas; differenze e duplicati restano visibili. Non calcola pensione spagnola, base reguladora, diritto, coordinamento UE o fiscalita'.
 
+## `fo pension estimate-spain`
+
+Stima la pensione ordinaria pubblica spagnola lorda da basi contributive riconciliate e rule pack versionato:
+
+```text
+../family-office-workspace/snapshots/spanish-statutory-pension.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main pension estimate-spain --retirement-year 2026
+```
+
+Default:
+
+- input: `../family-office-workspace/snapshots/spanish-contribution-reconciliation.snapshot.json`
+- rule pack: `../family-office-rules/spain/statutory-retirement-general.json`
+- output: `../family-office-workspace/snapshots/spanish-statutory-pension.snapshot.json`
+
+Il comando calcola solo lo scenario ordinario. Usa basi ufficiali selezionate dalla riconciliazione, parametri base reguladora, percentuale maturata e 14 paghe annue codificate nel rule pack. Se mancano basi sufficienti o requisiti minimi, scrive `blocked_missing_inputs` senza inventare importi. Non calcola anticipo, differimento, caps, fiscalita', supplementi, rivalutazione basi, integrazione lagune o coordinamento UE.
+
+## `fo pension coordinate-it-es`
+
+Costruisce un dossier di coordinamento pensionistico UE Italia-Spagna:
+
+```text
+../family-office-workspace/snapshots/eu-pension-coordination-it-es.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main pension coordinate-it-es --italian-contribution-months 240
+```
+
+Default:
+
+- INPS: `../family-office-workspace/snapshots/inps-pension.snapshot.json`
+- Spagna: `../family-office-workspace/snapshots/spanish-statutory-pension.snapshot.json`
+- rule pack: `../family-office-rules/cross-border/eu-pension-coordination-it-es.json`
+- output: `../family-office-workspace/snapshots/eu-pension-coordination-it-es.snapshot.json`
+
+Il comando mantiene separate le prestazioni nazionali e usa i periodi normalizzati solo per diagnostica di totalizzazione/pro-rata. Se i mesi italiani normalizzati non sono disponibili, produce un gap invece di convertire automaticamente settimane INPS in mesi. Non calcola P1 ufficiale, pensione INPS normativa, fiscalita', netto o trasferimenti di contributi.
+
+## `fo pension compose-income`
+
+Compone i flussi pensionistici disponibili in uno snapshot unico:
+
+```text
+../family-office-workspace/snapshots/pension-income.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main pension compose-income
+```
+
+Default:
+
+- INPS: `../family-office-workspace/snapshots/inps-pension.snapshot.json`
+- Spagna: `../family-office-workspace/snapshots/spanish-statutory-pension.snapshot.json`
+- RITA: `../family-office-workspace/snapshots/rita-options.snapshot.json`
+- coordinamento UE: `../family-office-workspace/snapshots/eu-pension-coordination-it-es.snapshot.json`
+- output: `../family-office-workspace/snapshots/pension-income.snapshot.json`
+
+Il comando mantiene separati flussi documentali, stime interne e opzioni. Il riepilogo somma solo importi lordi annuali ricorrenti, espliciti e in EUR; non calcola netto, imposte, annualizzazioni mancanti o pensioni normative.
+
+Per escludere le opzioni RITA:
+
+```text
+python -m family_office_engine.cli.main pension compose-income --no-rita
+```
+
+## `fo expenses build-lifecycle`
+
+Costruisce un cashflow annuo di spese da un piano esplicito:
+
+```text
+../family-office-workspace/snapshots/lifecycle-expenses.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main expenses build-lifecycle
+```
+
+Default:
+
+- input: `../family-office-workspace/household/lifecycle-expenses.json`
+- household snapshot: `../family-office-workspace/snapshots/household-facts.snapshot.json`
+- timeline snapshot: `../family-office-workspace/snapshots/timeline-events.snapshot.json`
+- output: `../family-office-workspace/snapshots/lifecycle-expenses.snapshot.json`
+
+Il comando annualizza solo spese dichiarate nel piano, con importi EUR e inflazione esplicita. Non stima budget mancanti, fiscalita', costi sanitari, rendimenti o raccomandazioni.
+
+## `fo retirement simulate`
+
+Esegue la simulazione pensionamento deterministica.
+
+Uso con reddito pensionistico composto:
+
+```text
+python -m family_office_engine.cli.main retirement simulate --pension-income-snapshot ../family-office-workspace/snapshots/pension-income.snapshot.json
+```
+
+Quando `--pension-income-snapshot` e' passato, il simulatore usa solo `gross_annual_recurring_total` come offset lordo annuo dei prelievi post-pensionamento. Il comando non calcola netto, imposte o decorrenze mensili.
+
 ## `fo tax reconcile`
 
 Riconcilia `payroll.snapshot.json` e `tax-documents.snapshot.json` senza calcolare imposte.

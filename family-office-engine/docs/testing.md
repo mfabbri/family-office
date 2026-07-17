@@ -253,6 +253,102 @@ Il test usa il rule pack pubblico:
 
 Il baseline valida fonti, limitazioni, eta' ordinaria, parametri della base reguladora e progressione della percentuale maturata. Non produce ancora snapshot ne' importi pensionistici.
 
+## Spanish Statutory Pension
+
+Verifica estimatore ordinario spagnolo con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_spanish_statutory_pension
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main pension estimate-spain --retirement-year 2026
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\spanish-statutory-pension.snapshot.json
+```
+
+L'estimatore produce `spanish-statutory-pension/v1` solo per pensione ordinaria lorda. In assenza di basi ufficiali sufficienti o requisiti minimi scrive `blocked_missing_inputs`. Non calcola risultato ufficiale, anticipo, differimento, caps, fiscalita', supplementi, rivalutazione basi, integrazione lagune o coordinamento UE.
+
+## EU Pension Coordination Italy-Spain
+
+Verifica coordinamento con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_eu_pension_coordination
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main pension coordinate-it-es --italian-contribution-months 240
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\eu-pension-coordination-it-es.snapshot.json
+```
+
+Il dossier mantiene separate pensione INPS e pensione spagnola. La totalizzazione serve solo per diritto/diagnostica e il pro-rata resta non calcolabile senza importi teorici nazionali e periodi normalizzati. Non calcola P1 ufficiale, pensione INPS normativa, fiscalita', netto o trasferimenti di contributi.
+
+## Pension Income Composer
+
+Verifica composer con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_pension_income
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main pension compose-income
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\pension-income.snapshot.json
+```
+
+Il composer produce `pension-income/v1` mantenendo separati INPS, pensione spagnola e RITA. Somma solo importi lordi annuali ricorrenti, espliciti e in EUR; non calcola netto, fiscalita', pensione INPS normativa o annualizzazioni mancanti.
+
+Verifica uso opzionale nella simulazione retirement:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main retirement simulate --pension-income-snapshot ..\family-office-workspace\snapshots\pension-income.snapshot.json
+```
+
+La simulazione usa il totale lordo annuo ricorrente come offset dei prelievi post-pensionamento, senza calcolare imposte o decorrenze mensili.
+
+## Lifecycle Expenses
+
+Verifica modello spese lifecycle con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_lifecycle_expenses
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main expenses build-lifecycle
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\lifecycle-expenses.snapshot.json
+```
+
+Il modello produce `lifecycle-expenses/v1` da un piano spese esplicito in `household/lifecycle-expenses.json`. Applica inflazione solo quando dichiarata e registra gap per periodi o eventi mancanti; non stima budget, fiscalita', sanita', cambi, rendimenti o raccomandazioni.
+
 Verifica riconciliazione documentale:
 
 ```text

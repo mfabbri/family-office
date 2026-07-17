@@ -19,6 +19,7 @@ def simulate_retirement(
     output_path: Path,
     target_ages: tuple[int, ...] = DEFAULT_TARGET_AGES,
     end_age: int = DEFAULT_END_AGE,
+    pension_income_snapshot_path: Path | None = None,
 ) -> dict[str, Any]:
     data_gaps: list[str] = []
     sources: dict[str, str] = {}
@@ -30,6 +31,11 @@ def simulate_retirement(
         if tax_events_snapshot_path is not None
         else None
     )
+    pension_income = (
+        _read_optional_json(pension_income_snapshot_path, data_gaps, "pension income")
+        if pension_income_snapshot_path is not None
+        else None
+    )
 
     if net_worth is not None:
         sources["net_worth"] = str(net_worth_snapshot_path)
@@ -37,10 +43,12 @@ def simulate_retirement(
         sources["manual_assumptions"] = str(assumptions_snapshot_path)
     if tax_events is not None and tax_events_snapshot_path is not None:
         sources["tax_events"] = str(tax_events_snapshot_path)
+    if pension_income is not None and pension_income_snapshot_path is not None:
+        sources["pension_income"] = str(pension_income_snapshot_path)
 
     scenarios: list[dict[str, Any]] = []
     if net_worth is not None and assumptions is not None:
-        scenarios = _simulate_scenarios(net_worth, assumptions, target_ages, end_age)
+        scenarios = _simulate_scenarios(net_worth, assumptions, target_ages, end_age, pension_income)
 
     snapshot = {
         "schema_version": SCHEMA_VERSION,
@@ -69,11 +77,13 @@ def _simulate_scenarios(
     assumptions_snapshot: dict[str, Any],
     target_ages: tuple[int, ...],
     end_age: int,
+    pension_income_snapshot: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     current_age = int(_nested(assumptions_snapshot, ("assumptions", "personal", "current_age")))
     expenses = _decimal(_nested(assumptions_snapshot, ("assumptions", "cashflow", "family_expenses_yearly")), "expenses")
     nominal_return = _decimal(_nested(assumptions_snapshot, ("assumptions", "returns", "nominal_return")), "nominal_return")
     starting_net_worth = _decimal(_nested(net_worth, ("totals", "net_worth")), "net_worth")
+    pension_income_gross = _gross_annual_recurring_pension_income(pension_income_snapshot)
 
     scenarios: list[dict[str, Any]] = []
     for target_age in target_ages:
@@ -90,7 +100,8 @@ def _simulate_scenarios(
         cashflows: list[dict[str, str | int]] = []
         for age in range(current_age, end_age + 1):
             retired = age >= target_age
-            withdrawal = expenses if retired else Decimal("0.00")
+            pension_offset = pension_income_gross if retired else Decimal("0.00")
+            withdrawal = max(expenses - pension_offset, Decimal("0.00")) if retired else Decimal("0.00")
             start_balance = balance
             balance = (balance - withdrawal) * (Decimal("1") + nominal_return)
             cashflows.append(
@@ -98,6 +109,7 @@ def _simulate_scenarios(
                     "age": age,
                     "retired": str(retired).lower(),
                     "start_balance": _money(start_balance),
+                    "pension_income_gross": _money(pension_offset),
                     "withdrawal": _money(withdrawal),
                     "end_balance": _money(balance),
                 }
@@ -111,6 +123,18 @@ def _simulate_scenarios(
             }
         )
     return scenarios
+
+
+def _gross_annual_recurring_pension_income(snapshot: dict[str, Any] | None) -> Decimal:
+    if snapshot is None:
+        return Decimal("0.00")
+    if snapshot.get("schema_version") != "pension-income/v1":
+        raise RetirementSimulationError(f"Unsupported pension income schema: {snapshot.get('schema_version')}")
+    summary = snapshot.get("summary") if isinstance(snapshot.get("summary"), dict) else {}
+    total = summary.get("gross_annual_recurring_total")
+    if total in (None, ""):
+        return Decimal("0.00")
+    return _decimal(total, "gross_annual_recurring_total")
 
 
 def _read_optional_json(path: Path | None, data_gaps: list[str], label: str) -> dict[str, Any] | None:
