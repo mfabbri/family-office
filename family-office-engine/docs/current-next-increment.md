@@ -2,7 +2,7 @@
 
 ## ID e titolo
 
-V3.9 - Multi-objective scoring.
+V4.1 - Goals and constraints model.
 
 ## Stato
 
@@ -10,95 +10,91 @@ V3.9 - Multi-objective scoring.
 
 ## Roadmap
 
-`docs/roadmap/roadmap-v3-decision-core.md`
+`docs/roadmap/roadmap-v4-wealth-planning.md`
 
 ## Motivazione e dipendenze
 
-La roadmap V3 resta la prima roadmap non completata secondo `roadmap-index.md`. L'incremento corrente precedente V3.8 era `done`; dall'ultimo audit periodico V3.6a sono stati completati tre incrementi funzionali (`V3.7`, `V3.8`, `V3.9`), quindi non scatta ancora la cadenza audit. Il primo incremento `planned` con dipendenze soddisfatte era V3.9.
+`current-next-increment.md` precedente e `roadmap-index.md` marcano V3 come `done` e il gate V3 -> V4 come superato. La prima roadmap non completata e' V4; il primo incremento `planned` con dipendenze soddisfatte e' V4.1.
+
+V4.1 formalizza obiettivi, priorita', soglie minime, orizzonte, rischio, liquidita', eventi familiari e vincoli legali in un contratto deterministico. Gli incrementi successivi V4.2-V4.10 potranno usare questi vincoli dichiarati invece di preferenze implicite.
 
 Dipendenze verificate:
 
-- V3.7 `decision-scenario/v2` e' `done`.
-- V3.8 `sensitivity-analysis/v1` e' `done`.
-- V3.9 non richiede nuove fonti normative o dati personali reali.
+- Gate V3 -> V4 `passed`.
+- `decision-scenario/v2`, `decision-score/v1` e `decision-dossier/v1` sono disponibili e tracciabili.
+- Non serve nuova normativa o rule pack fiscale per V4.1.
+- Non scatta code audit: dall'ultimo audit V3.10a sono stati completati tre incrementi funzionali (`V3.10b`, `V3.10c`, `V3.10d`), quindi V4.1 puo' procedere.
 
 ## Repository coinvolti
 
-- `family-office-engine`: contratto, scorer deterministico, CLI, test, fixture sintetica e documentazione.
-- `family-office-rules`: rule pack tecnico `decision-score-policy/v1` con metriche ammesse, orientamento e limiti di normalizzazione.
-- `family-office-workspace`: solo come destinazione degli snapshot privati quando la CLI viene eseguita su dati reali.
+- `family-office-engine`: contratto `planning-goals/v1`, validatore, snapshot builder, CLI, fixture sintetica, test e documentazione.
+- `family-office-workspace`: destinazione privata attesa per input e snapshot reali; nessun dato reale viene copiato nel repository software.
+- `family-office-rules`, `family-office-knowledge`, `family-office-bootstrap`: nessuna modifica prevista.
 
 ## Input attesi e classificazione dati
 
-- `decision-scenario/v2`: snapshot privato o sintetico.
-- `sensitivity-analysis/v1`: snapshot privato o sintetico, usato come fonte di contesto/gap.
-- Specifica scoring in JSON: alternative, metriche esplicite, pesi dichiarati, soglie opzionali e metadati.
-- Rule pack `decision-score-policy/v1`: metriche supportate, orientamento (`higher_is_better`/`lower_is_better`) e range di normalizzazione.
-- Test solo con fixture sintetiche, senza dati personali.
+- Input JSON `planning-goals/v1` con obiettivi, vincoli, preferenze di rischio/liquidita', orizzonte e riferimenti opzionali a eventi di `timeline-events/v1`.
+- Snapshot opzionale `timeline-events/v1` per validare riferimenti a eventi familiari.
+- Fixture sintetiche nell'engine; dati reali solo nel workspace privato.
 
 ## Output e contratti prodotti o modificati
 
-- Nuovo snapshot `decision-score/v1`.
-- Scorer deterministico che normalizza metriche esplicite, applica pesi dichiarati e produce punteggi separati per metrica e totale pesato.
-- Ranking stabile con gestione di pareggi.
-- Data gaps per metriche mancanti, pesi mancanti, metriche non consentite dal policy pack o input sorgenti parziali.
-- Hash riproducibile del contenuto normalizzato.
-- CLI `scenarios score`.
+- Contratto e snapshot `planning-goals/v1`.
+- Validatore deterministico con data gaps per campi mancanti, riferimenti timeline mancanti e vincoli incompleti.
+- Errori bloccanti per ID duplicati, priorita' non positive, soglie incoerenti, orizzonti invalidi e riferimenti a vincoli/obiettivi inesistenti.
+- CLI per validare input goals e scrivere snapshot nel workspace.
 
 ## File modificati
 
-- `family-office-engine/src/family_office_engine/services/decision_score.py`
+- `family-office-engine/src/family_office_engine/services/planning_goals.py`
 - `family-office-engine/src/family_office_engine/cli/main.py`
-- `family-office-engine/tests/unit/test_decision_score.py`
+- `family-office-engine/tests/unit/test_planning_goals.py`
 - `family-office-engine/tests/unit/test_validate.py`
-- `family-office-engine/examples/decision-score-input-sample.json`
-- `family-office-rules/decision/score-policy-v1.json`
-- `family-office-rules/decision/README.md`
-- `family-office-rules/docs/changelog.md`
+- `family-office-engine/examples/planning-goals-sample.json`
+- `family-office-workspace/household/planning-goals.draft.json`
+- `family-office-workspace/household/household-input-guide.md`
 - `family-office-engine/docs/api.md`
 - `family-office-engine/docs/cli.md`
 - `family-office-engine/docs/testing.md`
-- `family-office-engine/docs/roadmap/roadmap-v3-decision-core.md`
-- `family-office-engine/docs/decision-log.md`
 - `family-office-engine/docs/current-next-increment.md`
+- `family-office-engine/docs/roadmap/roadmap-v4-wealth-planning.md`
+- `family-office-engine/docs/decision-log.md`
 
-## Test e verifiche eseguite
+## Test e verifiche
 
-- Due alternative complete producono `decision-score/v1`, punteggi normalizzati, totale pesato, ranking stabile e hash riproducibile.
-- Cambiare pesi cambia il ranking quando le metriche lo giustificano.
-- Pareggi producono stesso rank e ordinamento stabile.
-- Metrica mancante genera gap esplicito e alternativa parziale esclusa dal ranking.
-- Metrica non ammessa dal policy pack genera gap esplicito.
-- Snapshot sorgente con schema errato viene rigettato.
-- CLI `scenarios score` scrive snapshot e stampa stato, alternative, ranking e gap.
-- Test mirati: `Ran 7 tests in 0.054s - OK`.
-- Regression suite engine: `Ran 256 tests in 1.568s - OK`.
+- Input completo produce snapshot `complete`, hash stabile e nessun gap.
+- Obiettivi incompatibili o soglie min/max incoerenti vengono rigettati.
+- Priorita' duplicate o non positive vengono rigettate.
+- Riferimento timeline mancante produce gap esplicito.
+- Campi opzionali mancanti o `unknown` producono data gaps, non valori inventati.
+- CLI smoke `planning goals validate`.
+- Eseguito: `$env:PYTHONPATH='src'; python -m unittest tests.unit.test_planning_goals tests.unit.test_validate` -> 55 test OK.
+- Eseguito: `$env:PYTHONPATH='src'; python -m unittest discover -s tests\unit` -> 281 test OK.
+- Eseguito: `git diff --check` -> OK.
+
+## Documentazione aggiornata
+
+- API e CLI per `planning-goals/v1`.
+- Testing docs con comandi di verifica.
+- Roadmap V4 con stato V4.1.
+- Decision log con confini e limiti del contratto.
+- Questo file con risultati e prossimo incremento deducibile.
+- Guida workspace con il nuovo draft privato `planning-goals.draft.json`.
 
 ## Criteri di completamento
 
-- `decision-score/v1` valuta alternative con metriche e pesi espliciti, mantenendo metriche separate dal totale.
-- Il ranking non dipende da una singola percentuale di successo e resta riproducibile.
-- Facts, assunzioni, metriche, pesi, limiti e data gaps restano separati.
-- Lo scorer non calcola imposte, rendimenti, pensioni, metriche finanziarie non fornite o raccomandazioni.
-- Test mirati e regression suite passano.
-- Roadmap, current increment, decision log e documentazione sono aggiornati.
-
-## Rischi, esclusioni e blocker
-
-- Fuori perimetro: raccomandazione finale, dossier Markdown, ottimizzazione, calcolo delle metriche sottostanti, simulazioni, fiscalita', pensioni e consulenza di investimento.
-- Lo scoring e' descrittivo e deterministicamente pesato; la revisione umana resta necessaria prima di interpretarlo come decisione.
-
-## Risultati
-
-Incremento completato.
-
-- Implementato `decision-score/v1` con servizio `build_decision_score`.
-- Aggiunta CLI `scenarios score`.
-- Aggiunto rule pack tecnico `family-office-rules/decision/score-policy-v1.json`.
-- Aggiunta fixture sintetica `examples/decision-score-input-sample.json`.
-- Aggiunti test unitari e smoke CLI.
-- Aggiornate API, CLI docs, testing docs, roadmap V3, decision log e changelog rules.
+- Gli obiettivi e i vincoli sono rappresentati in modo versionato, validabile e riproducibile.
+- L'output mantiene separati obiettivi, vincoli, preferenze, timeline refs, data gaps e limiti.
+- Non vengono calcolati rendimenti, imposte, ottimizzazioni, raccomandazioni o strategie.
+- Test mirati, CLI smoke e regression suite passano.
+- V4.1 e' marcato `done`; V4 e' `in_progress`; il prossimo incremento deducibile resta V4.2.
 
 ## Prossimo incremento deducibile
 
-Dopo V3.9, il prossimo incremento deducibile secondo la roadmap V3 e' V3.10 - Explainable recommendation dossier.
+V4.2 - Liquidity buckets and emergency reserve.
+
+## Rischi, esclusioni e blocker
+
+- Fuori perimetro: liquidity buckets, emergency reserve, ottimizzazione, scoring V4, fiscalita', investimenti tax-aware, AI e uso di dati reali.
+- Il contratto non decide trade-off tra obiettivi: registra priorita' e soglie dichiarate.
+- Se emergono obiettivi incompatibili non risolvibili deterministicamente, vengono registrati come errori o data gaps, non mediati dal servizio.

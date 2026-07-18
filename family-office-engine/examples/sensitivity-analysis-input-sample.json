@@ -5,6 +5,19 @@
   "record_type": "SensitivityAnalysisInput",
   "schema_version": "sensitivity-analysis/v1",
   "seed": 20260718,
+  "outcome_evaluation": {
+    "schema_version": "decision-outcome/v1",
+    "record_type": "DecisionOutcomeInput",
+    "outcome_id": "synthetic-sensitivity-outcome",
+    "label": "Synthetic sensitivity outcome",
+    "evaluator_id": "retirement-monte-carlo/v1",
+    "parameters": {
+      "simulations": 100,
+      "seed": 20260718,
+      "end_age": 95
+    },
+    "impact_metric_id": "final_balance_p50"
+  },
   "sensitivities": [
     {
       "delta": "0.01",

@@ -298,6 +298,28 @@ Funzione principale:
 
 Il composer separa facts, assunzioni, obiettivi, constraints e data gaps. Non esegue simulazioni, non calcola rendimenti, imposte, pensioni, scoring, stress test o raccomandazioni.
 
+## Decision Outcome
+
+Modulo:
+
+```text
+family_office_engine.services.decision_outcome
+```
+
+Funzione principale:
+
+- `build_decision_outcome(decision_scenario_snapshot_path, outcome_input_path, output_path)`: esegue un evaluator deterministico registrato sopra `decision-scenario/v2` e scrive `decision-outcome/v1`.
+- `evaluate_decision_outcome(scenario, outcome_input, decision_scenario_path=None, outcome_input_path=None)`: esegue lo stesso evaluator in memoria; e' usata dalla sensitivity outcome-linked per evitare file temporanei.
+
+Il primo evaluator supportato e' `retirement-monte-carlo/v1`. Legge dallo scenario input espliciti sotto `assumptions.personal`, `assumptions.portfolio`, `assumptions.cashflow` e `assumptions.market`, li adatta in memoria al simulatore Monte Carlo V1 esistente e produce metriche realmente calcolate. Ogni metrica contiene scenario hash, evaluator/versione e seed nella provenance.
+
+Scenario incompatibile o input mancanti producono `blocked_missing_inputs` e gap espliciti senza metriche. Schema sorgente, evaluator o parametri non supportati generano `DecisionOutcomeError`. Il servizio non legge sorgenti implicite e non calcola imposte, diritti pensionistici o raccomandazioni.
+
+Fixture:
+
+- `examples/decision-outcome-input-sample.json`
+- `examples/decision-scenario-input-sample.json`
+
 ## Sensitivity Analysis
 
 Modulo:
@@ -310,9 +332,11 @@ Funzione principale:
 
 - `build_sensitivity_analysis(decision_scenario_snapshot_path, sensitivity_input_path, output_path)`: legge `decision-scenario/v2` e una specifica esplicita di sensitivities, poi scrive `sensitivity-analysis/v1`.
 
-`sensitivity-analysis/v1` applica perturbazioni deterministiche alle sole assunzioni dello scenario. Le sensitivities supportano `absolute`, `relative` e `set`; ogni path deve partire da `assumptions`. L'output include casi isolati, `tornado_data` ordinati per magnitudine dichiarata, `stress_matrix` con combinazioni esplicite, gap propagati dallo scenario sorgente e hash SHA-256 del contenuto canonico.
+`sensitivity-analysis/v1` applica perturbazioni deterministiche alle sole assunzioni dello scenario. Le sensitivities supportano `absolute`, `relative` e `set`; ogni path deve partire da `assumptions`.
 
-Il servizio non esegue simulazioni, non calcola rendimenti futuri, fiscalita', pensioni, scoring, ranking decisionale o raccomandazioni.
+Se l'input contiene `outcome_evaluation`, il servizio usa la configurazione `DecisionOutcomeInput` incorporata per rieseguire lo stesso evaluator sulla baseline, su ogni variante valida e su ogni stress combinato. L'output include `baseline_outcome`, outcome e `metric_deltas` per caso, provenance degli hash outcome e un `tornado_data` ordinato per impatto assoluto sulla `impact_metric_id` dichiarata. Senza `outcome_evaluation` il formato V3.8 legacy resta supportato e il tornado usa la magnitudine della perturbazione.
+
+Il primo evaluator supportato resta `retirement-monte-carlo/v1`. Baseline o varianti bloccate producono gap espliciti e nessun delta inventato. Il servizio non calcola fiscalita', diritti pensionistici, scoring, ranking decisionale o raccomandazioni.
 
 Fixture:
 
@@ -330,13 +354,54 @@ Funzione principale:
 
 - `build_decision_score(decision_scenario_snapshot_path, sensitivity_analysis_snapshot_path, scoring_input_path, policy_path, output_path)`: legge scenario, sensitivity, input di scoring e policy pack, poi scrive `decision-score/v1`.
 
-`decision-score/v1` normalizza metriche esplicite usando il rule pack tecnico `decision-score-policy/v1`, applica pesi dichiarati nell'input e produce punteggi separati per metrica, totale pesato e ranking stabile. Le metriche supportate dal policy pack includono sostenibilita', patrimonio finale, liquidita', fiscal drag, rischio, complessita', reversibilita' e compliance; valori e pesi non sono inventati dal servizio.
+`decision-score/v1` normalizza metriche risolte da outcome deterministici usando il rule pack tecnico `decision-score-policy/v1`, applica pesi dichiarati nell'input e produce punteggi separati per metrica, totale pesato e ranking stabile. Ogni alternativa deve dichiarare `outcome_ref` verso baseline, sensitivity o stress di `sensitivity-analysis/v1`; ogni metrica pesata deve mappare esplicitamente una metrica policy a un `outcome_metric_id`. Le metriche supportate dal policy pack includono sostenibilita', patrimonio finale, liquidita', fiscal drag, rischio, complessita', reversibilita' e compliance; valori e pesi non sono inventati dal servizio.
 
-Il servizio registra gap per metriche mancanti, metriche non ammesse, input sorgenti parziali o policy non valida. Non calcola imposte, rendimenti, pensioni, metriche sottostanti, ottimizzazioni o raccomandazioni.
+Metriche manuali prive di outcome lineage, riferimenti outcome mancanti e unita' incompatibili diventano gap bloccanti e non entrano in un ranking raccomandabile. Il servizio registra anche gap per metriche mancanti, metriche non ammesse, input sorgenti parziali o policy non valida. Non calcola imposte, rendimenti, pensioni, metriche sottostanti, ottimizzazioni o raccomandazioni.
 
 Fixture:
 
 - `examples/decision-score-input-sample.json`
+
+## Decision Dossier
+
+Modulo:
+
+```text
+family_office_engine.services.decision_dossier
+```
+
+Funzione principale:
+
+- `build_decision_dossier(decision_scenario_snapshot_path, sensitivity_analysis_snapshot_path, decision_score_snapshot_path, dossier_input_path, output_path, markdown_output_path)`: legge scenario, sensitivity, score e configurazione dossier, poi scrive `decision-dossier/v1` e un report Markdown.
+
+`decision-dossier/v1` raccoglie facts summary, assunzioni, alternative, ranking, motivi del ranking, rischi da sensitivity, gap, limiti, lineage summary e azioni successive. La raccomandazione deterministica e' prodotta solo se lo score e' completo, il ranking esiste, il lineage delle metriche classificate e' completo e non sono presenti gap bloccanti.
+
+Il servizio non calcola imposte, rendimenti, pensioni, nuove metriche, ottimizzazioni o raccomandazioni AI. Il dossier e' sempre soggetto a revisione umana.
+
+Fixture:
+
+- `examples/decision-dossier-input-sample.json`
+
+## Planning Goals
+
+Modulo:
+
+```text
+family_office_engine.services.planning_goals
+```
+
+Funzioni principali:
+
+- `validate_planning_goals(data, timeline_snapshot=None)`: valida un documento `planning-goals/v1` e restituisce gap non bloccanti.
+- `import_planning_goals(input_path, output_path, timeline_snapshot_path=None)`: valida e normalizza obiettivi e vincoli in uno snapshot `planning-goals/v1`.
+
+`planning-goals/v1` rappresenta obiettivi dichiarati, priorita', soglie, orizzonte, profilo di rischio, politica di liquidita' e vincoli legali/familiari/temporali. I vincoli possono riferirsi a obiettivi e, se disponibile uno snapshot `timeline-events/v1`, a eventi della timeline.
+
+Il servizio rigetta ID duplicati, priorita' non positive o duplicate, soglie incoerenti, orizzonti invalidi e riferimenti a obiettivi inesistenti. Campi opzionali mancanti, profili `unknown`, vincoli senza soglia e riferimenti timeline non verificabili diventano `data_gaps`. Non calcola rendimenti, imposte, ottimizzazioni, scoring, trade-off o raccomandazioni.
+
+Fixture:
+
+- `examples/planning-goals-sample.json`
 
 ## Tax Reconciliation
 

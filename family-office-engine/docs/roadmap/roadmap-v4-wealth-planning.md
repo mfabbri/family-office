@@ -14,7 +14,7 @@ Usare il Decision Core per confrontare strategie patrimoniali lecite e realistic
 
 ### V4.1 — Goals and constraints model
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Formalizzare obiettivi, priorità, soglie minime, orizzonte, rischio, liquidità, eventi familiari e vincoli legali.
 
@@ -22,6 +22,8 @@ Formalizzare obiettivi, priorità, soglie minime, orizzonte, rischio, liquidità
 - Output: `planning-goals/v1`.
 - Test: obiettivi incompatibili, priorità, soglie e campi mancanti.
 - Done quando: l'ottimizzazione usa vincoli dichiarati invece di preferenze implicite.
+
+Esito: completato con contratto e snapshot `planning-goals/v1`, validatore deterministico, CLI, fixture sintetica, draft workspace e test. Non calcola strategie, imposte, rendimenti, scoring o raccomandazioni.
 
 ### V4.2 — Liquidity buckets and emergency reserve
 

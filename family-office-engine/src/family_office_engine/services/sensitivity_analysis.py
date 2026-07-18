@@ -5,6 +5,11 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
+from family_office_engine.services.decision_outcome import (
+    DecisionOutcomeError,
+    evaluate_decision_outcome,
+)
+
 SCHEMA_VERSION = "sensitivity-analysis/v1"
 INPUT_RECORD_TYPE = "SensitivityAnalysisInput"
 SNAPSHOT_RECORD_TYPE = "SensitivityAnalysisSnapshot"
@@ -27,14 +32,42 @@ def build_sensitivity_analysis(
         raise SensitivityAnalysisError("seed must be an integer")
 
     data_gaps: list[dict[str, Any]] = []
+    outcome_input, impact_metric_id = _outcome_evaluation(sensitivity_input)
+    baseline_outcome = _evaluate_outcome(
+        decision_scenario,
+        outcome_input,
+        "baseline",
+        data_gaps,
+    )
     sensitivity_cases = [
         _build_case(decision_scenario, sensitivity, data_gaps)
         for sensitivity in _sorted_items(sensitivity_input.get("sensitivities", []))
     ]
+    if outcome_input is not None:
+        for case in sensitivity_cases:
+            _attach_case_outcome(
+                decision_scenario,
+                case,
+                outcome_input,
+                baseline_outcome,
+                "sensitivity",
+                data_gaps,
+            )
     stress_matrix = [
         _build_stress_case(decision_scenario, stress, sensitivity_cases, data_gaps)
         for stress in _sorted_items(sensitivity_input.get("stress_scenarios", []))
     ]
+    if outcome_input is not None:
+        for stress in stress_matrix:
+            _attach_case_outcome(
+                decision_scenario,
+                stress,
+                outcome_input,
+                baseline_outcome,
+                "stress",
+                data_gaps,
+            )
+        _record_impact_metric_gap(baseline_outcome, impact_metric_id, data_gaps)
     source_gaps = _source_gaps(decision_scenario)
     data_gaps.extend(source_gaps)
 
@@ -61,8 +94,10 @@ def build_sensitivity_analysis(
             "as_of_date": decision_scenario.get("as_of_date"),
             "status": decision_scenario.get("status"),
         },
+        "outcome_evaluation": _outcome_evaluation_summary(outcome_input, impact_metric_id),
+        "baseline_outcome": baseline_outcome,
         "sensitivity_cases": sensitivity_cases,
-        "tornado_data": _tornado_data(sensitivity_cases),
+        "tornado_data": _tornado_data(sensitivity_cases, impact_metric_id),
         "stress_matrix": stress_matrix,
         "data_gaps": data_gaps,
     }
@@ -73,12 +108,13 @@ def build_sensitivity_analysis(
         **analysis_core,
         "reproducibility": {
             "hash_algorithm": "sha256",
-            "content_hash": _content_hash(analysis_core),
+            "content_hash": _content_hash(_semantic_analysis_core(analysis_core)),
         },
         "notes": (
             "Sensitivity analysis V1 applies explicit deterministic perturbations to decision-scenario/v2 "
-            "assumptions. It does not run simulations, calculate taxes, returns, pension entitlements, "
-            "scores or recommendations."
+            "assumptions. When outcome_evaluation is configured it reruns the registered deterministic "
+            "evaluator for baseline, variants and stress scenarios. It does not calculate taxes, pension "
+            "entitlements, scores or recommendations."
         ),
     }
     try:
@@ -113,6 +149,14 @@ def _read_sensitivity_input(path: Path) -> dict[str, Any]:
         errors.append("sensitivities must be a non-empty list")
     if not isinstance(data.get("stress_scenarios", []), list):
         errors.append("stress_scenarios must be a list")
+    outcome_evaluation = data.get("outcome_evaluation")
+    if outcome_evaluation is not None:
+        if not isinstance(outcome_evaluation, dict):
+            errors.append("outcome_evaluation must be an object")
+        elif not isinstance(outcome_evaluation.get("impact_metric_id"), str) or not outcome_evaluation[
+            "impact_metric_id"
+        ].strip():
+            errors.append("outcome_evaluation.impact_metric_id is required")
     if errors:
         raise SensitivityAnalysisError("; ".join(errors))
     return data
@@ -234,7 +278,42 @@ def _changed_value(base_value: Any, sensitivity: dict[str, Any], operation: str)
     raise SensitivityAnalysisError(f"Unsupported sensitivity operation: {operation}")
 
 
-def _tornado_data(sensitivity_cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _tornado_data(
+    sensitivity_cases: list[dict[str, Any]],
+    impact_metric_id: str | None,
+) -> list[dict[str, Any]]:
+    if impact_metric_id is not None:
+        candidates: list[tuple[dict[str, Any], dict[str, Any]]] = []
+        for case in sensitivity_cases:
+            deltas = case.get("metric_deltas", [])
+            metric_delta = next(
+                (delta for delta in deltas if delta.get("metric_id") == impact_metric_id),
+                None,
+            )
+            if case.get("status") == "complete" and metric_delta is not None:
+                candidates.append((case, metric_delta))
+        ranked_outcomes = sorted(
+            candidates,
+            key=lambda item: (-_decimal(item[1]["absolute_delta"], "absolute_delta"), item[0]["id"]),
+        )
+        return [
+            {
+                "rank": index,
+                "sensitivity_id": case["id"],
+                "label": case["label"],
+                "domain": case["domain"],
+                "path": case["path"],
+                "impact_metric_id": impact_metric_id,
+                "baseline_value": delta["baseline_value"],
+                "variant_value": delta["variant_value"],
+                "metric_delta": delta["delta"],
+                "absolute_impact": delta["absolute_delta"],
+                "unit": delta.get("unit"),
+                "operation": case["operation"],
+            }
+            for index, (case, delta) in enumerate(ranked_outcomes, start=1)
+        ]
+
     complete = [case for case in sensitivity_cases if case["status"] == "complete"]
     ranked = sorted(
         complete,
@@ -346,6 +425,172 @@ def _nested_or_none(data: dict[str, Any], path: tuple[str, ...]) -> Any:
             return None
         current = current[part]
     return current
+
+
+def _outcome_evaluation(
+    sensitivity_input: dict[str, Any],
+) -> tuple[dict[str, Any] | None, str | None]:
+    configuration = sensitivity_input.get("outcome_evaluation")
+    if configuration is None:
+        return None, None
+    assert isinstance(configuration, dict)
+    outcome_input = {
+        key: copy.deepcopy(value)
+        for key, value in configuration.items()
+        if key != "impact_metric_id"
+    }
+    return outcome_input, configuration["impact_metric_id"]
+
+
+def _evaluate_outcome(
+    scenario: dict[str, Any],
+    outcome_input: dict[str, Any] | None,
+    context_id: str,
+    data_gaps: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if outcome_input is None:
+        return None
+    try:
+        outcome = evaluate_decision_outcome(scenario, outcome_input)
+    except DecisionOutcomeError as exc:
+        raise SensitivityAnalysisError(f"Invalid outcome evaluation configuration: {exc}") from exc
+    if outcome["status"] == "blocked_missing_inputs":
+        data_gaps.append(
+            {
+                "code": "outcome_evaluation_blocked",
+                "context_id": context_id,
+                "evaluator_id": outcome["evaluator"]["evaluator_id"],
+                "message": "Deterministic outcome evaluation is blocked by missing inputs.",
+            }
+        )
+    return outcome
+
+
+def _attach_case_outcome(
+    decision_scenario: dict[str, Any],
+    case: dict[str, Any],
+    outcome_input: dict[str, Any],
+    baseline_outcome: dict[str, Any] | None,
+    context_kind: str,
+    data_gaps: list[dict[str, Any]],
+) -> None:
+    if case["status"] != "complete":
+        case["outcome"] = None
+        case["metric_deltas"] = []
+        return
+    context_id = f"{context_kind}:{case['id']}"
+    variant = _variant_scenario(decision_scenario, case["variant_assumptions"], context_id)
+    variant_input = _variant_outcome_input(outcome_input, context_id)
+    outcome = _evaluate_outcome(variant, variant_input, context_id, data_gaps)
+    case["outcome"] = outcome
+    case["metric_deltas"] = _metric_deltas(baseline_outcome, outcome)
+    if outcome is None or outcome["status"] != "complete":
+        case["status"] = "partial"
+
+
+def _variant_scenario(
+    decision_scenario: dict[str, Any],
+    assumptions: dict[str, Any],
+    context_id: str,
+) -> dict[str, Any]:
+    variant = copy.deepcopy(decision_scenario)
+    variant["scenario_id"] = f"{decision_scenario.get('scenario_id', 'scenario')}::{context_id}"
+    variant["assumptions"] = copy.deepcopy(assumptions)
+    base_hash = _nested_or_none(decision_scenario, ("reproducibility", "content_hash"))
+    variant["reproducibility"] = {
+        "hash_algorithm": "sha256",
+        "content_hash": _content_hash(
+            {
+                "base_scenario_hash": base_hash,
+                "context_id": context_id,
+                "assumptions": assumptions,
+            }
+        ),
+    }
+    return variant
+
+
+def _variant_outcome_input(outcome_input: dict[str, Any], context_id: str) -> dict[str, Any]:
+    variant = copy.deepcopy(outcome_input)
+    variant["outcome_id"] = f"{outcome_input['outcome_id']}::{context_id}"
+    variant["label"] = f"{outcome_input['label']} - {context_id}"
+    return variant
+
+
+def _metric_deltas(
+    baseline_outcome: dict[str, Any] | None,
+    variant_outcome: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if baseline_outcome is None or variant_outcome is None:
+        return []
+    if baseline_outcome["status"] == "blocked_missing_inputs" or variant_outcome["status"] == "blocked_missing_inputs":
+        return []
+    baseline_metrics = {metric["metric_id"]: metric for metric in baseline_outcome["metrics"]}
+    variant_metrics = {metric["metric_id"]: metric for metric in variant_outcome["metrics"]}
+    rows: list[dict[str, Any]] = []
+    for metric_id in sorted(set(baseline_metrics) & set(variant_metrics)):
+        baseline = baseline_metrics[metric_id]
+        variant = variant_metrics[metric_id]
+        try:
+            delta = _decimal(variant["value"], f"{metric_id}.variant") - _decimal(
+                baseline["value"], f"{metric_id}.baseline"
+            )
+        except SensitivityAnalysisError:
+            continue
+        rows.append(
+            {
+                "metric_id": metric_id,
+                "baseline_value": baseline["value"],
+                "variant_value": variant["value"],
+                "delta": str(delta.normalize()),
+                "absolute_delta": str(abs(delta).normalize()),
+                "unit": variant.get("unit"),
+                "provenance": {
+                    "baseline_outcome_hash": baseline_outcome["reproducibility"]["content_hash"],
+                    "variant_outcome_hash": variant_outcome["reproducibility"]["content_hash"],
+                    "evaluator_id": variant_outcome["evaluator"]["evaluator_id"],
+                    "seed": variant_outcome["evaluator"]["parameters"]["seed"],
+                },
+            }
+        )
+    return rows
+
+
+def _outcome_evaluation_summary(
+    outcome_input: dict[str, Any] | None,
+    impact_metric_id: str | None,
+) -> dict[str, Any] | None:
+    if outcome_input is None:
+        return None
+    return {
+        "evaluator_id": outcome_input.get("evaluator_id"),
+        "parameters": copy.deepcopy(outcome_input.get("parameters", {})),
+        "impact_metric_id": impact_metric_id,
+    }
+
+
+def _record_impact_metric_gap(
+    baseline_outcome: dict[str, Any] | None,
+    impact_metric_id: str | None,
+    data_gaps: list[dict[str, Any]],
+) -> None:
+    if baseline_outcome is None or impact_metric_id is None:
+        return
+    available = {metric.get("metric_id") for metric in baseline_outcome.get("metrics", [])}
+    if impact_metric_id not in available:
+        data_gaps.append(
+            {
+                "code": "impact_metric_unavailable",
+                "metric_id": impact_metric_id,
+                "message": "The declared impact metric is not available in the baseline outcome.",
+            }
+        )
+
+
+def _semantic_analysis_core(analysis_core: dict[str, Any]) -> dict[str, Any]:
+    semantic = copy.deepcopy(analysis_core)
+    semantic["sources"]["decision_scenario"].pop("path", None)
+    return semantic
 
 
 def _content_hash(data: dict[str, Any]) -> str:

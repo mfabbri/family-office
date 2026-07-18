@@ -1,0 +1,12 @@
+{
+  "schema_version": "decision-outcome/v1",
+  "record_type": "DecisionOutcomeInput",
+  "outcome_id": "synthetic-retirement-outcome",
+  "label": "Synthetic retirement Monte Carlo outcome",
+  "evaluator_id": "retirement-monte-carlo/v1",
+  "parameters": {
+    "simulations": 100,
+    "seed": 20260718,
+    "end_age": 95
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "as_of_date": "2026-07-18",
+  "constraints": [
+    {
+      "applies_to_objective_ids": [
+        "objective_emergency_reserve",
+        "objective_retirement_income"
+      ],
+      "constraint_id": "constraint_emergency_reserve",
+      "constraint_type": "liquidity",
+      "label": "Keep emergency reserve available",
+      "priority": 1,
+      "severity": "hard",
+      "threshold": {
+        "metric": "reserve_months",
+        "operator": "min",
+        "unit": "months",
+        "value": 12
+      }
+    },
+    {
+      "applies_to_objective_ids": [
+        "objective_retirement_income"
+      ],
+      "constraint_id": "constraint_retirement_timing",
+      "constraint_type": "timing",
+      "label": "Retirement date drives the income horizon",
+      "priority": 2,
+      "severity": "soft",
+      "threshold": {
+        "metric": "target_year",
+        "operator": "target",
+        "unit": "year",
+        "value": 2035
+      },
+      "timeline_event_ids": [
+        "event_self_retirement"
+      ]
+    }
+  ],
+  "data_gaps": [],
+  "household_id": "synthetic_household",
+  "liquidity_policy": {
+    "minimum_reserve_months": 12,
+    "preferred_bucket": "emergency_reserve"
+  },
+  "objectives": [
+    {
+      "category": "liquidity",
+      "label": "Maintain emergency reserve",
+      "objective_id": "objective_emergency_reserve",
+      "priority": 1,
+      "target": {
+        "metric": "reserve_months",
+        "operator": "min",
+        "unit": "months",
+        "value": 12
+      },
+      "time_horizon_year": 2027
+    },
+    {
+      "category": "retirement_income",
+      "label": "Sustain retirement income",
+      "objective_id": "objective_retirement_income",
+      "priority": 2,
+      "target": {
+        "metric": "annual_net_need",
+        "operator": "target",
+        "unit": "EUR/year",
+        "value": 48000
+      },
+      "time_horizon_year": 2035
+    }
+  ],
+  "planning_horizon": {
+    "end_year": 2055,
+    "start_year": 2026
+  },
+  "record_type": "PlanningGoals",
+  "risk_profile": {
+    "capacity": "medium",
+    "max_loss_ratio": "0.20",
+    "tolerance": "medium"
+  },
+  "schema_version": "planning-goals/v1"
+}

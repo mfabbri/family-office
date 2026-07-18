@@ -9,8 +9,23 @@
     "market": {
       "return_model": "explicit_nominal",
       "nominal_return": "0.03",
+      "nominal_volatility": "0.10",
       "inflation": "0.02",
       "source": "synthetic fixture"
+    },
+    "personal": {
+      "current_age": 60,
+      "target_retirement_age": 64
+    },
+    "portfolio": {
+      "starting_net_worth": "250000.00",
+      "currency": "EUR"
+    },
+    "cashflow": {
+      "family_expenses_yearly": "24000.00",
+      "net_salary_monthly": "3000.00",
+      "salary_months": 12,
+      "retirement_income_yearly": "12000.00"
     },
     "withdrawal_policy": {
       "policy_id": "fixed_real_need",

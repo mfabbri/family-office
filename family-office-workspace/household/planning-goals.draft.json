@@ -1,0 +1,27 @@
+{
+  "as_of_date": null,
+  "constraints": [],
+  "data_gaps": [
+    {
+      "code": "draft_not_completed",
+      "message": "Replace null and empty values with private reviewed planning goals before validation."
+    }
+  ],
+  "household_id": null,
+  "liquidity_policy": {
+    "minimum_reserve_months": null,
+    "preferred_bucket": "unknown"
+  },
+  "objectives": [],
+  "planning_horizon": {
+    "end_year": null,
+    "start_year": null
+  },
+  "record_type": "PlanningGoals",
+  "risk_profile": {
+    "capacity": "unknown",
+    "max_loss_ratio": null,
+    "tolerance": "unknown"
+  },
+  "schema_version": "planning-goals/v1"
+}

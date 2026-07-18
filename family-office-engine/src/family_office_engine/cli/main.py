@@ -86,6 +86,10 @@ from family_office_engine.services.decision_scenario import (
     DecisionScenarioError,
     compose_decision_scenario,
 )
+from family_office_engine.services.decision_outcome import (
+    DecisionOutcomeError,
+    build_decision_outcome,
+)
 from family_office_engine.services.sensitivity_analysis import (
     SensitivityAnalysisError,
     build_sensitivity_analysis,
@@ -94,12 +98,17 @@ from family_office_engine.services.decision_score import (
     DecisionScoreError,
     build_decision_score,
 )
+from family_office_engine.services.decision_dossier import (
+    DecisionDossierError,
+    build_decision_dossier,
+)
 from family_office_engine.services.rita_options import RitaOptionsError, optimize_rita_options
 from family_office_engine.services.estate_baseline import EstateBaselineError, build_estate_baseline
 from family_office_engine.services.household_facts import HouseholdFactsError, import_household_facts
 from family_office_engine.services.ownership_graph import OwnershipGraphError, import_ownership_graph
 from family_office_engine.services.asset_availability import AssetAvailabilityError, import_asset_availability
 from family_office_engine.services.timeline_events import TimelineEventsError, import_timeline_events
+from family_office_engine.services.planning_goals import PlanningGoalsError, import_planning_goals
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -395,6 +404,14 @@ def default_timeline_policy() -> Path:
     return resolve_repo("rules") / "timeline" / "default-overlap-policy.json"
 
 
+def default_planning_goals_input() -> Path:
+    return resolve_repo("workspace") / "household" / "planning-goals.json"
+
+
+def default_planning_goals_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "planning-goals.snapshot.json"
+
+
 def default_retirement_simulation_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "retirement-simulation.snapshot.json"
 
@@ -415,6 +432,14 @@ def default_decision_scenario_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "decision-scenario-v2.snapshot.json"
 
 
+def default_decision_outcome_input() -> Path:
+    return resolve_repo("workspace") / "scenarios" / "decision-outcome.json"
+
+
+def default_decision_outcome_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "decision-outcome.snapshot.json"
+
+
 def default_sensitivity_analysis_input() -> Path:
     return resolve_repo("workspace") / "scenarios" / "sensitivity-analysis.json"
 
@@ -433,6 +458,18 @@ def default_decision_score_policy() -> Path:
 
 def default_decision_score_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "decision-score.snapshot.json"
+
+
+def default_decision_dossier_input() -> Path:
+    return resolve_repo("workspace") / "scenarios" / "decision-dossier.json"
+
+
+def default_decision_dossier_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "decision-dossier.snapshot.json"
+
+
+def default_decision_dossier_report_output() -> Path:
+    return resolve_repo("workspace") / "reports" / "decision-dossier.md"
 
 
 def default_decision_dashboard_output() -> Path:
@@ -1235,6 +1272,35 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_timeline_events_output(),
         help="Output timeline events snapshot JSON path",
     )
+    planning = subparsers.add_parser("planning", help="Validate planning contracts")
+    planning_subparsers = planning.add_subparsers(dest="planning_command")
+    planning_goals_parser = planning_subparsers.add_parser(
+        "goals",
+        help="Validate and normalize planning goals and constraints",
+    )
+    planning_goals_subparsers = planning_goals_parser.add_subparsers(dest="planning_goals_command")
+    planning_goals_validate_parser = planning_goals_subparsers.add_parser(
+        "validate",
+        help="Validate and normalize planning goals and constraints",
+    )
+    planning_goals_validate_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_planning_goals_input(),
+        help="Input planning goals JSON path",
+    )
+    planning_goals_validate_parser.add_argument(
+        "--timeline-snapshot",
+        type=Path,
+        default=default_timeline_events_output(),
+        help="Optional timeline events snapshot used to validate event references",
+    )
+    planning_goals_validate_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_planning_goals_output(),
+        help="Output planning goals snapshot JSON path",
+    )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
     tax_documents_import_parser = tax_documents_subparsers.add_parser(
@@ -1433,9 +1499,31 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_decision_scenario_output(),
         help="Output decision scenario V2 snapshot JSON path",
     )
+    scenarios_evaluate_parser = scenarios_subparsers.add_parser(
+        "evaluate",
+        help="Run a registered deterministic evaluator and build decision-outcome/v1",
+    )
+    scenarios_evaluate_parser.add_argument(
+        "--decision-scenario-snapshot",
+        type=Path,
+        default=default_decision_scenario_output(),
+        help="Input decision scenario V2 snapshot JSON path",
+    )
+    scenarios_evaluate_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_decision_outcome_input(),
+        help="Input decision outcome configuration JSON path",
+    )
+    scenarios_evaluate_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_decision_outcome_output(),
+        help="Output decision outcome snapshot JSON path",
+    )
     scenarios_sensitivity_parser = scenarios_subparsers.add_parser(
         "sensitivity",
-        help="Build deterministic sensitivity-analysis/v1 from decision-scenario/v2",
+        help="Build sensitivity-analysis/v1 and optionally rerun deterministic outcomes",
     )
     scenarios_sensitivity_parser.add_argument(
         "--decision-scenario-snapshot",
@@ -1488,6 +1576,46 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=default_decision_score_output(),
         help="Output decision score snapshot JSON path",
+    )
+    scenarios_dossier_parser = scenarios_subparsers.add_parser(
+        "dossier",
+        help="Build deterministic decision-dossier/v1 and Markdown report",
+    )
+    scenarios_dossier_parser.add_argument(
+        "--decision-scenario-snapshot",
+        type=Path,
+        default=default_decision_scenario_output(),
+        help="Input decision scenario V2 snapshot JSON path",
+    )
+    scenarios_dossier_parser.add_argument(
+        "--sensitivity-analysis-snapshot",
+        type=Path,
+        default=default_sensitivity_analysis_output(),
+        help="Input sensitivity analysis snapshot JSON path",
+    )
+    scenarios_dossier_parser.add_argument(
+        "--decision-score-snapshot",
+        type=Path,
+        default=default_decision_score_output(),
+        help="Input decision score snapshot JSON path",
+    )
+    scenarios_dossier_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_decision_dossier_input(),
+        help="Input decision dossier JSON path",
+    )
+    scenarios_dossier_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_decision_dossier_output(),
+        help="Output decision dossier snapshot JSON path",
+    )
+    scenarios_dossier_parser.add_argument(
+        "--markdown-output",
+        type=Path,
+        default=default_decision_dossier_report_output(),
+        help="Output decision dossier Markdown path",
     )
     dashboard = subparsers.add_parser("dashboard", help="Build decision dashboard snapshots")
     dashboard_subparsers = dashboard.add_subparsers(dest="dashboard_command")
@@ -2017,6 +2145,26 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
 
+    if (
+        args.command == "planning"
+        and args.planning_command == "goals"
+        and args.planning_goals_command == "validate"
+    ):
+        try:
+            snapshot = import_planning_goals(args.input, args.output, args.timeline_snapshot)
+        except PlanningGoalsError as exc:
+            print(f"planning goals: ERROR ({exc})")
+            return 1
+        print(
+            "planning goals: "
+            f"{snapshot['status']} "
+            f"{len(snapshot['objectives'])} objectives, "
+            f"{len(snapshot['constraints'])} constraints, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
     if args.command == "expenses" and args.expenses_command == "build-lifecycle":
         try:
             snapshot = build_lifecycle_expenses(
@@ -2140,6 +2288,26 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
 
+    if args.command == "scenarios" and args.scenarios_command == "evaluate":
+        try:
+            snapshot = build_decision_outcome(
+                args.decision_scenario_snapshot,
+                args.input,
+                args.output,
+            )
+        except DecisionOutcomeError as exc:
+            print(f"scenarios: ERROR ({exc})")
+            return 1
+        print(
+            "scenarios: "
+            f"{snapshot['status']} "
+            f"evaluator={snapshot['evaluator']['evaluator_id']}, "
+            f"{len(snapshot['metrics'])} metrics, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
     if args.command == "scenarios" and args.scenarios_command == "sensitivity":
         try:
             snapshot = build_sensitivity_analysis(
@@ -2179,6 +2347,30 @@ def main(argv: list[str] | None = None) -> int:
             f"{len(snapshot['ranking'])} ranked, "
             f"{len(snapshot['data_gaps'])} gaps "
             f"({args.output})"
+        )
+        return 0
+
+    if args.command == "scenarios" and args.scenarios_command == "dossier":
+        try:
+            snapshot = build_decision_dossier(
+                args.decision_scenario_snapshot,
+                args.sensitivity_analysis_snapshot,
+                args.decision_score_snapshot,
+                args.input,
+                args.output,
+                args.markdown_output,
+            )
+        except DecisionDossierError as exc:
+            print(f"scenarios: ERROR ({exc})")
+            return 1
+        recommendation = snapshot.get("recommendation") or {}
+        recommendation_id = recommendation.get("alternative_id", "blocked")
+        print(
+            "scenarios: "
+            f"{snapshot['status']} "
+            f"recommendation={recommendation_id}, "
+            f"{len(snapshot['blocking_gaps'])} blocking gaps "
+            f"({args.output}; {args.markdown_output})"
         )
         return 0
 

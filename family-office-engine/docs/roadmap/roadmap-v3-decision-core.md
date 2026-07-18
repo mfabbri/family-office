@@ -243,7 +243,7 @@ Valutare alternative per sostenibilità, patrimonio finale, liquidità, fiscal d
 
 ### V3.10 — Explainable recommendation dossier
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Produrre una raccomandazione deterministica che mostri fatti, assunzioni, alternative, motivi del ranking, rischi, gap e azioni successive.
 
@@ -253,6 +253,58 @@ Produrre una raccomandazione deterministica che mostri fatti, assunzioni, altern
 - Test: provenance completa, nessuna raccomandazione con gap bloccanti, stabilità del report.
 - Done quando: un revisore può ricostruire il risultato senza consultare il codice.
 
+### V3.10a — Code audit cadence 4 and V3 exit readiness
+
+**Stato:** `done`
+
+Eseguire il quarto audit tecnico periodico dopo quattro incrementi funzionali V3 completati dall'ultimo audit (`V3.7`, `V3.8`, `V3.9`, `V3.10`) prima di procedere alla roadmap V4.
+
+- Dipende da: V3.10.
+- Repository: `bootstrap`, `engine`, `rules`, `knowledge`, con verifica di confine sul `workspace`.
+- Output: audit documentato in `current-next-increment.md`, eventuali follow-up in roadmap o decision log, verifica exit criteria V3.
+- Test: regression suite engine, controllo privacy/dati personali, allineamento scenario-sensitivity-score-dossier-docs-test, data gaps ed error handling.
+- Done quando: i risultati dell'audit sono tracciati e il gate V3 -> V4 può essere valutato senza debiti impliciti.
+
+Nota successiva all'audit: una verifica semantica del codice ha rilevato che il gate non e' ancora superato. `sensitivity-analysis/v1` produce varianti delle assunzioni ma non outcome rivalutati, mentre `decision-score/v1` accetta metriche esplicite senza lineage obbligatorio verso simulazioni. L'audit resta completato come attivita', ma la sua conclusione di readiness e' corretta dagli incrementi V3.10b-V3.10d.
+
+### V3.10b — Decision outcome contract and deterministic evaluator bridge
+
+**Stato:** `done`
+
+Collegare `decision-scenario/v2` a un primo caso verticale realmente supportato dai valutatori deterministici esistenti e produrre outcome riproducibili utilizzabili dagli incrementi successivi.
+
+- Dipende da: V3.7 e V3.10a.
+- Repository: `engine`, `workspace`.
+- Output: `decision-outcome/v1` con metriche calcolate, evaluator/versione, seed, provenance, data gaps e hash riproducibile.
+- Test: outcome calcolato, riproducibilita', scenario incompatibile, evaluator non supportato, provenance completa e smoke CLI.
+- Done quando: almeno un caso verticale trasforma uno scenario V2 in metriche calcolate senza copiare metriche manuali e senza leggere input impliciti.
+
+### V3.10c — Outcome-linked sensitivity and stress execution
+
+**Stato:** `done`
+
+Estendere la sensitivity affinche' ogni variante supportata riesegua il valutatore deterministico e confronti gli outcome con la baseline.
+
+- Dipende da: V3.10b.
+- Repository: `engine`.
+- Output: estensione compatibile di `sensitivity-analysis/v1` oppure nuova versione se il contratto cambia in modo incompatibile, con baseline outcome, variant outcome, delta metriche e tornado ordinato per impatto dichiarato.
+- Test: perturbazione senza effetto, cambio outcome, stress combinato, ordinamento per impatto, evaluator bloccato, seed e hash stabili.
+- Done quando: il sistema identifica quali assunzioni cambiano gli outcome e rende verificabile se cambia il ranking decisionale.
+
+### V3.10d — Traceable scoring pipeline and V3 gate verification
+
+**Stato:** `done`
+
+Collegare scoring e dossier agli outcome calcolati, rendere obbligatoria la provenance delle metriche usate per una raccomandazione e rivalutare il gate V3 -> V4 con un golden scenario end-to-end.
+
+- Dipende da: V3.10c.
+- Repository: `bootstrap`, `engine`, `rules`, `workspace` con sole fixture sintetiche nei repository pubblicabili.
+- Output: scoring con lineage scenario -> evaluator -> outcome -> sensitivity -> ranking -> dossier; golden scenario sintetico; esito documentato del gate V3 -> V4.
+- Test: metriche senza provenance bloccanti, ranking modificato da outcome, dossier ricostruibile, golden end-to-end e regression suite completa.
+- Done quando: ogni raccomandazione e' riconducibile a facts, regole, simulazioni e metriche calcolate; solo allora V3 puo' essere marcata `done` nell'indice e V4.1 diventa selezionabile.
+
+Esito: completato con scoring outcome-linked, blocchi su lineage mancante, dossier con verifica della provenance e golden pipeline sintetica end-to-end. La regression suite engine passa con 273 test.
+
 ## Exit criteria V3
 
 - Il patrimonio è attribuito a soggetti e vincoli.
@@ -261,3 +313,9 @@ Produrre una raccomandazione deterministica che mostri fatti, assunzioni, altern
 - Gli scenari sono artefatti versionati, non insiemi di parametri CLI.
 - Sensitivity e scoring sono deterministici e spiegabili.
 - Le raccomandazioni vengono bloccate quando mancano facts essenziali.
+
+## Stato del gate V3 -> V4
+
+`passed`
+
+Le primitive V3.1-V3.10d sono disponibili e la regression suite passa. Il lineage eseguibile tra scenario, outcome simulati, sensitivity, scoring e dossier e' verificato da test mirati e da un golden scenario sintetico end-to-end. V4.1 puo' essere selezionato come prossimo incremento.

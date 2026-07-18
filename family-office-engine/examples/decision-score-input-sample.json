@@ -3,19 +3,38 @@
     {
       "alternative_id": "aggressive",
       "label": "Aggressive allocation",
+      "outcome_ref": {
+        "id": "return_up",
+        "kind": "sensitivity"
+      },
       "metrics": {
-        "final_wealth": "700000",
-        "risk": "0.70",
-        "sustainability": "0.80"
+        "final_wealth": {
+          "outcome_metric_id": "final_balance_p50"
+        },
+        "risk": {
+          "outcome_metric_id": "risk_ratio"
+        },
+        "sustainability": {
+          "outcome_metric_id": "success_rate"
+        }
       }
     },
     {
       "alternative_id": "balanced",
       "label": "Balanced allocation",
+      "outcome_ref": {
+        "kind": "baseline"
+      },
       "metrics": {
-        "final_wealth": "620000",
-        "risk": "0.30",
-        "sustainability": "0.78"
+        "final_wealth": {
+          "outcome_metric_id": "final_balance_p50"
+        },
+        "risk": {
+          "outcome_metric_id": "risk_ratio"
+        },
+        "sustainability": {
+          "outcome_metric_id": "success_rate"
+        }
       }
     }
   ],

@@ -27,7 +27,7 @@ class DecisionScoreTest(unittest.TestCase):
             root = Path(tmp_dir)
             paths = _write_sources(root)
             score_input = _scoring_input()
-            score_input["weights"] = {"final_wealth": "0.9", "risk": "0.1"}
+            score_input["weights"] = {"final_wealth": "0.9", "sustainability": "0.1"}
 
             result = _score(root, paths, score_input, "score.json")
 
@@ -38,7 +38,7 @@ class DecisionScoreTest(unittest.TestCase):
             root = Path(tmp_dir)
             paths = _write_sources(root)
             score_input = _scoring_input()
-            score_input["alternatives"][1]["metrics"] = dict(score_input["alternatives"][0]["metrics"])
+            score_input["alternatives"][1]["outcome_ref"] = dict(score_input["alternatives"][0]["outcome_ref"])
 
             result = _score(root, paths, score_input, "score.json")
 
@@ -50,7 +50,7 @@ class DecisionScoreTest(unittest.TestCase):
             root = Path(tmp_dir)
             paths = _write_sources(root)
             score_input = _scoring_input()
-            score_input["alternatives"][0]["metrics"].pop("risk")
+            score_input["alternatives"][0]["metrics"].pop("final_wealth")
 
             result = _score(root, paths, score_input, "score.json")
 
@@ -58,6 +58,32 @@ class DecisionScoreTest(unittest.TestCase):
             self.assertIn("missing_alternative_metric", {gap["code"] for gap in result["data_gaps"]})
             self.assertEqual(result["alternatives"][0]["status"], "partial")
             self.assertEqual([row["alternative_id"] for row in result["ranking"]], ["balanced"])
+
+    def test_manual_metric_without_outcome_lineage_is_blocking(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            paths = _write_sources(root)
+            score_input = _scoring_input()
+            score_input["alternatives"][0]["metrics"]["final_wealth"] = "700000"
+
+            result = _score(root, paths, score_input, "score.json")
+
+            self.assertEqual(result["status"], "partial")
+            self.assertEqual(result["lineage_status"], "incomplete")
+            self.assertIn("metric_provenance_missing", {gap["code"] for gap in result["data_gaps"]})
+            self.assertTrue(next(gap for gap in result["data_gaps"] if gap["code"] == "metric_provenance_missing")["blocking"])
+
+    def test_missing_outcome_reference_is_blocking(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            paths = _write_sources(root)
+            score_input = _scoring_input()
+            score_input["alternatives"][0]["outcome_ref"] = {"kind": "stress", "id": "missing"}
+
+            result = _score(root, paths, score_input, "score.json")
+
+            self.assertEqual(result["status"], "partial")
+            self.assertIn("outcome_reference_unavailable", {gap["code"] for gap in result["data_gaps"]})
 
     def test_unsupported_weight_metric_creates_gap(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -123,7 +149,44 @@ def _sensitivity_analysis() -> dict:
         "record_type": "SensitivityAnalysisSnapshot",
         "status": "complete",
         "analysis_id": "synthetic_sensitivity",
+        "baseline_outcome": _outcome("baseline", "0.90", "500000.00", "synthetic_base_case"),
+        "sensitivity_cases": [
+            {
+                "id": "return_up",
+                "status": "complete",
+                "outcome": _outcome("return-up", "0.70", "800000.00", "synthetic_base_case::return_up"),
+            }
+        ],
+        "stress_matrix": [],
         "data_gaps": [],
+        "reproducibility": {"content_hash": "sensitivity-hash"},
+    }
+
+
+def _outcome(outcome_id: str, success_rate: str, final_balance: str, scenario_id: str) -> dict:
+    provenance = {
+        "scenario_id": scenario_id,
+        "scenario_content_hash": f"{scenario_id}-hash",
+        "evaluator_id": "retirement-monte-carlo/v1",
+        "evaluator_version": "v1",
+        "seed": 20260718,
+    }
+    return {
+        "schema_version": "decision-outcome/v1",
+        "record_type": "DecisionOutcomeSnapshot",
+        "status": "complete",
+        "outcome_id": outcome_id,
+        "evaluator": {
+            "evaluator_id": "retirement-monte-carlo/v1",
+            "version": "v1",
+            "parameters": {"simulations": 25, "seed": 20260718, "end_age": 95},
+        },
+        "metrics": [
+            {"metric_id": "success_rate", "value": success_rate, "unit": "ratio", "provenance": provenance},
+            {"metric_id": "final_balance_p50", "value": final_balance, "unit": "EUR", "provenance": provenance},
+        ],
+        "data_gaps": [],
+        "reproducibility": {"content_hash": f"{outcome_id}-hash"},
     }
 
 
@@ -169,17 +232,25 @@ def _scoring_input() -> dict:
         "score_id": "synthetic_decision_score",
         "label": "Synthetic decision score",
         "as_of_date": "2026-07-18",
-        "weights": {"sustainability": "0.45", "final_wealth": "0.25", "risk": "0.30"},
+        "weights": {"sustainability": "0.75", "final_wealth": "0.25"},
         "alternatives": [
             {
                 "alternative_id": "aggressive",
                 "label": "Aggressive allocation",
-                "metrics": {"sustainability": "0.80", "final_wealth": "700000", "risk": "0.70"},
+                "outcome_ref": {"kind": "sensitivity", "id": "return_up"},
+                "metrics": {
+                    "sustainability": {"outcome_metric_id": "success_rate"},
+                    "final_wealth": {"outcome_metric_id": "final_balance_p50"},
+                },
             },
             {
                 "alternative_id": "balanced",
                 "label": "Balanced allocation",
-                "metrics": {"sustainability": "0.78", "final_wealth": "620000", "risk": "0.30"},
+                "outcome_ref": {"kind": "baseline"},
+                "metrics": {
+                    "sustainability": {"outcome_metric_id": "success_rate"},
+                    "final_wealth": {"outcome_metric_id": "final_balance_p50"},
+                },
             },
         ],
     }

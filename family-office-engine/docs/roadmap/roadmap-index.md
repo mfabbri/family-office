@@ -9,10 +9,12 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 0 | `roadmap-mvp.md` | Ingestion, patrimonio e simulazione iniziale | `done` |
 | 1 | `roadmap-v1.md` | Parser documentali V1 | `done_with_gaps` |
 | 2 | `roadmap-v2.md` | Cashflow, fiscalità, RITA e successione V1 | `done` |
-| 3 | `roadmap-v3-decision-core.md` | Modello decisionale spiegabile | `in_progress` |
-| 4 | `roadmap-v4-wealth-planning.md` | Pianificazione patrimoniale multi-obiettivo | `planned` |
+| 3 | `roadmap-v3-decision-core.md` | Modello decisionale spiegabile | `done` |
+| 4 | `roadmap-v4-wealth-planning.md` | Pianificazione patrimoniale multi-obiettivo | `in_progress` |
 | 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `planned` |
 | 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `planned` |
+
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `in_progress`: V4.1 e' completato e V4.2 e' il prossimo incremento selezionabile.
 
 `done_with_gaps` indica che la capability è disponibile ma alcuni formati o fonti reali restano da aggiungere tramite incrementi mirati. Non blocca la roadmap successiva se i gap non sono prerequisiti dell'incremento selezionato.
 

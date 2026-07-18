@@ -71,7 +71,7 @@
     }
   ],
   "limitations": [
-    "Metric values are explicit inputs; this policy does not calculate financial, tax, pension or legal outcomes.",
+    "Metric values must be resolved from explicit deterministic outcome references; this policy does not calculate financial, tax, pension or legal outcomes.",
     "Weights are not defined by this policy and must be provided explicitly by the scoring input.",
     "Scores are descriptive planning diagnostics, not recommendations or advice."
   ]

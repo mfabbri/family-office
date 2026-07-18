@@ -371,6 +371,28 @@ Lo snapshot risultante viene scritto in:
 
 Il composer produce `decision-scenario/v2` da snapshot e assunzioni scenario esplicite. Include un hash riproducibile del contenuto canonico e non esegue simulazioni, scoring, imposte, rendimenti o raccomandazioni.
 
+## Decision Outcome
+
+Verifica evaluator bridge con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_decision_outcome
+```
+
+Verifica CLI sul workspace privato, dopo aver predisposto scenario e configurazione outcome:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main scenarios evaluate
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\decision-outcome.snapshot.json
+```
+
+I test coprono metriche Monte Carlo calcolate, seed e hash stabili, provenance per metrica, scenario parziale, input mancanti, schema incompatibile ed evaluator non supportato. I dati sono esclusivamente sintetici.
+
 ## Sensitivity Analysis
 
 Verifica analyzer con fixture sintetiche:
@@ -391,7 +413,19 @@ Lo snapshot risultante viene scritto in:
 ..\family-office-workspace\snapshots\sensitivity-analysis.snapshot.json
 ```
 
-L'analyzer produce `sensitivity-analysis/v1` da `decision-scenario/v2` e da una specifica esplicita in `scenarios/sensitivity-analysis.json`. Applica variazioni controllate alle assunzioni, propaga gap e produce tornado data e stress matrix; non esegue Monte Carlo, scoring, fiscalita', rendimenti o raccomandazioni.
+L'analyzer produce `sensitivity-analysis/v1` da `decision-scenario/v2` e da una specifica esplicita in `scenarios/sensitivity-analysis.json`. Con `outcome_evaluation` riesegue il Monte Carlo deterministico per baseline, varianti e stress, calcola delta per le metriche comuni e ordina il tornado sulla metrica dichiarata.
+
+I test coprono perturbazione con effetto, perturbazione senza effetto, stress combinato, singola esecuzione per variante, evaluator bloccato, gap espliciti, seed/hash stabili e compatibilita' con il formato legacy senza outcome. Non vengono calcolati fiscalita', diritti pensionistici, scoring o raccomandazioni.
+
+## V3 Golden Pipeline
+
+Verifica end-to-end del gate V3 -> V4 con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_v3_golden_pipeline
+```
+
+Il golden attraversa `decision-scenario/v2`, `sensitivity-analysis/v1` con outcome Monte Carlo deterministico, `decision-score/v1` outcome-linked e `decision-dossier/v1`. Verifica hash stabili, ranking tracciabile, dossier completo e assenza di gap bloccanti.
 
 ## Decision Score
 
@@ -413,7 +447,52 @@ Lo snapshot risultante viene scritto in:
 ..\family-office-workspace\snapshots\decision-score.snapshot.json
 ```
 
-Lo scorer produce `decision-score/v1` da metriche e pesi espliciti in `scenarios/decision-score.json`, normalizzati dal policy pack `..\family-office-rules\decision\score-policy-v1.json`. Non calcola metriche sottostanti, fiscalita', rendimenti, pensioni, ottimizzazioni o raccomandazioni.
+Lo scorer produce `decision-score/v1` da pesi espliciti in `scenarios/decision-score.json` e metriche risolte dagli outcome deterministici contenuti in `sensitivity-analysis/v1`, normalizzati dal policy pack `..\family-office-rules\decision\score-policy-v1.json`. Metriche manuali prive di outcome lineage sono gap bloccanti. Non calcola metriche sottostanti, fiscalita', rendimenti, pensioni, ottimizzazioni o raccomandazioni.
+
+## Decision Dossier
+
+Verifica dossier con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_decision_dossier
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main scenarios dossier
+```
+
+Gli output risultanti vengono scritti in:
+
+```text
+..\family-office-workspace\snapshots\decision-dossier.snapshot.json
+..\family-office-workspace\reports\decision-dossier.md
+```
+
+Il dossier produce `decision-dossier/v1` e un report Markdown da scenario, sensitivity e score. Blocca la raccomandazione quando sono presenti gap bloccanti, ranking incompleto o lineage metrica incompleto; non calcola nuove metriche, fiscalita', rendimenti, pensioni, ottimizzazioni o raccomandazioni AI.
+
+## Planning Goals
+
+Verifica contratto obiettivi e vincoli V4 con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_planning_goals
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals validate
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\planning-goals.snapshot.json
+```
+
+Il contratto `planning-goals/v1` registra obiettivi, priorita', soglie, orizzonte, rischio, liquidita' e vincoli dichiarati. I test coprono snapshot completo, hash stabile, priorita' duplicate, soglie range incoerenti, riferimenti a obiettivi inesistenti, riferimenti timeline mancanti e data gaps. Non vengono calcolati rendimenti, imposte, ottimizzazioni, scoring o raccomandazioni.
 
 Verifica riconciliazione documentale:
 

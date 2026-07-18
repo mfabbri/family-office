@@ -377,6 +377,28 @@ Default:
 
 Il comando raccoglie riferimenti, summary, assunzioni esplicite, obiettivi e gap in `decision-scenario/v2`. Non esegue Monte Carlo, sensitivity, scoring, fiscalita', rendimenti o raccomandazioni.
 
+## `fo scenarios evaluate`
+
+Esegue il primo evaluator deterministico registrato e produce:
+
+```text
+../family-office-workspace/snapshots/decision-outcome.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main scenarios evaluate
+```
+
+Default:
+
+- decision scenario: `../family-office-workspace/snapshots/decision-scenario-v2.snapshot.json`
+- configurazione outcome: `../family-office-workspace/scenarios/decision-outcome.json`
+- output: `../family-office-workspace/snapshots/decision-outcome.snapshot.json`
+
+`retirement-monte-carlo/v1` usa solo input espliciti gia' inclusi nelle assunzioni dello scenario e registra evaluator, versione, parametri, seed, hash e provenance per ogni metrica. Se gli input richiesti mancano, il comando scrive un outcome `blocked_missing_inputs`; non legge snapshot esterni implicitamente e non inventa metriche.
+
 ## `fo scenarios sensitivity`
 
 Costruisce uno snapshot di sensitivities e stress matrix sopra uno scenario V2:
@@ -397,7 +419,9 @@ Default:
 - input sensitivities: `../family-office-workspace/scenarios/sensitivity-analysis.json`
 - output: `../family-office-workspace/snapshots/sensitivity-analysis.snapshot.json`
 
-Il comando applica solo perturbazioni esplicite alle assunzioni di `decision-scenario/v2` e produce `sensitivity-analysis/v1` con casi isolati, tornado data e stress matrix. Non esegue Monte Carlo, calcolo rendimenti, fiscalita', pensioni, scoring o raccomandazioni.
+Il comando applica perturbazioni esplicite alle assunzioni di `decision-scenario/v2`. Quando `scenarios/sensitivity-analysis.json` contiene `outcome_evaluation`, riesegue `retirement-monte-carlo/v1` con gli stessi parametri e seed per baseline, casi isolati e stress combinati; produce outcome, delta metriche e tornado ordinato per la metrica di impatto dichiarata.
+
+Senza `outcome_evaluation` mantiene il comportamento legacy basato sulla sola magnitudine della perturbazione. Evaluator bloccati diventano gap espliciti; il comando non inventa metriche e non calcola fiscalita', diritti pensionistici, scoring o raccomandazioni.
 
 ## `fo scenarios score`
 
@@ -421,7 +445,55 @@ Default:
 - policy: `../family-office-rules/decision/score-policy-v1.json`
 - output: `../family-office-workspace/snapshots/decision-score.snapshot.json`
 
-Il comando produce `decision-score/v1` applicando pesi espliciti a metriche esplicite normalizzate dal policy pack. Non calcola le metriche sottostanti, imposte, rendimenti, pensioni, ottimizzazioni o raccomandazioni.
+Il comando produce `decision-score/v1` applicando pesi espliciti a metriche risolte da outcome deterministici presenti in `sensitivity-analysis/v1`. Ogni alternativa deve dichiarare `outcome_ref` e ogni metrica deve dichiarare `outcome_metric_id`; metriche manuali prive di lineage diventano gap bloccanti. Non calcola le metriche sottostanti, imposte, rendimenti, pensioni, ottimizzazioni o raccomandazioni.
+
+## `fo scenarios dossier`
+
+Costruisce uno snapshot dossier e un report Markdown:
+
+```text
+../family-office-workspace/snapshots/decision-dossier.snapshot.json
+../family-office-workspace/reports/decision-dossier.md
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main scenarios dossier
+```
+
+Default:
+
+- decision scenario: `../family-office-workspace/snapshots/decision-scenario-v2.snapshot.json`
+- sensitivity analysis: `../family-office-workspace/snapshots/sensitivity-analysis.snapshot.json`
+- decision score: `../family-office-workspace/snapshots/decision-score.snapshot.json`
+- input dossier: `../family-office-workspace/scenarios/decision-dossier.json`
+- output snapshot: `../family-office-workspace/snapshots/decision-dossier.snapshot.json`
+- output Markdown: `../family-office-workspace/reports/decision-dossier.md`
+
+Il comando produce `decision-dossier/v1` e blocca la raccomandazione se score, ranking, lineage delle metriche o gap bloccanti non consentono una revisione solida. Non calcola nuove metriche, imposte, rendimenti, pensioni, ottimizzazioni o raccomandazioni AI.
+
+## `fo planning goals validate`
+
+Valida e normalizza obiettivi e vincoli patrimoniali V4:
+
+```text
+../family-office-workspace/snapshots/planning-goals.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main planning goals validate
+```
+
+Default:
+
+- input: `../family-office-workspace/household/planning-goals.json`
+- timeline: `../family-office-workspace/snapshots/timeline-events.snapshot.json`
+- output: `../family-office-workspace/snapshots/planning-goals.snapshot.json`
+
+Il comando produce `planning-goals/v1` con obiettivi, priorita', soglie, orizzonte, rischio, liquidita' e vincoli dichiarati. Valida riferimenti a obiettivi e, se la timeline e' disponibile, riferimenti a eventi. Non calcola rendimenti, imposte, ottimizzazioni, trade-off o raccomandazioni.
 
 ## `fo retirement simulate`
 

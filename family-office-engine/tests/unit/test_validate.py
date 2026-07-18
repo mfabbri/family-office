@@ -1033,6 +1033,35 @@ class ValidateCliTest(unittest.TestCase):
             written = json.loads(output_path.read_text(encoding="utf-8"))
             self.assertEqual(written["record_type"], "TimelineEventsSnapshot")
 
+    def test_main_planning_goals_validate_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "planning-goals.json"
+            timeline_path = root / "timeline-events.snapshot.json"
+            output_path = root / "planning-goals.snapshot.json"
+            input_path.write_text(json.dumps(_synthetic_planning_goals()), encoding="utf-8")
+            timeline_path.write_text(json.dumps(_synthetic_timeline_events_snapshot()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "goals",
+                        "validate",
+                        "--input",
+                        str(input_path),
+                        "--timeline-snapshot",
+                        str(timeline_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("planning goals: complete 2 objectives, 2 constraints, 0 gaps", stdout.getvalue())
+
     def test_main_tax_reconcile_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -1441,6 +1470,40 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(output_path.exists())
             self.assertIn("scenarios: complete 2 sensitivities, 1 stress scenarios, 0 gaps", stdout.getvalue())
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["baseline_outcome"]["status"], "complete")
+            self.assertEqual(written["tornado_data"][0]["impact_metric_id"], "final_balance_p50")
+
+    def test_main_scenarios_evaluate_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            decision_scenario_path = root / "decision-scenario-v2.snapshot.json"
+            input_path = root / "decision-outcome.json"
+            output_path = root / "decision-outcome.snapshot.json"
+            decision_scenario_path.write_text(json.dumps(_synthetic_decision_scenario_snapshot()), encoding="utf-8")
+            input_path.write_text(json.dumps(_synthetic_decision_outcome_input()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "scenarios",
+                        "evaluate",
+                        "--decision-scenario-snapshot",
+                        str(decision_scenario_path),
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("scenarios: complete evaluator=retirement-monte-carlo/v1", stdout.getvalue())
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["record_type"], "DecisionOutcomeSnapshot")
+            self.assertTrue(written["metrics"])
 
     def test_main_scenarios_score_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -1477,6 +1540,46 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(output_path.exists())
             self.assertIn("scenarios: complete 2 alternatives, 2 ranked, 0 gaps", stdout.getvalue())
+
+    def test_main_scenarios_dossier_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            decision_scenario_path = root / "decision-scenario-v2.snapshot.json"
+            sensitivity_path = root / "sensitivity-analysis.snapshot.json"
+            score_path = root / "decision-score.snapshot.json"
+            input_path = root / "decision-dossier.json"
+            output_path = root / "decision-dossier.snapshot.json"
+            markdown_path = root / "decision-dossier.md"
+            decision_scenario_path.write_text(json.dumps(_synthetic_decision_scenario_snapshot()), encoding="utf-8")
+            sensitivity_path.write_text(json.dumps(_synthetic_sensitivity_analysis_snapshot()), encoding="utf-8")
+            score_path.write_text(json.dumps(_synthetic_decision_score_snapshot()), encoding="utf-8")
+            input_path.write_text(json.dumps(_synthetic_decision_dossier_input()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "scenarios",
+                        "dossier",
+                        "--decision-scenario-snapshot",
+                        str(decision_scenario_path),
+                        "--sensitivity-analysis-snapshot",
+                        str(sensitivity_path),
+                        "--decision-score-snapshot",
+                        str(score_path),
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                        "--markdown-output",
+                        str(markdown_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertTrue(markdown_path.exists())
+            self.assertIn("scenarios: complete recommendation=balanced, 0 blocking gaps", stdout.getvalue())
 
     def test_main_dashboard_build_returns_success_with_missing_inputs(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -1700,11 +1803,35 @@ def _synthetic_decision_scenario_snapshot() -> dict:
         "label": "Synthetic base case",
         "as_of_date": "2026-07-17",
         "assumptions": {
-            "market": {"nominal_return": "0.03", "inflation": "0.02", "source": "synthetic fixture"},
+            "market": {
+                "nominal_return": "0.03",
+                "nominal_volatility": "0.10",
+                "inflation": "0.02",
+                "source": "synthetic fixture",
+            },
+            "personal": {"current_age": 60, "target_retirement_age": 64},
+            "portfolio": {"starting_net_worth": "250000.00", "currency": "EUR"},
+            "cashflow": {
+                "family_expenses_yearly": "24000.00",
+                "net_salary_monthly": "3000.00",
+                "salary_months": 12,
+                "retirement_income_yearly": "12000.00",
+            },
             "withdrawal_policy": {"policy_id": "fixed_real_need", "source": "synthetic fixture"},
         },
         "data_gaps": [],
         "reproducibility": {"content_hash": "synthetic-hash"},
+    }
+
+
+def _synthetic_decision_outcome_input() -> dict:
+    return {
+        "schema_version": "decision-outcome/v1",
+        "record_type": "DecisionOutcomeInput",
+        "outcome_id": "synthetic_retirement_outcome",
+        "label": "Synthetic retirement outcome",
+        "evaluator_id": "retirement-monte-carlo/v1",
+        "parameters": {"simulations": 25, "seed": 1234, "end_age": 95},
     }
 
 
@@ -1716,6 +1843,15 @@ def _synthetic_sensitivity_analysis_input() -> dict:
         "label": "Synthetic sensitivity analysis",
         "as_of_date": "2026-07-18",
         "seed": 20260718,
+        "outcome_evaluation": {
+            "schema_version": "decision-outcome/v1",
+            "record_type": "DecisionOutcomeInput",
+            "outcome_id": "synthetic-sensitivity-outcome",
+            "label": "Synthetic sensitivity outcome",
+            "evaluator_id": "retirement-monte-carlo/v1",
+            "parameters": {"simulations": 25, "seed": 20260718, "end_age": 95},
+            "impact_metric_id": "final_balance_p50",
+        },
         "sensitivities": [
             {
                 "id": "inflation_up",
@@ -1750,7 +1886,29 @@ def _synthetic_sensitivity_analysis_snapshot() -> dict:
         "record_type": "SensitivityAnalysisSnapshot",
         "status": "complete",
         "analysis_id": "synthetic_sensitivity",
+        "baseline_outcome": _synthetic_decision_outcome_snapshot(
+            "baseline",
+            "0.90",
+            "620000.00",
+            "0.30",
+            "synthetic_base_case",
+        ),
+        "sensitivity_cases": [
+            {
+                "id": "return_up",
+                "status": "complete",
+                "outcome": _synthetic_decision_outcome_snapshot(
+                    "return-up",
+                    "0.78",
+                    "700000.00",
+                    "0.70",
+                    "synthetic_base_case::sensitivity:return_up",
+                ),
+            }
+        ],
+        "stress_matrix": [],
         "data_gaps": [],
+        "reproducibility": {"content_hash": "synthetic-sensitivity-hash"},
     }
 
 
@@ -1766,12 +1924,22 @@ def _synthetic_decision_score_input() -> dict:
             {
                 "alternative_id": "aggressive",
                 "label": "Aggressive allocation",
-                "metrics": {"sustainability": "0.80", "final_wealth": "700000", "risk": "0.70"},
+                "outcome_ref": {"kind": "sensitivity", "id": "return_up"},
+                "metrics": {
+                    "sustainability": {"outcome_metric_id": "success_rate"},
+                    "final_wealth": {"outcome_metric_id": "final_balance_p50"},
+                    "risk": {"outcome_metric_id": "risk_ratio"},
+                },
             },
             {
                 "alternative_id": "balanced",
                 "label": "Balanced allocation",
-                "metrics": {"sustainability": "0.78", "final_wealth": "620000", "risk": "0.30"},
+                "outcome_ref": {"kind": "baseline"},
+                "metrics": {
+                    "sustainability": {"outcome_metric_id": "success_rate"},
+                    "final_wealth": {"outcome_metric_id": "final_balance_p50"},
+                    "risk": {"outcome_metric_id": "risk_ratio"},
+                },
             },
         ],
     }
@@ -1809,6 +1977,110 @@ def _synthetic_decision_score_policy() -> dict:
             },
         ],
         "limitations": ["synthetic fixture"],
+    }
+
+
+def _synthetic_decision_score_snapshot() -> dict:
+    provenance = {
+        "scenario_content_hash": "synthetic-hash",
+        "evaluator_id": "retirement-monte-carlo/v1",
+        "outcome_hash": "baseline-outcome-hash",
+        "outcome_metric_id": "success_rate",
+    }
+    return {
+        "schema_version": "decision-score/v1",
+        "record_type": "DecisionScoreSnapshot",
+        "status": "complete",
+        "score_id": "synthetic_decision_score",
+        "lineage_status": "complete",
+        "alternatives": [
+            {
+                "alternative_id": "balanced",
+                "label": "Balanced allocation",
+                "status": "complete",
+                "lineage_status": "complete",
+                "total_score": "0.7210",
+                "metrics": [
+                    {
+                        "metric_id": "sustainability",
+                        "label": "Sustainability",
+                        "raw_value": "0.78",
+                        "normalized_score": "0.7800",
+                        "weight": "0.45",
+                        "weighted_score": "0.3510",
+                        "provenance": provenance,
+                    }
+                ],
+            },
+            {
+                "alternative_id": "aggressive",
+                "label": "Aggressive allocation",
+                "status": "complete",
+                "lineage_status": "complete",
+                "total_score": "0.6250",
+                "metrics": [
+                    {
+                        "metric_id": "sustainability",
+                        "label": "Sustainability",
+                        "raw_value": "0.62",
+                        "normalized_score": "0.6200",
+                        "weight": "0.45",
+                        "weighted_score": "0.2790",
+                        "provenance": {**provenance, "outcome_hash": "return-up-outcome-hash"},
+                    }
+                ],
+            },
+        ],
+        "ranking": [
+            {"rank": 1, "alternative_id": "balanced", "label": "Balanced allocation", "total_score": "0.7210"},
+            {"rank": 2, "alternative_id": "aggressive", "label": "Aggressive allocation", "total_score": "0.6250"},
+        ],
+        "data_gaps": [],
+        "reproducibility": {"content_hash": "synthetic-score-hash"},
+    }
+
+
+def _synthetic_decision_outcome_snapshot(
+    outcome_id: str,
+    success_rate: str,
+    final_balance: str,
+    risk_ratio: str,
+    scenario_id: str,
+) -> dict:
+    provenance = {
+        "scenario_id": scenario_id,
+        "scenario_content_hash": f"{scenario_id}-hash",
+        "evaluator_id": "retirement-monte-carlo/v1",
+        "evaluator_version": "v1",
+        "seed": 20260718,
+    }
+    return {
+        "schema_version": "decision-outcome/v1",
+        "record_type": "DecisionOutcomeSnapshot",
+        "status": "complete",
+        "outcome_id": outcome_id,
+        "metrics": [
+            {"metric_id": "success_rate", "value": success_rate, "unit": "ratio", "provenance": provenance},
+            {"metric_id": "final_balance_p50", "value": final_balance, "unit": "EUR", "provenance": provenance},
+            {"metric_id": "risk_ratio", "value": risk_ratio, "unit": "ratio", "provenance": provenance},
+        ],
+        "data_gaps": [],
+        "reproducibility": {"content_hash": f"{outcome_id}-outcome-hash"},
+    }
+
+
+def _synthetic_decision_dossier_input() -> dict:
+    return {
+        "schema_version": "decision-dossier/v1",
+        "record_type": "DecisionDossierInput",
+        "dossier_id": "synthetic_dossier",
+        "label": "Synthetic decision dossier",
+        "as_of_date": "2026-07-18",
+        "blocking_gap_codes": [],
+        "next_actions": [
+            {"action_id": "human_review", "label": "Review ranking and evidence with a human reviewer."}
+        ],
+        "human_review": {"required": True, "reviewer_role": "human_reviewer"},
     }
 
 
@@ -1858,6 +2130,56 @@ def _synthetic_timeline_events_snapshot() -> dict:
         "status": "complete",
         "events": [{"event_id": "retirement", "event_type": "retirement"}],
         "occurrences": [{"event_id": "retirement", "occurrence_date": "2039-05-01"}],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_planning_goals() -> dict:
+    return {
+        "schema_version": "planning-goals/v1",
+        "record_type": "PlanningGoals",
+        "household_id": "synthetic_household",
+        "as_of_date": "2026-07-18",
+        "planning_horizon": {"start_year": 2026, "end_year": 2055},
+        "risk_profile": {"capacity": "medium", "tolerance": "medium", "max_loss_ratio": "0.20"},
+        "liquidity_policy": {"minimum_reserve_months": 12, "preferred_bucket": "emergency_reserve"},
+        "objectives": [
+            {
+                "objective_id": "objective_emergency_reserve",
+                "label": "Maintain emergency reserve",
+                "category": "liquidity",
+                "priority": 1,
+                "target": {"metric": "reserve_months", "operator": "min", "unit": "months", "value": 12},
+            },
+            {
+                "objective_id": "objective_retirement_income",
+                "label": "Sustain retirement income",
+                "category": "retirement_income",
+                "priority": 2,
+                "target": {"metric": "annual_net_need", "operator": "target", "unit": "EUR/year", "value": 48000},
+            },
+        ],
+        "constraints": [
+            {
+                "constraint_id": "constraint_emergency_reserve",
+                "label": "Keep emergency reserve available",
+                "constraint_type": "liquidity",
+                "severity": "hard",
+                "priority": 1,
+                "applies_to_objective_ids": ["objective_emergency_reserve"],
+                "threshold": {"metric": "reserve_months", "operator": "min", "unit": "months", "value": 12},
+            },
+            {
+                "constraint_id": "constraint_retirement_timing",
+                "label": "Retirement event anchors the income horizon",
+                "constraint_type": "timing",
+                "severity": "soft",
+                "priority": 2,
+                "applies_to_objective_ids": ["objective_retirement_income"],
+                "timeline_event_ids": ["retirement"],
+                "threshold": {"metric": "target_year", "operator": "target", "unit": "year", "value": 2039},
+            },
+        ],
         "data_gaps": [],
     }
 

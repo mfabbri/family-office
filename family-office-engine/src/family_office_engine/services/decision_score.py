@@ -42,10 +42,11 @@ def build_decision_score(
     data_gaps.extend(_source_gaps("sensitivity_analysis", sensitivity_analysis))
     weights = _weights(scoring_input, metric_definitions, data_gaps)
     alternatives = [
-        _score_alternative(alternative, metric_definitions, weights, data_gaps)
+        _score_alternative(alternative, sensitivity_analysis, metric_definitions, weights, data_gaps)
         for alternative in _sorted_alternatives(scoring_input["alternatives"])
     ]
     ranking = _ranking(alternatives)
+    lineage_status = "complete" if alternatives and all(a["lineage_status"] == "complete" for a in alternatives) else "incomplete"
 
     score_core = {
         "score_id": scoring_input["score_id"],
@@ -64,6 +65,7 @@ def build_decision_score(
         },
         "weights": {metric_id: str(weight) for metric_id, weight in weights.items()},
         "metric_policy": _metric_policy_summary(metric_definitions, weights),
+        "lineage_status": lineage_status,
         "alternatives": alternatives,
         "ranking": ranking,
         "data_gaps": data_gaps,
@@ -75,11 +77,12 @@ def build_decision_score(
         **score_core,
         "reproducibility": {
             "hash_algorithm": "sha256",
-            "content_hash": _content_hash(score_core),
+            "content_hash": _content_hash(_semantic_score_core(score_core)),
         },
         "notes": (
-            "Decision score V1 applies explicit weights to explicit metrics. It does not calculate taxes, "
-            "returns, pension entitlements, underlying metrics or recommendations."
+            "Decision score V1 resolves explicitly mapped deterministic outcome metrics and applies explicit "
+            "weights. Metrics without outcome lineage are blocking. It does not calculate taxes, pension "
+            "entitlements, underlying metrics or recommendations."
         ),
     }
     try:
@@ -181,6 +184,7 @@ def _weights(
 
 def _score_alternative(
     alternative: dict[str, Any],
+    sensitivity_analysis: dict[str, Any],
     metric_definitions: dict[str, dict[str, Any]],
     weights: dict[str, Decimal],
     data_gaps: list[dict[str, Any]],
@@ -189,6 +193,8 @@ def _score_alternative(
     metrics = alternative.get("metrics")
     if not isinstance(metrics, dict):
         raise DecisionScoreError(f"alternative {alternative_id} metrics must be an object")
+
+    outcome, outcome_reference = _resolve_outcome(alternative, sensitivity_analysis, alternative_id, data_gaps)
 
     metric_scores: list[dict[str, Any]] = []
     weighted_sum = Decimal("0")
@@ -207,7 +213,53 @@ def _score_alternative(
                 }
             )
             continue
-        raw_value = _decimal(metrics[metric_id], f"{alternative_id}.{metric_id}")
+        metric_spec = metrics[metric_id]
+        if not isinstance(metric_spec, dict) or not isinstance(metric_spec.get("outcome_metric_id"), str):
+            missing_metrics.append(metric_id)
+            data_gaps.append(
+                {
+                    "code": "metric_provenance_missing",
+                    "blocking": True,
+                    "alternative_id": alternative_id,
+                    "metric_id": metric_id,
+                    "message": "Weighted metric must map explicitly to a deterministic outcome metric.",
+                }
+            )
+            continue
+        if outcome is None:
+            missing_metrics.append(metric_id)
+            continue
+        outcome_metric_id = metric_spec["outcome_metric_id"]
+        outcome_metric = _outcome_metric(outcome, outcome_metric_id)
+        if outcome_metric is None:
+            missing_metrics.append(metric_id)
+            data_gaps.append(
+                {
+                    "code": "outcome_metric_missing",
+                    "blocking": True,
+                    "alternative_id": alternative_id,
+                    "metric_id": metric_id,
+                    "outcome_metric_id": outcome_metric_id,
+                    "message": "Mapped metric is not available in the referenced deterministic outcome.",
+                }
+            )
+            continue
+        expected_unit = definition.get("unit")
+        if expected_unit and outcome_metric.get("unit") != expected_unit:
+            missing_metrics.append(metric_id)
+            data_gaps.append(
+                {
+                    "code": "outcome_metric_unit_mismatch",
+                    "blocking": True,
+                    "alternative_id": alternative_id,
+                    "metric_id": metric_id,
+                    "expected_unit": expected_unit,
+                    "actual_unit": outcome_metric.get("unit"),
+                    "message": "Outcome metric unit does not match the score policy metric unit.",
+                }
+            )
+            continue
+        raw_value = _decimal(outcome_metric["value"], f"{alternative_id}.{metric_id}")
         normalized = _normalize(raw_value, definition)
         weighted = normalized * weight
         weighted_sum += weighted
@@ -222,6 +274,16 @@ def _score_alternative(
                 "weighted_score": _ratio(weighted),
                 "orientation": definition["orientation"],
                 "unit": definition.get("unit"),
+                "provenance": {
+                    **dict(outcome_metric.get("provenance", {})),
+                    "outcome_metric_id": outcome_metric_id,
+                    "outcome_id": outcome.get("outcome_id"),
+                    "outcome_hash": _nested_or_none(outcome, ("reproducibility", "content_hash")),
+                    "sensitivity_analysis_hash": _nested_or_none(
+                        sensitivity_analysis, ("reproducibility", "content_hash")
+                    ),
+                    "outcome_reference": outcome_reference,
+                },
             }
         )
 
@@ -231,10 +293,68 @@ def _score_alternative(
         "alternative_id": alternative_id,
         "label": alternative.get("label", alternative_id),
         "status": status,
+        "lineage_status": "complete" if status == "complete" else "incomplete",
+        "outcome_reference": outcome_reference,
         "metrics": metric_scores,
         "missing_metrics": missing_metrics,
         "total_score": total_score,
     }
+
+
+def _resolve_outcome(
+    alternative: dict[str, Any],
+    sensitivity_analysis: dict[str, Any],
+    alternative_id: str,
+    data_gaps: list[dict[str, Any]],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    reference = alternative.get("outcome_ref")
+    if not isinstance(reference, dict) or reference.get("kind") not in {"baseline", "sensitivity", "stress"}:
+        data_gaps.append(
+            {
+                "code": "missing_outcome_reference",
+                "blocking": True,
+                "alternative_id": alternative_id,
+                "message": "Alternative must reference baseline, sensitivity or stress deterministic outcome.",
+            }
+        )
+        return None, None
+    kind = reference["kind"]
+    reference_id = reference.get("id")
+    outcome: Any = None
+    if kind == "baseline":
+        outcome = sensitivity_analysis.get("baseline_outcome")
+    else:
+        collection_name = "sensitivity_cases" if kind == "sensitivity" else "stress_matrix"
+        collection = sensitivity_analysis.get(collection_name, [])
+        if isinstance(collection, list):
+            row = next(
+                (item for item in collection if isinstance(item, dict) and item.get("id") == reference_id),
+                None,
+            )
+            outcome = row.get("outcome") if isinstance(row, dict) else None
+    normalized_reference = {"kind": kind, "id": reference_id if kind != "baseline" else None}
+    if not isinstance(outcome, dict) or outcome.get("status") != "complete":
+        data_gaps.append(
+            {
+                "code": "outcome_reference_unavailable",
+                "blocking": True,
+                "alternative_id": alternative_id,
+                "outcome_reference": normalized_reference,
+                "message": "Referenced deterministic outcome is missing or not complete.",
+            }
+        )
+        return None, normalized_reference
+    return outcome, normalized_reference
+
+
+def _outcome_metric(outcome: dict[str, Any], metric_id: str) -> dict[str, Any] | None:
+    metrics = outcome.get("metrics", [])
+    if not isinstance(metrics, list):
+        return None
+    return next(
+        (metric for metric in metrics if isinstance(metric, dict) and metric.get("metric_id") == metric_id),
+        None,
+    )
 
 
 def _normalize(raw_value: Decimal, definition: dict[str, Any]) -> Decimal:
@@ -334,6 +454,23 @@ def _decimal(value: Any, field_name: str) -> Decimal:
 
 def _ratio(value: Decimal) -> str:
     return str(value.quantize(Decimal("0.0001")))
+
+
+def _nested_or_none(data: dict[str, Any], path: tuple[str, ...]) -> Any:
+    current: Any = data
+    for part in path:
+        if not isinstance(current, dict) or part not in current:
+            return None
+        current = current[part]
+    return current
+
+
+def _semantic_score_core(score_core: dict[str, Any]) -> dict[str, Any]:
+    semantic = json.loads(json.dumps(score_core))
+    for descriptor in semantic.get("sources", {}).values():
+        if isinstance(descriptor, dict):
+            descriptor.pop("path", None)
+    return semantic
 
 
 def _content_hash(data: dict[str, Any]) -> str:

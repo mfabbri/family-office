@@ -12,6 +12,8 @@ Questa guida serve per compilare i file privati in `family-office-workspace/hous
 6. Esegui `fo household availability validate`.
 7. Compila `timeline-events.json` partendo da `timeline-events.draft.json`, usando gli stessi `person_id` e `asset_id`.
 8. Esegui `fo household timeline validate`.
+9. Compila `planning-goals.json` partendo da `planning-goals.draft.json`, usando gli `event_id` della timeline quando un vincolo dipende da un evento.
+10. Esegui `fo planning goals validate`.
 
 ## Regole pratiche
 
@@ -60,3 +62,15 @@ Campi principali per ogni evento:
 - `related_asset_id`: asset collegato, se applicabile.
 
 La timeline ordina e valida eventi dichiarati, ma non calcola importi, imposte, pensioni o cashflow.
+
+## Planning goals
+
+Campi principali:
+
+- `planning_horizon`: anni di inizio e fine piano.
+- `risk_profile`: capacita', tolleranza e perdita massima dichiarata.
+- `liquidity_policy`: mesi minimi di riserva e bucket preferito.
+- `objectives`: obiettivi con `objective_id`, categoria, priorita' e target dichiarato.
+- `constraints`: vincoli con severita' `hard`/`soft`, priorita', soglia e riferimenti opzionali a obiettivi o eventi timeline.
+
+I goals dichiarano preferenze e limiti per gli incrementi V4. Non calcolano strategie, imposte, rendimenti o raccomandazioni.

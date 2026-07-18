@@ -1,0 +1,23 @@
+{
+  "as_of_date": "2026-07-18",
+  "blocking_gap_codes": [
+    "missing_decision_ranking",
+    "missing_alternative_metric",
+    "missing_market_assumptions"
+  ],
+  "dossier_id": "synthetic_dossier",
+  "human_review": {
+    "required": true,
+    "reviewer_role": "human_reviewer"
+  },
+  "label": "Synthetic decision dossier",
+  "next_actions": [
+    {
+      "action_id": "human_review",
+      "label": "Review ranking, gaps and evidence with a qualified human reviewer.",
+      "owner": "human_reviewer"
+    }
+  ],
+  "record_type": "DecisionDossierInput",
+  "schema_version": "decision-dossier/v1"
+}
