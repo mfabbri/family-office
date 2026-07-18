@@ -350,6 +350,79 @@ Default:
 
 Il comando annualizza solo spese dichiarate nel piano, con importi EUR e inflazione esplicita. Non stima budget mancanti, fiscalita', costi sanitari, rendimenti o raccomandazioni.
 
+## `fo scenarios compose-v2`
+
+Compone un artefatto scenario V2 deterministico:
+
+```text
+../family-office-workspace/snapshots/decision-scenario-v2.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main scenarios compose-v2
+```
+
+Default:
+
+- input: `../family-office-workspace/scenarios/decision-scenario-v2.json`
+- household: `../family-office-workspace/snapshots/household-facts.snapshot.json`
+- ownership: `../family-office-workspace/snapshots/ownership-beneficiary-graph.snapshot.json`
+- asset availability: `../family-office-workspace/snapshots/asset-availability.snapshot.json`
+- timeline: `../family-office-workspace/snapshots/timeline-events.snapshot.json`
+- pension income: `../family-office-workspace/snapshots/pension-income.snapshot.json`
+- lifecycle expenses: `../family-office-workspace/snapshots/lifecycle-expenses.snapshot.json`
+- output: `../family-office-workspace/snapshots/decision-scenario-v2.snapshot.json`
+
+Il comando raccoglie riferimenti, summary, assunzioni esplicite, obiettivi e gap in `decision-scenario/v2`. Non esegue Monte Carlo, sensitivity, scoring, fiscalita', rendimenti o raccomandazioni.
+
+## `fo scenarios sensitivity`
+
+Costruisce uno snapshot di sensitivities e stress matrix sopra uno scenario V2:
+
+```text
+../family-office-workspace/snapshots/sensitivity-analysis.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main scenarios sensitivity
+```
+
+Default:
+
+- decision scenario: `../family-office-workspace/snapshots/decision-scenario-v2.snapshot.json`
+- input sensitivities: `../family-office-workspace/scenarios/sensitivity-analysis.json`
+- output: `../family-office-workspace/snapshots/sensitivity-analysis.snapshot.json`
+
+Il comando applica solo perturbazioni esplicite alle assunzioni di `decision-scenario/v2` e produce `sensitivity-analysis/v1` con casi isolati, tornado data e stress matrix. Non esegue Monte Carlo, calcolo rendimenti, fiscalita', pensioni, scoring o raccomandazioni.
+
+## `fo scenarios score`
+
+Costruisce uno snapshot di scoring multi-obiettivo:
+
+```text
+../family-office-workspace/snapshots/decision-score.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main scenarios score
+```
+
+Default:
+
+- decision scenario: `../family-office-workspace/snapshots/decision-scenario-v2.snapshot.json`
+- sensitivity analysis: `../family-office-workspace/snapshots/sensitivity-analysis.snapshot.json`
+- input scoring: `../family-office-workspace/scenarios/decision-score.json`
+- policy: `../family-office-rules/decision/score-policy-v1.json`
+- output: `../family-office-workspace/snapshots/decision-score.snapshot.json`
+
+Il comando produce `decision-score/v1` applicando pesi espliciti a metriche esplicite normalizzate dal policy pack. Non calcola le metriche sottostanti, imposte, rendimenti, pensioni, ottimizzazioni o raccomandazioni.
+
 ## `fo retirement simulate`
 
 Esegue la simulazione pensionamento deterministica.

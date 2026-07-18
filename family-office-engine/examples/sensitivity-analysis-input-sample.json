@@ -1,0 +1,44 @@
+{
+  "analysis_id": "synthetic_sensitivity",
+  "as_of_date": "2026-07-18",
+  "label": "Synthetic sensitivity analysis",
+  "record_type": "SensitivityAnalysisInput",
+  "schema_version": "sensitivity-analysis/v1",
+  "seed": 20260718,
+  "sensitivities": [
+    {
+      "delta": "0.01",
+      "domain": "inflation",
+      "id": "inflation_up",
+      "label": "Inflation +1pp",
+      "operation": "absolute",
+      "path": [
+        "assumptions",
+        "market",
+        "inflation"
+      ]
+    },
+    {
+      "delta": "0.05",
+      "domain": "returns",
+      "id": "return_up",
+      "label": "Nominal return +5%",
+      "operation": "relative",
+      "path": [
+        "assumptions",
+        "market",
+        "nominal_return"
+      ]
+    }
+  ],
+  "stress_scenarios": [
+    {
+      "id": "market_upside",
+      "label": "Market upside",
+      "sensitivity_ids": [
+        "return_up",
+        "inflation_up"
+      ]
+    }
+  ]
+}

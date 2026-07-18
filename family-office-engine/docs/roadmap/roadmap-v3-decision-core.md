@@ -195,7 +195,7 @@ Modellare spese per fase della vita, inflazione, figli, sanità, abitazione e sp
 
 ### V3.6a — Code audit cadence 3 before scenario contract V2
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Eseguire il terzo audit tecnico periodico dopo quattro incrementi funzionali V3 completati dall'ultimo audit (`V3.5c`, `V3.5d`, `V3.5e`, `V3.6`) prima di procedere a V3.7.
 
@@ -207,7 +207,7 @@ Eseguire il terzo audit tecnico periodico dopo quattro incrementi funzionali V3 
 
 ### V3.7 — Scenario contract V2 and composer
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Creare un contratto di scenario che combini facts, eventi, regole, ipotesi di mercato, policy di prelievo e obiettivi.
 
@@ -219,7 +219,7 @@ Creare un contratto di scenario che combini facts, eventi, regole, ipotesi di me
 
 ### V3.8 — Sensitivity and stress testing
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Eseguire variazioni controllate su rendimenti, inflazione, redditi, longevità, spese, fiscalità e timing degli eventi.
 
@@ -231,7 +231,7 @@ Eseguire variazioni controllate su rendimenti, inflazione, redditi, longevità, 
 
 ### V3.9 — Multi-objective scoring
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Valutare alternative per sostenibilità, patrimonio finale, liquidità, fiscal drag, rischio, complessità, reversibilità e compliance.
 

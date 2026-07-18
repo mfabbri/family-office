@@ -1,0 +1,43 @@
+{
+  "schema_version": "decision-scenario/v2",
+  "record_type": "DecisionScenarioInput",
+  "scenario_id": "synthetic_base_case",
+  "label": "Synthetic base case",
+  "as_of_date": "2026-07-17",
+  "scenario_type": "planning",
+  "assumptions": {
+    "market": {
+      "return_model": "explicit_nominal",
+      "nominal_return": "0.03",
+      "inflation": "0.02",
+      "source": "synthetic fixture"
+    },
+    "withdrawal_policy": {
+      "policy_id": "fixed_real_need",
+      "priority": "preserve_liquidity",
+      "source": "synthetic fixture"
+    }
+  },
+  "objectives": [
+    {
+      "objective_id": "sustainability",
+      "metric": "avoid_depletion",
+      "priority": 1
+    },
+    {
+      "objective_id": "liquidity",
+      "metric": "maintain_emergency_buffer",
+      "priority": 2
+    }
+  ],
+  "constraints": [
+    {
+      "constraint_id": "no_tax_calculation",
+      "description": "Tax calculations are outside this scenario composer."
+    }
+  ],
+  "review": {
+    "requires_human_review": true,
+    "review_reason": "Synthetic planning scenario; not advice."
+  }
+}

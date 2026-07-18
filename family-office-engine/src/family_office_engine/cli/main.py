@@ -82,6 +82,18 @@ from family_office_engine.services.lifecycle_expenses import (
     LifecycleExpensesError,
     build_lifecycle_expenses,
 )
+from family_office_engine.services.decision_scenario import (
+    DecisionScenarioError,
+    compose_decision_scenario,
+)
+from family_office_engine.services.sensitivity_analysis import (
+    SensitivityAnalysisError,
+    build_sensitivity_analysis,
+)
+from family_office_engine.services.decision_score import (
+    DecisionScoreError,
+    build_decision_score,
+)
 from family_office_engine.services.rita_options import RitaOptionsError, optimize_rita_options
 from family_office_engine.services.estate_baseline import EstateBaselineError, build_estate_baseline
 from family_office_engine.services.household_facts import HouseholdFactsError, import_household_facts
@@ -393,6 +405,34 @@ def default_monte_carlo_output() -> Path:
 
 def default_scenario_comparison_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "scenario-comparison.snapshot.json"
+
+
+def default_decision_scenario_input() -> Path:
+    return resolve_repo("workspace") / "scenarios" / "decision-scenario-v2.json"
+
+
+def default_decision_scenario_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "decision-scenario-v2.snapshot.json"
+
+
+def default_sensitivity_analysis_input() -> Path:
+    return resolve_repo("workspace") / "scenarios" / "sensitivity-analysis.json"
+
+
+def default_sensitivity_analysis_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "sensitivity-analysis.snapshot.json"
+
+
+def default_decision_score_input() -> Path:
+    return resolve_repo("workspace") / "scenarios" / "decision-score.json"
+
+
+def default_decision_score_policy() -> Path:
+    return resolve_repo("rules") / "decision" / "score-policy-v1.json"
+
+
+def default_decision_score_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "decision-score.snapshot.json"
 
 
 def default_decision_dashboard_output() -> Path:
@@ -1341,6 +1381,114 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=default_scenario_comparison_output(),
     )
+    scenarios_compose_v2_parser = scenarios_subparsers.add_parser(
+        "compose-v2",
+        help="Compose a deterministic decision-scenario/v2 artifact",
+    )
+    scenarios_compose_v2_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_decision_scenario_input(),
+        help="Input decision scenario V2 JSON path",
+    )
+    scenarios_compose_v2_parser.add_argument(
+        "--household-snapshot",
+        type=Path,
+        default=default_household_facts_output(),
+        help="Input household facts snapshot JSON path",
+    )
+    scenarios_compose_v2_parser.add_argument(
+        "--ownership-snapshot",
+        type=Path,
+        default=default_ownership_graph_output(),
+        help="Input ownership graph snapshot JSON path",
+    )
+    scenarios_compose_v2_parser.add_argument(
+        "--asset-availability-snapshot",
+        type=Path,
+        default=default_asset_availability_output(),
+        help="Input asset availability snapshot JSON path",
+    )
+    scenarios_compose_v2_parser.add_argument(
+        "--timeline-snapshot",
+        type=Path,
+        default=default_timeline_events_output(),
+        help="Input timeline events snapshot JSON path",
+    )
+    scenarios_compose_v2_parser.add_argument(
+        "--pension-income-snapshot",
+        type=Path,
+        default=default_pension_income_output(),
+        help="Input pension income snapshot JSON path",
+    )
+    scenarios_compose_v2_parser.add_argument(
+        "--lifecycle-expenses-snapshot",
+        type=Path,
+        default=default_lifecycle_expenses_output(),
+        help="Input lifecycle expenses snapshot JSON path",
+    )
+    scenarios_compose_v2_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_decision_scenario_output(),
+        help="Output decision scenario V2 snapshot JSON path",
+    )
+    scenarios_sensitivity_parser = scenarios_subparsers.add_parser(
+        "sensitivity",
+        help="Build deterministic sensitivity-analysis/v1 from decision-scenario/v2",
+    )
+    scenarios_sensitivity_parser.add_argument(
+        "--decision-scenario-snapshot",
+        type=Path,
+        default=default_decision_scenario_output(),
+        help="Input decision scenario V2 snapshot JSON path",
+    )
+    scenarios_sensitivity_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_sensitivity_analysis_input(),
+        help="Input sensitivity analysis JSON path",
+    )
+    scenarios_sensitivity_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_sensitivity_analysis_output(),
+        help="Output sensitivity analysis snapshot JSON path",
+    )
+    scenarios_score_parser = scenarios_subparsers.add_parser(
+        "score",
+        help="Build deterministic decision-score/v1 from explicit metrics and weights",
+    )
+    scenarios_score_parser.add_argument(
+        "--decision-scenario-snapshot",
+        type=Path,
+        default=default_decision_scenario_output(),
+        help="Input decision scenario V2 snapshot JSON path",
+    )
+    scenarios_score_parser.add_argument(
+        "--sensitivity-analysis-snapshot",
+        type=Path,
+        default=default_sensitivity_analysis_output(),
+        help="Input sensitivity analysis snapshot JSON path",
+    )
+    scenarios_score_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_decision_score_input(),
+        help="Input decision score JSON path",
+    )
+    scenarios_score_parser.add_argument(
+        "--policy",
+        type=Path,
+        default=default_decision_score_policy(),
+        help="Decision score policy JSON path",
+    )
+    scenarios_score_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_decision_score_output(),
+        help="Output decision score snapshot JSON path",
+    )
     dashboard = subparsers.add_parser("dashboard", help="Build decision dashboard snapshots")
     dashboard_subparsers = dashboard.add_subparsers(dest="dashboard_command")
     dashboard_build_parser = dashboard_subparsers.add_parser(
@@ -1966,6 +2114,72 @@ def main(argv: list[str] | None = None) -> int:
             print(f"scenarios: ERROR ({exc})")
             return 1
         print(f"scenarios: {snapshot['status']} ({args.output})")
+        return 0
+
+    if args.command == "scenarios" and args.scenarios_command == "compose-v2":
+        try:
+            snapshot = compose_decision_scenario(
+                args.input,
+                args.output,
+                household_snapshot_path=args.household_snapshot,
+                ownership_snapshot_path=args.ownership_snapshot,
+                asset_availability_snapshot_path=args.asset_availability_snapshot,
+                timeline_snapshot_path=args.timeline_snapshot,
+                pension_income_snapshot_path=args.pension_income_snapshot,
+                lifecycle_expenses_snapshot_path=args.lifecycle_expenses_snapshot,
+            )
+        except DecisionScenarioError as exc:
+            print(f"scenarios: ERROR ({exc})")
+            return 1
+        print(
+            "scenarios: "
+            f"{snapshot['status']} "
+            f"{len(snapshot['sources'])} sources, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if args.command == "scenarios" and args.scenarios_command == "sensitivity":
+        try:
+            snapshot = build_sensitivity_analysis(
+                args.decision_scenario_snapshot,
+                args.input,
+                args.output,
+            )
+        except SensitivityAnalysisError as exc:
+            print(f"scenarios: ERROR ({exc})")
+            return 1
+        print(
+            "scenarios: "
+            f"{snapshot['status']} "
+            f"{len(snapshot['sensitivity_cases'])} sensitivities, "
+            f"{len(snapshot['stress_matrix'])} stress scenarios, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if args.command == "scenarios" and args.scenarios_command == "score":
+        try:
+            snapshot = build_decision_score(
+                args.decision_scenario_snapshot,
+                args.sensitivity_analysis_snapshot,
+                args.input,
+                args.policy,
+                args.output,
+            )
+        except DecisionScoreError as exc:
+            print(f"scenarios: ERROR ({exc})")
+            return 1
+        print(
+            "scenarios: "
+            f"{snapshot['status']} "
+            f"{len(snapshot['alternatives'])} alternatives, "
+            f"{len(snapshot['ranking'])} ranked, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
         return 0
 
     if args.command == "dashboard" and args.dashboard_command == "build":

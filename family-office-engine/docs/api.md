@@ -282,6 +282,62 @@ Funzione principale:
 
 Il servizio usa solo importi espliciti in EUR. Non stima spese mancanti, costo sanitario, fiscalita', rendimenti, cambio valuta, inflazione implicita, scoring o raccomandazioni.
 
+## Decision Scenario V2
+
+Modulo:
+
+```text
+family_office_engine.services.decision_scenario
+```
+
+Funzione principale:
+
+- `compose_decision_scenario(scenario_input_path, output_path, household_snapshot_path, ownership_snapshot_path, asset_availability_snapshot_path, timeline_snapshot_path, pension_income_snapshot_path=None, lifecycle_expenses_snapshot_path=None)`: compone `decision-scenario/v2`.
+
+`decision-scenario/v2` e' un artefatto deterministico e rieseguibile che combina riferimenti e summary da household facts, ownership graph, asset availability, timeline, pension income, lifecycle expenses e assunzioni scenario esplicite. Produce un hash SHA-256 del contenuto canonico per verificare riproducibilita'.
+
+Il composer separa facts, assunzioni, obiettivi, constraints e data gaps. Non esegue simulazioni, non calcola rendimenti, imposte, pensioni, scoring, stress test o raccomandazioni.
+
+## Sensitivity Analysis
+
+Modulo:
+
+```text
+family_office_engine.services.sensitivity_analysis
+```
+
+Funzione principale:
+
+- `build_sensitivity_analysis(decision_scenario_snapshot_path, sensitivity_input_path, output_path)`: legge `decision-scenario/v2` e una specifica esplicita di sensitivities, poi scrive `sensitivity-analysis/v1`.
+
+`sensitivity-analysis/v1` applica perturbazioni deterministiche alle sole assunzioni dello scenario. Le sensitivities supportano `absolute`, `relative` e `set`; ogni path deve partire da `assumptions`. L'output include casi isolati, `tornado_data` ordinati per magnitudine dichiarata, `stress_matrix` con combinazioni esplicite, gap propagati dallo scenario sorgente e hash SHA-256 del contenuto canonico.
+
+Il servizio non esegue simulazioni, non calcola rendimenti futuri, fiscalita', pensioni, scoring, ranking decisionale o raccomandazioni.
+
+Fixture:
+
+- `examples/sensitivity-analysis-input-sample.json`
+
+## Decision Score
+
+Modulo:
+
+```text
+family_office_engine.services.decision_score
+```
+
+Funzione principale:
+
+- `build_decision_score(decision_scenario_snapshot_path, sensitivity_analysis_snapshot_path, scoring_input_path, policy_path, output_path)`: legge scenario, sensitivity, input di scoring e policy pack, poi scrive `decision-score/v1`.
+
+`decision-score/v1` normalizza metriche esplicite usando il rule pack tecnico `decision-score-policy/v1`, applica pesi dichiarati nell'input e produce punteggi separati per metrica, totale pesato e ranking stabile. Le metriche supportate dal policy pack includono sostenibilita', patrimonio finale, liquidita', fiscal drag, rischio, complessita', reversibilita' e compliance; valori e pesi non sono inventati dal servizio.
+
+Il servizio registra gap per metriche mancanti, metriche non ammesse, input sorgenti parziali o policy non valida. Non calcola imposte, rendimenti, pensioni, metriche sottostanti, ottimizzazioni o raccomandazioni.
+
+Fixture:
+
+- `examples/decision-score-input-sample.json`
+
 ## Tax Reconciliation
 
 Modulo:

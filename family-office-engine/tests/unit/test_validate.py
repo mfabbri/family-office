@@ -1366,6 +1366,118 @@ class ValidateCliTest(unittest.TestCase):
             self.assertTrue(output_path.exists())
             self.assertIn("scenarios: blocked_missing_inputs", stdout.getvalue())
 
+    def test_main_scenarios_compose_v2_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "decision-scenario-input.json"
+            household_path = root / "household.snapshot.json"
+            ownership_path = root / "ownership.snapshot.json"
+            availability_path = root / "asset-availability.snapshot.json"
+            timeline_path = root / "timeline-events.snapshot.json"
+            pension_income_path = root / "pension-income.snapshot.json"
+            lifecycle_expenses_path = root / "lifecycle-expenses.snapshot.json"
+            output_path = root / "decision-scenario-v2.snapshot.json"
+            input_path.write_text(json.dumps(_synthetic_decision_scenario_input()), encoding="utf-8")
+            household_path.write_text(json.dumps(_synthetic_household_facts_snapshot()), encoding="utf-8")
+            ownership_path.write_text(json.dumps(_synthetic_ownership_graph_snapshot()), encoding="utf-8")
+            availability_path.write_text(json.dumps(_synthetic_asset_availability_snapshot()), encoding="utf-8")
+            timeline_path.write_text(json.dumps(_synthetic_timeline_events_snapshot()), encoding="utf-8")
+            pension_income_path.write_text(json.dumps(_synthetic_pension_income_snapshot()), encoding="utf-8")
+            lifecycle_expenses_path.write_text(json.dumps(_synthetic_lifecycle_expenses_snapshot()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "scenarios",
+                        "compose-v2",
+                        "--input",
+                        str(input_path),
+                        "--household-snapshot",
+                        str(household_path),
+                        "--ownership-snapshot",
+                        str(ownership_path),
+                        "--asset-availability-snapshot",
+                        str(availability_path),
+                        "--timeline-snapshot",
+                        str(timeline_path),
+                        "--pension-income-snapshot",
+                        str(pension_income_path),
+                        "--lifecycle-expenses-snapshot",
+                        str(lifecycle_expenses_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("scenarios: complete 6 sources, 0 gaps", stdout.getvalue())
+
+    def test_main_scenarios_sensitivity_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            decision_scenario_path = root / "decision-scenario-v2.snapshot.json"
+            input_path = root / "sensitivity-analysis.json"
+            output_path = root / "sensitivity-analysis.snapshot.json"
+            decision_scenario_path.write_text(json.dumps(_synthetic_decision_scenario_snapshot()), encoding="utf-8")
+            input_path.write_text(json.dumps(_synthetic_sensitivity_analysis_input()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "scenarios",
+                        "sensitivity",
+                        "--decision-scenario-snapshot",
+                        str(decision_scenario_path),
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("scenarios: complete 2 sensitivities, 1 stress scenarios, 0 gaps", stdout.getvalue())
+
+    def test_main_scenarios_score_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            decision_scenario_path = root / "decision-scenario-v2.snapshot.json"
+            sensitivity_path = root / "sensitivity-analysis.snapshot.json"
+            input_path = root / "decision-score.json"
+            policy_path = root / "score-policy-v1.json"
+            output_path = root / "decision-score.snapshot.json"
+            decision_scenario_path.write_text(json.dumps(_synthetic_decision_scenario_snapshot()), encoding="utf-8")
+            sensitivity_path.write_text(json.dumps(_synthetic_sensitivity_analysis_snapshot()), encoding="utf-8")
+            input_path.write_text(json.dumps(_synthetic_decision_score_input()), encoding="utf-8")
+            policy_path.write_text(json.dumps(_synthetic_decision_score_policy()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "scenarios",
+                        "score",
+                        "--decision-scenario-snapshot",
+                        str(decision_scenario_path),
+                        "--sensitivity-analysis-snapshot",
+                        str(sensitivity_path),
+                        "--input",
+                        str(input_path),
+                        "--policy",
+                        str(policy_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("scenarios: complete 2 alternatives, 2 ranked, 0 gaps", stdout.getvalue())
+
     def test_main_dashboard_build_returns_success_with_missing_inputs(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "decision-dashboard.snapshot.json"
@@ -1557,6 +1669,221 @@ def _synthetic_lifecycle_expense_plan() -> dict:
                 "provenance": "synthetic fixture",
             }
         ],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_decision_scenario_input() -> dict:
+    return {
+        "schema_version": "decision-scenario/v2",
+        "record_type": "DecisionScenarioInput",
+        "scenario_id": "synthetic_base_case",
+        "label": "Synthetic base case",
+        "as_of_date": "2026-07-17",
+        "scenario_type": "planning",
+        "assumptions": {
+            "market": {"nominal_return": "0.03", "inflation": "0.02", "source": "synthetic fixture"},
+            "withdrawal_policy": {"policy_id": "fixed_real_need", "source": "synthetic fixture"},
+        },
+        "objectives": [{"objective_id": "sustainability", "priority": 1}],
+        "constraints": [],
+        "review": {"requires_human_review": True},
+    }
+
+
+def _synthetic_decision_scenario_snapshot() -> dict:
+    return {
+        "schema_version": "decision-scenario/v2",
+        "record_type": "DecisionScenarioSnapshot",
+        "status": "complete",
+        "scenario_id": "synthetic_base_case",
+        "label": "Synthetic base case",
+        "as_of_date": "2026-07-17",
+        "assumptions": {
+            "market": {"nominal_return": "0.03", "inflation": "0.02", "source": "synthetic fixture"},
+            "withdrawal_policy": {"policy_id": "fixed_real_need", "source": "synthetic fixture"},
+        },
+        "data_gaps": [],
+        "reproducibility": {"content_hash": "synthetic-hash"},
+    }
+
+
+def _synthetic_sensitivity_analysis_input() -> dict:
+    return {
+        "schema_version": "sensitivity-analysis/v1",
+        "record_type": "SensitivityAnalysisInput",
+        "analysis_id": "synthetic_sensitivity",
+        "label": "Synthetic sensitivity analysis",
+        "as_of_date": "2026-07-18",
+        "seed": 20260718,
+        "sensitivities": [
+            {
+                "id": "inflation_up",
+                "label": "Inflation +1pp",
+                "domain": "inflation",
+                "path": ["assumptions", "market", "inflation"],
+                "operation": "absolute",
+                "delta": "0.01",
+            },
+            {
+                "id": "return_up",
+                "label": "Nominal return +5%",
+                "domain": "returns",
+                "path": ["assumptions", "market", "nominal_return"],
+                "operation": "relative",
+                "delta": "0.05",
+            },
+        ],
+        "stress_scenarios": [
+            {
+                "id": "market_upside",
+                "label": "Market upside",
+                "sensitivity_ids": ["return_up", "inflation_up"],
+            }
+        ],
+    }
+
+
+def _synthetic_sensitivity_analysis_snapshot() -> dict:
+    return {
+        "schema_version": "sensitivity-analysis/v1",
+        "record_type": "SensitivityAnalysisSnapshot",
+        "status": "complete",
+        "analysis_id": "synthetic_sensitivity",
+        "data_gaps": [],
+    }
+
+
+def _synthetic_decision_score_input() -> dict:
+    return {
+        "schema_version": "decision-score/v1",
+        "record_type": "DecisionScoreInput",
+        "score_id": "synthetic_decision_score",
+        "label": "Synthetic decision score",
+        "as_of_date": "2026-07-18",
+        "weights": {"sustainability": "0.45", "final_wealth": "0.25", "risk": "0.30"},
+        "alternatives": [
+            {
+                "alternative_id": "aggressive",
+                "label": "Aggressive allocation",
+                "metrics": {"sustainability": "0.80", "final_wealth": "700000", "risk": "0.70"},
+            },
+            {
+                "alternative_id": "balanced",
+                "label": "Balanced allocation",
+                "metrics": {"sustainability": "0.78", "final_wealth": "620000", "risk": "0.30"},
+            },
+        ],
+    }
+
+
+def _synthetic_decision_score_policy() -> dict:
+    return {
+        "schema_version": "decision-score-policy/v1",
+        "record_type": "DecisionScorePolicy",
+        "policy_id": "decision.score.policy.v1",
+        "metrics": [
+            {
+                "metric_id": "sustainability",
+                "label": "Sustainability",
+                "orientation": "higher_is_better",
+                "min_value": "0",
+                "max_value": "1",
+                "unit": "ratio",
+            },
+            {
+                "metric_id": "final_wealth",
+                "label": "Final wealth",
+                "orientation": "higher_is_better",
+                "min_value": "0",
+                "max_value": "1000000",
+                "unit": "EUR",
+            },
+            {
+                "metric_id": "risk",
+                "label": "Risk",
+                "orientation": "lower_is_better",
+                "min_value": "0",
+                "max_value": "1",
+                "unit": "ratio",
+            },
+        ],
+        "limitations": ["synthetic fixture"],
+    }
+
+
+def _synthetic_household_facts_snapshot() -> dict:
+    return {
+        "schema_version": "household-facts/v1",
+        "record_type": "HouseholdFactsSnapshot",
+        "status": "complete",
+        "persons": [{"person_id": "person_self"}, {"person_id": "person_spouse"}],
+        "relationships": [
+            {
+                "from_person_id": "person_self",
+                "to_person_id": "person_spouse",
+                "relationship_type": "spouse",
+            }
+        ],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_ownership_graph_snapshot() -> dict:
+    return {
+        "schema_version": "ownership-beneficiary-graph/v1",
+        "record_type": "OwnershipBeneficiaryGraphSnapshot",
+        "status": "complete",
+        "assets": [{"asset_id": "asset_brokerage"}],
+        "debts": [],
+        "beneficiaries": [],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_asset_availability_snapshot() -> dict:
+    return {
+        "schema_version": "asset-availability/v1",
+        "record_type": "AssetAvailabilitySnapshot",
+        "status": "complete",
+        "classifications": [{"asset_id": "asset_brokerage", "liquidity_bucket": "immediate"}],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_timeline_events_snapshot() -> dict:
+    return {
+        "schema_version": "timeline-events/v1",
+        "record_type": "TimelineEventsSnapshot",
+        "status": "complete",
+        "events": [{"event_id": "retirement", "event_type": "retirement"}],
+        "occurrences": [{"event_id": "retirement", "occurrence_date": "2039-05-01"}],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_pension_income_snapshot() -> dict:
+    return {
+        "schema_version": "pension-income/v1",
+        "record_type": "PensionIncomeSnapshot",
+        "status": "complete",
+        "income_streams": [{"stream_id": "spanish_public_pension"}],
+        "summary": {
+            "stream_count": 1,
+            "gross_annual_recurring_total": "21000.00",
+            "gross_annual_recurring_total_currency": "EUR",
+        },
+        "data_gaps": [],
+    }
+
+
+def _synthetic_lifecycle_expenses_snapshot() -> dict:
+    return {
+        "schema_version": "lifecycle-expenses/v1",
+        "record_type": "LifecycleExpensesSnapshot",
+        "status": "complete",
+        "expense_entries": [{"entry_id": "expense_living"}],
+        "summary": {"entry_count": 1, "year_count": 3, "first_year": 2026, "last_year": 2028},
         "data_gaps": [],
     }
 

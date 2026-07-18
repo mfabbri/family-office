@@ -1,0 +1,32 @@
+{
+  "alternatives": [
+    {
+      "alternative_id": "aggressive",
+      "label": "Aggressive allocation",
+      "metrics": {
+        "final_wealth": "700000",
+        "risk": "0.70",
+        "sustainability": "0.80"
+      }
+    },
+    {
+      "alternative_id": "balanced",
+      "label": "Balanced allocation",
+      "metrics": {
+        "final_wealth": "620000",
+        "risk": "0.30",
+        "sustainability": "0.78"
+      }
+    }
+  ],
+  "as_of_date": "2026-07-18",
+  "label": "Synthetic decision score",
+  "record_type": "DecisionScoreInput",
+  "schema_version": "decision-score/v1",
+  "score_id": "synthetic_decision_score",
+  "weights": {
+    "final_wealth": "0.25",
+    "risk": "0.30",
+    "sustainability": "0.45"
+  }
+}

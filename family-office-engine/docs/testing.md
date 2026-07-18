@@ -349,6 +349,72 @@ Lo snapshot risultante viene scritto in:
 
 Il modello produce `lifecycle-expenses/v1` da un piano spese esplicito in `household/lifecycle-expenses.json`. Applica inflazione solo quando dichiarata e registra gap per periodi o eventi mancanti; non stima budget, fiscalita', sanita', cambi, rendimenti o raccomandazioni.
 
+## Decision Scenario V2
+
+Verifica composer con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_decision_scenario
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main scenarios compose-v2
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\decision-scenario-v2.snapshot.json
+```
+
+Il composer produce `decision-scenario/v2` da snapshot e assunzioni scenario esplicite. Include un hash riproducibile del contenuto canonico e non esegue simulazioni, scoring, imposte, rendimenti o raccomandazioni.
+
+## Sensitivity Analysis
+
+Verifica analyzer con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_sensitivity_analysis
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main scenarios sensitivity
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\sensitivity-analysis.snapshot.json
+```
+
+L'analyzer produce `sensitivity-analysis/v1` da `decision-scenario/v2` e da una specifica esplicita in `scenarios/sensitivity-analysis.json`. Applica variazioni controllate alle assunzioni, propaga gap e produce tornado data e stress matrix; non esegue Monte Carlo, scoring, fiscalita', rendimenti o raccomandazioni.
+
+## Decision Score
+
+Verifica scorer con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_decision_score
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main scenarios score
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\decision-score.snapshot.json
+```
+
+Lo scorer produce `decision-score/v1` da metriche e pesi espliciti in `scenarios/decision-score.json`, normalizzati dal policy pack `..\family-office-rules\decision\score-policy-v1.json`. Non calcola metriche sottostanti, fiscalita', rendimenti, pensioni, ottimizzazioni o raccomandazioni.
+
 Verifica riconciliazione documentale:
 
 ```text
