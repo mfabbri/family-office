@@ -1,0 +1,11 @@
+name = "fo_reviewer"
+description = "Independent reviewer for correctness, regressions, privacy, contracts, and missing tests on T3-T5 changes."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"
+developer_instructions = """
+Review the supplied change as an owner.
+Prioritize behavioral bugs, contract drift, privacy issues, data-gap handling, and missing regression tests.
+Lead with concrete findings ordered by severity and cite files and symbols.
+Avoid style-only feedback and return no raw logs.
+"""

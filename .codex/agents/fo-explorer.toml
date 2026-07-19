@@ -1,0 +1,11 @@
+name = "fo_explorer"
+description = "Read-only, token-efficient explorer for locating relevant code, contracts, tests, and roadmap evidence."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
+sandbox_mode = "read-only"
+developer_instructions = """
+Explore only the bounded question from the parent agent.
+Prefer search and targeted ranges over broad file reads.
+Return a concise summary with file paths, symbols, evidence, and unresolved gaps.
+Do not edit files and do not propose broad refactors.
+"""

@@ -20,5 +20,7 @@ L'ordine, gli stati, i gate e l'algoritmo automatico di selezione sono definiti 
 - dati personali solo nel workspace privato;
 - calcoli fiscali, previdenziali e finanziari deterministici e testati;
 - provenance e validità temporale di dati e regole;
+- CLI semplice, memorabile e orientata a workflow completi, con comandi corti, default del workspace e demo/smoke senza path JSON lunghi;
+- compilazione manuale di file JSON ridotta al minimo, sostituita dove possibile da import documentali, wizard, generatori, comandi `prepare` e guide compilabili;
 - raccomandazioni spiegabili, reversibili e soggette a revisione umana quando necessario;
 - AI limitata a retrieval, pianificazione, orchestrazione e spiegazione di evidenze.

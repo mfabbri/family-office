@@ -4,9 +4,91 @@
   "data_gaps": [
     {
       "code": "draft_not_completed",
-      "message": "Replace null and empty values with private reviewed planning goals before validation."
+      "message": "Completa questo draft con obiettivi patrimoniali privati e revisionati, poi rimuovi questo gap o sostituiscilo con gap reali."
     }
   ],
+  "draft_examples": {
+    "constraint": {
+      "applies_to_objective_ids": [
+        "objective_emergency_reserve"
+      ],
+      "constraint_id": "constraint_keep_reserve",
+      "constraint_type": "liquidity",
+      "label": "Mantenere disponibile la riserva di emergenza",
+      "priority": 1,
+      "severity": "hard",
+      "threshold": {
+        "metric": "reserve_months",
+        "operator": "min",
+        "unit": "months",
+        "value": 12
+      },
+      "timeline_event_ids": []
+    },
+    "objective": {
+      "category": "liquidity",
+      "label": "Mantenere una riserva di emergenza",
+      "objective_id": "objective_emergency_reserve",
+      "priority": 1,
+      "target": {
+        "metric": "reserve_months",
+        "operator": "min",
+        "unit": "months",
+        "value": 12
+      },
+      "time_horizon_year": 2027
+    }
+  },
+  "draft_notes": {
+    "as_of_date": "Data in cui questi obiettivi sono stati rivisti, in formato YYYY-MM-DD.",
+    "constraint_type_values": [
+      "legal",
+      "liquidity",
+      "risk",
+      "tax",
+      "family",
+      "timing",
+      "asset",
+      "other"
+    ],
+    "constraints": "Regole o limiti che il piano deve rispettare. Usa severity=hard per vincoli non negoziabili e severity=soft per preferenze.",
+    "data_gaps": "Tieni qui solo informazioni davvero mancanti. Rimuovi draft_not_completed dopo avere sostituito i valori null.",
+    "household_id": "Usa lo stesso household id di household-facts.json, ad esempio household_main.",
+    "liquidity_policy": "Dichiara quanta riserva liquida deve restare disponibile prima di usare asset per obiettivi di lungo periodo.",
+    "liquidity_preferred_bucket_values": [
+      "emergency_reserve",
+      "short_term",
+      "medium_term",
+      "long_term",
+      "unknown"
+    ],
+    "objective_category_values": [
+      "retirement_income",
+      "capital_preservation",
+      "liquidity",
+      "family_protection",
+      "tax_efficiency",
+      "estate",
+      "education",
+      "real_estate",
+      "other"
+    ],
+    "objectives": "Risultati desiderati, ordinati per priorita'. Un numero piu' basso significa piu' importante.",
+    "operator_values": [
+      "min",
+      "max",
+      "target",
+      "range"
+    ],
+    "planning_horizon": "Primo e ultimo anno coperti da questo insieme di obiettivi.",
+    "risk_level_values": [
+      "low",
+      "medium",
+      "high",
+      "unknown"
+    ],
+    "risk_profile": "capacity e' la capacita' finanziaria di assorbire perdite; tolerance e' il comfort psicologico con la volatilita'; max_loss_ratio e' la perdita massima accettabile del portafoglio, ad esempio 0.20 per 20 percento."
+  },
   "household_id": null,
   "liquidity_policy": {
     "minimum_reserve_months": null,

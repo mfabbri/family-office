@@ -11,6 +11,7 @@ __pycache__/
 # Local/editor history
 .history/
 .agents/
+.migration-backups/
 
 # OS/editor noise
 .DS_Store

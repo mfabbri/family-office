@@ -1,28 +1,16 @@
-# Agent Operating Instructions
+# Bootstrap Agent Instructions
 
-Queste istruzioni valgono per qualsiasi coding agent.
+Leggere prima `../AGENTS.md` e poi il router:
 
-## Ordine di lettura obbligatorio
+- `docs/playbooks/00-task-router.md`
 
-1. `docs/repository-map.md`
-2. `docs/developer-playbook.md`
-3. `docs/workflow.md`
-4. `docs/next-increment-developer-plan.md`
-5. `../family-office-engine/docs/current-next-increment.md`
-6. `../family-office-engine/docs/roadmap/roadmap-index.md`
-7. roadmap attiva indicata dall'indice, partendo da `roadmap-v2.md`
-8. `../family-office-engine/docs/roadmap/roadmap-long-term.md`
-9. `../family-office-engine/docs/decision-log.md`
+Il bootstrap governa metodo, playbook e orchestrazione. Non contiene dati personali, logica fiscale eseguibile o codice applicativo.
 
-L'agente deve leggere le altre roadmap solo quanto basta per verificare dipendenze e gate; non deve anticiparne l'implementazione.
+## Regole locali
 
-## Principi
-
-- Non inserire dati personali nel repository `family-office-engine`.
-- Non usare LLM per calcoli fiscali, previdenziali o finanziari: usare regole e simulatori testati.
-- Ogni incremento deve essere piccolo, verificabile e tracciabile.
-- Aggiornare documentazione, test, stato roadmap e decision log insieme al codice.
-- Se cambia la normativa: aggiornare prima `knowledge`, poi `rules`, poi test, infine `engine`.
-- Usare `roadmap-index.md` come unica politica di selezione del prossimo incremento.
-- Non saltare un incremento bloccato: creare prima il più piccolo incremento abilitante.
-- Non anticipare la roadmap AI per compensare dati, regole o simulatori mancanti.
+- Non caricare tutti i documenti di governance all'avvio.
+- Usare progressive disclosure e il budget in `docs/playbooks/01-context-budget.md`.
+- Usare il tier di modello indicato da `docs/playbooks/02-model-routing.md`.
+- Usare subagent solo secondo `docs/playbooks/03-subagent-policy.md`.
+- Per il prossimo incremento usare `docs/playbooks/04-micro-increment.md`.
+- Aggiornare un documento di governance solo se la modifica ne cambia davvero il contenuto operativo.

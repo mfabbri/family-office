@@ -14,9 +14,10 @@ Pacchetto unico di avvio per il consulente finanziario/fiscale personale.
 
 Aprire la root del progetto e far leggere all'agente:
 
-1. `family-office-bootstrap/AGENTS.md`, se presente;
-2. roadmap e playbook in `family-office-bootstrap/docs/`;
-3. profilo e asset inventory in `family-office-workspace/`.
+1. `AGENTS.md`;
+2. `family-office-bootstrap/docs/playbooks/00-task-router.md`;
+3. soltanto i file richiesti dal router;
+4. profilo e asset inventory nel workspace solo quando necessari al task.
 
 L'obiettivo iniziale non è generare subito strategie fiscali, ma consolidare un inventario patrimoniale verificabile e separare correttamente:
 
@@ -39,3 +40,7 @@ Le roadmap V3–V6 separano Decision Core, Wealth Planning, AI Orchestration e O
 ## Previdenza spagnola
 
 La roadmap V3 prevede una pipeline documentale e deterministica basata su Vida Laboral, basi contributive ufficiali e nóminas, seguita da stima della prestazione e coordinamento UE. La fiscalità e il netto per residente italiano sono trattati separatamente nella roadmap V4.
+
+## Agent orchestration e consumo token
+
+La configurazione in `.codex/` e i playbook in `family-office-bootstrap/docs/playbooks/` applicano progressive disclosure, task routing T0–T5, model routing e subagent selettivi. Il default è single-agent con contesto ridotto; roadmap aggiuntive, review profonde e parallelismo vengono attivati solo da trigger espliciti.

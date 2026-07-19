@@ -12,8 +12,10 @@ Questa guida serve per compilare i file privati in `family-office-workspace/hous
 6. Esegui `fo household availability validate`.
 7. Compila `timeline-events.json` partendo da `timeline-events.draft.json`, usando gli stessi `person_id` e `asset_id`.
 8. Esegui `fo household timeline validate`.
-9. Compila `planning-goals.json` partendo da `planning-goals.draft.json`, usando gli `event_id` della timeline quando un vincolo dipende da un evento.
-10. Esegui `fo planning goals validate`.
+9. Esegui `fo planning goals status` per vedere se manca l'input, se il draft e' ancora da compilare o se lo snapshot e' pronto.
+10. Esegui `fo planning goals prepare` se `planning-goals.json` non esiste ancora.
+11. Compila `planning-goals.json`, usando gli `event_id` della timeline quando un vincolo dipende da un evento.
+12. Esegui `fo planning goals validate`.
 
 ## Regole pratiche
 
@@ -48,6 +50,34 @@ $env:PYTHONPATH='src'; python -m family_office_engine.cli.main household availab
 
 Gli snapshot vengono scritti in `family-office-workspace/snapshots/`. Errori e gap vanno corretti nei file privati, non negli esempi sintetici dell'engine.
 
+Per provare il progresso della CLI senza ricordare path JSON, usa la demo sintetica:
+
+```text
+fo planning goals demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals demo
+```
+
+Quando i file privati sono pronti, il comando reale rimane corto perche' usa i default del workspace:
+
+```text
+fo planning goals status
+fo planning goals prepare
+fo planning goals validate
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals status
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals prepare
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals validate
+```
+
 ## Timeline events
 
 Campi principali per ogni evento:
@@ -67,10 +97,28 @@ La timeline ordina e valida eventi dichiarati, ma non calcola importi, imposte, 
 
 Campi principali:
 
-- `planning_horizon`: anni di inizio e fine piano.
-- `risk_profile`: capacita', tolleranza e perdita massima dichiarata.
-- `liquidity_policy`: mesi minimi di riserva e bucket preferito.
-- `objectives`: obiettivi con `objective_id`, categoria, priorita' e target dichiarato.
-- `constraints`: vincoli con severita' `hard`/`soft`, priorita', soglia e riferimenti opzionali a obiettivi o eventi timeline.
+- `household_id`: stesso ID usato in `household-facts.json`.
+- `as_of_date`: data di revisione degli obiettivi, formato `YYYY-MM-DD`.
+- `planning_horizon`: anni di inizio e fine del piano, ad esempio 2026-2055.
+- `risk_profile.capacity`: capacita' finanziaria di assorbire perdite (`low`, `medium`, `high`, `unknown`).
+- `risk_profile.tolerance`: comfort psicologico con volatilita' e ribassi (`low`, `medium`, `high`, `unknown`).
+- `risk_profile.max_loss_ratio`: perdita massima accettabile, ad esempio `0.20` per 20%.
+- `liquidity_policy.minimum_reserve_months`: mesi di spese da tenere liquidi prima di pianificare il resto.
+- `liquidity_policy.preferred_bucket`: bucket preferito tra `emergency_reserve`, `short_term`, `medium_term`, `long_term`, `unknown`.
+- `objectives`: risultati desiderati. Ogni obiettivo ha `objective_id`, `category`, `priority`, `target` e `time_horizon_year`.
+- `constraints`: vincoli da rispettare. `hard` significa non negoziabile; `soft` significa preferenza forte ma rivedibile.
+
+Categorie obiettivo ammesse:
+
+```text
+retirement_income, capital_preservation, liquidity, family_protection,
+tax_efficiency, estate, education, real_estate, other
+```
+
+Operatori soglia ammessi:
+
+```text
+min, max, target, range
+```
 
 I goals dichiarano preferenze e limiti per gli incrementi V4. Non calcolano strategie, imposte, rendimenti o raccomandazioni.
