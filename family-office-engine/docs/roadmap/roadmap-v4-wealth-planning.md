@@ -4,6 +4,8 @@
 
 Usare il Decision Core per confrontare strategie patrimoniali lecite e realistiche, ottimizzando rendimento netto, liquidità, fiscalità, protezione familiare e reversibilità.
 
+Gli incrementi V4 devono mantenere semplice l'uso della CLI: preferire comandi corti con default del workspace, demo/smoke sintetici e preparazione guidata degli input. La compilazione manuale di JSON deve restare minima e giustificata; quando inevitabile, servono draft, template, guida leggibile e validazione locale.
+
 ## Prerequisiti
 
 - Gate V3 completato.
@@ -27,7 +29,7 @@ Esito: completato con contratto e snapshot `planning-goals/v1`, validatore deter
 
 ### V4.2 — Liquidity buckets and emergency reserve
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Dividere gli asset in riserva, breve, medio e lungo termine tenendo conto di vincoli, volatilità e date di disponibilità.
 
@@ -36,6 +38,20 @@ Dividere gli asset in riserva, breve, medio e lungo termine tenendo conto di vin
 - Output: `liquidity-plan/v1`.
 - Test: riserva insufficiente, asset vincolati, valuta estera, concentrazione.
 - Done quando: il piano non usa per spese correnti asset non liquidabili.
+
+Esito: completato con contratto e snapshot `liquidity-plan/v1`, builder deterministico, CLI, fixture sintetiche e test. La riserva usa spese mensili esplicite e mesi dichiarati; asset non liquidabili, locked, vincolati, in valuta estera o senza classificazione non finanziano spese correnti. Non calcola rendimenti, imposte, FX, ottimizzazioni, scoring o raccomandazioni.
+
+### V4.2a — Code audit after liquidity plan
+
+**Stato:** `planned`
+
+Audit periodico dopo quattro o piu' incrementi funzionali completati dall'ultimo audit V3.10a.
+
+- Dipende da: V4.2.
+- Repository: `engine`.
+- Output: audit checklist e follow-up espliciti, se presenti.
+- Test: suite pertinente e verifica allineamento schema, builder, CLI, fixture, docs e privacy.
+- Done quando: eventuali debiti non corretti sono registrati e non bloccano o bloccano esplicitamente V4.3.
 
 ### V4.3 — Retirement decumulation strategies
 

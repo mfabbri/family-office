@@ -1039,7 +1039,10 @@ class ValidateCliTest(unittest.TestCase):
             input_path = root / "planning-goals.json"
             timeline_path = root / "timeline-events.snapshot.json"
             output_path = root / "planning-goals.snapshot.json"
-            input_path.write_text(json.dumps(_synthetic_planning_goals()), encoding="utf-8")
+            goals = _synthetic_planning_goals()
+            goals["draft_notes"] = {"objectives": "Human-readable guidance ignored by the validator."}
+            goals["draft_examples"] = {"objective": goals["objectives"][0]}
+            input_path.write_text(json.dumps(goals), encoding="utf-8")
             timeline_path.write_text(json.dumps(_synthetic_timeline_events_snapshot()), encoding="utf-8")
             stdout = io.StringIO()
 
@@ -1061,6 +1064,285 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(output_path.exists())
             self.assertIn("planning goals: complete 2 objectives, 2 constraints, 0 gaps", stdout.getvalue())
+
+    def test_main_planning_goals_prepare_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            draft_path = root / "planning-goals.draft.json"
+            input_path = root / "planning-goals.json"
+            draft_path.write_text(json.dumps(_synthetic_planning_goals()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "goals",
+                        "prepare",
+                        "--draft",
+                        str(draft_path),
+                        "--input",
+                        str(input_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(input_path.exists())
+            self.assertEqual(
+                json.loads(input_path.read_text(encoding="utf-8")),
+                _synthetic_planning_goals(),
+            )
+            self.assertIn("planning goals: prepared", stdout.getvalue())
+            self.assertIn("fo planning goals validate", stdout.getvalue())
+
+    def test_main_planning_goals_prepare_refuses_overwrite(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            draft_path = root / "planning-goals.draft.json"
+            input_path = root / "planning-goals.json"
+            draft_path.write_text(json.dumps(_synthetic_planning_goals()), encoding="utf-8")
+            input_path.write_text("{}", encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "goals",
+                        "prepare",
+                        "--draft",
+                        str(draft_path),
+                        "--input",
+                        str(input_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 1)
+            self.assertIn("use --overwrite", stdout.getvalue())
+
+    def test_main_planning_goals_status_reports_missing_input(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            draft_path = root / "planning-goals.draft.json"
+            input_path = root / "planning-goals.json"
+            output_path = root / "planning-goals.snapshot.json"
+            timeline_path = root / "timeline-events.snapshot.json"
+            draft_path.write_text(json.dumps(_synthetic_planning_goals()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "goals",
+                        "status",
+                        "--draft",
+                        str(draft_path),
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                        "--timeline-snapshot",
+                        str(timeline_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn("planning goals status: input_missing", stdout.getvalue())
+            self.assertIn("fo planning goals prepare", stdout.getvalue())
+
+    def test_main_planning_goals_status_reports_unedited_draft(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            draft_path = root / "planning-goals.draft.json"
+            input_path = root / "planning-goals.json"
+            output_path = root / "planning-goals.snapshot.json"
+            timeline_path = root / "timeline-events.snapshot.json"
+            input_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "planning-goals/v1",
+                        "record_type": "PlanningGoals",
+                        "household_id": None,
+                        "as_of_date": None,
+                        "planning_horizon": {"start_year": None, "end_year": None},
+                        "risk_profile": {
+                            "capacity": "unknown",
+                            "tolerance": "unknown",
+                            "max_loss_ratio": None,
+                        },
+                        "liquidity_policy": {
+                            "minimum_reserve_months": None,
+                            "preferred_bucket": "unknown",
+                        },
+                        "objectives": [],
+                        "constraints": [],
+                        "data_gaps": [{"code": "draft_not_completed", "message": "Complete the draft."}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "goals",
+                        "status",
+                        "--draft",
+                        str(draft_path),
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                        "--timeline-snapshot",
+                        str(timeline_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn("planning goals status: draft_needs_editing", stdout.getvalue())
+            self.assertIn("fill planning-goals.json", stdout.getvalue())
+
+    def test_main_planning_goals_validate_missing_file_suggests_prepare(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "missing-planning-goals.json"
+            output_path = root / "planning-goals.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "goals",
+                        "validate",
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 1)
+            self.assertIn("Planning goals file not found", stdout.getvalue())
+            self.assertIn("fo planning goals prepare", stdout.getvalue())
+
+    def test_main_planning_liquidity_build_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "liquidity-input.json"
+            net_worth_path = root / "net-worth.snapshot.json"
+            availability_path = root / "asset-availability.snapshot.json"
+            goals_path = root / "planning-goals.snapshot.json"
+            output_path = root / "liquidity-plan.snapshot.json"
+            input_path.write_text(json.dumps(_synthetic_liquidity_input()), encoding="utf-8")
+            net_worth_path.write_text(json.dumps(_synthetic_liquidity_net_worth()), encoding="utf-8")
+            availability_path.write_text(json.dumps(_synthetic_liquidity_availability()), encoding="utf-8")
+            goals_path.write_text(json.dumps(_synthetic_planning_goals_snapshot()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "liquidity",
+                        "build",
+                        "--input",
+                        str(input_path),
+                        "--net-worth-snapshot",
+                        str(net_worth_path),
+                        "--asset-availability-snapshot",
+                        str(availability_path),
+                        "--planning-goals-snapshot",
+                        str(goals_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("planning liquidity: partial reserve=12000.00/36000.00 2 assets", stdout.getvalue())
+
+    def test_main_planning_goals_validate_unedited_draft_explains_next_step(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "planning-goals.json"
+            output_path = root / "planning-goals.snapshot.json"
+            input_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "planning-goals/v1",
+                        "record_type": "PlanningGoals",
+                        "household_id": None,
+                        "as_of_date": None,
+                        "planning_horizon": {"start_year": None, "end_year": None},
+                        "risk_profile": {
+                            "capacity": "unknown",
+                            "tolerance": "unknown",
+                            "max_loss_ratio": None,
+                        },
+                        "liquidity_policy": {
+                            "minimum_reserve_months": None,
+                            "preferred_bucket": "unknown",
+                        },
+                        "objectives": [],
+                        "constraints": [],
+                        "data_gaps": [{"code": "draft_not_completed", "message": "Complete the draft."}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "goals",
+                        "validate",
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 1)
+            self.assertIn("Planning goals input is still an unedited draft", stdout.getvalue())
+            self.assertIn("fo planning goals validate", stdout.getvalue())
+
+    def test_main_planning_goals_demo_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            timeline_output_path = root / "timeline-events.snapshot.json"
+            output_path = root / "planning-goals.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "goals",
+                        "demo",
+                        "--timeline-output",
+                        str(timeline_output_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(timeline_output_path.exists())
+            self.assertTrue(output_path.exists())
+            self.assertIn(
+                "planning goals demo: timeline=complete 8 events, goals=complete 2 objectives, 2 constraints, 0 gaps",
+                stdout.getvalue(),
+            )
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["record_type"], "PlanningGoalsSnapshot")
 
     def test_main_tax_reconcile_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -2178,6 +2460,80 @@ def _synthetic_planning_goals() -> dict:
                 "applies_to_objective_ids": ["objective_retirement_income"],
                 "timeline_event_ids": ["retirement"],
                 "threshold": {"metric": "target_year", "operator": "target", "unit": "year", "value": 2039},
+            },
+        ],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_planning_goals_snapshot() -> dict:
+    return {
+        "schema_version": "planning-goals/v1",
+        "record_type": "PlanningGoalsSnapshot",
+        "status": "complete",
+        "liquidity_policy": {"minimum_reserve_months": 12, "preferred_bucket": "emergency_reserve"},
+        "data_gaps": [],
+    }
+
+
+def _synthetic_liquidity_input() -> dict:
+    return {
+        "schema_version": "liquidity-plan-input/v1",
+        "record_type": "LiquidityPlanInput",
+        "household_id": "synthetic_household",
+        "as_of_date": "2026-07-18",
+        "base_currency": "EUR",
+        "monthly_expenses": "3000.00",
+        "minimum_reserve_months": 6,
+        "concentration_threshold": "0.80",
+        "data_gaps": [],
+    }
+
+
+def _synthetic_liquidity_net_worth() -> dict:
+    return {
+        "schema_version": "net-worth/v1",
+        "record_type": "NetWorthSnapshot",
+        "components": [
+            {
+                "id": "asset_cash",
+                "label": "Cash account",
+                "type": "asset",
+                "asset_class": "cash",
+                "value": "12000.00",
+                "currency": "EUR",
+            },
+            {
+                "id": "asset_family_home",
+                "label": "Family home",
+                "type": "asset",
+                "asset_class": "real_estate",
+                "value": "180000.00",
+                "currency": "EUR",
+            },
+        ],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_liquidity_availability() -> dict:
+    return {
+        "schema_version": "asset-availability/v1",
+        "record_type": "AssetAvailabilitySnapshot",
+        "classifications": [
+            {
+                "asset_id": "asset_cash",
+                "liquidity_tier": "immediate",
+                "first_available_date": "2026-07-18",
+                "constraints": ["none"],
+                "risk_level": "low",
+            },
+            {
+                "asset_id": "asset_family_home",
+                "liquidity_tier": "illiquid",
+                "first_available_date": "2027-07-18",
+                "constraints": ["co_ownership", "sale_process"],
+                "risk_level": "illiquid",
             },
         ],
         "data_gaps": [],

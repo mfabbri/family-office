@@ -14,7 +14,7 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `planned` |
 | 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `planned` |
 
-La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `in_progress`: V4.1 e' completato e V4.2 e' il prossimo incremento selezionabile.
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `in_progress`: V4.1 e V4.2 sono completati e V4.2a e' il prossimo incremento selezionabile per rispettare la cadenza di code audit prima di V4.3.
 
 `done_with_gaps` indica che la capability è disponibile ma alcuni formati o fonti reali restano da aggiungere tramite incrementi mirati. Non blocca la roadmap successiva se i gap non sono prerequisiti dell'incremento selezionato.
 
@@ -107,6 +107,8 @@ Questi requisiti valgono in tutte le roadmap e possono generare incrementi abili
 - niente LLM per calcoli fiscali, previdenziali o finanziari;
 - provenance, versionamento e data gaps obbligatori;
 - compatibilità multipiattaforma dei path;
+- CLI semplice da usare: ogni capability utente deve preferire comandi corti con default del workspace, demo/smoke senza path JSON lunghi e help chiaro prima di richiedere opzioni avanzate;
+- compilazione manuale di file JSON ridotta al minimo: quando un input strutturato resta necessario, deve essere accompagnato da draft, template, guida leggibile e validazione locale; gli incrementi futuri devono preferire import, wizard, generatori o comandi `prepare` dove possibile;
 - dipendenze Python esterne dichiarate in `family-office-engine/pyproject.toml`, installate nel venv del repository e verificate con l'interprete del venv prima di eseguire parser, CLI o test;
 - output riproducibili con input e seed dichiarati;
 - privacy conforme, titolarità trasparente verso autorità e intermediari;

@@ -403,6 +403,27 @@ Fixture:
 
 - `examples/planning-goals-sample.json`
 
+## Liquidity Plan
+
+Modulo:
+
+```text
+family_office_engine.services.liquidity_plan
+```
+
+Funzione principale:
+
+- `build_liquidity_plan(input_path, output_path, net_worth_snapshot_path=None, asset_availability_snapshot_path=None, planning_goals_snapshot_path=None)`: legge input esplicito e snapshot disponibili, poi scrive `liquidity-plan/v1`.
+
+`liquidity-plan/v1` assegna asset valorizzati a bucket `emergency_reserve`, `short_term`, `medium_term`, `long_term` e `restricted`. Il target di riserva usa `monthly_expenses` e i mesi minimi dichiarati in `planning-goals/v1`, con fallback all'input se lo snapshot goals non e' disponibile.
+
+Il piano segnala shortfall di riserva, asset bloccati per spese correnti, asset in valuta diversa dalla valuta base, classificazioni mancanti e concentrazione oltre soglia. Asset illiquidi, locked, co-owned, gravati da lien, soggetti a policy terms o senza classificazione restano fuori dalla riserva disponibile. Non calcola rendimenti, imposte, cambi valuta, ottimizzazioni, scoring o raccomandazioni.
+
+Fixture:
+
+- `examples/liquidity-plan-input-sample.json`
+- `examples/liquidity-plan-net-worth-sample.json`
+
 ## Tax Reconciliation
 
 Modulo:

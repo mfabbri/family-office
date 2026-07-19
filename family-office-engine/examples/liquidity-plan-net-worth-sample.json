@@ -1,0 +1,52 @@
+{
+  "components": [
+    {
+      "asset_class": "brokerage",
+      "currency": "EUR",
+      "id": "asset_brokerage_self",
+      "label": "Synthetic brokerage account",
+      "source": {
+        "snapshot": "synthetic fixture"
+      },
+      "type": "asset",
+      "valuation_date": "2026-07-18",
+      "value": "42000.00"
+    },
+    {
+      "asset_class": "real_estate",
+      "currency": "EUR",
+      "id": "asset_family_home",
+      "label": "Synthetic family home",
+      "source": {
+        "snapshot": "synthetic fixture"
+      },
+      "type": "asset",
+      "valuation_date": "2026-07-18",
+      "value": "240000.00"
+    },
+    {
+      "asset_class": "cash",
+      "currency": "EUR",
+      "id": "asset_child_account",
+      "label": "Synthetic child account",
+      "source": {
+        "snapshot": "synthetic fixture"
+      },
+      "type": "asset",
+      "valuation_date": "2026-07-18",
+      "value": "12000.00"
+    }
+  ],
+  "currency": "EUR",
+  "data_gaps": [],
+  "record_type": "NetWorthSnapshot",
+  "schema_version": "net-worth/v1",
+  "sources": {
+    "synthetic": "examples/liquidity-plan-net-worth-sample.json"
+  },
+  "totals": {
+    "assets": "294000.00",
+    "liabilities": "0.00",
+    "net_worth": "294000.00"
+  }
+}

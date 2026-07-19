@@ -2,7 +2,7 @@
 
 ## ID e titolo
 
-V4.1 - Goals and constraints model.
+V4.2 - Liquidity buckets and emergency reserve.
 
 ## Stato
 
@@ -14,87 +14,91 @@ V4.1 - Goals and constraints model.
 
 ## Motivazione e dipendenze
 
-`current-next-increment.md` precedente e `roadmap-index.md` marcano V3 come `done` e il gate V3 -> V4 come superato. La prima roadmap non completata e' V4; il primo incremento `planned` con dipendenze soddisfatte e' V4.1.
+`current-next-increment.md` precedente marcava V4.1 come `done` e indicava V4.2 come prossimo incremento deducibile. La roadmap V4 e' `in_progress`; V4.2 era il primo incremento `planned` con dipendenze soddisfatte.
 
-V4.1 formalizza obiettivi, priorita', soglie minime, orizzonte, rischio, liquidita', eventi familiari e vincoli legali in un contratto deterministico. Gli incrementi successivi V4.2-V4.10 potranno usare questi vincoli dichiarati invece di preferenze implicite.
+V4.2 divide gli asset valorizzati in riserva, breve, medio, lungo termine e vincolati usando classificazioni esplicite di disponibilita' asset, net worth e obiettivi dichiarati. Il servizio impedisce che le spese correnti dipendano da asset non liquidabili e segnala riserva insufficiente, valuta estera, concentrazione e dati mancanti.
 
 Dipendenze verificate:
 
-- Gate V3 -> V4 `passed`.
-- `decision-scenario/v2`, `decision-score/v1` e `decision-dossier/v1` sono disponibili e tracciabili.
-- Non serve nuova normativa o rule pack fiscale per V4.1.
-- Non scatta code audit: dall'ultimo audit V3.10a sono stati completati tre incrementi funzionali (`V3.10b`, `V3.10c`, `V3.10d`), quindi V4.1 puo' procedere.
+- V4.1 `planning-goals/v1` e' `done`.
+- V3.3 asset availability e net worth sono disponibili come contratti engine.
+- Non serve nuova normativa o rule pack fiscale: V4.2 classifica liquidita' da input espliciti senza tassazione, rendimenti o raccomandazioni.
+- Dopo V4.2 la cadenza audit richiede V4.2a prima di V4.3.
 
 ## Repository coinvolti
 
-- `family-office-engine`: contratto `planning-goals/v1`, validatore, snapshot builder, CLI, fixture sintetica, test e documentazione.
+- `family-office-engine`: contratto `liquidity-plan/v1`, snapshot builder, CLI, fixture sintetica, test e documentazione.
 - `family-office-workspace`: destinazione privata attesa per input e snapshot reali; nessun dato reale viene copiato nel repository software.
-- `family-office-rules`, `family-office-knowledge`, `family-office-bootstrap`: nessuna modifica prevista.
+- `family-office-rules`, `family-office-knowledge`, `family-office-bootstrap`: nessuna modifica.
 
 ## Input attesi e classificazione dati
 
-- Input JSON `planning-goals/v1` con obiettivi, vincoli, preferenze di rischio/liquidita', orizzonte e riferimenti opzionali a eventi di `timeline-events/v1`.
-- Snapshot opzionale `timeline-events/v1` per validare riferimenti a eventi familiari.
+- Input JSON `liquidity-plan-input/v1` con spese mensili, valuta base e soglie di concentrazione opzionali.
+- Snapshot `net-worth/v1`, `asset-availability/v1` e `planning-goals/v1`.
 - Fixture sintetiche nell'engine; dati reali solo nel workspace privato.
 
 ## Output e contratti prodotti o modificati
 
-- Contratto e snapshot `planning-goals/v1`.
-- Validatore deterministico con data gaps per campi mancanti, riferimenti timeline mancanti e vincoli incompleti.
-- Errori bloccanti per ID duplicati, priorita' non positive, soglie incoerenti, orizzonti invalidi e riferimenti a vincoli/obiettivi inesistenti.
-- CLI per validare input goals e scrivere snapshot nel workspace.
+- Contratto e snapshot `liquidity-plan/v1`.
+- Emergency reserve target, funded amount e shortfall.
+- Bucket `emergency_reserve`, `short_term`, `medium_term`, `long_term` e `restricted` con asset assegnati.
+- Data gaps e warning per riserva insufficiente, valuta estera, asset vincolati, dati mancanti e concentrazione.
+- CLI `planning liquidity build` e `planning liquidity demo`.
 
 ## File modificati
 
-- `family-office-engine/src/family_office_engine/services/planning_goals.py`
+- `family-office-engine/src/family_office_engine/services/liquidity_plan.py`
 - `family-office-engine/src/family_office_engine/cli/main.py`
-- `family-office-engine/tests/unit/test_planning_goals.py`
+- `family-office-engine/tests/unit/test_liquidity_plan.py`
 - `family-office-engine/tests/unit/test_validate.py`
-- `family-office-engine/examples/planning-goals-sample.json`
-- `family-office-workspace/household/planning-goals.draft.json`
-- `family-office-workspace/household/household-input-guide.md`
+- `family-office-engine/examples/liquidity-plan-input-sample.json`
+- `family-office-engine/examples/liquidity-plan-net-worth-sample.json`
+- `family-office-engine/docs/plans/2026-07-19-v4.2-liquidity-plan.md`
 - `family-office-engine/docs/api.md`
 - `family-office-engine/docs/cli.md`
 - `family-office-engine/docs/testing.md`
 - `family-office-engine/docs/current-next-increment.md`
 - `family-office-engine/docs/roadmap/roadmap-v4-wealth-planning.md`
+- `family-office-engine/docs/roadmap/roadmap-index.md`
 - `family-office-engine/docs/decision-log.md`
 
 ## Test e verifiche
 
-- Input completo produce snapshot `complete`, hash stabile e nessun gap.
-- Obiettivi incompatibili o soglie min/max incoerenti vengono rigettati.
-- Priorita' duplicate o non positive vengono rigettate.
-- Riferimento timeline mancante produce gap esplicito.
-- Campi opzionali mancanti o `unknown` producono data gaps, non valori inventati.
-- CLI smoke `planning goals validate`.
-- Eseguito: `$env:PYTHONPATH='src'; python -m unittest tests.unit.test_planning_goals tests.unit.test_validate` -> 55 test OK.
-- Eseguito: `$env:PYTHONPATH='src'; python -m unittest discover -s tests\unit` -> 281 test OK.
-- Eseguito: `git diff --check` -> OK.
+- Input completo produce snapshot con hash stabile.
+- Riserva insufficiente produce shortfall esplicito.
+- Asset illiquidi, locked o vincolati sono esclusi dal funding delle spese correnti.
+- Valuta estera produce data gap senza conversione inventata.
+- Concentrazione sopra soglia produce warning.
+- CLI smoke `planning liquidity build` e `planning liquidity demo`.
+- Eseguito: `$env:PYTHONPATH='src'; python -m unittest tests.unit.test_liquidity_plan tests.unit.test_validate` -> 61 test OK.
+- Eseguito: `$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning liquidity demo` -> OK.
+- Eseguito: `$env:PYTHONPATH='src'; python -m unittest discover -s tests\unit` -> 294 test OK.
+- Eseguito: `git diff --check` -> OK, con soli warning CRLF di Git.
 
 ## Documentazione aggiornata
 
-- API e CLI per `planning-goals/v1`.
+- API e CLI per `liquidity-plan/v1`.
 - Testing docs con comandi di verifica.
-- Roadmap V4 con stato V4.1.
+- Roadmap V4 con stato V4.2 e audit V4.2a.
+- Roadmap index con prossimo incremento audit.
 - Decision log con confini e limiti del contratto.
 - Questo file con risultati e prossimo incremento deducibile.
-- Guida workspace con il nuovo draft privato `planning-goals.draft.json`.
 
 ## Criteri di completamento
 
-- Gli obiettivi e i vincoli sono rappresentati in modo versionato, validabile e riproducibile.
-- L'output mantiene separati obiettivi, vincoli, preferenze, timeline refs, data gaps e limiti.
-- Non vengono calcolati rendimenti, imposte, ottimizzazioni, raccomandazioni o strategie.
+- Gli asset sono assegnati a bucket di liquidita' versionati, riproducibili e tracciabili.
+- La riserva minima usa mesi dichiarati e spese mensili esplicite.
+- Il piano non usa per spese correnti asset non liquidabili.
+- Non vengono calcolati rendimenti, imposte, FX, ottimizzazioni, scoring o raccomandazioni.
 - Test mirati, CLI smoke e regression suite passano.
-- V4.1 e' marcato `done`; V4 e' `in_progress`; il prossimo incremento deducibile resta V4.2.
+- V4.2 e' marcato `done`; V4 resta `in_progress`; il prossimo incremento deducibile e' V4.2a.
 
 ## Prossimo incremento deducibile
 
-V4.2 - Liquidity buckets and emergency reserve.
+V4.2a - Code audit after liquidity plan.
 
 ## Rischi, esclusioni e blocker
 
-- Fuori perimetro: liquidity buckets, emergency reserve, ottimizzazione, scoring V4, fiscalita', investimenti tax-aware, AI e uso di dati reali.
-- Il contratto non decide trade-off tra obiettivi: registra priorita' e soglie dichiarate.
-- Se emergono obiettivi incompatibili non risolvibili deterministicamente, vengono registrati come errori o data gaps, non mediati dal servizio.
+- Fuori perimetro: decumulo, ottimizzazione, scoring V4, fiscalita', investimenti tax-aware, AI e uso di dati reali.
+- Il piano non converte valute e non valuta rischi di mercato: segnala gap e warning.
+- Asset con classificazione mancante, unknown o vincoli bloccanti non vengono promossi a riserva disponibile.

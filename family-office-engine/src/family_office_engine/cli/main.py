@@ -109,6 +109,7 @@ from family_office_engine.services.ownership_graph import OwnershipGraphError, i
 from family_office_engine.services.asset_availability import AssetAvailabilityError, import_asset_availability
 from family_office_engine.services.timeline_events import TimelineEventsError, import_timeline_events
 from family_office_engine.services.planning_goals import PlanningGoalsError, import_planning_goals
+from family_office_engine.services.liquidity_plan import LiquidityPlanError, build_liquidity_plan
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -372,6 +373,10 @@ def default_household_facts_input() -> Path:
     return resolve_repo("workspace") / "household" / "household-facts.json"
 
 
+def default_household_facts_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "household-facts-sample.json"
+
+
 def default_household_facts_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "household-facts.snapshot.json"
 
@@ -388,6 +393,10 @@ def default_asset_availability_input() -> Path:
     return resolve_repo("workspace") / "household" / "asset-availability.json"
 
 
+def default_asset_availability_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "asset-availability-sample.json"
+
+
 def default_asset_availability_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "asset-availability.snapshot.json"
 
@@ -396,8 +405,16 @@ def default_timeline_events_input() -> Path:
     return resolve_repo("workspace") / "household" / "timeline-events.json"
 
 
+def default_timeline_events_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "timeline-events-sample.json"
+
+
 def default_timeline_events_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "timeline-events.snapshot.json"
+
+
+def default_timeline_events_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-timeline-events.synthetic.snapshot.json"
 
 
 def default_timeline_policy() -> Path:
@@ -408,8 +425,40 @@ def default_planning_goals_input() -> Path:
     return resolve_repo("workspace") / "household" / "planning-goals.json"
 
 
+def default_planning_goals_draft() -> Path:
+    return resolve_repo("workspace") / "household" / "planning-goals.draft.json"
+
+
+def default_planning_goals_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "planning-goals-sample.json"
+
+
 def default_planning_goals_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "planning-goals.snapshot.json"
+
+
+def default_planning_goals_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-planning-goals.synthetic.snapshot.json"
+
+
+def default_liquidity_plan_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "liquidity-plan-input.json"
+
+
+def default_liquidity_plan_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "liquidity-plan-input-sample.json"
+
+
+def default_liquidity_plan_sample_net_worth() -> Path:
+    return resolve_repo("engine") / "examples" / "liquidity-plan-net-worth-sample.json"
+
+
+def default_liquidity_plan_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "liquidity-plan.snapshot.json"
+
+
+def default_liquidity_plan_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-liquidity-plan.synthetic.snapshot.json"
 
 
 def default_retirement_simulation_output() -> Path:
@@ -537,6 +586,94 @@ def print_validate(status: Mapping[str, bool], environ: Mapping[str, str] | None
         path = resolve_repo(name, environ)
         state = "OK" if ok else "MISSING"
         print(f"{name}: {state} ({path})")
+
+
+def prepare_planning_goals_input(draft_path: Path, input_path: Path, overwrite: bool = False) -> dict[str, str]:
+    if not draft_path.exists():
+        raise PlanningGoalsError(f"Planning goals draft not found: {draft_path}")
+    if input_path.exists() and not overwrite:
+        raise PlanningGoalsError(f"Planning goals input already exists: {input_path}; use --overwrite to replace it")
+    try:
+        input_path.parent.mkdir(parents=True, exist_ok=True)
+        input_path.write_text(draft_path.read_text(encoding="utf-8"), encoding="utf-8")
+    except OSError as exc:
+        raise PlanningGoalsError(f"Cannot prepare planning goals input: {input_path}") from exc
+    return {
+        "status": "prepared",
+        "draft_path": str(draft_path),
+        "input_path": str(input_path),
+    }
+
+
+def planning_goals_status(input_path: Path, draft_path: Path, output_path: Path, timeline_path: Path) -> dict[str, str]:
+    if output_path.exists():
+        return {
+            "status": "snapshot_ready",
+            "message": f"snapshot exists: {output_path}",
+            "next_action": "run `fo planning goals validate` after changing goals, or continue with the next V4 workflow",
+        }
+    if input_path.exists() and _is_unedited_planning_goals_draft(input_path):
+        return {
+            "status": "draft_needs_editing",
+            "message": f"input exists but is still an unedited draft: {input_path}",
+            "next_action": "fill planning-goals.json, then run `fo planning goals validate`",
+        }
+    if input_path.exists():
+        if timeline_path.exists():
+            next_action = "run `fo planning goals validate`"
+        else:
+            next_action = "run `fo household timeline validate`, then `fo planning goals validate`"
+        return {
+            "status": "input_ready",
+            "message": f"input exists: {input_path}",
+            "next_action": next_action,
+        }
+    if draft_path.exists():
+        return {
+            "status": "input_missing",
+            "message": f"private input is missing; draft exists: {draft_path}",
+            "next_action": "run `fo planning goals prepare`, edit planning-goals.json, then validate",
+        }
+    return {
+        "status": "draft_missing",
+        "message": f"private input and draft are missing: {input_path}",
+        "next_action": "run `fo planning goals demo` for a synthetic smoke check",
+    }
+
+
+def print_planning_goals_status(status: Mapping[str, str]) -> None:
+    print(f"planning goals status: {status['status']}")
+    print(f"message: {status['message']}")
+    print(f"next: {status['next_action']}")
+
+
+def format_planning_goals_error(exc: PlanningGoalsError, input_path: Path) -> str:
+    message = str(exc)
+    if "Planning goals file not found:" in message:
+        return (
+            f"{message}. Run `fo planning goals prepare` to create the editable private input, "
+            "or `fo planning goals demo` for a synthetic smoke check."
+        )
+    if _is_unedited_planning_goals_draft(input_path):
+        return (
+            f"Planning goals input is still an unedited draft: {input_path}. "
+            "Fill household_id, as_of_date, planning_horizon, risk_profile, liquidity_policy, "
+            "objectives and constraints, then run `fo planning goals validate` again."
+        )
+    return message
+
+
+def _is_unedited_planning_goals_draft(input_path: Path) -> bool:
+    try:
+        data = json.loads(input_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(data, dict):
+        return False
+    gaps = data.get("data_gaps", [])
+    if not isinstance(gaps, list):
+        return False
+    return any(isinstance(gap, dict) and gap.get("code") == "draft_not_completed" for gap in gaps)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1279,6 +1416,55 @@ def build_parser() -> argparse.ArgumentParser:
         help="Validate and normalize planning goals and constraints",
     )
     planning_goals_subparsers = planning_goals_parser.add_subparsers(dest="planning_goals_command")
+    planning_goals_prepare_parser = planning_goals_subparsers.add_parser(
+        "prepare",
+        help="Create the editable private planning goals input from the workspace draft",
+    )
+    planning_goals_prepare_parser.add_argument(
+        "--draft",
+        type=Path,
+        default=default_planning_goals_draft(),
+        help="Planning goals draft JSON path",
+    )
+    planning_goals_prepare_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_planning_goals_input(),
+        help="Output editable private planning goals JSON path",
+    )
+    planning_goals_prepare_parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite an existing planning goals input file",
+    )
+    planning_goals_status_parser = planning_goals_subparsers.add_parser(
+        "status",
+        help="Show planning goals workflow status and next action",
+    )
+    planning_goals_status_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_planning_goals_input(),
+        help="Planning goals JSON path",
+    )
+    planning_goals_status_parser.add_argument(
+        "--draft",
+        type=Path,
+        default=default_planning_goals_draft(),
+        help="Planning goals draft JSON path",
+    )
+    planning_goals_status_parser.add_argument(
+        "--timeline-snapshot",
+        type=Path,
+        default=default_timeline_events_output(),
+        help="Timeline events snapshot path",
+    )
+    planning_goals_status_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_planning_goals_output(),
+        help="Planning goals snapshot JSON path",
+    )
     planning_goals_validate_parser = planning_goals_subparsers.add_parser(
         "validate",
         help="Validate and normalize planning goals and constraints",
@@ -1300,6 +1486,77 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=default_planning_goals_output(),
         help="Output planning goals snapshot JSON path",
+    )
+    planning_goals_demo_parser = planning_goals_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic planning goals check with bundled examples",
+    )
+    planning_goals_demo_parser.add_argument(
+        "--timeline-output",
+        type=Path,
+        default=default_timeline_events_demo_output(),
+        help="Output synthetic timeline events snapshot JSON path",
+    )
+    planning_goals_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_planning_goals_demo_output(),
+        help="Output synthetic planning goals snapshot JSON path",
+    )
+    planning_liquidity_parser = planning_subparsers.add_parser(
+        "liquidity",
+        help="Build liquidity buckets and emergency reserve plan",
+    )
+    planning_liquidity_subparsers = planning_liquidity_parser.add_subparsers(dest="planning_liquidity_command")
+    planning_liquidity_build_parser = planning_liquidity_subparsers.add_parser(
+        "build",
+        help="Build liquidity-plan/v1 from explicit snapshots",
+    )
+    planning_liquidity_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_liquidity_plan_input(),
+        help="Input liquidity plan JSON path",
+    )
+    planning_liquidity_build_parser.add_argument(
+        "--net-worth-snapshot",
+        type=Path,
+        default=default_net_worth_output(),
+        help="Input net worth snapshot JSON path",
+    )
+    planning_liquidity_build_parser.add_argument(
+        "--asset-availability-snapshot",
+        type=Path,
+        default=default_asset_availability_output(),
+        help="Input asset availability snapshot JSON path",
+    )
+    planning_liquidity_build_parser.add_argument(
+        "--planning-goals-snapshot",
+        type=Path,
+        default=default_planning_goals_output(),
+        help="Input planning goals snapshot JSON path",
+    )
+    planning_liquidity_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_liquidity_plan_output(),
+        help="Output liquidity plan snapshot JSON path",
+    )
+    planning_liquidity_demo_parser = planning_liquidity_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic liquidity plan check with bundled examples",
+    )
+    planning_liquidity_demo_parser.add_argument(
+        "--planning-goals-output",
+        type=Path,
+        default=default_planning_goals_demo_output(),
+        help="Output synthetic planning goals snapshot JSON path",
+    )
+    planning_liquidity_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_liquidity_plan_demo_output(),
+        help="Output synthetic liquidity plan snapshot JSON path",
     )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
@@ -2148,18 +2405,142 @@ def main(argv: list[str] | None = None) -> int:
     if (
         args.command == "planning"
         and args.planning_command == "goals"
+        and args.planning_goals_command == "prepare"
+    ):
+        try:
+            result = prepare_planning_goals_input(args.draft, args.input, args.overwrite)
+        except PlanningGoalsError as exc:
+            print(f"planning goals: ERROR ({exc})")
+            return 1
+        print(
+            "planning goals: prepared "
+            f"({result['input_path']}; edit it, then run `fo planning goals validate`)"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "goals"
+        and args.planning_goals_command == "status"
+    ):
+        print_planning_goals_status(
+            planning_goals_status(
+                args.input,
+                args.draft,
+                args.output,
+                args.timeline_snapshot,
+            )
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "goals"
         and args.planning_goals_command == "validate"
     ):
         try:
             snapshot = import_planning_goals(args.input, args.output, args.timeline_snapshot)
         except PlanningGoalsError as exc:
-            print(f"planning goals: ERROR ({exc})")
+            print(f"planning goals: ERROR ({format_planning_goals_error(exc, args.input)})")
             return 1
         print(
             "planning goals: "
             f"{snapshot['status']} "
             f"{len(snapshot['objectives'])} objectives, "
             f"{len(snapshot['constraints'])} constraints, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "goals"
+        and args.planning_goals_command == "demo"
+    ):
+        try:
+            timeline_snapshot = import_timeline_events(
+                default_timeline_events_sample_input(),
+                args.timeline_output,
+                default_timeline_policy(),
+                default_household_facts_sample_input(),
+                default_asset_availability_sample_input(),
+            )
+            planning_snapshot = import_planning_goals(
+                default_planning_goals_sample_input(),
+                args.output,
+                args.timeline_output,
+            )
+        except (TimelineEventsError, PlanningGoalsError) as exc:
+            print(f"planning goals demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning goals demo: "
+            f"timeline={timeline_snapshot['status']} "
+            f"{len(timeline_snapshot['events'])} events, "
+            f"goals={planning_snapshot['status']} "
+            f"{len(planning_snapshot['objectives'])} objectives, "
+            f"{len(planning_snapshot['constraints'])} constraints, "
+            f"{len(planning_snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "liquidity"
+        and args.planning_liquidity_command == "build"
+    ):
+        try:
+            snapshot = build_liquidity_plan(
+                args.input,
+                args.output,
+                net_worth_snapshot_path=args.net_worth_snapshot,
+                asset_availability_snapshot_path=args.asset_availability_snapshot,
+                planning_goals_snapshot_path=args.planning_goals_snapshot,
+            )
+        except LiquidityPlanError as exc:
+            print(f"planning liquidity: ERROR ({exc})")
+            return 1
+        print(
+            "planning liquidity: "
+            f"{snapshot['status']} "
+            f"reserve={snapshot['emergency_reserve']['funded_amount']}/"
+            f"{snapshot['emergency_reserve']['target_amount']} "
+            f"{len(snapshot['asset_assignments'])} assets, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "liquidity"
+        and args.planning_liquidity_command == "demo"
+    ):
+        try:
+            planning_snapshot = import_planning_goals(
+                default_planning_goals_sample_input(),
+                args.planning_goals_output,
+                None,
+            )
+            snapshot = build_liquidity_plan(
+                default_liquidity_plan_sample_input(),
+                args.output,
+                net_worth_snapshot_path=default_liquidity_plan_sample_net_worth(),
+                asset_availability_snapshot_path=default_asset_availability_sample_input(),
+                planning_goals_snapshot_path=args.planning_goals_output,
+            )
+        except (PlanningGoalsError, LiquidityPlanError) as exc:
+            print(f"planning liquidity demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning liquidity demo: "
+            f"goals={planning_snapshot['status']} "
+            f"liquidity={snapshot['status']} "
+            f"reserve={snapshot['emergency_reserve']['funded_amount']}/"
+            f"{snapshot['emergency_reserve']['target_amount']} "
+            f"{len(snapshot['asset_assignments'])} assets, "
             f"{len(snapshot['data_gaps'])} gaps "
             f"({args.output})"
         )

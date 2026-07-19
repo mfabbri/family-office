@@ -483,7 +483,29 @@ $env:PYTHONPATH='src'; python -m unittest tests.unit.test_planning_goals
 Verifica CLI sul workspace privato:
 
 ```text
+fo planning goals status
+fo planning goals prepare
+fo planning goals validate
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals status
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals prepare
 $env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals validate
+```
+
+Verifica demo sintetica senza ricordare path JSON:
+
+```text
+fo planning goals demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals demo
 ```
 
 Lo snapshot risultante viene scritto in:
@@ -493,6 +515,46 @@ Lo snapshot risultante viene scritto in:
 ```
 
 Il contratto `planning-goals/v1` registra obiettivi, priorita', soglie, orizzonte, rischio, liquidita' e vincoli dichiarati. I test coprono snapshot completo, hash stabile, priorita' duplicate, soglie range incoerenti, riferimenti a obiettivi inesistenti, riferimenti timeline mancanti e data gaps. Non vengono calcolati rendimenti, imposte, ottimizzazioni, scoring o raccomandazioni.
+
+## Liquidity Plan
+
+Verifica contratto bucket di liquidita' V4 con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_liquidity_plan
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+fo planning liquidity build
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning liquidity build
+```
+
+Verifica demo sintetica senza ricordare path JSON:
+
+```text
+fo planning liquidity demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning liquidity demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\liquidity-plan.snapshot.json
+```
+
+Il contratto `liquidity-plan/v1` assegna asset valorizzati a riserva, breve, medio, lungo termine e restricted usando net worth, asset availability e planning goals. I test coprono shortfall di riserva, asset bloccati per spese correnti, valuta estera senza conversione, concentrazione, hash stabile e input mancanti. Non vengono calcolati rendimenti, imposte, cambi valuta, ottimizzazioni, scoring o raccomandazioni.
 
 Verifica riconciliazione documentale:
 

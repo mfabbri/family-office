@@ -484,7 +484,34 @@ Valida e normalizza obiettivi e vincoli patrimoniali V4:
 Uso:
 
 ```text
+fo planning goals status
+fo planning goals validate
+```
+
+Se l'input privato non esiste ancora, preparalo dal draft del workspace:
+
+```text
+fo planning goals prepare
+```
+
+`status` non modifica file e mostra il punto del workflow: input mancante, draft ancora da compilare, input pronto o snapshot gia' presente. Il draft contiene `draft_notes` e `draft_examples` per spiegare i campi e i valori ammessi; queste sezioni sono guida umana e possono restare nel file durante la compilazione.
+
+Da checkout sorgente:
+
+```text
 python -m family_office_engine.cli.main planning goals validate
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning goals demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning goals demo
 ```
 
 Default:
@@ -492,8 +519,63 @@ Default:
 - input: `../family-office-workspace/household/planning-goals.json`
 - timeline: `../family-office-workspace/snapshots/timeline-events.snapshot.json`
 - output: `../family-office-workspace/snapshots/planning-goals.snapshot.json`
+- draft prepare: `../family-office-workspace/household/planning-goals.draft.json`
+
+Default demo:
+
+- timeline sintetica: `../family-office-workspace/snapshots/cli-check-timeline-events.synthetic.snapshot.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-planning-goals.synthetic.snapshot.json`
 
 Il comando produce `planning-goals/v1` con obiettivi, priorita', soglie, orizzonte, rischio, liquidita' e vincoli dichiarati. Valida riferimenti a obiettivi e, se la timeline e' disponibile, riferimenti a eventi. Non calcola rendimenti, imposte, ottimizzazioni, trade-off o raccomandazioni.
+
+## `fo planning liquidity build`
+
+Costruisce il piano bucket di liquidita' V4:
+
+```text
+../family-office-workspace/snapshots/liquidity-plan.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning liquidity build
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning liquidity build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning liquidity demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning liquidity demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/liquidity-plan-input.json`
+- net worth: `../family-office-workspace/snapshots/net-worth.snapshot.json`
+- asset availability: `../family-office-workspace/snapshots/asset-availability.snapshot.json`
+- planning goals: `../family-office-workspace/snapshots/planning-goals.snapshot.json`
+- output: `../family-office-workspace/snapshots/liquidity-plan.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/liquidity-plan-input-sample.json`
+- net worth sintetico: `examples/liquidity-plan-net-worth-sample.json`
+- asset availability sintetica: `examples/asset-availability-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-liquidity-plan.synthetic.snapshot.json`
+
+Il comando produce `liquidity-plan/v1` con riserva minima, bucket asset, asset bloccati per spese correnti, warning e data gaps. Non converte valute e non calcola rendimenti, imposte, ottimizzazioni, scoring o raccomandazioni.
 
 ## `fo retirement simulate`
 

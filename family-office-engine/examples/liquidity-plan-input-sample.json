@@ -1,0 +1,11 @@
+{
+  "as_of_date": "2026-07-18",
+  "base_currency": "EUR",
+  "concentration_threshold": "0.60",
+  "data_gaps": [],
+  "household_id": "synthetic_household",
+  "minimum_reserve_months": 12,
+  "monthly_expenses": "3000.00",
+  "record_type": "LiquidityPlanInput",
+  "schema_version": "liquidity-plan-input/v1"
+}
