@@ -26,6 +26,11 @@ Questa guida serve per compilare i file privati in `family-office-workspace/hous
 - `provenance` deve spiegare da dove arriva il dato, ad esempio documento, estratto conto o inserimento manuale revisionato.
 - Le date sono in formato `YYYY-MM-DD`.
 
+Guide dettagliate per i due file piu' importanti del liquidity plan:
+
+- `ownership-beneficiaries-guide.md`: significato di asset, debiti, quote, titolari e beneficiari.
+- `asset-availability-guide.md`: significato di liquidita', vincoli, rischio, giurisdizione e trattamento fiscale descrittivo.
+
 ## Asset availability
 
 Campi principali per ogni asset:

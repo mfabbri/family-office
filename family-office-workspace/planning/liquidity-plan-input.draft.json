@@ -1,0 +1,16 @@
+{
+  "as_of_date": "YYYY-MM-DD",
+  "base_currency": "EUR",
+  "concentration_threshold": "0.50",
+  "data_gaps": [
+    {
+      "code": "replace_with_known_gap_or_remove",
+      "message": "Describe any uncertainty, incomplete bank history, outdated valuation or missing liquidity term."
+    }
+  ],
+  "household_id": "household_main",
+  "minimum_reserve_months": 6,
+  "monthly_expenses": "0.00",
+  "record_type": "LiquidityPlanInput",
+  "schema_version": "liquidity-plan-input/v1"
+}

@@ -1,7 +1,11 @@
+import contextlib
+import io
 import json
 import re
 from pathlib import Path
 from typing import Any
+
+from family_office_engine.ingestion.investments import _extract_pdf_content_stream_text
 
 SCHEMA_VERSION = "bank-insurance/v1"
 
@@ -60,6 +64,22 @@ def load_bank_insurance_documents(input_dir: Path, document_group: str) -> list[
 
 def parse_bank_insurance_text(text: str, document_group: str, filename: str) -> dict[str, Any]:
     normalized = _normalize_text(text)
+    bank_items = _parse_bank_account_statement(normalized, document_group, filename)
+    if bank_items:
+        return {
+            "status": "extracted",
+            "provider": bank_items[0]["provider"],
+            "items": bank_items,
+            "data_gaps": [],
+        }
+    plan_universal_items = _parse_plan_universal_value(normalized, filename)
+    if plan_universal_items:
+        return {
+            "status": "extracted",
+            "provider": "Plan Universal",
+            "items": plan_universal_items,
+            "data_gaps": [],
+        }
     generali_items = _parse_generali_contributions(normalized, filename)
     if generali_items:
         return {
@@ -155,10 +175,80 @@ def _extract_pdf_text(path: Path) -> str:
         raise BankInsuranceImportError("PyPDF2 is required to extract bank/insurance PDF text") from exc
 
     try:
-        reader = PdfReader(str(path))
-        return "\n".join(page.extract_text() or "" for page in reader.pages)
+        with contextlib.redirect_stderr(io.StringIO()):
+            reader = PdfReader(str(path))
+        page_texts: list[str] = []
+        extraction_errors: list[Exception] = []
+        for page in reader.pages:
+            try:
+                with contextlib.redirect_stderr(io.StringIO()):
+                    page_texts.append(page.extract_text() or "")
+            except Exception as exc:
+                extraction_errors.append(exc)
+                page_texts.append("")
+        text = "\n".join(page_texts)
+        if text.strip():
+            return text
+        fallback_text = _extract_pdf_content_stream_text(reader)
+        if fallback_text.strip():
+            return fallback_text
+        if extraction_errors:
+            raise extraction_errors[0]
+        return text
     except Exception as exc:
         raise BankInsuranceImportError(f"Cannot extract text from bank/insurance PDF: {path}") from exc
+
+
+def _parse_bank_account_statement(text: str, document_group: str, filename: str) -> list[dict[str, Any]]:
+    if document_group != "bank" or "ESTRATTO" not in text.upper() or "SALDO FINALE" not in text.upper():
+        return []
+
+    statement_date = _search_date(text, r"ESTRATTO AL\s*(\d{2}-\d{2}-\d{4})", separator="-")
+    final_balance = _search_decimal(text, r"(\d[\d.]*,\d{2})\s*SALDO FINALE")
+    if final_balance is None:
+        return []
+    account = _search_value(text, r"CONTO N\.\s*([0-9 ]+)\s+IN EURO")
+
+    item = {
+        "provider": "bank_statement",
+        "document_group": "bank",
+        "instrument_type": "bank_account",
+        "description": "Current account final balance",
+        "amount_type": "account_balance",
+        "statement_date": statement_date,
+        "amount": final_balance,
+        "currency": "EUR",
+        "confidence": "parsed_from_statement",
+    }
+    if account is not None:
+        item["account"] = re.sub(r"\D", "", account)
+    return [item]
+
+
+def _parse_plan_universal_value(text: str, filename: str) -> list[dict[str, Any]]:
+    if "PLAN UNIVERSAL" not in text.upper() or "Fondo acumulado final del periodo" not in text:
+        return []
+
+    statement_date = _search_date(text, r"Fondo acumulado final del periodo\s*\((\d{2}/\d{2}/\d{4})\)")
+    amount = _search_decimal(text, r"Fondo acumulado final del periodo\s*\(\d{2}/\d{2}/\d{4}\)\s+(\d[\d.]*,\d{2})")
+    if amount is None:
+        return []
+    account = _search_value(text, r"PLAN UNIVERSAL N[°º]?:\s*([A-Z0-9]+)")
+
+    item = {
+        "provider": "Plan Universal",
+        "document_group": "insurance",
+        "instrument_type": "insurance_policy",
+        "description": "Plan Universal accumulated fund",
+        "amount_type": "policy_value",
+        "statement_date": statement_date,
+        "amount": amount,
+        "currency": "EUR",
+        "confidence": "parsed_from_statement",
+    }
+    if account is not None:
+        item["account"] = account
+    return [item]
 
 
 def _parse_generali_contributions(text: str, filename: str) -> list[dict[str, Any]]:
@@ -201,6 +291,14 @@ def _search_decimal(text: str, pattern: str) -> str | None:
     if value is None:
         return None
     return value.replace(".", "").replace(",", ".")
+
+
+def _search_date(text: str, pattern: str, *, separator: str = "/") -> str | None:
+    value = _search_value(text, pattern)
+    if value is None:
+        return None
+    day, month, year = value.split(separator)
+    return f"{year}-{month}-{day}"
 
 
 def _search_value(text: str, pattern: str) -> str | None:

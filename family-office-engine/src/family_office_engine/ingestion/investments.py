@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import re
 from pathlib import Path
@@ -72,6 +74,9 @@ def load_investment_documents(input_dir: Path, country: str) -> list[dict[str, A
 def parse_investment_text(text: str, country: str, filename: str) -> dict[str, Any]:
     normalized = _decode_pdf_unicode_tokens(_normalize_text(text))
     parsers = (
+        _parse_directa,
+        _parse_consultinvest,
+        _parse_etica_balance_certificate,
         _parse_kutxabank_pensiones,
         _parse_amundi,
         _parse_moneyfarm,
@@ -142,10 +147,241 @@ def _extract_pdf_text(path: Path) -> str:
         raise InvestmentsImportError("PyPDF2 is required to extract investment PDF text") from exc
 
     try:
-        reader = PdfReader(str(path))
-        return "\n".join(page.extract_text() or "" for page in reader.pages)
+        with contextlib.redirect_stderr(io.StringIO()):
+            reader = PdfReader(str(path))
+        page_texts: list[str] = []
+        extraction_errors: list[Exception] = []
+        for page in reader.pages:
+            try:
+                with contextlib.redirect_stderr(io.StringIO()):
+                    page_texts.append(page.extract_text() or "")
+            except Exception as exc:  # PyPDF2 can fail on custom encoded text streams.
+                extraction_errors.append(exc)
+                page_texts.append("")
+        text = "\n".join(page_texts)
+        if text.strip():
+            return text
+        fallback_text = _extract_pdf_content_stream_text(reader)
+        if fallback_text.strip():
+            return fallback_text
+        if extraction_errors:
+            raise extraction_errors[0]
+        return text
     except Exception as exc:
         raise InvestmentsImportError(f"Cannot extract text from investment PDF: {path}") from exc
+
+
+def _extract_pdf_content_stream_text(reader: Any) -> str:
+    chunks: list[str] = []
+    for page in reader.pages:
+        resources = page.get("/Resources") or {}
+        font_maps = _page_to_unicode_maps(resources)
+        current_font: str | None = None
+        try:
+            contents = page.get_contents()
+            if contents is None:
+                continue
+            data = contents.get_data()
+        except Exception:
+            continue
+        for token in re.finditer(rb"/([A-Za-z][A-Za-z0-9]*)\s+[0-9.]+\s+Tf|\((.*?)\)\s*Tj", data, flags=re.DOTALL):
+            if token.group(1):
+                current_font = "/" + token.group(1).decode("latin1")
+                continue
+            raw = _decode_pdf_literal_bytes(token.group(2) or b"")
+            chunks.append(_decode_pdf_text_bytes(raw, font_maps.get(current_font or "")))
+    return "\n".join(chunk for chunk in chunks if chunk)
+
+
+def _page_to_unicode_maps(resources: Any) -> dict[str, dict[int, str]]:
+    fonts = resources.get("/Font") if hasattr(resources, "get") else None
+    if fonts is None:
+        return {}
+    try:
+        font_objects = fonts.get_object()
+    except Exception:
+        return {}
+    maps: dict[str, dict[int, str]] = {}
+    for name, font_ref in font_objects.items():
+        try:
+            font = font_ref.get_object()
+            to_unicode = font.get("/ToUnicode")
+            if to_unicode:
+                maps[str(name)] = _parse_to_unicode_cmap(to_unicode.get_object().get_data())
+        except Exception:
+            continue
+    return maps
+
+
+def _parse_to_unicode_cmap(data: bytes) -> dict[int, str]:
+    text = data.decode("latin1", errors="ignore")
+    mapping: dict[int, str] = {}
+    for source, target in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", _bfchar_sections(text)):
+        decoded = _decode_hex_unicode(target)
+        if decoded is not None:
+            mapping[int(source, 16)] = decoded
+    for start, _end, targets in re.findall(
+        r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*\[(.*?)\]",
+        _bfrange_sections(text),
+        flags=re.DOTALL,
+    ):
+        source = int(start, 16)
+        for offset, target in enumerate(re.findall(r"<([0-9A-Fa-f]+)>", targets)):
+            decoded = _decode_hex_unicode(target)
+            if decoded is not None:
+                mapping[source + offset] = decoded
+    return mapping
+
+
+def _bfchar_sections(text: str) -> str:
+    return "\n".join(re.findall(r"beginbfchar(.*?)endbfchar", text, flags=re.DOTALL))
+
+
+def _bfrange_sections(text: str) -> str:
+    return "\n".join(re.findall(r"beginbfrange(.*?)endbfrange", text, flags=re.DOTALL))
+
+
+def _decode_hex_unicode(value: str) -> str | None:
+    try:
+        raw = bytes.fromhex(value)
+    except ValueError:
+        return None
+    encoding = "utf-16-be" if len(raw) % 2 == 0 else "latin1"
+    return raw.decode(encoding, errors="ignore")
+
+
+def _decode_pdf_literal_bytes(value: bytes) -> bytes:
+    output = bytearray()
+    index = 0
+    escapes = {
+        ord("n"): ord("\n"),
+        ord("r"): ord("\r"),
+        ord("t"): ord("\t"),
+        ord("b"): ord("\b"),
+        ord("f"): ord("\f"),
+        ord("("): ord("("),
+        ord(")"): ord(")"),
+        ord("\\"): ord("\\"),
+    }
+    while index < len(value):
+        current = value[index]
+        if current == ord("\\") and index + 1 < len(value):
+            next_byte = value[index + 1]
+            if next_byte in escapes:
+                output.append(escapes[next_byte])
+                index += 2
+                continue
+        output.append(current)
+        index += 1
+    return bytes(output)
+
+
+def _decode_pdf_text_bytes(value: bytes, to_unicode: dict[int, str] | None) -> str:
+    if to_unicode:
+        chars: list[str] = []
+        for index in range(0, len(value) - 1, 2):
+            chars.append(to_unicode.get(int.from_bytes(value[index:index + 2], "big"), ""))
+        return "".join(chars)
+    return value.decode("latin1", errors="ignore")
+
+
+def _parse_consultinvest(text: str, country: str, filename: str) -> list[dict[str, Any]]:
+    if "Consultinvest" not in text or "Patrimonio finale" not in text:
+        return []
+
+    statement_date = _search_date(text, r"Prospetto riassuntivo al\s*(\d{2}/\d{2}/\d{4})")
+    if statement_date is None:
+        statement_date = _search_date(text, r"\d{2}/\d{2}/\d{4}\s*-\s*(\d{2}/\d{2}/\d{4})")
+    final_value = _search_last_amount(text, r"Patrimonio finale\s+(-?\d[\d.]*,\d{2})")
+    if final_value is None:
+        return []
+    account = _search_value(text, r"Mandato:\s*(?:\n|\s)+([0-9/]+)-CONSULENZA FINANZIARIA")
+
+    position = {
+        "provider": "Consultinvest",
+        "country": country,
+        "instrument_type": "managed_portfolio",
+        "description": "Consulenza finanziaria",
+        "statement_date": statement_date,
+        "market_value": _normalize_decimal(final_value),
+        "currency": "EUR",
+        "confidence": "parsed_from_statement",
+    }
+    if account is not None:
+        position["account"] = _normalize_account_id(account)
+    return [position]
+
+
+def _parse_directa(text: str, country: str, filename: str) -> list[dict[str, Any]]:
+    if "DIRECTA" not in text.upper() or "TOTALE LIQUIDITA" not in text.upper():
+        return []
+
+    statement_date = _search_date(text, r"Operazione\s*(\d{2}/\d{2}/\d{4})")
+    liquidity = _search_value(text, r"TOTALE LIQUIDITA['’]?:\s*(-?\d[\d.]*,\d{2})")
+    securities = _search_value(text, r"TOTALE TITOLI EURO\s+(-?\d[\d.]*,\d{2})")
+    if liquidity is None:
+        return []
+    account = _search_value(text, r"Conto n\.?\s*([A-Z][0-9]+)")
+
+    positions = [
+        {
+            "provider": "Directa",
+            "country": country,
+            "instrument_type": "cash_account",
+            "description": "Situazione patrimoniale liquidita",
+            "statement_date": statement_date,
+            "market_value": _normalize_decimal(liquidity),
+            "currency": "EUR",
+            "confidence": "parsed_from_statement",
+        }
+    ]
+    if account is not None:
+        positions[0]["account"] = account
+    if securities is not None and _normalize_decimal(securities) != "0.00":
+        security_position = {
+            "provider": "Directa",
+            "country": country,
+            "instrument_type": "brokerage_portfolio",
+            "description": "Situazione patrimoniale titoli",
+            "statement_date": statement_date,
+            "market_value": _normalize_decimal(securities),
+            "currency": "EUR",
+            "confidence": "parsed_from_statement",
+        }
+        if account is not None:
+            security_position["account"] = account
+        positions.append(security_position)
+    return positions
+
+
+def _parse_etica_balance_certificate(text: str, country: str, filename: str) -> list[dict[str, Any]]:
+    if "Etica" not in text and "ETICA" not in text:
+        return []
+    if "Attestazione saldo" not in text or "Controvalore del suo investimento" not in text:
+        return []
+
+    statement_date = _search_date(text, r"saldo al\s*(\d{2}/\d{2}/\d{4})")
+    account = _search_value(text, r"Codice rapporto:\s*([0-9]+)")
+    positions: list[dict[str, Any]] = []
+    for fund_name, value in re.findall(
+        r"(ETICA [A-Z0-9 .'\-]+?)\s+[\d.,]+\s+€?\s*[\d.,]+\s+€?\s*(\d[\d.]*,\d{2})",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        position = {
+            "provider": "Etica",
+            "country": country,
+            "instrument_type": "investment_fund",
+            "description": re.sub(r"\s+", " ", fund_name).strip(),
+            "statement_date": statement_date,
+            "market_value": _normalize_decimal(value),
+            "currency": "EUR",
+            "confidence": "parsed_from_balance_certificate",
+        }
+        if account is not None:
+            position["account"] = account
+        positions.append(position)
+    return positions
 
 
 def _parse_amundi(text: str, country: str, filename: str) -> list[dict[str, Any]]:
@@ -420,6 +656,13 @@ def _search_value(text: str, pattern: str) -> str | None:
     return match.group(1).strip()
 
 
+def _search_last_amount(text: str, pattern: str) -> str | None:
+    matches = re.findall(pattern, text, flags=re.IGNORECASE)
+    if not matches:
+        return None
+    return matches[-1]
+
+
 def _normalize_decimal(value: str) -> str:
     return value.replace(".", "").replace(",", ".")
 
@@ -441,6 +684,8 @@ def _guess_provider(text: str, filename: str) -> str:
         return "Amundi"
     if "moneyfarm" in haystack or "mfm investment" in haystack:
         return "Moneyfarm"
+    if "consultinvest" in haystack:
+        return "Consultinvest"
     if "kutxabank" in haystack:
         return "Kutxabank"
     if "etica" in haystack:

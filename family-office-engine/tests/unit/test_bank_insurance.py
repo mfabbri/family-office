@@ -19,8 +19,43 @@ Dichiariamo che nel 2025 i contributi complessivi versati sono pari a EUR 2.802,
 Contributi versati dal Contraente EUR 2.802,58
 """
 
+BANK_STATEMENT_TEXT = """
+ESTRATTO AL 31-12-2024
+DEL CONTO N. 000 000 000000 IN EURO
+31/12/24******** 43.199,48SALDO FINALE
+"""
+
+PLAN_UNIVERSAL_TEXT = """
+Periodo 01/10/2025 - 31/12/2025
+PLAN UNIVERSAL N°:
+PUA000000 - NIF: Y0000000F
+Fondo acumulado final del periodo (31/12/2025)
+5.352,52
+"""
+
 
 class BankInsuranceTest(unittest.TestCase):
+    def test_parse_bank_account_final_balance(self):
+        result = parse_bank_insurance_text(BANK_STATEMENT_TEXT, "bank", "statement.pdf")
+
+        self.assertEqual(result["status"], "extracted")
+        self.assertEqual(result["items"][0]["instrument_type"], "bank_account")
+        self.assertEqual(result["items"][0]["amount_type"], "account_balance")
+        self.assertEqual(result["items"][0]["amount"], "43199.48")
+        self.assertEqual(result["items"][0]["statement_date"], "2024-12-31")
+        self.assertEqual(result["items"][0]["account"], "000000000000")
+
+    def test_parse_plan_universal_policy_value(self):
+        result = parse_bank_insurance_text(PLAN_UNIVERSAL_TEXT, "insurance", "plan-universal.pdf")
+
+        self.assertEqual(result["status"], "extracted")
+        self.assertEqual(result["provider"], "Plan Universal")
+        self.assertEqual(result["items"][0]["instrument_type"], "insurance_policy")
+        self.assertEqual(result["items"][0]["amount_type"], "policy_value")
+        self.assertEqual(result["items"][0]["amount"], "5352.52")
+        self.assertEqual(result["items"][0]["statement_date"], "2025-12-31")
+        self.assertEqual(result["items"][0]["account"], "PUA000000")
+
     def test_parse_generali_contributions(self):
         result = parse_bank_insurance_text(GENERALI_TEXT, "insurance", "generali.pdf")
 

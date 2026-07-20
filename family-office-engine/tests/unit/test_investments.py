@@ -7,6 +7,7 @@ from unittest.mock import patch
 from family_office_engine.ingestion.investments import (
     InvestmentsImportError,
     _decode_pdf_unicode_tokens,
+    _extract_pdf_content_stream_text,
     import_investments,
     parse_investment_text,
 )
@@ -80,6 +81,53 @@ KUTXABANK GESTION ACTIVA RENDIMIENTO FI
 """
 
 
+CONSULTINVEST_TEXT = """
+Rendiconto del servizio di Riferimento
+Consultinvest
+Mandato:
+000/0000000-CONSULENZA FINANZIARIA
+Periodo di riferimento:
+01/01/2026 - 31/03/2026
+Prospetto riassuntivo al 31/03/2026 - CONSULENZA FINANZIARIA
+Patrimonio iniziale
+28.672,65
+Patrimonio finale
+28.288,40
+"""
+
+DIRECTA_TEXT = """
+Oggetto: Situazione Patrimoniale alla data Operazione31/12/2025 Pag. 1
+Conto n.Z0000Intestato aSYNTHETIC HOLDER
+TOTALE LIQUIDITA':             17.725,26
+PORTAFOGLIO TITOLI QUANTITA'/VALORE NOMINALE PREZZO VALORE EURO
+_____________________ TOTALE TITOLI EURO
+                 0,00
+DIRECTA S.I.M.p.A.
+"""
+
+ETICA_BALANCE_CERTIFICATE_TEXT = """
+Milano, 10/07/2024
+Oggetto: Attestazione saldo al 29/12/2023
+Controvalore del suo investimento al 29/12/2023
+Codice rapporto:
+ 00000000
+Fondo
+Numero Quote
+Valore Quota
+Controvalore
+ETICA AZIONARIO CL.R
+987,296
+€
+13,968
+€
+13.790,55
+ETICA RENDITA BILANCIATA CL. R
+-
+-
+-
+"""
+
+
 class InvestmentsTest(unittest.TestCase):
     def test_decode_pdf_layout_tokens(self):
         result = _decode_pdf_unicode_tokens(
@@ -103,6 +151,44 @@ class InvestmentsTest(unittest.TestCase):
         self.assertEqual(result["provider"], "Moneyfarm")
         self.assertEqual(result["positions"][0]["market_value"], "29689.70")
         self.assertEqual(result["positions"][0]["statement_date"], "2024-12-31")
+
+    def test_parse_consultinvest_position(self):
+        result = parse_investment_text(CONSULTINVEST_TEXT, "IT", "consultinvest.pdf")
+
+        self.assertEqual(result["status"], "extracted")
+        self.assertEqual(result["provider"], "Consultinvest")
+        self.assertEqual(result["positions"][0]["instrument_type"], "managed_portfolio")
+        self.assertEqual(result["positions"][0]["market_value"], "28288.40")
+        self.assertEqual(result["positions"][0]["statement_date"], "2026-03-31")
+        self.assertEqual(result["positions"][0]["account"], "0000000000")
+
+    def test_parse_directa_cash_position(self):
+        result = parse_investment_text(DIRECTA_TEXT, "IT", "directa.pdf")
+
+        self.assertEqual(result["status"], "extracted")
+        self.assertEqual(result["provider"], "Directa")
+        self.assertEqual(len(result["positions"]), 1)
+        self.assertEqual(result["positions"][0]["instrument_type"], "cash_account")
+        self.assertEqual(result["positions"][0]["market_value"], "17725.26")
+        self.assertEqual(result["positions"][0]["statement_date"], "2025-12-31")
+        self.assertEqual(result["positions"][0]["account"], "Z0000")
+
+    def test_parse_etica_balance_certificate_position(self):
+        result = parse_investment_text(ETICA_BALANCE_CERTIFICATE_TEXT, "IT", "etica.pdf")
+
+        self.assertEqual(result["status"], "extracted")
+        self.assertEqual(result["provider"], "Etica")
+        self.assertEqual(len(result["positions"]), 1)
+        self.assertEqual(result["positions"][0]["instrument_type"], "investment_fund")
+        self.assertEqual(result["positions"][0]["description"], "ETICA AZIONARIO CL.R")
+        self.assertEqual(result["positions"][0]["market_value"], "13790.55")
+        self.assertEqual(result["positions"][0]["statement_date"], "2023-12-29")
+        self.assertEqual(result["positions"][0]["account"], "00000000")
+
+    def test_extract_pdf_content_stream_uses_to_unicode_map(self):
+        result = _extract_pdf_content_stream_text(_FakeReader())
+
+        self.assertEqual(result, "AB\nOK")
 
     def test_parse_kutxabank_tax_data_cash_position(self):
         result = parse_investment_text(KUTXABANK_TEXT, "ES", "kutxabank.pdf")
@@ -188,6 +274,52 @@ class InvestmentsTest(unittest.TestCase):
 
             with self.assertRaisesRegex(InvestmentsImportError, "directory not found"):
                 import_investments(root / "missing", spain_dir, root / "snapshot.json")
+
+
+class _FakeReader:
+    def __init__(self):
+        self.pages = [_FakePage()]
+
+
+class _FakePage:
+    def get(self, key):
+        if key == "/Resources":
+            return {"/Font": _FakeRef({"/F": _FakeRef(_FakeFont())})}
+        return None
+
+    def get_contents(self):
+        data = b"/F 8 Tf\n(" + bytes([0, 1, 0, 2]) + b")Tj\n/F1 8 Tf\n(OK)Tj"
+        return _FakeContent(data)
+
+
+class _FakeContent:
+    def __init__(self, data):
+        self._data = data
+
+    def get_data(self):
+        return self._data
+
+
+class _FakeFont(dict):
+    def __init__(self):
+        super().__init__({"/ToUnicode": _FakeRef(_FakeCMap())})
+
+
+class _FakeCMap:
+    def get_data(self):
+        return b"""
+beginbfrange
+<0001> <0002> [<0041> <0042>]
+endbfrange
+"""
+
+
+class _FakeRef:
+    def __init__(self, value):
+        self._value = value
+
+    def get_object(self):
+        return self._value
 
 
 if __name__ == "__main__":
