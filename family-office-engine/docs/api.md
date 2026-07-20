@@ -448,6 +448,26 @@ Fixture:
 - `examples/decumulation-pension-income-sample.json`
 - `examples/decumulation-rita-options-sample.json`
 
+## Pension Contribution Options
+
+Modulo:
+
+```text
+family_office_engine.services.pension_contribution_options
+```
+
+Funzione principale:
+
+- `build_pension_contribution_options(input_path, rule_pack_path, output_path)`: confronta opzioni esplicite di contribuzione a previdenza complementare e scrive `pension-contribution-options/v1`.
+
+`pension-contribution-options/v1` usa un rule pack versionato per limiti di deducibilita' e input dichiarati per aliquota marginale, contributi gia' dedotti, opzioni future, liquidita' e costo opportunita'. Ogni opzione separa contributo lavoratore, contributo datore e TFR, indicando importi deducibili/non deducibili, beneficio fiscale stimato, liquidita' bloccata, costo opportunita', vincoli e gap.
+
+Il servizio non calcola IRPEF completa, detrazioni, addizionali, rendimenti, matching contrattuale non dichiarato o raccomandazioni.
+
+Fixture:
+
+- `examples/pension-contribution-input-sample.json`
+
 ## Tax Reconciliation
 
 Modulo:

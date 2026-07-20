@@ -29,6 +29,15 @@ class LiquidityPlanError(ValueError):
     pass
 
 
+def validate_liquidity_plan_input(data: dict[str, Any]) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    data_gaps: list[dict[str, Any]] = []
+    _validate_input(data, errors, data_gaps)
+    if errors:
+        raise LiquidityPlanError("; ".join(errors))
+    return data_gaps
+
+
 def build_liquidity_plan(
     input_path: Path,
     output_path: Path,

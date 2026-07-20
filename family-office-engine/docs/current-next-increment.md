@@ -2,7 +2,7 @@
 
 ## ID e titolo
 
-V4.3 - Retirement decumulation strategies.
+V4.4 - Pension contribution optimizer.
 
 ## Stato
 
@@ -14,73 +14,73 @@ V4.3 - Retirement decumulation strategies.
 
 ## Motivazione e dipendenze
 
-`current-next-increment.md` precedente marcava V4.2a come `done` e indicava V4.3 come prossimo incremento deducibile. La roadmap V4 e' `in_progress`; non ci sono audit bloccanti prima di V4.3.
+`current-next-increment.md` precedente marcava V4.3b come `done` e indicava V4.4 come prossimo incremento deducibile. La roadmap V4 e' `in_progress`; V4.4 dipende da V3.5e `pension-income/v1` e dal rule engine fiscale, gia' disponibili.
 
-Dipendenze verificate:
-
-- V4.2 `liquidity-plan/v1` e' `done`.
-- V3.5e `pension-income/v1` e' `done`.
-- La prima implementazione usa tassi espliciti nelle policy e non introduce interpretazione normativa o nuovi rule pack fiscali.
+L'incremento e' T4: tocca deducibilita' fiscale e previdenza complementare italiana. E' stato applicato il flusso `knowledge -> rules -> tests -> engine`.
 
 ## Piano operativo
 
-Piano salvato in `docs/plans/2026-07-20-v4.3-retirement-decumulation-strategies.md`.
+Piano salvato in `docs/plans/2026-07-20-v4.4-pension-contribution-optimizer.md`.
 
 ## Perimetro previsto
 
-- Servizio `services/decumulation_strategy.py`.
-- CLI `planning decumulation build` e `planning decumulation demo`.
-- Fixture sintetiche `examples/decumulation-*.json`.
-- Test unitari e CLI smoke collegati.
-- Documentazione API, CLI, testing e roadmap V4 solo se l'implementazione conferma il contratto.
+- Knowledge note Italia su deducibilita' contributi previdenza complementare.
+- Rule pack 2026 `pension-contribution-rule-pack/v1`.
+- Contratto `pension-contribution-options/v1`.
+- Servizio deterministico e CLI `planning pension-contributions build/demo`.
+- Fixture sintetica e test su plafond, contributo datore, prima occupazione, liquidita' e anno non coperto.
 
 ## Esito implementazione
 
-- Introdotto `decumulation-strategy/v1` con builder deterministico, hash stabile e note sui limiti.
-- Le policy dichiarano eta' pensionamento, orizzonte, fabbisogno netto annuo, cash buffer, ordine prelievi, sequenza rendimenti, tassi espliciti e RITA si'/no.
-- Il servizio compone `net-worth/v1`, `liquidity-plan/v1`, `pension-income/v1` e opzionalmente `rita-options/v1`, escludendo asset restricted/non classificati o in valuta non convertita.
-- L'output contiene cashflow annui, metriche nette, shortfall, depletion age, uso pensione/RITA, warning, data gaps e ranking tecnico non prescrittivo.
-- Nessuna modifica a rules o knowledge: non sono stati introdotti calcoli normativi o fiscali reali.
+- Aggiunta knowledge note `previdenza-complementare-deducibilita-it.md` con fonti verificate il 2026-07-20.
+- Aggiunto rule pack `family-office-rules/italy/2026/pension-contribution-deduction.json`.
+- Aggiunto servizio `pension_contribution_options` per confrontare opzioni esplicite.
+- Aggiunta fixture `examples/pension-contribution-input-sample.json`.
+- Aggiunta CLI `fo planning pension-contributions build` e `demo`.
+- Aggiornati API docs, CLI docs, testing docs, JSON input guide, decision log e roadmap.
 
 ## File modificati
 
-- `family-office-engine/src/family_office_engine/services/decumulation_strategy.py`
-- `family-office-engine/tests/unit/test_decumulation_strategy.py`
+- `family-office-knowledge/pensions/previdenza-complementare-deducibilita-it.md`
+- `family-office-knowledge/pensions/README.md`
+- `family-office-rules/italy/2026/pension-contribution-deduction.json`
+- `family-office-rules/italy/2026/README.md`
+- `family-office-engine/docs/plans/2026-07-20-v4.4-pension-contribution-optimizer.md`
+- `family-office-engine/src/family_office_engine/services/pension_contribution_options.py`
 - `family-office-engine/src/family_office_engine/cli/main.py`
+- `family-office-engine/examples/pension-contribution-input-sample.json`
+- `family-office-engine/tests/unit/test_pension_contribution_options.py`
 - `family-office-engine/tests/unit/test_validate.py`
-- `family-office-engine/examples/decumulation-policy-set-sample.json`
-- `family-office-engine/examples/decumulation-net-worth-sample.json`
-- `family-office-engine/examples/decumulation-liquidity-plan-sample.json`
-- `family-office-engine/examples/decumulation-pension-income-sample.json`
-- `family-office-engine/examples/decumulation-rita-options-sample.json`
 - `family-office-engine/docs/api.md`
 - `family-office-engine/docs/cli.md`
 - `family-office-engine/docs/testing.md`
-- `family-office-engine/docs/plans/2026-07-20-v4.3-retirement-decumulation-strategies.md`
+- `family-office-engine/docs/json-input-guides.md`
+- `family-office-engine/docs/decision-log.md`
 - `family-office-engine/docs/current-next-increment.md`
 - `family-office-engine/docs/roadmap/roadmap-index.md`
 - `family-office-engine/docs/roadmap/roadmap-v4-wealth-planning.md`
-- `family-office-engine/docs/decision-log.md`
 
 ## Test e verifiche
 
-- Eseguito: `$env:PYTHONPATH='src'; python -m unittest tests.unit.test_decumulation_strategy tests.unit.test_validate` -> 64 test OK.
-- Eseguito: `$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning decumulation demo` -> OK, `partial 2 policies`, `best=later_no_rita`, 1 gap.
-- Eseguito: `$env:PYTHONPATH='src'; python -m unittest discover -s tests\unit` -> 309 test OK.
+- Eseguito: `$env:PYTHONPATH='src'; python -m unittest tests.unit.test_pension_contribution_options tests.unit.test_validate.ValidateCliTest.test_main_planning_pension_contributions_demo_returns_success` -> 6 test OK.
+- Eseguito: `$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning pension-contributions demo` -> OK, `complete 3 options`, `best=employee_plus_match`, 0 gap, 3 constraints sintetici.
+- Eseguito: `$env:PYTHONPATH='src'; python -m unittest discover -s tests\unit` -> 320 test OK.
 - Eseguito: `git diff --check` -> OK, con soli warning CRLF di Git.
 
 ## Criteri di completamento
 
-- `decumulation-strategy/v1` disponibile da servizio e CLI.
-- Almeno due policy confrontate con metriche nette, cashflow, warning e data gaps.
-- Test mirati e regression pertinente verdi.
-- V4.3 marcato `done`; V4 resta `in_progress`.
+- Ogni opzione espone deducibilita', beneficio fiscale stimato, costo opportunita', liquidita' persa, vincoli e data gaps.
+- Nessun valore normativo e' hard-coded nell'engine.
+- Aliquota marginale, contributi gia' dedotti, liquidita' e costo opportunita' sono input espliciti.
+- Test pertinenti verdi.
+- V4.4 marcato `done`; V4 resta `in_progress`.
 
 ## Prossimo incremento deducibile
 
-V4.3a - CLI and JSON input guides.
+V4.5 - Tax-aware investment planning.
 
 ## Rischi, esclusioni e blocker
 
-- Fuori perimetro: ottimizzazione contributi, fiscalita' normativa, investimenti tax-aware, AI, dati reali e raccomandazioni.
-- Nessun blocker esplicito al momento dell'avvio.
+- Fuori perimetro: IRPEF completa, detrazioni, addizionali, CU/dichiarazione, rendimenti, matching contrattuale non dichiarato, parser nuovi, dati reali e raccomandazioni.
+- Le fonti normative sono state verificate il 2026-07-20; cambi successivi richiedono aggiornamento `knowledge -> rules -> tests -> engine`.
+- Nessun blocker esplicito al momento della chiusura.

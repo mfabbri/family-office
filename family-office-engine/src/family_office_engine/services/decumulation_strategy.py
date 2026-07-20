@@ -20,6 +20,15 @@ class DecumulationStrategyError(ValueError):
     pass
 
 
+def validate_decumulation_policy_set(data: dict[str, Any]) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    data_gaps: list[dict[str, Any]] = []
+    _validate_input(data, errors, data_gaps)
+    if errors:
+        raise DecumulationStrategyError("; ".join(errors))
+    return data_gaps
+
+
 def build_decumulation_strategy(
     input_path: Path,
     output_path: Path,

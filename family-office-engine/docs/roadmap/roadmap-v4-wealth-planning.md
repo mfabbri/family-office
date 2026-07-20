@@ -71,7 +71,7 @@ Esito: completato con contratto e snapshot `decumulation-strategy/v1`, builder d
 
 ### V4.3a — CLI and JSON input guides
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Ridurre la compilazione manuale fragile documentando in modo operativo ogni JSON che l'utente deve compilare e una guida generale alle funzioni disponibili da CLI.
 
@@ -81,9 +81,27 @@ Ridurre la compilazione manuale fragile documentando in modo operativo ogni JSON
 - Test: smoke CLI esistenti, verifica presenza guide per input JSON attivi, link/documentazione coerenti.
 - Done quando: ogni input JSON richiesto da una capability CLI ha guida leggibile, esempio sintetico o draft/template, e la guida generale spiega quali comandi usare senza dover leggere il codice.
 
+Esito: completato con guida generale CLI, mappa degli input JSON attivi, guida campo-per-campo per `decumulation-policy-set/v1`, draft sintetico workspace per decumulation, link in `docs/cli.md` e test documentale di copertura. Nessuna modifica a rules o knowledge; non sono stati introdotti calcoli, parser o dati reali.
+
+### V4.3b — Interactive JSON input wizard
+
+**Stato:** `done`
+
+Ridurre ulteriormente la compilazione manuale dei JSON aggiungendo supporto CLI guidato da domande concrete, con salvataggio di draft validabili nel workspace.
+
+- Dipende da: V4.3a.
+- Repository: `engine`, `workspace`.
+- Output: comandi CLI `prepare`/wizard per gli input JSON attivi piu' usati, partendo da `planning-goals`, `liquidity-plan-input` e `decumulation-policy-set`.
+- Test: sessioni simulate stdin/stdout, overwrite sicuro, default non personali, validazione immediata del JSON generato, smoke CLI sui draft prodotti.
+- Done quando: l'utente puo' creare o aggiornare i principali input JSON rispondendo a domande leggibili, senza aprire il file a mano salvo revisione finale, e senza copiare dati personali nel repository software.
+
+Note di perimetro: il wizard deve porre domande deterministiche e salvare solo nel workspace privato. Non usa LLM per dedurre importi, aliquote, rendimenti, diritti pensionistici o raccomandazioni; valori incerti devono diventare `data_gaps`.
+
+Esito: completato con wizard CLI per `planning-goals/v1`, `liquidity-plan-input/v1` e `decumulation-policy-set/v1`, scrittura sicura con `--overwrite`, validazione input immediata, test stdin/stdout simulati e documentazione CLI aggiornata. Nessuna modifica a rules o knowledge; non sono stati introdotti calcoli, parser, import automatici o dati reali.
+
 ### V4.4 — Pension contribution optimizer
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Valutare contribuzioni future a previdenza complementare, TFR, deducibilità, liquidità persa e beneficio atteso.
 
@@ -92,6 +110,8 @@ Valutare contribuzioni future a previdenza complementare, TFR, deducibilità, li
 - Output: `pension-contribution-options/v1`.
 - Test: plafond, contributo datore, orizzonti e aliquote marginali.
 - Done quando: ogni opzione mostra beneficio fiscale, costo opportunità e vincoli.
+
+Esito: completato con knowledge note italiana, rule pack `it.pension-contribution-deduction.2026.v1`, contratto `pension-contribution-options/v1`, servizio deterministico, fixture sintetica, CLI build/demo, test su plafond ordinario, contributo datore, extra prima occupazione, TFR separato, liquidita' e anno non coperto. Il beneficio fiscale usa solo aliquota marginale dichiarata; non calcola IRPEF completa, rendimenti, matching contrattuale non dichiarato o raccomandazioni.
 
 ### V4.5 — Tax-aware investment planning
 

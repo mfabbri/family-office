@@ -1,5 +1,9 @@
 # CLI
 
+Guida generale e ordine d'uso: `docs/cli-workflow.md`.
+
+Mappa degli input JSON compilabili: `docs/json-input-guides.md`.
+
 ## `fo payroll import`
 
 Importa buste paga PDF dal workspace privato e scrive:
@@ -516,7 +520,15 @@ Se l'input privato non esiste ancora, preparalo dal draft del workspace:
 fo planning goals prepare
 ```
 
+In alternativa puoi creare il JSON con domande guidate:
+
+```text
+fo planning goals wizard
+```
+
 `status` non modifica file e mostra il punto del workflow: input mancante, draft ancora da compilare, input pronto o snapshot gia' presente. Il draft contiene `draft_notes` e `draft_examples` per spiegare i campi e i valori ammessi; queste sezioni sono guida umana e possono restare nel file durante la compilazione.
+
+`wizard` pone domande deterministiche, scrive il JSON privato e lo valida a livello di contratto input. Le risposte lasciate incerte restano tracciate in `data_gaps`; non calcola rendimenti, imposte, ottimizzazioni o raccomandazioni.
 
 Da checkout sorgente:
 
@@ -564,6 +576,12 @@ Uso:
 fo planning liquidity build
 ```
 
+Wizard interattivo input:
+
+```text
+fo planning liquidity wizard
+```
+
 Da checkout sorgente:
 
 ```text
@@ -604,6 +622,8 @@ Default demo:
 
 Il comando produce `liquidity-plan/v1` con riserva minima, bucket asset, asset bloccati per spese correnti, warning e data gaps. Non converte valute e non calcola rendimenti, imposte, ottimizzazioni, scoring o raccomandazioni.
 
+`fo planning liquidity wizard` crea `liquidity-plan-input/v1` nel workspace, rifiuta overwrite salvo `--overwrite` e valida il JSON senza richiedere snapshot esterni.
+
 ## `fo planning decumulation build`
 
 Confronta policy di decumulo pensionistico V4:
@@ -616,6 +636,12 @@ Uso:
 
 ```text
 fo planning decumulation build
+```
+
+Wizard interattivo policy:
+
+```text
+fo planning decumulation wizard
 ```
 
 Da checkout sorgente:
@@ -645,6 +671,11 @@ Default:
 - RITA options: `../family-office-workspace/snapshots/rita-options.snapshot.json`
 - output: `../family-office-workspace/snapshots/decumulation-strategy.snapshot.json`
 
+Guida alla compilazione:
+
+- `examples/decumulation-policy-set-guide.md`
+- bozza privata: `../family-office-workspace/planning/decumulation-policy-set.draft.json`
+
 Default demo:
 
 - input sintetico: `examples/decumulation-policy-set-sample.json`
@@ -655,6 +686,47 @@ Default demo:
 - output sintetico: `../family-office-workspace/snapshots/cli-check-decumulation-strategy.synthetic.snapshot.json`
 
 Il comando produce `decumulation-strategy/v1` con cashflow annui per policy, ranking tecnico, metriche nette, warning e data gaps. I tassi netti sono solo quelli dichiarati nell'input; non calcola fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
+
+`fo planning decumulation wizard` crea una prima policy esplicita `decumulation-policy-set/v1`; asset, rendimenti e tassi restano assunzioni dichiarate dall'utente e vanno revisionati prima del build.
+
+## `fo planning pension-contributions build`
+
+Confronta opzioni esplicite di contribuzione a previdenza complementare:
+
+```text
+../family-office-workspace/snapshots/pension-contribution-options.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning pension-contributions build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning pension-contributions demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning pension-contributions demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/pension-contribution-input.json`
+- rule pack: `../family-office-rules/italy/2026/pension-contribution-deduction.json`
+- output: `../family-office-workspace/snapshots/pension-contribution-options.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/pension-contribution-input-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-pension-contribution-options.synthetic.snapshot.json`
+
+Il comando produce `pension-contribution-options/v1` con deducibilita', beneficio fiscale stimato da aliquota marginale dichiarata, costo opportunita', liquidita' persa, vincoli e ranking tecnico. Non calcola IRPEF completa, rendimenti, matching contrattuale non dichiarato o raccomandazioni.
 
 ## `fo retirement simulate`
 

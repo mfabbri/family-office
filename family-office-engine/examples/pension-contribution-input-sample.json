@@ -1,0 +1,43 @@
+{
+  "already_deducted_contributions": "1000.00",
+  "as_of_date": "2026-07-20",
+  "available_liquidity": "25000.00",
+  "data_gaps": [],
+  "first_employment_extra_deduction_room": "1500.00",
+  "household_id": "synthetic_household",
+  "jurisdiction": "IT",
+  "marginal_tax_rate": "0.35",
+  "minimum_liquidity_after_contributions": "18000.00",
+  "options": [
+    {
+      "employee_contribution": "3000.00",
+      "employer_contribution": "1000.00",
+      "horizon_years": 1,
+      "label": "Employee contribution with employer match",
+      "opportunity_cost_rate": "0.03",
+      "option_id": "employee_plus_match",
+      "tfr_transfer": "0.00"
+    },
+    {
+      "employee_contribution": "6500.00",
+      "employer_contribution": "0.00",
+      "horizon_years": 1,
+      "label": "Max personal contribution using first employment room",
+      "opportunity_cost_rate": "0.03",
+      "option_id": "max_personal_with_extra_room",
+      "tfr_transfer": "0.00"
+    },
+    {
+      "employee_contribution": "2000.00",
+      "employer_contribution": "0.00",
+      "horizon_years": 1,
+      "label": "Employee contribution plus TFR transfer",
+      "opportunity_cost_rate": "0.03",
+      "option_id": "employee_plus_tfr",
+      "tfr_transfer": "6000.00"
+    }
+  ],
+  "record_type": "PensionContributionInput",
+  "schema_version": "pension-contribution-input/v1",
+  "tax_year": 2026
+}

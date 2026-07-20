@@ -1,0 +1,59 @@
+{
+  "schema_version": "pension-contribution-rule-pack/v1",
+  "rule_pack_id": "it.pension-contribution-deduction.2026.v1",
+  "jurisdiction": "IT",
+  "currency": "EUR",
+  "description": "Italian complementary pension contribution deduction limits for tax year 2026.",
+  "status": "versioned_rule_not_advice",
+  "knowledge_refs": [
+    "family-office-knowledge/pensions/previdenza-complementare-deducibilita-it.md"
+  ],
+  "source_refs": [
+    {
+      "source_id": "normattiva.dlgs-2005-252.art8",
+      "title": "Decreto legislativo 5 dicembre 2005, n. 252, articolo 8",
+      "url": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2005-12-05;252~art8",
+      "verified_on": "2026-07-20"
+    },
+    {
+      "source_id": "normattiva.dpr-1986-917.art10",
+      "title": "DPR 22 dicembre 1986, n. 917, articolo 10",
+      "url": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.presidente:1986-12-22;917~art10!vig",
+      "verified_on": "2026-07-20"
+    },
+    {
+      "source_id": "agenziaentrate.precompilata.previdenza-complementare",
+      "title": "Agenzia Entrate, dichiarazione precompilata, previdenza complementare",
+      "url": "https://infoprecompilata.agenziaentrate.gov.it/portale/semplificata-mod-previdenza",
+      "verified_on": "2026-07-20"
+    }
+  ],
+  "limitations": [
+    "Covers contribution deductibility only.",
+    "Does not calculate full IRPEF, deductions, surtaxes, withholding, declaration outcomes, fund-specific contractual matching, investment returns or advice.",
+    "Marginal tax rate, already deducted contributions and planned option amounts must be provided upstream.",
+    "TFR transfer is tracked separately and is not treated as an ordinary deductible contribution in this rule pack."
+  ],
+  "rules": [
+    {
+      "rule_id": "it.pension-contribution-deduction.ordinary.2026",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "ordinary_annual_deduction_limit": "5164.57",
+      "first_employment": {
+        "eligible_after_participation_years": 5,
+        "use_within_following_years": 20,
+        "first_five_years_reference_amount": "25822.85",
+        "annual_extra_deduction_limit": "2582.29"
+      },
+      "deductible_contribution_sources": [
+        "employee",
+        "employer",
+        "committente"
+      ],
+      "non_deductible_immediate_sources": [
+        "tfr_transfer"
+      ]
+    }
+  ]
+}

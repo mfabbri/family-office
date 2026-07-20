@@ -596,6 +596,40 @@ Lo snapshot risultante viene scritto in:
 
 Il contratto `decumulation-strategy/v1` confronta policy dichiarate usando net worth, liquidity plan, pension income e RITA options. I test coprono piu' eta' di pensionamento, sequenza rendimenti, longevita', RITA si'/no, hash stabile e input mancanti. Non vengono calcolati fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
 
+## Pension Contribution Options
+
+Verifica contratto opzioni contributive V4 con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_pension_contribution_options
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+fo planning pension-contributions build
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning pension-contributions demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning pension-contributions demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\pension-contribution-options.snapshot.json
+```
+
+Il contratto `pension-contribution-options/v1` confronta opzioni esplicite con rule pack di deducibilita' previdenza complementare. I test coprono plafond ordinario, contributo datore, extra prima occupazione, TFR separato, vincolo liquidita', anno non coperto e CLI demo. Non vengono calcolati IRPEF completa, rendimenti, matching contrattuale non dichiarato, ottimizzazioni o raccomandazioni.
+
 Verifica riconciliazione documentale:
 
 ```text

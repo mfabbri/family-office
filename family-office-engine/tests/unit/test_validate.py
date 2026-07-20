@@ -83,6 +83,54 @@ SYNTHETIC_TAX_RULE_PACK = {
 
 
 class ValidateCliTest(unittest.TestCase):
+    def test_json_input_guides_cover_active_cli_inputs(self):
+        guide_path = REPOSITORY_ROOT / "family-office-engine" / "docs" / "json-input-guides.md"
+        workflow_path = REPOSITORY_ROOT / "family-office-engine" / "docs" / "cli-workflow.md"
+        decumulation_guide_path = (
+            REPOSITORY_ROOT / "family-office-engine" / "examples" / "decumulation-policy-set-guide.md"
+        )
+        liquidity_guide_path = REPOSITORY_ROOT / "family-office-engine" / "examples" / "liquidity-plan-input-guide.md"
+        decumulation_draft_path = (
+            REPOSITORY_ROOT / "family-office-workspace" / "planning" / "decumulation-policy-set.draft.json"
+        )
+
+        for path in [guide_path, workflow_path, decumulation_guide_path, liquidity_guide_path, decumulation_draft_path]:
+            self.assertTrue(path.exists(), f"Missing guide or draft: {path}")
+
+        guide = guide_path.read_text(encoding="utf-8")
+        required_inputs = [
+            "base-assumptions.json",
+            "household-facts/v1",
+            "ownership-beneficiary-graph/v1",
+            "asset-availability/v1",
+            "timeline-events/v1",
+            "lifecycle-expenses/v1",
+            "planning-goals/v1",
+            "liquidity-plan-input/v1",
+            "decumulation-policy-set/v1",
+            "decision-scenario-v2.json",
+            "decision-outcome.json",
+            "sensitivity-analysis.json",
+            "decision-score.json",
+            "decision-dossier.json",
+        ]
+
+        for input_name in required_inputs:
+            self.assertIn(input_name, guide)
+
+        decumulation_guide = decumulation_guide_path.read_text(encoding="utf-8")
+        for field in [
+            "policy_id",
+            "retirement_age",
+            "end_age",
+            "annual_spending_need",
+            "cash_buffer_target",
+            "withdrawal_order",
+            "annual_return_sequence",
+            "include_rita",
+        ]:
+            self.assertIn(field, decumulation_guide)
+
     def test_validate_returns_repo_status_dict(self):
         result = validate()
 
@@ -1120,6 +1168,48 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(exit_code, 1)
             self.assertIn("use --overwrite", stdout.getvalue())
 
+    def test_main_planning_goals_wizard_writes_valid_input(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "planning-goals.json"
+            answers = [
+                "wizard_household",
+                "2026-07-20",
+                "2026",
+                "2056",
+                "medium",
+                "low",
+                "0.15",
+                "9",
+                "42000.00",
+                "2036",
+            ]
+            stdout = io.StringIO()
+
+            with patch("builtins.input", side_effect=answers), redirect_stdout(stdout):
+                exit_code = main(["planning", "goals", "wizard", "--input", str(input_path)])
+
+            self.assertEqual(exit_code, 0)
+            written = json.loads(input_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "planning-goals/v1")
+            self.assertEqual(written["household_id"], "wizard_household")
+            self.assertEqual(written["liquidity_policy"]["minimum_reserve_months"], 9)
+            self.assertEqual(written["data_gaps"], [])
+            self.assertIn("planning goals wizard: prepared 0 gaps", stdout.getvalue())
+
+    def test_main_planning_goals_wizard_refuses_overwrite(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "planning-goals.json"
+            input_path.write_text("{}", encoding="utf-8")
+            stdout = io.StringIO()
+
+            with patch("builtins.input", side_effect=[""] * 10), redirect_stdout(stdout):
+                exit_code = main(["planning", "goals", "wizard", "--input", str(input_path)])
+
+            self.assertEqual(exit_code, 1)
+            self.assertIn("use --overwrite", stdout.getvalue())
+
     def test_main_planning_goals_status_reports_missing_input(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -1266,6 +1356,24 @@ class ValidateCliTest(unittest.TestCase):
             self.assertTrue(output_path.exists())
             self.assertIn("planning liquidity: partial reserve=12000.00/36000.00 2 assets", stdout.getvalue())
 
+    def test_main_planning_liquidity_wizard_writes_valid_input(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "liquidity-plan-input.json"
+            answers = ["wizard_household", "2026-07-20", "EUR", "3500.00", "10", "0.55"]
+            stdout = io.StringIO()
+
+            with patch("builtins.input", side_effect=answers), redirect_stdout(stdout):
+                exit_code = main(["planning", "liquidity", "wizard", "--input", str(input_path)])
+
+            self.assertEqual(exit_code, 0)
+            written = json.loads(input_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "liquidity-plan-input/v1")
+            self.assertEqual(written["monthly_expenses"], "3500.00")
+            self.assertEqual(written["minimum_reserve_months"], 10)
+            self.assertEqual(written["data_gaps"], [])
+            self.assertIn("planning liquidity wizard: prepared 0 gaps", stdout.getvalue())
+
     def test_main_planning_decumulation_build_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -1306,6 +1414,39 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(output_path.exists())
             self.assertIn("planning decumulation: partial 2 policies", stdout.getvalue())
+
+    def test_main_planning_decumulation_wizard_writes_valid_input(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "decumulation-policy-set.json"
+            answers = [
+                "wizard_household",
+                "2026-07-20",
+                "EUR",
+                "60",
+                "67",
+                "95",
+                "36000.00",
+                "24000.00",
+                "asset_cash, asset_brokerage",
+                "yes",
+                "0.02,0.03",
+                "0.10",
+                "0.20",
+                "0.15",
+            ]
+            stdout = io.StringIO()
+
+            with patch("builtins.input", side_effect=answers), redirect_stdout(stdout):
+                exit_code = main(["planning", "decumulation", "wizard", "--input", str(input_path)])
+
+            self.assertEqual(exit_code, 0)
+            written = json.loads(input_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "decumulation-policy-set/v1")
+            self.assertEqual(written["policies"][0]["withdrawal_order"], ["asset_cash", "asset_brokerage"])
+            self.assertTrue(written["policies"][0]["include_rita"])
+            self.assertEqual(written["data_gaps"], [])
+            self.assertIn("planning decumulation wizard: prepared 0 gaps", stdout.getvalue())
 
     def test_main_planning_decumulation_demo_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -1404,6 +1545,32 @@ class ValidateCliTest(unittest.TestCase):
             )
             written = json.loads(output_path.read_text(encoding="utf-8"))
             self.assertEqual(written["record_type"], "PlanningGoalsSnapshot")
+
+    def test_main_planning_pension_contributions_demo_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "pension-contribution-options.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "pension-contributions",
+                        "demo",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn(
+                "planning pension-contributions demo: complete 3 options, best=employee_plus_match",
+                stdout.getvalue(),
+            )
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "pension-contribution-options/v1")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.pension-contribution-deduction.2026.v1")
 
     def test_main_tax_reconcile_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

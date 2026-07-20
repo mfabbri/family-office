@@ -3,7 +3,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Mapping
 
 from family_office_engine.ingestion.manual_assumptions import (
     AssumptionsImportError,
@@ -108,11 +108,20 @@ from family_office_engine.services.household_facts import HouseholdFactsError, i
 from family_office_engine.services.ownership_graph import OwnershipGraphError, import_ownership_graph
 from family_office_engine.services.asset_availability import AssetAvailabilityError, import_asset_availability
 from family_office_engine.services.timeline_events import TimelineEventsError, import_timeline_events
-from family_office_engine.services.planning_goals import PlanningGoalsError, import_planning_goals
-from family_office_engine.services.liquidity_plan import LiquidityPlanError, build_liquidity_plan
+from family_office_engine.services.planning_goals import PlanningGoalsError, import_planning_goals, validate_planning_goals
+from family_office_engine.services.liquidity_plan import (
+    LiquidityPlanError,
+    build_liquidity_plan,
+    validate_liquidity_plan_input,
+)
 from family_office_engine.services.decumulation_strategy import (
     DecumulationStrategyError,
     build_decumulation_strategy,
+    validate_decumulation_policy_set,
+)
+from family_office_engine.services.pension_contribution_options import (
+    PensionContributionOptionsError,
+    build_pension_contribution_options,
 )
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
@@ -331,6 +340,10 @@ def default_italy_tax_rule_pack() -> Path:
     return resolve_repo("rules") / "italy" / "2026" / "irpef-national.json"
 
 
+def default_pension_contribution_rule_pack() -> Path:
+    return resolve_repo("rules") / "italy" / "2026" / "pension-contribution-deduction.json"
+
+
 def default_tax_calculation_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "tax-calculation.snapshot.json"
 
@@ -467,6 +480,22 @@ def default_liquidity_plan_demo_output() -> Path:
 
 def default_decumulation_policy_set_input() -> Path:
     return resolve_repo("workspace") / "planning" / "decumulation-policy-set.json"
+
+
+def default_pension_contribution_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "pension-contribution-input.json"
+
+
+def default_pension_contribution_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "pension-contribution-input-sample.json"
+
+
+def default_pension_contribution_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "pension-contribution-options.snapshot.json"
+
+
+def default_pension_contribution_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-pension-contribution-options.synthetic.snapshot.json"
 
 
 def default_decumulation_policy_set_sample_input() -> Path:
@@ -639,6 +668,229 @@ def prepare_planning_goals_input(draft_path: Path, input_path: Path, overwrite: 
         "draft_path": str(draft_path),
         "input_path": str(input_path),
     }
+
+
+def run_planning_goals_wizard(input_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    print("planning goals wizard: leave uncertain answers blank; they will be marked as data gaps.")
+    household_id = _prompt_text("Household id", "household_private")
+    as_of_date = _prompt_text("As-of date (YYYY-MM-DD)", "2026-01-01")
+    start_year = _prompt_int("Planning start year", 2026)
+    end_year = _prompt_int("Planning end year", start_year + 30)
+    risk_capacity = _prompt_choice("Risk capacity (low/medium/high/unknown)", "unknown", {"low", "medium", "high", "unknown"})
+    risk_tolerance = _prompt_choice(
+        "Risk tolerance (low/medium/high/unknown)",
+        "unknown",
+        {"low", "medium", "high", "unknown"},
+    )
+    max_loss_ratio = _prompt_decimal_text("Maximum acceptable loss ratio", "0.20")
+    reserve_months = _prompt_int("Minimum emergency reserve months", 12)
+    annual_need = _prompt_decimal_text("Target annual net retirement need", "0.00")
+    target_year = _prompt_int("Target retirement income year", max(start_year, 2035))
+
+    gaps = _wizard_gaps(
+        [
+            (risk_capacity == "unknown", "unknown_risk_capacity", "Risk capacity was left unknown in the wizard."),
+            (risk_tolerance == "unknown", "unknown_risk_tolerance", "Risk tolerance was left unknown in the wizard."),
+            (annual_need == "0.00", "unknown_retirement_need", "Retirement income target must be reviewed."),
+        ]
+    )
+    data = {
+        "schema_version": "planning-goals/v1",
+        "record_type": "PlanningGoals",
+        "household_id": household_id,
+        "as_of_date": as_of_date,
+        "planning_horizon": {"start_year": start_year, "end_year": end_year},
+        "risk_profile": {
+            "capacity": risk_capacity,
+            "tolerance": risk_tolerance,
+            "max_loss_ratio": max_loss_ratio,
+        },
+        "liquidity_policy": {
+            "minimum_reserve_months": reserve_months,
+            "preferred_bucket": "emergency_reserve",
+        },
+        "objectives": [
+            {
+                "objective_id": "objective_emergency_reserve",
+                "label": "Maintain emergency reserve",
+                "category": "liquidity",
+                "priority": 1,
+                "target": {"metric": "reserve_months", "operator": "min", "value": reserve_months, "unit": "months"},
+                "time_horizon_year": start_year,
+            },
+            {
+                "objective_id": "objective_retirement_income",
+                "label": "Sustain retirement income",
+                "category": "retirement_income",
+                "priority": 2,
+                "target": {
+                    "metric": "annual_net_need",
+                    "operator": "target",
+                    "value": annual_need,
+                    "unit": "EUR/year",
+                },
+                "time_horizon_year": target_year,
+            },
+        ],
+        "constraints": [
+            {
+                "constraint_id": "constraint_emergency_reserve",
+                "label": "Keep emergency reserve available",
+                "constraint_type": "liquidity",
+                "severity": "hard",
+                "priority": 1,
+                "applies_to_objective_ids": ["objective_emergency_reserve", "objective_retirement_income"],
+                "threshold": {"metric": "reserve_months", "operator": "min", "value": reserve_months, "unit": "months"},
+            }
+        ],
+        "data_gaps": gaps,
+    }
+    validate_planning_goals(data, None)
+    _write_wizard_json(input_path, data, overwrite, PlanningGoalsError, "planning goals")
+    return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(gaps)}
+
+
+def run_liquidity_plan_wizard(input_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    print("planning liquidity wizard: enter declared values only; uncertain fields become data gaps.")
+    household_id = _prompt_text("Household id", "household_private")
+    as_of_date = _prompt_text("As-of date (YYYY-MM-DD)", "2026-01-01")
+    base_currency = _prompt_text("Base currency", "EUR").upper()
+    monthly_expenses = _prompt_decimal_text("Monthly expenses", "0.00")
+    reserve_months = _prompt_int("Minimum emergency reserve months", 12)
+    concentration_threshold = _prompt_decimal_text("Concentration threshold ratio", "0.60")
+    gaps = _wizard_gaps(
+        [(monthly_expenses == "0.00", "unknown_monthly_expenses", "Monthly expenses must be reviewed.")]
+    )
+    data = {
+        "schema_version": "liquidity-plan-input/v1",
+        "record_type": "LiquidityPlanInput",
+        "household_id": household_id,
+        "as_of_date": as_of_date,
+        "base_currency": base_currency,
+        "monthly_expenses": monthly_expenses,
+        "minimum_reserve_months": reserve_months,
+        "concentration_threshold": concentration_threshold,
+        "data_gaps": gaps,
+    }
+    validate_liquidity_plan_input(data)
+    _write_wizard_json(input_path, data, overwrite, LiquidityPlanError, "liquidity plan input")
+    return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(gaps)}
+
+
+def run_decumulation_policy_wizard(input_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    print("planning decumulation wizard: rates and returns must be explicit reviewed assumptions.")
+    household_id = _prompt_text("Household id", "household_private")
+    as_of_date = _prompt_text("As-of date (YYYY-MM-DD)", "2026-01-01")
+    base_currency = _prompt_text("Base currency", "EUR").upper()
+    current_age = _prompt_int("Current age", 60)
+    retirement_age = _prompt_int("Retirement age", max(current_age, 67))
+    end_age = _prompt_int("End age", max(retirement_age, 95))
+    annual_spending_need = _prompt_decimal_text("Annual spending need", "0.00")
+    cash_buffer_target = _prompt_decimal_text("Cash buffer target", "0.00")
+    withdrawal_order = _prompt_list("Withdrawal asset ids, comma-separated", ["asset_cash"])
+    include_rita = _prompt_bool("Include RITA bridge? (yes/no)", False)
+    annual_returns = _prompt_list("Annual return sequence, comma-separated decimals", ["0.00"])
+    withdrawal_tax_rate = _prompt_decimal_text("Withdrawal tax rate", "0.00")
+    pension_tax_rate = _prompt_decimal_text("Pension tax rate", "0.00")
+    rita_tax_rate = _prompt_decimal_text("RITA tax rate", "0.00")
+    gaps = _wizard_gaps(
+        [
+            (annual_spending_need == "0.00", "unknown_annual_spending_need", "Annual spending need must be reviewed."),
+            (cash_buffer_target == "0.00", "unknown_cash_buffer_target", "Cash buffer target must be reviewed."),
+            (annual_returns == ["0.00"], "unknown_return_assumption", "Return sequence must be reviewed."),
+        ]
+    )
+    data = {
+        "schema_version": "decumulation-policy-set/v1",
+        "record_type": "DecumulationPolicySet",
+        "household_id": household_id,
+        "as_of_date": as_of_date,
+        "base_currency": base_currency,
+        "current_age": current_age,
+        "policies": [
+            {
+                "policy_id": "wizard_policy",
+                "label": "Wizard policy",
+                "retirement_age": retirement_age,
+                "end_age": end_age,
+                "annual_spending_need": annual_spending_need,
+                "cash_buffer_target": cash_buffer_target,
+                "withdrawal_order": withdrawal_order,
+                "include_rita": include_rita,
+                "annual_return_sequence": annual_returns,
+                "withdrawal_tax_rate": withdrawal_tax_rate,
+                "pension_tax_rate": pension_tax_rate,
+                "rita_tax_rate": rita_tax_rate,
+            }
+        ],
+        "data_gaps": gaps,
+    }
+    validate_decumulation_policy_set(data)
+    _write_wizard_json(input_path, data, overwrite, DecumulationStrategyError, "decumulation policy set")
+    return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(gaps)}
+
+
+def _write_wizard_json(
+    path: Path,
+    data: dict[str, Any],
+    overwrite: bool,
+    error_type: type[ValueError],
+    label: str,
+) -> None:
+    if path.exists() and not overwrite:
+        raise error_type(f"{label} already exists: {path}; use --overwrite to replace it")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    except OSError as exc:
+        raise error_type(f"Cannot write {label}: {path}") from exc
+
+
+def _prompt_text(label: str, default: str) -> str:
+    value = input(f"{label} [{default}]: ").strip()
+    return value or default
+
+
+def _prompt_int(label: str, default: int) -> int:
+    value = input(f"{label} [{default}]: ").strip()
+    if not value:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
+def _prompt_decimal_text(label: str, default: str) -> str:
+    value = input(f"{label} [{default}]: ").strip()
+    return value or default
+
+
+def _prompt_choice(label: str, default: str, choices: set[str]) -> str:
+    value = input(f"{label} [{default}]: ").strip().lower()
+    return value if value in choices else default
+
+
+def _prompt_bool(label: str, default: bool) -> bool:
+    default_label = "yes" if default else "no"
+    value = input(f"{label} [{default_label}]: ").strip().lower()
+    if value in {"yes", "y", "true", "1"}:
+        return True
+    if value in {"no", "n", "false", "0"}:
+        return False
+    return default
+
+
+def _prompt_list(label: str, default: list[str]) -> list[str]:
+    value = input(f"{label} [{', '.join(default)}]: ").strip()
+    if not value:
+        return default
+    items = [item.strip() for item in value.split(",") if item.strip()]
+    return items or default
+
+
+def _wizard_gaps(items: list[tuple[bool, str, str]]) -> list[dict[str, str]]:
+    return [{"code": code, "message": message} for condition, code, message in items if condition]
 
 
 def planning_goals_status(input_path: Path, draft_path: Path, output_path: Path, timeline_path: Path) -> dict[str, str]:
@@ -1473,6 +1725,21 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Overwrite an existing planning goals input file",
     )
+    planning_goals_wizard_parser = planning_goals_subparsers.add_parser(
+        "wizard",
+        help="Interactively create a private planning goals JSON input",
+    )
+    planning_goals_wizard_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_planning_goals_input(),
+        help="Output editable private planning goals JSON path",
+    )
+    planning_goals_wizard_parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite an existing planning goals input file",
+    )
     planning_goals_status_parser = planning_goals_subparsers.add_parser(
         "status",
         help="Show planning goals workflow status and next action",
@@ -1578,6 +1845,21 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_liquidity_plan_output(),
         help="Output liquidity plan snapshot JSON path",
     )
+    planning_liquidity_wizard_parser = planning_liquidity_subparsers.add_parser(
+        "wizard",
+        help="Interactively create a private liquidity-plan-input/v1 JSON",
+    )
+    planning_liquidity_wizard_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_liquidity_plan_input(),
+        help="Output editable private liquidity plan input JSON path",
+    )
+    planning_liquidity_wizard_parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite an existing liquidity plan input file",
+    )
     planning_liquidity_demo_parser = planning_liquidity_subparsers.add_parser(
         "demo",
         help="Run the synthetic liquidity plan check with bundled examples",
@@ -1641,6 +1923,21 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_decumulation_strategy_output(),
         help="Output decumulation strategy snapshot JSON path",
     )
+    planning_decumulation_wizard_parser = planning_decumulation_subparsers.add_parser(
+        "wizard",
+        help="Interactively create a private decumulation-policy-set/v1 JSON",
+    )
+    planning_decumulation_wizard_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_decumulation_policy_set_input(),
+        help="Output editable private decumulation policy set JSON path",
+    )
+    planning_decumulation_wizard_parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite an existing decumulation policy set input file",
+    )
     planning_decumulation_demo_parser = planning_decumulation_subparsers.add_parser(
         "demo",
         help="Run the synthetic decumulation strategy check with bundled examples",
@@ -1650,6 +1947,45 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=default_decumulation_strategy_demo_output(),
         help="Output synthetic decumulation strategy snapshot JSON path",
+    )
+    planning_pension_contributions_parser = planning_subparsers.add_parser(
+        "pension-contributions",
+        help="Compare complementary pension contribution options",
+    )
+    planning_pension_contributions_subparsers = planning_pension_contributions_parser.add_subparsers(
+        dest="planning_pension_contributions_command"
+    )
+    planning_pension_contributions_build_parser = planning_pension_contributions_subparsers.add_parser(
+        "build",
+        help="Build pension-contribution-options/v1 from explicit input and rule pack",
+    )
+    planning_pension_contributions_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_pension_contribution_input(),
+        help="Input pension contribution options JSON path",
+    )
+    planning_pension_contributions_build_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_pension_contribution_rule_pack(),
+        help="Input pension contribution rule pack JSON path",
+    )
+    planning_pension_contributions_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_pension_contribution_output(),
+        help="Output pension contribution options snapshot JSON path",
+    )
+    planning_pension_contributions_demo_parser = planning_pension_contributions_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic pension contribution options check with bundled examples",
+    )
+    planning_pension_contributions_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_pension_contribution_demo_output(),
+        help="Output synthetic pension contribution options snapshot JSON path",
     )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
@@ -2514,6 +2850,23 @@ def main(argv: list[str] | None = None) -> int:
     if (
         args.command == "planning"
         and args.planning_command == "goals"
+        and args.planning_goals_command == "wizard"
+    ):
+        try:
+            result = run_planning_goals_wizard(args.input, args.overwrite)
+        except PlanningGoalsError as exc:
+            print(f"planning goals wizard: ERROR ({exc})")
+            return 1
+        print(
+            "planning goals wizard: prepared "
+            f"{result['data_gap_count']} gaps "
+            f"({result['input_path']}; review it, then run `fo planning goals validate`)"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "goals"
         and args.planning_goals_command == "status"
     ):
         print_planning_goals_status(
@@ -2582,6 +2935,23 @@ def main(argv: list[str] | None = None) -> int:
     if (
         args.command == "planning"
         and args.planning_command == "liquidity"
+        and args.planning_liquidity_command == "wizard"
+    ):
+        try:
+            result = run_liquidity_plan_wizard(args.input, args.overwrite)
+        except LiquidityPlanError as exc:
+            print(f"planning liquidity wizard: ERROR ({exc})")
+            return 1
+        print(
+            "planning liquidity wizard: prepared "
+            f"{result['data_gap_count']} gaps "
+            f"({result['input_path']}; review it, then run `fo planning liquidity build`)"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "liquidity"
         and args.planning_liquidity_command == "build"
     ):
         try:
@@ -2642,6 +3012,23 @@ def main(argv: list[str] | None = None) -> int:
     if (
         args.command == "planning"
         and args.planning_command == "decumulation"
+        and args.planning_decumulation_command == "wizard"
+    ):
+        try:
+            result = run_decumulation_policy_wizard(args.input, args.overwrite)
+        except DecumulationStrategyError as exc:
+            print(f"planning decumulation wizard: ERROR ({exc})")
+            return 1
+        print(
+            "planning decumulation wizard: prepared "
+            f"{result['data_gap_count']} gaps "
+            f"({result['input_path']}; review it, then run `fo planning decumulation build`)"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "decumulation"
         and args.planning_decumulation_command == "build"
     ):
         try:
@@ -2689,6 +3076,52 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['summary']['policy_count']} policies, "
             f"best={snapshot['summary']['best_ranked_policy_id'] or 'n/a'}, "
             f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "pension-contributions"
+        and args.planning_pension_contributions_command == "build"
+    ):
+        try:
+            snapshot = build_pension_contribution_options(args.input, args.rule_pack, args.output)
+        except PensionContributionOptionsError as exc:
+            print(f"planning pension-contributions: ERROR ({exc})")
+            return 1
+        print(
+            "planning pension-contributions: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['option_count']} options, "
+            f"best={snapshot['summary']['best_option_id'] or 'n/a'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['constraint_count']} constraints "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "pension-contributions"
+        and args.planning_pension_contributions_command == "demo"
+    ):
+        try:
+            snapshot = build_pension_contribution_options(
+                default_pension_contribution_sample_input(),
+                default_pension_contribution_rule_pack(),
+                args.output,
+            )
+        except PensionContributionOptionsError as exc:
+            print(f"planning pension-contributions demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning pension-contributions demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['option_count']} options, "
+            f"best={snapshot['summary']['best_option_id'] or 'n/a'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['constraint_count']} constraints "
             f"({args.output})"
         )
         return 0
