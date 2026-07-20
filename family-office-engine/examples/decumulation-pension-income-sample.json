@@ -1,0 +1,21 @@
+{
+  "data_gaps": [],
+  "income_streams": [
+    {
+      "benefit_type": "public_statutory_pension",
+      "gross": {
+        "annual_amount": "18000.00",
+        "currency": "EUR"
+      },
+      "stream_id": "synthetic_public_pension"
+    }
+  ],
+  "record_type": "PensionIncomeSnapshot",
+  "schema_version": "pension-income/v1",
+  "status": "complete",
+  "summary": {
+    "gross_annual_recurring_total": "18000.00",
+    "gross_annual_recurring_total_currency": "EUR",
+    "stream_count": 1
+  }
+}

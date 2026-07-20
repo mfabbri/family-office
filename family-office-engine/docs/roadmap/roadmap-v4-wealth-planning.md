@@ -43,7 +43,7 @@ Esito: completato con contratto e snapshot `liquidity-plan/v1`, builder determin
 
 ### V4.2a — Code audit after liquidity plan
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Audit periodico dopo quattro o piu' incrementi funzionali completati dall'ultimo audit V3.10a.
 
@@ -53,9 +53,11 @@ Audit periodico dopo quattro o piu' incrementi funzionali completati dall'ultimo
 - Test: suite pertinente e verifica allineamento schema, builder, CLI, fixture, docs e privacy.
 - Done quando: eventuali debiti non corretti sono registrati e non bloccano o bloccano esplicitamente V4.3.
 
+Esito: audit completato sul perimetro `liquidity-plan/v1` con piano operativo, checklist, correzione mirata e regression suite. Corretto il caso in cui un asset immediato in valuta estera era marcato come bloccato ma restava nel bucket `emergency_reserve`: ora non finanzia la riserva senza conversione FX. Nessun follow-up bloccante per V4.3.
+
 ### V4.3 — Retirement decumulation strategies
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Confrontare ordine dei prelievi, cash buffer, ribilanciamento, RITA, prestazioni pensionistiche e uso degli asset imponibili.
 
@@ -64,6 +66,20 @@ Confrontare ordine dei prelievi, cash buffer, ribilanciamento, RITA, prestazioni
 - Output: `decumulation-strategy/v1`.
 - Test: diverse età, sequenza rendimenti, longevità, RITA sì/no.
 - Done quando: il sistema confronta più policy di decumulo con metriche nette.
+
+Esito: completato con contratto e snapshot `decumulation-strategy/v1`, builder deterministico, CLI, fixture sintetiche e test. Il confronto usa policy esplicite, patrimonio, liquidity plan, pension income e RITA options opzionali; produce cashflow annui, metriche nette, shortfall, depletion age, warning, data gaps e ranking tecnico. I tassi netti sono dichiarati nell'input; non calcola fiscalita' normativa, rendimenti attesi, FX, ottimizzazioni o raccomandazioni.
+
+### V4.3a — CLI and JSON input guides
+
+**Stato:** `planned`
+
+Ridurre la compilazione manuale fragile documentando in modo operativo ogni JSON che l'utente deve compilare e una guida generale alle funzioni disponibili da CLI.
+
+- Dipende da: V4.3.
+- Repository: `engine`, `workspace`.
+- Output: guide campo-per-campo per i JSON compilabili, draft/template mancanti, guida generale CLI per capability e ordine d'uso.
+- Test: smoke CLI esistenti, verifica presenza guide per input JSON attivi, link/documentazione coerenti.
+- Done quando: ogni input JSON richiesto da una capability CLI ha guida leggibile, esempio sintetico o draft/template, e la guida generale spiega quali comandi usare senza dover leggere il codice.
 
 ### V4.4 — Pension contribution optimizer
 

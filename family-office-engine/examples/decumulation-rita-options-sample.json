@@ -1,0 +1,14 @@
+{
+  "data_gaps": [],
+  "options": [
+    {
+      "currency": "EUR",
+      "duration_months": 36,
+      "gross_monthly_amount": "900.00",
+      "option_id": "synthetic_rita_36m"
+    }
+  ],
+  "record_type": "RitaOptionsSnapshot",
+  "schema_version": "rita-options/v1",
+  "status": "complete"
+}

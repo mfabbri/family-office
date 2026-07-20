@@ -49,6 +49,28 @@ python -m family_office_engine.cli.main payroll diagnose --json
 
 La diagnostica non stampa importi personali nell'output sintetico.
 
+## `fo investments import`
+
+Importa rendiconti investimento PDF classificati nel workspace privato e scrive:
+
+```text
+../family-office-workspace/snapshots/investments.snapshot.json
+```
+
+Uso:
+
+```text
+python -m family_office_engine.cli.main investments import
+```
+
+Default input:
+
+- Italia: `../family-office-workspace/documents/investimenti/italia`
+- Spagna: `../family-office-workspace/documents/investimenti/spagna`
+- Directa: `../family-office-workspace/documents/investimenti/directa`
+
+Il parser supporta formati deterministici per Amundi, Moneyfarm, Kutxabank, Consultinvest e Directa. Per PDF con testo custom-encoded, come alcuni rendiconti Consultinvest, usa un fallback sul content stream PDF e sulle mappe ToUnicode quando PyPDF2 non riesce a estrarre testo standard. Lo snapshot registra provider, tipo strumento, data rendiconto, valore, valuta e provenance; non stima valori mancanti e non calcola imposte, performance o raccomandazioni.
+
 ## `fo tax calculate`
 
 Calcola un'imposta progressiva usando un rule pack JSON versionato.
@@ -568,6 +590,11 @@ Default:
 - planning goals: `../family-office-workspace/snapshots/planning-goals.snapshot.json`
 - output: `../family-office-workspace/snapshots/liquidity-plan.snapshot.json`
 
+Guida alla compilazione:
+
+- `examples/liquidity-plan-input-guide.md`
+- bozza privata: `../family-office-workspace/planning/liquidity-plan-input.draft.json`
+
 Default demo:
 
 - input sintetico: `examples/liquidity-plan-input-sample.json`
@@ -576,6 +603,58 @@ Default demo:
 - output sintetico: `../family-office-workspace/snapshots/cli-check-liquidity-plan.synthetic.snapshot.json`
 
 Il comando produce `liquidity-plan/v1` con riserva minima, bucket asset, asset bloccati per spese correnti, warning e data gaps. Non converte valute e non calcola rendimenti, imposte, ottimizzazioni, scoring o raccomandazioni.
+
+## `fo planning decumulation build`
+
+Confronta policy di decumulo pensionistico V4:
+
+```text
+../family-office-workspace/snapshots/decumulation-strategy.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning decumulation build
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning decumulation build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning decumulation demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning decumulation demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/decumulation-policy-set.json`
+- net worth: `../family-office-workspace/snapshots/net-worth.snapshot.json`
+- liquidity plan: `../family-office-workspace/snapshots/liquidity-plan.snapshot.json`
+- pension income: `../family-office-workspace/snapshots/pension-income.snapshot.json`
+- RITA options: `../family-office-workspace/snapshots/rita-options.snapshot.json`
+- output: `../family-office-workspace/snapshots/decumulation-strategy.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/decumulation-policy-set-sample.json`
+- net worth sintetico: `examples/decumulation-net-worth-sample.json`
+- liquidity plan sintetico: `examples/decumulation-liquidity-plan-sample.json`
+- pension income sintetico: `examples/decumulation-pension-income-sample.json`
+- RITA options sintetico: `examples/decumulation-rita-options-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-decumulation-strategy.synthetic.snapshot.json`
+
+Il comando produce `decumulation-strategy/v1` con cashflow annui per policy, ranking tecnico, metriche nette, warning e data gaps. I tassi netti sono solo quelli dichiarati nell'input; non calcola fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
 
 ## `fo retirement simulate`
 

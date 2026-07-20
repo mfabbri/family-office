@@ -417,12 +417,36 @@ Funzione principale:
 
 `liquidity-plan/v1` assegna asset valorizzati a bucket `emergency_reserve`, `short_term`, `medium_term`, `long_term` e `restricted`. Il target di riserva usa `monthly_expenses` e i mesi minimi dichiarati in `planning-goals/v1`, con fallback all'input se lo snapshot goals non e' disponibile.
 
-Il piano segnala shortfall di riserva, asset bloccati per spese correnti, asset in valuta diversa dalla valuta base, classificazioni mancanti e concentrazione oltre soglia. Asset illiquidi, locked, co-owned, gravati da lien, soggetti a policy terms o senza classificazione restano fuori dalla riserva disponibile. Non calcola rendimenti, imposte, cambi valuta, ottimizzazioni, scoring o raccomandazioni.
+Il piano segnala shortfall di riserva, asset bloccati per spese correnti, asset in valuta diversa dalla valuta base, classificazioni mancanti e concentrazione oltre soglia. Asset illiquidi, locked, co-owned, gravati da lien, soggetti a policy terms, in valuta estera o senza classificazione restano fuori dalla riserva disponibile. Non calcola rendimenti, imposte, cambi valuta, ottimizzazioni, scoring o raccomandazioni.
 
 Fixture:
 
 - `examples/liquidity-plan-input-sample.json`
 - `examples/liquidity-plan-net-worth-sample.json`
+
+## Decumulation Strategy
+
+Modulo:
+
+```text
+family_office_engine.services.decumulation_strategy
+```
+
+Funzione principale:
+
+- `build_decumulation_strategy(input_path, output_path, net_worth_snapshot_path=None, liquidity_plan_snapshot_path=None, pension_income_snapshot_path=None, rita_options_snapshot_path=None)`: confronta policy di decumulo esplicite e scrive `decumulation-strategy/v1`.
+
+`decumulation-strategy/v1` usa asset valorizzati, bucket di liquidita', pension income e opzioni RITA disponibili per simulare cashflow annui per policy. Ogni policy dichiara eta' pensionamento, eta' fine orizzonte, fabbisogno netto annuo, cash buffer target, ordine prelievi, sequenza rendimenti, tassi espliciti e scelta RITA si'/no.
+
+Le metriche includono saldo finale, eta' di depletion, anni e importo di shortfall, spesa netta coperta, prelievi lordi, pensione netta usata e RITA netta usata. I tassi netti sono solo quelli dichiarati nell'input: il servizio non calcola fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
+
+Fixture:
+
+- `examples/decumulation-policy-set-sample.json`
+- `examples/decumulation-net-worth-sample.json`
+- `examples/decumulation-liquidity-plan-sample.json`
+- `examples/decumulation-pension-income-sample.json`
+- `examples/decumulation-rita-options-sample.json`
 
 ## Tax Reconciliation
 

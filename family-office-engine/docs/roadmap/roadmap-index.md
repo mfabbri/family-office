@@ -14,7 +14,7 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `planned` |
 | 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `planned` |
 
-La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `in_progress`: V4.1 e V4.2 sono completati e V4.2a e' il prossimo incremento selezionabile per rispettare la cadenza di code audit prima di V4.3.
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `in_progress`: V4.1, V4.2, V4.2a e V4.3 sono completati; V4.3a e' il prossimo incremento selezionabile prima di V4.4.
 
 `done_with_gaps` indica che la capability è disponibile ma alcuni formati o fonti reali restano da aggiungere tramite incrementi mirati. Non blocca la roadmap successiva se i gap non sono prerequisiti dell'incremento selezionato.
 

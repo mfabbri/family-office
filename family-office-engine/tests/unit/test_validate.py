@@ -1266,6 +1266,67 @@ class ValidateCliTest(unittest.TestCase):
             self.assertTrue(output_path.exists())
             self.assertIn("planning liquidity: partial reserve=12000.00/36000.00 2 assets", stdout.getvalue())
 
+    def test_main_planning_decumulation_build_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "decumulation-policy-set.json"
+            net_worth_path = root / "net-worth.snapshot.json"
+            liquidity_path = root / "liquidity-plan.snapshot.json"
+            pension_path = root / "pension-income.snapshot.json"
+            rita_path = root / "rita-options.snapshot.json"
+            output_path = root / "decumulation-strategy.snapshot.json"
+            input_path.write_text(json.dumps(_synthetic_decumulation_policy_set()), encoding="utf-8")
+            net_worth_path.write_text(json.dumps(_synthetic_decumulation_net_worth()), encoding="utf-8")
+            liquidity_path.write_text(json.dumps(_synthetic_decumulation_liquidity_plan()), encoding="utf-8")
+            pension_path.write_text(json.dumps(_synthetic_pension_income_snapshot()), encoding="utf-8")
+            rita_path.write_text(json.dumps(_synthetic_rita_options_snapshot()), encoding="utf-8")
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "decumulation",
+                        "build",
+                        "--input",
+                        str(input_path),
+                        "--net-worth-snapshot",
+                        str(net_worth_path),
+                        "--liquidity-plan-snapshot",
+                        str(liquidity_path),
+                        "--pension-income-snapshot",
+                        str(pension_path),
+                        "--rita-options-snapshot",
+                        str(rita_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("planning decumulation: partial 2 policies", stdout.getvalue())
+
+    def test_main_planning_decumulation_demo_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "decumulation-strategy.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "decumulation",
+                        "demo",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("planning decumulation demo: partial 2 policies", stdout.getvalue())
+
     def test_main_planning_goals_validate_unedited_draft_explains_next_step(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -2535,6 +2596,113 @@ def _synthetic_liquidity_availability() -> dict:
                 "constraints": ["co_ownership", "sale_process"],
                 "risk_level": "illiquid",
             },
+        ],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_decumulation_policy_set() -> dict:
+    return {
+        "schema_version": "decumulation-policy-set/v1",
+        "record_type": "DecumulationPolicySet",
+        "household_id": "synthetic_household",
+        "as_of_date": "2026-07-20",
+        "base_currency": "EUR",
+        "current_age": 60,
+        "policies": [
+            {
+                "policy_id": "bridge_rita",
+                "label": "Bridge with RITA",
+                "retirement_age": 62,
+                "end_age": 95,
+                "annual_spending_need": "36000.00",
+                "cash_buffer_target": "24000.00",
+                "withdrawal_order": ["asset_brokerage", "asset_cash"],
+                "annual_return_sequence": ["-0.08", "0.02", "0.03"],
+                "withdrawal_tax_rate": "0.10",
+                "pension_tax_rate": "0.20",
+                "rita_tax_rate": "0.15",
+                "include_rita": True,
+            },
+            {
+                "policy_id": "later_no_rita",
+                "label": "Later without RITA",
+                "retirement_age": 67,
+                "end_age": 90,
+                "annual_spending_need": "36000.00",
+                "cash_buffer_target": "30000.00",
+                "withdrawal_order": ["asset_cash", "asset_brokerage"],
+                "annual_return_sequence": ["0.03"],
+                "withdrawal_tax_rate": "0.10",
+                "pension_tax_rate": "0.20",
+                "rita_tax_rate": "0.15",
+                "include_rita": False,
+            },
+        ],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_decumulation_net_worth() -> dict:
+    return {
+        "schema_version": "net-worth/v1",
+        "record_type": "NetWorthSnapshot",
+        "components": [
+            {
+                "id": "asset_cash",
+                "label": "Synthetic cash",
+                "type": "asset",
+                "asset_class": "cash",
+                "value": "30000.00",
+                "currency": "EUR",
+            },
+            {
+                "id": "asset_brokerage",
+                "label": "Synthetic brokerage",
+                "type": "asset",
+                "asset_class": "brokerage",
+                "value": "220000.00",
+                "currency": "EUR",
+            },
+            {
+                "id": "asset_home",
+                "label": "Synthetic home",
+                "type": "asset",
+                "asset_class": "real_estate",
+                "value": "250000.00",
+                "currency": "EUR",
+            },
+        ],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_decumulation_liquidity_plan() -> dict:
+    return {
+        "schema_version": "liquidity-plan/v1",
+        "record_type": "LiquidityPlanSnapshot",
+        "status": "complete",
+        "asset_assignments": [
+            {"asset_id": "asset_cash", "bucket": "emergency_reserve"},
+            {"asset_id": "asset_brokerage", "bucket": "medium_term"},
+            {"asset_id": "asset_home", "bucket": "restricted"},
+        ],
+        "data_gaps": [],
+    }
+
+
+def _synthetic_rita_options_snapshot() -> dict:
+    return {
+        "schema_version": "rita-options/v1",
+        "record_type": "RitaOptionsSnapshot",
+        "status": "complete",
+        "options": [
+            {
+                "option_id": "synthetic_rita",
+                "gross_monthly_amount": "900.00",
+                "duration_months": 36,
+                "currency": "EUR",
+            }
         ],
         "data_gaps": [],
     }

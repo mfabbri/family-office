@@ -110,6 +110,10 @@ from family_office_engine.services.asset_availability import AssetAvailabilityEr
 from family_office_engine.services.timeline_events import TimelineEventsError, import_timeline_events
 from family_office_engine.services.planning_goals import PlanningGoalsError, import_planning_goals
 from family_office_engine.services.liquidity_plan import LiquidityPlanError, build_liquidity_plan
+from family_office_engine.services.decumulation_strategy import (
+    DecumulationStrategyError,
+    build_decumulation_strategy,
+)
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -459,6 +463,38 @@ def default_liquidity_plan_output() -> Path:
 
 def default_liquidity_plan_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-liquidity-plan.synthetic.snapshot.json"
+
+
+def default_decumulation_policy_set_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "decumulation-policy-set.json"
+
+
+def default_decumulation_policy_set_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "decumulation-policy-set-sample.json"
+
+
+def default_decumulation_sample_net_worth() -> Path:
+    return resolve_repo("engine") / "examples" / "decumulation-net-worth-sample.json"
+
+
+def default_decumulation_sample_liquidity_plan() -> Path:
+    return resolve_repo("engine") / "examples" / "decumulation-liquidity-plan-sample.json"
+
+
+def default_decumulation_sample_pension_income() -> Path:
+    return resolve_repo("engine") / "examples" / "decumulation-pension-income-sample.json"
+
+
+def default_decumulation_sample_rita_options() -> Path:
+    return resolve_repo("engine") / "examples" / "decumulation-rita-options-sample.json"
+
+
+def default_decumulation_strategy_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "decumulation-strategy.snapshot.json"
+
+
+def default_decumulation_strategy_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-decumulation-strategy.synthetic.snapshot.json"
 
 
 def default_retirement_simulation_output() -> Path:
@@ -1558,6 +1594,63 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_liquidity_plan_demo_output(),
         help="Output synthetic liquidity plan snapshot JSON path",
     )
+    planning_decumulation_parser = planning_subparsers.add_parser(
+        "decumulation",
+        help="Compare retirement decumulation policies",
+    )
+    planning_decumulation_subparsers = planning_decumulation_parser.add_subparsers(
+        dest="planning_decumulation_command"
+    )
+    planning_decumulation_build_parser = planning_decumulation_subparsers.add_parser(
+        "build",
+        help="Build decumulation-strategy/v1 from explicit snapshots",
+    )
+    planning_decumulation_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_decumulation_policy_set_input(),
+        help="Input decumulation policy set JSON path",
+    )
+    planning_decumulation_build_parser.add_argument(
+        "--net-worth-snapshot",
+        type=Path,
+        default=default_net_worth_output(),
+        help="Input net worth snapshot JSON path",
+    )
+    planning_decumulation_build_parser.add_argument(
+        "--liquidity-plan-snapshot",
+        type=Path,
+        default=default_liquidity_plan_output(),
+        help="Input liquidity plan snapshot JSON path",
+    )
+    planning_decumulation_build_parser.add_argument(
+        "--pension-income-snapshot",
+        type=Path,
+        default=default_pension_income_output(),
+        help="Input pension income snapshot JSON path",
+    )
+    planning_decumulation_build_parser.add_argument(
+        "--rita-options-snapshot",
+        type=Path,
+        default=default_rita_options_output(),
+        help="Optional RITA options snapshot JSON path",
+    )
+    planning_decumulation_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_decumulation_strategy_output(),
+        help="Output decumulation strategy snapshot JSON path",
+    )
+    planning_decumulation_demo_parser = planning_decumulation_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic decumulation strategy check with bundled examples",
+    )
+    planning_decumulation_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_decumulation_strategy_demo_output(),
+        help="Output synthetic decumulation strategy snapshot JSON path",
+    )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
     tax_documents_import_parser = tax_documents_subparsers.add_parser(
@@ -2542,6 +2635,60 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['emergency_reserve']['target_amount']} "
             f"{len(snapshot['asset_assignments'])} assets, "
             f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "decumulation"
+        and args.planning_decumulation_command == "build"
+    ):
+        try:
+            snapshot = build_decumulation_strategy(
+                args.input,
+                args.output,
+                net_worth_snapshot_path=args.net_worth_snapshot,
+                liquidity_plan_snapshot_path=args.liquidity_plan_snapshot,
+                pension_income_snapshot_path=args.pension_income_snapshot,
+                rita_options_snapshot_path=args.rita_options_snapshot,
+            )
+        except DecumulationStrategyError as exc:
+            print(f"planning decumulation: ERROR ({exc})")
+            return 1
+        print(
+            "planning decumulation: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['policy_count']} policies, "
+            f"best={snapshot['summary']['best_ranked_policy_id'] or 'n/a'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "decumulation"
+        and args.planning_decumulation_command == "demo"
+    ):
+        try:
+            snapshot = build_decumulation_strategy(
+                default_decumulation_policy_set_sample_input(),
+                args.output,
+                net_worth_snapshot_path=default_decumulation_sample_net_worth(),
+                liquidity_plan_snapshot_path=default_decumulation_sample_liquidity_plan(),
+                pension_income_snapshot_path=default_decumulation_sample_pension_income(),
+                rita_options_snapshot_path=default_decumulation_sample_rita_options(),
+            )
+        except DecumulationStrategyError as exc:
+            print(f"planning decumulation demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning decumulation demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['policy_count']} policies, "
+            f"best={snapshot['summary']['best_ranked_policy_id'] or 'n/a'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )
         return 0

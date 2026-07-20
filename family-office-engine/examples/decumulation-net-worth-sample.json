@@ -1,0 +1,36 @@
+{
+  "components": [
+    {
+      "asset_class": "cash",
+      "currency": "EUR",
+      "id": "asset_cash",
+      "label": "Synthetic cash buffer",
+      "type": "asset",
+      "value": "30000.00"
+    },
+    {
+      "asset_class": "brokerage",
+      "currency": "EUR",
+      "id": "asset_brokerage",
+      "label": "Synthetic taxable brokerage",
+      "type": "asset",
+      "value": "220000.00"
+    },
+    {
+      "asset_class": "real_estate",
+      "currency": "EUR",
+      "id": "asset_family_home",
+      "label": "Synthetic family home",
+      "type": "asset",
+      "value": "250000.00"
+    }
+  ],
+  "data_gaps": [],
+  "record_type": "NetWorthSnapshot",
+  "schema_version": "net-worth/v1",
+  "totals": {
+    "assets": "500000.00",
+    "liabilities": "0.00",
+    "net_worth": "500000.00"
+  }
+}

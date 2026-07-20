@@ -1,0 +1,53 @@
+{
+  "as_of_date": "2026-07-20",
+  "base_currency": "EUR",
+  "current_age": 60,
+  "data_gaps": [],
+  "household_id": "synthetic_household",
+  "policies": [
+    {
+      "annual_return_sequence": [
+        "-0.08",
+        "0.02",
+        "0.03"
+      ],
+      "annual_spending_need": "36000.00",
+      "cash_buffer_target": "24000.00",
+      "end_age": 95,
+      "include_rita": true,
+      "label": "Bridge with RITA and brokerage first",
+      "pension_tax_rate": "0.20",
+      "policy_id": "bridge_rita",
+      "retirement_age": 62,
+      "rita_tax_rate": "0.15",
+      "withdrawal_order": [
+        "asset_brokerage",
+        "asset_cash"
+      ],
+      "withdrawal_tax_rate": "0.10"
+    },
+    {
+      "annual_return_sequence": [
+        "0.03",
+        "0.03",
+        "0.03"
+      ],
+      "annual_spending_need": "36000.00",
+      "cash_buffer_target": "30000.00",
+      "end_age": 90,
+      "include_rita": false,
+      "label": "Later retirement without RITA",
+      "pension_tax_rate": "0.20",
+      "policy_id": "later_no_rita",
+      "retirement_age": 67,
+      "rita_tax_rate": "0.15",
+      "withdrawal_order": [
+        "asset_cash",
+        "asset_brokerage"
+      ],
+      "withdrawal_tax_rate": "0.10"
+    }
+  ],
+  "record_type": "DecumulationPolicySet",
+  "schema_version": "decumulation-policy-set/v1"
+}

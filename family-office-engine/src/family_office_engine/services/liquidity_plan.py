@@ -285,6 +285,9 @@ def _assignment_for_component(
     if blocks_current_spending and "blocked_for_current_spending" not in reason_codes:
         reason_codes.append("blocked_for_current_spending")
 
+    if currency != base_currency:
+        bucket = "restricted"
+
     return {
         "asset_id": asset_id,
         "label": component.get("label") or asset_id,

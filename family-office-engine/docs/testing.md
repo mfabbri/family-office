@@ -554,7 +554,47 @@ Lo snapshot risultante viene scritto in:
 ..\family-office-workspace\snapshots\liquidity-plan.snapshot.json
 ```
 
-Il contratto `liquidity-plan/v1` assegna asset valorizzati a riserva, breve, medio, lungo termine e restricted usando net worth, asset availability e planning goals. I test coprono shortfall di riserva, asset bloccati per spese correnti, valuta estera senza conversione, concentrazione, hash stabile e input mancanti. Non vengono calcolati rendimenti, imposte, cambi valuta, ottimizzazioni, scoring o raccomandazioni.
+Il contratto `liquidity-plan/v1` assegna asset valorizzati a riserva, breve, medio, lungo termine e restricted usando net worth, asset availability e planning goals. I test coprono shortfall di riserva, asset bloccati per spese correnti, valuta estera senza conversione e senza funding della riserva, concentrazione, hash stabile e input mancanti. Non vengono calcolati rendimenti, imposte, cambi valuta, ottimizzazioni, scoring o raccomandazioni.
+
+## Decumulation Strategy
+
+Verifica contratto strategie di decumulo V4 con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_decumulation_strategy
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+fo planning decumulation build
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning decumulation build
+```
+
+Verifica demo sintetica senza ricordare path JSON:
+
+```text
+fo planning decumulation demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning decumulation demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\decumulation-strategy.snapshot.json
+```
+
+Il contratto `decumulation-strategy/v1` confronta policy dichiarate usando net worth, liquidity plan, pension income e RITA options. I test coprono piu' eta' di pensionamento, sequenza rendimenti, longevita', RITA si'/no, hash stabile e input mancanti. Non vengono calcolati fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
 
 Verifica riconciliazione documentale:
 

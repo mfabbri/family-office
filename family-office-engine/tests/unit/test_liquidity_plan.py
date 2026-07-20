@@ -60,6 +60,26 @@ class LiquidityPlanTest(unittest.TestCase):
             brokerage = next(asset for asset in result["asset_assignments"] if asset["asset_id"] == "asset_brokerage")
             self.assertTrue(brokerage["blocks_current_spending"])
 
+    def test_foreign_currency_immediate_asset_does_not_fund_reserve(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            net_worth = _net_worth()
+            net_worth["components"][0]["currency"] = "USD"
+
+            result = build_liquidity_plan(
+                _write_json(root / "liquidity-input.json", _input()),
+                root / "liquidity.json",
+                net_worth_snapshot_path=_write_json(root / "net-worth.json", net_worth),
+                asset_availability_snapshot_path=_write_json(root / "availability.json", _availability()),
+                planning_goals_snapshot_path=_write_json(root / "goals.json", _planning_goals()),
+            )
+
+            cash = next(asset for asset in result["asset_assignments"] if asset["asset_id"] == "asset_cash")
+            self.assertEqual(cash["bucket"], "restricted")
+            self.assertTrue(cash["blocks_current_spending"])
+            self.assertEqual(result["emergency_reserve"]["funded_amount"], "0.00")
+            self.assertEqual(result["emergency_reserve"]["shortfall"], "36000.00")
+
     def test_concentration_warning_uses_declared_threshold(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

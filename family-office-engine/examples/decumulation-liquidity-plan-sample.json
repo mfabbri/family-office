@@ -1,0 +1,41 @@
+{
+  "asset_assignments": [
+    {
+      "asset_id": "asset_cash",
+      "blocks_current_spending": false,
+      "bucket": "emergency_reserve",
+      "currency": "EUR",
+      "label": "Synthetic cash buffer",
+      "reason_codes": [
+        "immediate_liquidity"
+      ],
+      "value": "30000.00"
+    },
+    {
+      "asset_id": "asset_brokerage",
+      "blocks_current_spending": false,
+      "bucket": "medium_term",
+      "currency": "EUR",
+      "label": "Synthetic taxable brokerage",
+      "reason_codes": [
+        "liquidity_tier:short_term"
+      ],
+      "value": "220000.00"
+    },
+    {
+      "asset_id": "asset_family_home",
+      "blocks_current_spending": true,
+      "bucket": "restricted",
+      "currency": "EUR",
+      "label": "Synthetic family home",
+      "reason_codes": [
+        "illiquid"
+      ],
+      "value": "250000.00"
+    }
+  ],
+  "data_gaps": [],
+  "record_type": "LiquidityPlanSnapshot",
+  "schema_version": "liquidity-plan/v1",
+  "status": "complete"
+}
