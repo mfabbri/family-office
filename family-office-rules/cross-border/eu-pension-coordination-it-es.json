@@ -1,6 +1,6 @@
 {
   "schema_version": "eu-pension-coordination-rule-pack/v1",
-  "rule_pack_id": "eu.it-es.pension-coordination.v1",
+  "rule_pack_id": "eu.it-es.pension-coordination.2026.v2",
   "jurisdictions": [
     "IT",
     "ES",
@@ -13,7 +13,7 @@
       "source_id": "eurlex.reg-883-2004",
       "title": "Regulation (EC) No 883/2004 on the coordination of social security systems",
       "url": "https://eur-lex.europa.eu/eli/reg/2004/883/oj/eng",
-      "retrieved_on": "2026-07-16",
+      "retrieved_on": "2026-07-23",
       "provisions": [
         "Article 50",
         "Article 51",
@@ -25,10 +25,29 @@
       "source_id": "europa.your-europe.state-pensions-abroad",
       "title": "Your Europe, State pensions abroad",
       "url": "https://europa.eu/youreurope/citizens/work/retire-abroad/state-pensions-abroad/index_en.htm",
-      "retrieved_on": "2026-07-16",
+      "retrieved_on": "2026-07-23",
       "provisions": [
         "Eligibility periods",
         "How your pension is calculated"
+      ]
+    },
+    {
+      "source_id": "seg-social.jubilacion.requisitos",
+      "title": "Seguridad Social, Pension de jubilacion, requisitos",
+      "url": "https://prestaciones.seg-social.es/servicio/pension-jubilacion.html?categoria=jubilacion",
+      "retrieved_on": "2026-07-23",
+      "provisions": [
+        "Requisitos"
+      ]
+    },
+    {
+      "source_id": "seg-social.jubilacion.cuantia",
+      "title": "Seguridad Social, Prestaciones/Pensiones de Trabajadores, cuantia",
+      "url": "https://www.seg-social.es/wps/portal/wss/internet/Trabajadores/PrestacionesPensionesTrabajadores/10963/28393/28396/28475/177458",
+      "retrieved_on": "2026-07-23",
+      "provisions": [
+        "Base reguladora",
+        "Porcentaje"
       ]
     }
   ],
@@ -40,16 +59,52 @@
     "separate_payment_by_country": true
   },
   "required_inputs": [
-    "italian_pension_source",
-    "spanish_pension_source",
-    "italian_periods_normalized_months",
-    "spanish_periods_normalized_months"
+    "date_of_birth",
+    "retirement_date",
+    "recent_contribution_anchor_date",
+    "inps_history_status",
+    "future_assumptions_status",
+    "dated_insurance_periods",
+    "spanish_theoretical_gross_pension_with_spanish_only_provenance"
   ],
+  "spanish_ordinary_entitlement": {
+    "valid_from": "2026-01-01",
+    "valid_to": "2026-12-31",
+    "minimum_total_contribution_months": 180,
+    "specific_contribution_months_within_lookback": 24,
+    "specific_contribution_lookback_months": 180,
+    "ordinary_age_if_long_career": {
+      "years": 65,
+      "months": 0,
+      "minimum_contribution_months": 459
+    },
+    "standard_ordinary_age": {
+      "years": 66,
+      "months": 10
+    },
+    "totalization_applies_to_entitlement_only": true,
+    "recent_contribution_anchor_required": true,
+    "source_provision": "Seguridad Social jubilacion requisitos 2026"
+  },
+  "pro_rata_method": {
+    "legal_basis": "Regulation (EC) No 883/2004 Article 52",
+    "theoretical_amount_required": true,
+    "spanish_ratio_numerator": "non_overlapping_spanish_insurance_months",
+    "ratio_denominator": "non_overlapping_total_eu_insurance_months",
+    "rounding": {
+      "money_decimals": 2,
+      "ratio_decimals": 6,
+      "mode": "ROUND_HALF_UP"
+    },
+    "minimum_spanish_period_months_for_pro_rata": 12,
+    "no_foreign_bases_in_spanish_theoretical_amount": true
+  },
   "calculation_limits": [
     "Does not calculate Italian statutory pension from first principles.",
     "Does not create official P1 decisions.",
     "Does not calculate tax, net amounts, exchange rates or application procedures.",
-    "Pro-rata amounts require a national theoretical amount and normalized periods."
+    "Spanish pro-rata amounts require dated non-overlapping periods and an explicit Spanish theoretical amount.",
+    "Italian periods can be used for entitlement aggregation only, not as Spanish contribution bases."
   ],
   "limitations": [
     "Internal coordination dossier only; not an official INPS or Seguridad Social decision.",

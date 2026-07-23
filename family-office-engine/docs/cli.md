@@ -728,6 +728,176 @@ Default demo:
 
 Il comando produce `pension-contribution-options/v1` con deducibilita', beneficio fiscale stimato da aliquota marginale dichiarata, costo opportunita', liquidita' persa, vincoli e ranking tecnico. Non calcola IRPEF completa, rendimenti, matching contrattuale non dichiarato o raccomandazioni.
 
+## `fo planning tax-aware-portfolio build`
+
+Confronta opzioni esplicite di portafoglio al netto di costi e fiscalita' finanziaria:
+
+```text
+../family-office-workspace/snapshots/tax-aware-portfolio.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning tax-aware-portfolio build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning tax-aware-portfolio demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning tax-aware-portfolio demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/tax-aware-portfolio-input.json`
+- rule pack: `../family-office-rules/italy/2026/tax-aware-investment.json`
+- output: `../family-office-workspace/snapshots/tax-aware-portfolio.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/tax-aware-portfolio-input-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-tax-aware-portfolio.synthetic.snapshot.json`
+
+Il comando produce `tax-aware-portfolio/v1` con rendimento lordo esplicito, costi, imponibile realizzato, uso minusvalenze dichiarate, imposte 26%/12,5% secondo categoria documentata, bollo/IVAFE, fiscal drag, fiscalita' differita stimata e ranking tecnico. Non calcola rendimenti attesi, fiscalita' estera completa, dichiarazione, PIR, cripto-attivita' o raccomandazioni.
+
+## `fo planning it-es-pension-tax classify`
+
+Classifica il trattamento convenzionale Italia-Spagna degli stream pensionistici:
+
+```text
+../family-office-workspace/snapshots/it-es-pension-tax-classification.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning it-es-pension-tax classify
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning it-es-pension-tax demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning it-es-pension-tax demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/it-es-pension-tax-classification-input.json`
+- pension income: `../family-office-workspace/snapshots/pension-income.snapshot.json`
+- rule pack: `../family-office-rules/cross-border/it-es-pension-tax-classification.json`
+- output: `../family-office-workspace/snapshots/it-es-pension-tax-classification.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/it-es-pension-tax-classification-input-sample.json`
+- pension income sintetico: `examples/it-es-pension-income-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-it-es-pension-tax-classification.synthetic.snapshot.json`
+
+Il comando produce `it-es-pension-tax-classification/v1` con articolo convenzionale candidato, Stato con potesta' impositiva, ritenuta attesa qualitativa, documenti richiesti, warning e confidence. Non calcola netto, IRPEF, IRPF spagnola, credito per imposte estere, rimborsi o dichiarazione completa.
+
+## `fo planning spanish-pension-net build`
+
+Calcola un ponte lordo-netto per pensioni spagnole di residente fiscale italiano:
+
+```text
+../family-office-workspace/snapshots/spanish-pension-net-it-resident.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning spanish-pension-net build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning spanish-pension-net demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning spanish-pension-net demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/spanish-pension-net-it-resident-input.json`
+- pension income: `../family-office-workspace/snapshots/pension-income.snapshot.json`
+- classificazione: `../family-office-workspace/snapshots/it-es-pension-tax-classification.snapshot.json`
+- rule pack netto: `../family-office-rules/cross-border/spanish-pension-net-it-resident.json`
+- rule pack IRPEF: `../family-office-rules/italy/2026/irpef-national.json`
+- output: `../family-office-workspace/snapshots/spanish-pension-net-it-resident.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/spanish-pension-net-it-resident-input-sample.json`
+- pension income sintetico: `examples/it-es-pension-income-sample.json`
+- classificazione sintetica: `examples/spanish-pension-net-it-es-classification-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-spanish-pension-net-it-resident.synthetic.snapshot.json`
+
+Il comando produce `spanish-pension-net-it-resident/v1` con lordo, ritenuta spagnola dichiarata, IRPEF nazionale incrementale, credito art. 165 quando applicabile, netto, warning e confidence. Non calcola detrazioni, addizionali, acconti, rimborsi, imposte spagnole o dichiarazione completa.
+
+## `fo planning it-es-eu-pension build`
+
+Stima diritto pensionistico spagnolo in coordinamento UE e quota pro-rata:
+
+```text
+../family-office-workspace/snapshots/it-es-eu-pension-pro-rata.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning it-es-eu-pension build
+```
+
+Prepara una bozza sintetica nel workspace privato:
+
+```text
+fo planning it-es-eu-pension prepare
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning it-es-eu-pension demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning it-es-eu-pension demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/it-es-eu-pension-pro-rata-input.json`
+- draft prepare: `../family-office-workspace/planning/it-es-eu-pension-pro-rata-input.draft.json`
+- rule pack: `../family-office-rules/cross-border/eu-pension-coordination-it-es.json`
+- output: `../family-office-workspace/snapshots/it-es-eu-pension-pro-rata.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/it-es-eu-pension-pro-rata-input-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-it-es-eu-pension-pro-rata.synthetic.snapshot.json`
+
+Il comando produce `it-es-eu-pension-pro-rata/v1` con data nascita, scenario pensionamento, anchor del requisito recente, periodi IT/ES datati, mesi non sovrapposti, diritto spagnolo autonomo e totalizzato, importo teorico spagnolo esplicito con provenance solo spagnola, quota pro-rata, warning e data gaps. Non calcola pensione INPS normativa, fiscalita', netto, P1 ufficiale, basi spagnole da periodi italiani o contribuzione futura non dichiarata.
+
 ## `fo retirement simulate`
 
 Esegue la simulazione pensionamento deterministica.

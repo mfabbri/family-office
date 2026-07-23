@@ -1,0 +1,99 @@
+{
+  "schema_version": "tax-aware-investment-rule-pack/v1",
+  "rule_pack_id": "it.tax-aware-investment.2026.v1",
+  "jurisdiction": "IT",
+  "currency": "EUR",
+  "description": "Italian tax-aware investment planning baseline for tax year 2026.",
+  "status": "versioned_rule_not_advice",
+  "knowledge_refs": [
+    "family-office-knowledge/taxation/investment-tax-regimes-it.md"
+  ],
+  "source_refs": [
+    {
+      "source_id": "agenziaentrate.precompilata.plusvalenze-finanziarie-2026",
+      "title": "Agenzia Entrate, dichiarazione precompilata 2026, Plusvalenze di natura finanziaria",
+      "url": "https://infoprecompilata.agenziaentrate.gov.it/portale/semplificata-mod-plusvalenze-natura-finanziaria",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "agenziaentrate.precompilata.estero-cripto-2026",
+      "title": "Agenzia Entrate, dichiarazione precompilata 2026, Estero e cripto attivita'",
+      "url": "https://infoprecompilata.agenziaentrate.gov.it/portale/semplificata-mod-estero-e-cripto-attivit%C3%A0",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "mef.def.prassi-ivafe",
+      "title": "MEF, Documentazione economica e finanziaria, prassi IVAFE",
+      "url": "https://def.finanze.it/DocTribFrontend/getPrassiDetail.do?id=%7B8FDC5F14-47CD-43FB-A4CE-637D71401DE6%7D",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "senato.dossier-rendite-finanziarie",
+      "title": "Senato della Repubblica, dossier tassazione delle rendite finanziarie",
+      "url": "https://www.senato.it/show-doc?id=1363883&leg=19&part=dossier_dossier1-sezione_sezione13-h1_h13&tipodoc=DOSSIER",
+      "verified_on": "2026-07-23"
+    }
+  ],
+  "limitations": [
+    "Covers ordinary financial income/capital gains, qualified government instruments declared upstream, stamp duty and ordinary IVAFE for products financial assets.",
+    "Does not cover PIR, crypto-assets, qualified shareholdings, real-estate funds, foreign tax credits, full tax return preparation, foreign taxation, IVAFE blacklist uplift or current-account fixed/minimum cases.",
+    "Expected returns, turnover, costs, realized gains, unrealized gains and available loss carryforwards must be declared upstream.",
+    "OICR government-bond quota is not inferred; use an explicit government_qualified portion only when documented."
+  ],
+  "tax_rates": {
+    "ordinary_financial": "0.2600",
+    "government_qualified": "0.1250"
+  },
+  "wealth_taxes": {
+    "domestic_stamp_duty": {
+      "rate": "0.0020",
+      "applies_to_holding_location": "domestic_intermediary"
+    },
+    "foreign_ivafe": {
+      "rate": "0.0020",
+      "applies_to_holding_location": "foreign_intermediary"
+    }
+  },
+  "regimes": {
+    "dichiarativo": {
+      "requires_tax_return": true,
+      "requires_italian_tax_substitute": false,
+      "tax_timing": "realization",
+      "compatible_holding_locations": [
+        "domestic_intermediary",
+        "foreign_intermediary"
+      ]
+    },
+    "amministrato": {
+      "requires_tax_return": false,
+      "requires_italian_tax_substitute": true,
+      "tax_timing": "realization",
+      "compatible_holding_locations": [
+        "domestic_intermediary"
+      ]
+    },
+    "gestito": {
+      "requires_tax_return": false,
+      "requires_italian_tax_substitute": true,
+      "tax_timing": "annual_result",
+      "compatible_holding_locations": [
+        "domestic_intermediary"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "rule_id": "it.tax-aware-investment.baseline.2026",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "supported_tax_categories": [
+        "ordinary_financial",
+        "government_qualified"
+      ],
+      "supported_holding_locations": [
+        "domestic_intermediary",
+        "foreign_intermediary"
+      ]
+    }
+  ]
+}

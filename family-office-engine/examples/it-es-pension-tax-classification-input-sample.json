@@ -1,0 +1,31 @@
+{
+  "schema_version": "it-es-pension-tax-classification-input/v1",
+  "record_type": "ItEsPensionTaxClassificationInput",
+  "household_id": "synthetic_household",
+  "as_of_date": "2026-07-23",
+  "tax_year": 2026,
+  "recipient": {
+    "person_id": "person_self",
+    "fiscal_residence": "IT",
+    "nationalities": [
+      "IT"
+    ]
+  },
+  "stream_classifications": [
+    {
+      "stream_id": "spanish_public_pension",
+      "payer_country": "ES",
+      "service_sector": "private",
+      "payer_type": "social_security_institution",
+      "benefit_origin": "previous_private_employment"
+    },
+    {
+      "stream_id": "spanish_civil_service_pension",
+      "payer_country": "ES",
+      "service_sector": "public",
+      "payer_type": "state_or_local_authority",
+      "benefit_origin": "previous_public_service"
+    }
+  ],
+  "data_gaps": []
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": "spanish-pension-net-it-resident-rule-pack/v1",
+  "rule_pack_id": "it.spanish-pension-net-it-resident.2026.v1",
+  "jurisdiction": "IT",
+  "source_country": "ES",
+  "currency": "EUR",
+  "description": "Net Spanish pension flow for an Italian tax resident, using IT-ES classification and Italian national IRPEF for tax year 2026.",
+  "status": "versioned_rule_not_advice",
+  "knowledge_refs": [
+    "family-office-knowledge/international/spanish-pension-net-it-resident.md",
+    "family-office-knowledge/international/it-es-pension-tax-classification.md",
+    "family-office-knowledge/taxation/irpef.md"
+  ],
+  "source_refs": [
+    {
+      "source_id": "agenziaentrate.precompilata.lavoro-pensioni-esteri-2026",
+      "title": "Agenzia Entrate, dichiarazione precompilata 2026, lavoro dipendente e pensioni",
+      "url": "https://infoprecompilata.agenziaentrate.gov.it/portale/semplificata-mod-lavoro-dipendente-e-pensioni",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "agenziaentrate.precompilata.quadro-ce-2026",
+      "title": "Agenzia Entrate, dichiarazione precompilata 2026, Quadro CE",
+      "url": "https://infoprecompilata.agenziaentrate.gov.it/portale/quadro-ce",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "normattiva.dpr-1986-917.art165",
+      "title": "DPR 22 dicembre 1986, n. 917, articolo 165",
+      "url": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:presidente.repubblica:decreto:1986-12-22;917~art165!vig",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "mef.circolare-9e-2015.credito-estero",
+      "title": "MEF/Agenzia Entrate, circolare 9/E 2015, credito per imposte estere",
+      "url": "https://def.finanze.it/DocTribFrontend/getPrassiDetail.do?id=%7B8F43B1E3-7F72-4A17-8572-1F6905FC28F3%7D",
+      "verified_on": "2026-07-23"
+    }
+  ],
+  "limitations": [
+    "Calculates only a deterministic gross-to-net bridge for Spanish pension streams already classified by it-es-pension-tax-classification/v1.",
+    "Uses Italian national gross IRPEF brackets only; does not calculate deductions, regional/municipal surtaxes, advances, refunds, Spanish tax from rates or full return filing outcomes.",
+    "Foreign tax credit requires explicit definitive foreign tax and declared credit applicability; provisional or refundable withholding must become a data gap.",
+    "Optional new-resident pension regimes, Article 24-ter TUIR, and professional advice workflows are out of scope."
+  ],
+  "credit_method": {
+    "method_id": "it.tuir-art165.incremental-limit.v1",
+    "requires_definitive_foreign_tax": true,
+    "foreign_tax_credit_formula": "min(definitive_foreign_tax, italian_incremental_tax_on_foreign_pension, italian_tax_after_pension * foreign_income / total_taxable_income, declared_credit_capacity)",
+    "declared_credit_capacity_required": false
+  },
+  "rules": [
+    {
+      "rule_id": "it.spanish-pension-net-it-resident.2026",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "resident_country": "IT",
+      "source_country": "ES",
+      "supported_classification_schema": "it-es-pension-tax-classification/v1",
+      "italian_irpef_rule_pack_id": "it.irpef-national.2026.v1",
+      "taxable_when_taxing_power_country": "IT",
+      "exempt_when_taxing_power_country": "ES"
+    }
+  ]
+}

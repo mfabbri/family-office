@@ -468,6 +468,88 @@ Fixture:
 
 - `examples/pension-contribution-input-sample.json`
 
+## Tax-aware Portfolio
+
+Modulo:
+
+```text
+family_office_engine.services.tax_aware_portfolio
+```
+
+Funzione principale:
+
+- `build_tax_aware_portfolio(input_path, rule_pack_path, output_path)`: confronta opzioni esplicite di portafoglio e scrive `tax-aware-portfolio/v1`.
+
+`tax-aware-portfolio/v1` usa un rule pack versionato per aliquote finanziarie, bollo e IVAFE. Ogni opzione dichiara regime fiscale, minusvalenze compensabili e posizioni con valore, categoria fiscale, luogo di detenzione, rendimento lordo atteso esplicito, costi e turnover. Il servizio calcola rendimento lordo, costi, imponibile realizzato, offset minusvalenze, imposte, bollo/IVAFE, fiscal drag, stima della fiscalita' differita e rendimento netto.
+
+Regimi incompatibili con luogo di detenzione e categorie agevolate non documentate diventano vincoli o data gaps. Il servizio non calcola rendimenti attesi, rischio, dichiarazione completa, fiscalita' estera, PIR, cripto-attivita' o raccomandazioni.
+
+Fixture:
+
+- `examples/tax-aware-portfolio-input-sample.json`
+
+## IT-ES Pension Tax Classification
+
+Modulo:
+
+```text
+family_office_engine.services.it_es_pension_tax_classification
+```
+
+Funzione principale:
+
+- `classify_it_es_pension_tax(input_path, pension_income_snapshot_path, rule_pack_path, output_path)`: classifica stream pensionistici secondo la Convenzione Italia-Spagna e scrive `it-es-pension-tax-classification/v1`.
+
+`it-es-pension-tax-classification/v1` legge `pension-income/v1` e un input esplicito con residenza fiscale, nazionalita' e fatti di classificazione per stream. Il servizio distingue pensioni da precedente impiego privato, pensioni da servizio pubblico e l'eccezione per beneficiario residente/nazionale dello Stato di residenza. Ogni stream espone articolo convenzionale candidato, Stato con potesta' impositiva, ritenuta attesa in termini qualitativi, documenti richiesti, warning, confidence e data gaps.
+
+Il servizio non calcola ritenute effettive, IRPEF, IRPF spagnola, crediti per imposte estere, netto pensionistico, rimborsi o dichiarazione completa.
+
+Fixture:
+
+- `examples/it-es-pension-tax-classification-input-sample.json`
+- `examples/it-es-pension-income-sample.json`
+
+## Spanish Pension Net IT Resident
+
+Modulo:
+
+```text
+family_office_engine.services.spanish_pension_net_it_resident
+```
+
+Funzione principale:
+
+- `build_spanish_pension_net_it_resident(input_path, pension_income_snapshot_path, classification_snapshot_path, rule_pack_path, irpef_rule_pack_path, output_path)`: calcola un ponte lordo-netto per pensioni spagnole di residente fiscale italiano e scrive `spanish-pension-net-it-resident/v1`.
+
+`spanish-pension-net-it-resident/v1` legge `pension-income/v1`, `it-es-pension-tax-classification/v1`, input fiscale esplicito e rule pack IRPEF nazionale. Per pensioni imponibili in Italia calcola IRPEF nazionale incrementale su altri redditi imponibili dichiarati piu' pensione, eventuale credito art. 165 su imposte estere definitive e netto annuo. Per pensioni con potesta' impositiva spagnola esclusiva non applica IRPEF italiana e usa solo la ritenuta spagnola dichiarata.
+
+Il servizio non calcola detrazioni, addizionali, acconti, rimborsi, imposte spagnole da aliquote spagnole, regime art. 24-ter o dichiarazione completa.
+
+Fixture:
+
+- `examples/spanish-pension-net-it-resident-input-sample.json`
+- `examples/spanish-pension-net-it-es-classification-sample.json`
+
+## IT-ES EU Pension Pro-Rata
+
+Modulo:
+
+```text
+family_office_engine.services.it_es_eu_pension_pro_rata
+```
+
+Funzione principale:
+
+- `build_it_es_eu_pension_pro_rata(input_path, rule_pack_path, output_path)`: stima diritto spagnolo in coordinamento UE e scrive `it-es-eu-pension-pro-rata/v1`.
+
+`it-es-eu-pension-pro-rata/v1` legge periodi assicurativi IT/ES datati e un importo teorico spagnolo esplicito. Il servizio normalizza i mesi, conta una sola volta le sovrapposizioni nel denominatore UE, distingue diritto autonomo spagnolo e diritto per totalizzazione, quindi calcola la quota pro-rata spagnola da importo teorico e rapporto ES/UE.
+
+Il servizio non calcola pensione INPS normativa, P1 ufficiale, fiscalita', netto, basi spagnole da periodi italiani, Paesi diversi da Italia/Spagna o contribuzione futura non dichiarata.
+
+Fixture:
+
+- `examples/it-es-eu-pension-pro-rata-input-sample.json`
+
 ## Tax Reconciliation
 
 Modulo:

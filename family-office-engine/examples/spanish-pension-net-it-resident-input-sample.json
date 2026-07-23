@@ -1,0 +1,26 @@
+{
+  "schema_version": "spanish-pension-net-it-resident-input/v1",
+  "record_type": "SpanishPensionNetItResidentInput",
+  "household_id": "synthetic_household",
+  "as_of_date": "2026-07-23",
+  "tax_year": 2026,
+  "resident_country": "IT",
+  "other_italian_taxable_income": "30000.00",
+  "streams": [
+    {
+      "stream_id": "spanish_public_pension",
+      "gross_annual_amount": "21000.00",
+      "spanish_tax_withheld": "0.00",
+      "spanish_tax_definitive": false,
+      "foreign_tax_credit_applicable": false
+    },
+    {
+      "stream_id": "spanish_civil_service_pension",
+      "gross_annual_amount": "12600.00",
+      "spanish_tax_withheld": "1800.00",
+      "spanish_tax_definitive": true,
+      "foreign_tax_credit_applicable": false
+    }
+  ],
+  "data_gaps": []
+}

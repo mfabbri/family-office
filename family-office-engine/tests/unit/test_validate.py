@@ -1572,6 +1572,84 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(written["schema_version"], "pension-contribution-options/v1")
             self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.pension-contribution-deduction.2026.v1")
 
+    def test_main_planning_tax_aware_portfolio_demo_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "tax-aware-portfolio.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "tax-aware-portfolio",
+                        "demo",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn(
+                "planning tax-aware-portfolio demo: complete 3 options, best=foreign_declarative_low_turnover",
+                stdout.getvalue(),
+            )
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "tax-aware-portfolio/v1")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.tax-aware-investment.2026.v1")
+
+    def test_main_planning_it_es_pension_tax_demo_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "it-es-pension-tax-classification.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "it-es-pension-tax",
+                        "demo",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn(
+                "planning it-es-pension-tax demo: complete 2/2 classified, 0 gaps, 0 warnings",
+                stdout.getvalue(),
+            )
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "it-es-pension-tax-classification/v1")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it-es.pension-tax-classification.2026.v1")
+
+    def test_main_planning_spanish_pension_net_demo_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "spanish-pension-net-it-resident.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "spanish-pension-net",
+                        "demo",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn(
+                "planning spanish-pension-net demo: complete 2/2 complete, net=24370.00, 0 gaps, 0 warnings",
+                stdout.getvalue(),
+            )
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "spanish-pension-net-it-resident/v1")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.spanish-pension-net-it-resident.2026.v1")
+
     def test_main_tax_reconcile_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

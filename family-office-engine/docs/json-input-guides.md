@@ -92,6 +92,47 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Ogni opzione dichiara `option_id`, `label`, `employee_contribution`, `employer_contribution`, `tfr_transfer`, `opportunity_cost_rate` e `horizon_years`.
 - Nota: `marginal_tax_rate`, liquidita', costo opportunita' e contributi sono input dichiarati; il motore non calcola IRPEF completa o rendimenti.
 
+## `tax-aware-portfolio-input/v1`
+
+- Default: `../family-office-workspace/planning/tax-aware-portfolio-input.json`.
+- Esempio: `examples/tax-aware-portfolio-input-sample.json`.
+- Comandi: `planning tax-aware-portfolio build`, `planning tax-aware-portfolio demo`.
+- Campi: `household_id`, `as_of_date`, `tax_year`, `jurisdiction`, `base_currency`, `options`, `data_gaps`.
+- Ogni opzione dichiara `option_id`, `label`, `tax_regime`, `available_loss_offset` e `positions`.
+- Ogni posizione dichiara `position_id`, `label`, `tax_category`, `tax_category_documented`, `holding_location`, `market_value`, `expected_gross_return_rate`, `annual_cost_rate` e `turnover_rate`.
+- Nota: categorie fiscali, rendimenti, costi, turnover e minusvalenze sono input espliciti; il motore applica solo il rule pack versionato e non stima classificazioni o rendimenti.
+
+## `it-es-pension-tax-classification-input/v1`
+
+- Default: `../family-office-workspace/planning/it-es-pension-tax-classification-input.json`.
+- Esempio: `examples/it-es-pension-tax-classification-input-sample.json`.
+- Comandi: `planning it-es-pension-tax classify`, `planning it-es-pension-tax demo`.
+- Campi: `household_id`, `as_of_date`, `tax_year`, `recipient`, `stream_classifications`, `data_gaps`.
+- `recipient` dichiara `person_id`, `fiscal_residence` e `nationalities`.
+- Ogni `stream_classifications` dichiara `stream_id`, `payer_country`, `service_sector`, `payer_type` e `benefit_origin`.
+- Nota: il servizio non deduce automaticamente se una pensione previdenziale pubblica estera deriva da impiego privato o servizio pubblico; senza classificazione esplicita produce gap.
+
+## `spanish-pension-net-it-resident-input/v1`
+
+- Default: `../family-office-workspace/planning/spanish-pension-net-it-resident-input.json`.
+- Esempio: `examples/spanish-pension-net-it-resident-input-sample.json`.
+- Comandi: `planning spanish-pension-net build`, `planning spanish-pension-net demo`.
+- Campi: `household_id`, `as_of_date`, `tax_year`, `resident_country`, `other_italian_taxable_income`, `streams`, `data_gaps`.
+- Ogni stream dichiara `stream_id`, `gross_annual_amount`, `spanish_tax_withheld`, `spanish_tax_definitive`, `foreign_tax_credit_applicable` e opzionalmente `declared_credit_capacity`.
+- Nota: altri redditi, lordo, ritenute e capienza credito sono input espliciti; il motore applica solo rule pack versionati e non calcola dichiarazione completa.
+
+## `it-es-eu-pension-pro-rata-input/v1`
+
+- Default: `../family-office-workspace/planning/it-es-eu-pension-pro-rata-input.json`.
+- Esempio: `examples/it-es-eu-pension-pro-rata-input-sample.json`.
+- Draft: `../family-office-workspace/planning/it-es-eu-pension-pro-rata-input.draft.json`.
+- Comandi: `planning it-es-eu-pension prepare`, `planning it-es-eu-pension build`, `planning it-es-eu-pension demo`.
+- Campi: `scenario`, `retirement_date`, `date_of_birth`, `recent_contribution_anchor_date`, `inps_history_status`, `future_assumptions_status`, `sources`, `insurance_periods`, `spanish_theoretical_pension`, `data_gaps`.
+- Ogni periodo dichiara `country`, `start_date`, `end_date`, `period_type` e `source_document`; i Paesi ammessi nel contratto sono `IT` ed `ES`.
+- I periodi devono coprire mesi interi. Periodi parziali o successivi allo scenario vanno risolti prima dell'input oppure dichiarati come gap.
+- `spanish_theoretical_pension` dichiara importo lordo mensile e/o annuo coerente, valuta, paghe annue, fonte, `source_country: ES` e `basis: spanish_only_bases`.
+- Nota: i periodi italiani servono solo per verificare il diritto per totalizzazione UE. Il comando non usa contributi italiani come basi spagnole e non deduce contribuzione futura.
+
 ## Scenario decisionale
 
 ### `decision-scenario-v2.json`

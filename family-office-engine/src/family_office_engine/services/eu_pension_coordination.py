@@ -250,13 +250,18 @@ def _status(italian: dict[str, Any], spanish: dict[str, Any], period_summary: di
 def _validate_source_refs(source_refs: Any) -> None:
     if not isinstance(source_refs, list) or not source_refs:
         raise EuPensionCoordinationError("EU pension coordination rule pack must contain source_refs")
-    allowed_prefixes = ("https://eur-lex.europa.eu/", "https://europa.eu/")
+    allowed_prefixes = (
+        "https://eur-lex.europa.eu/",
+        "https://europa.eu/",
+        "https://prestaciones.seg-social.es/",
+        "https://www.seg-social.es/",
+    )
     for source_ref in source_refs:
         for field in ("source_id", "title", "url", "retrieved_on", "provisions"):
             if field not in source_ref:
                 raise EuPensionCoordinationError(f"EU pension coordination source_ref missing field: {field}")
         if not str(source_ref["url"]).startswith(allowed_prefixes):
-            raise EuPensionCoordinationError("EU pension coordination source_ref must use an official EU URL")
+            raise EuPensionCoordinationError("EU pension coordination source_ref must use an official EU or Spanish URL")
         if not isinstance(source_ref["provisions"], list) or not source_ref["provisions"]:
             raise EuPensionCoordinationError("EU pension coordination source_ref provisions must be non-empty")
 

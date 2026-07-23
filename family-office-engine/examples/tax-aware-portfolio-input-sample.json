@@ -1,0 +1,80 @@
+{
+  "schema_version": "tax-aware-portfolio-input/v1",
+  "record_type": "TaxAwarePortfolioInput",
+  "household_id": "synthetic_household",
+  "as_of_date": "2026-07-23",
+  "tax_year": 2026,
+  "jurisdiction": "IT",
+  "base_currency": "EUR",
+  "options": [
+    {
+      "option_id": "domestic_admin_balanced",
+      "label": "Domestic amministrato balanced",
+      "tax_regime": "amministrato",
+      "available_loss_offset": "200.00",
+      "positions": [
+        {
+          "position_id": "ordinary_etf",
+          "label": "Ordinary equity ETF",
+          "tax_category": "ordinary_financial",
+          "tax_category_documented": true,
+          "holding_location": "domestic_intermediary",
+          "market_value": "60000.00",
+          "expected_gross_return_rate": "0.0500",
+          "annual_cost_rate": "0.0020",
+          "turnover_rate": "0.4000"
+        },
+        {
+          "position_id": "government_bonds",
+          "label": "Government bond sleeve",
+          "tax_category": "government_qualified",
+          "tax_category_documented": true,
+          "holding_location": "domestic_intermediary",
+          "market_value": "40000.00",
+          "expected_gross_return_rate": "0.0300",
+          "annual_cost_rate": "0.0010",
+          "turnover_rate": "1.0000"
+        }
+      ]
+    },
+    {
+      "option_id": "foreign_declarative_low_turnover",
+      "label": "Foreign dichiarativo low turnover",
+      "tax_regime": "dichiarativo",
+      "available_loss_offset": "0.00",
+      "positions": [
+        {
+          "position_id": "foreign_ordinary_etf",
+          "label": "Foreign ordinary ETF",
+          "tax_category": "ordinary_financial",
+          "tax_category_documented": true,
+          "holding_location": "foreign_intermediary",
+          "market_value": "100000.00",
+          "expected_gross_return_rate": "0.0500",
+          "annual_cost_rate": "0.0015",
+          "turnover_rate": "0.1000"
+        }
+      ]
+    },
+    {
+      "option_id": "foreign_admin_incompatible",
+      "label": "Foreign amministrato incompatible",
+      "tax_regime": "amministrato",
+      "available_loss_offset": "0.00",
+      "positions": [
+        {
+          "position_id": "foreign_brokerage",
+          "label": "Foreign brokerage",
+          "tax_category": "ordinary_financial",
+          "tax_category_documented": true,
+          "holding_location": "foreign_intermediary",
+          "market_value": "50000.00",
+          "expected_gross_return_rate": "0.0400",
+          "annual_cost_rate": "0.0010",
+          "turnover_rate": "0.5000"
+        }
+      ]
+    }
+  ],
+  "data_gaps": []
+}

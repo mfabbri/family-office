@@ -1,0 +1,102 @@
+{
+  "schema_version": "it-es-pension-tax-classification/v1",
+  "record_type": "ItEsPensionTaxClassificationSnapshot",
+  "status": "complete",
+  "source": {
+    "type": "synthetic"
+  },
+  "input": {
+    "household_id": "synthetic_household",
+    "as_of_date": "2026-07-23",
+    "tax_year": 2026,
+    "recipient": {
+      "person_id": "person_self",
+      "fiscal_residence": "IT",
+      "nationalities": [
+        "IT"
+      ]
+    }
+  },
+  "rule_pack": {
+    "rule_pack_id": "it-es.pension-tax-classification.2026.v1",
+    "schema_version": "it-es-pension-tax-classification-rule-pack/v1"
+  },
+  "classifications": [
+    {
+      "stream_id": "spanish_public_pension",
+      "classification_status": "classified",
+      "facts": {
+        "stream_id": "spanish_public_pension",
+        "country": "ES",
+        "payer": "Seguridad Social",
+        "benefit_type": "public_statutory_pension",
+        "payer_country": "ES",
+        "service_sector": "private",
+        "payer_type": "social_security_institution",
+        "benefit_origin": "previous_private_employment"
+      },
+      "treaty_article": "18",
+      "rule_id": "it-es.treaty.private-pension.article-18.2026",
+      "taxing_power": {
+        "type": "exclusive",
+        "country": "IT",
+        "basis": "recipient_fiscal_residence"
+      },
+      "withholding": {
+        "expected": false,
+        "country": "ES"
+      },
+      "required_documents": [
+        "fiscal_residence_certificate",
+        "pension_award_or_payer_statement",
+        "private_employment_evidence"
+      ],
+      "warnings": [],
+      "confidence": "medium",
+      "data_gaps": []
+    },
+    {
+      "stream_id": "spanish_civil_service_pension",
+      "classification_status": "classified",
+      "facts": {
+        "stream_id": "spanish_civil_service_pension",
+        "country": "ES",
+        "payer": "Spanish public administration",
+        "benefit_type": "public_service_pension",
+        "payer_country": "ES",
+        "service_sector": "public",
+        "payer_type": "state_or_local_authority",
+        "benefit_origin": "previous_public_service"
+      },
+      "treaty_article": "19.2",
+      "rule_id": "it-es.treaty.public-pension.article-19-2-source.2026",
+      "taxing_power": {
+        "type": "exclusive",
+        "country": "ES",
+        "basis": "public_service_payer_state"
+      },
+      "withholding": {
+        "expected": true,
+        "country": "ES"
+      },
+      "required_documents": [
+        "fiscal_residence_certificate",
+        "nationality_evidence",
+        "public_service_payer_statement"
+      ],
+      "warnings": [],
+      "confidence": "medium",
+      "data_gaps": []
+    }
+  ],
+  "summary": {
+    "stream_count": 2,
+    "classified_stream_count": 2,
+    "data_gap_count": 0,
+    "warning_count": 0
+  },
+  "data_gaps": [],
+  "reproducibility": {
+    "content_hash": "synthetic-it-es-classification"
+  }
+}

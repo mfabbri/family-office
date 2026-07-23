@@ -115,7 +115,7 @@ Esito: completato con knowledge note italiana, rule pack `it.pension-contributio
 
 ### V4.5 — Tax-aware investment planning
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Confrontare regimi amministrato, gestito e dichiarativo, fiscal drag, minusvalenze, bollo/IVAFE e strumenti compatibili con gli obiettivi.
 
@@ -125,9 +125,11 @@ Confrontare regimi amministrato, gestito e dichiarativo, fiscal drag, minusvalen
 - Test: 26%, 12,5% ove applicabile, bollo/IVAFE, costi e turnover.
 - Done quando: il rendimento confrontato è netto di imposte e costi espliciti.
 
+Esito: completato con knowledge note italiana, rule pack `it.tax-aware-investment.2026.v1`, contratto `tax-aware-portfolio/v1`, servizio deterministico, fixture sintetica, CLI build/demo e test su aliquota 26%, 12,5% documentata, bollo, IVAFE, costi, turnover, minusvalenze, regime incompatibile e anno non coperto. Il confronto usa solo rendimenti, costi, turnover, categorie fiscali e minusvalenze dichiarati nell'input; non calcola rendimenti attesi, fiscalita' estera completa, dichiarazione, PIR, cripto-attivita' o raccomandazioni.
+
 ### V4.6a — Italy–Spain pension tax classification
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Classificare la pensione spagnola e gli altri flussi previdenziali transfrontalieri secondo residenza fiscale, natura della prestazione, soggetto erogatore e convenzione applicabile.
 
@@ -137,9 +139,11 @@ Classificare la pensione spagnola e gli altri flussi previdenziali transfrontali
 - Test: residente italiano, cambio di residenza, pensione pubblica/privata ove rilevante, classificazione incerta.
 - Done quando: il sistema distingue il calcolo lordo previdenziale dal trattamento fiscale e non applica automaticamente una regola convenzionale senza classificazione.
 
+Esito: completato con knowledge note Convenzione Italia-Spagna, rule pack `it-es.pension-tax-classification.2026.v1`, contratto `it-es-pension-tax-classification/v1`, servizio deterministico, fixture sintetiche, CLI classify/demo e test su residente italiano, cambio di residenza, pensione pubblica, pensione privata, eccezione di nazionalita', classificazione incerta e anno non coperto. Il sistema classifica potesta' impositiva e ritenuta attesa qualitativa senza calcolare netto, IRPEF, IRPF spagnola, crediti d'imposta o dichiarazione completa.
+
 ### V4.6b — Net Spanish pension for an Italian tax resident
 
-**Stato:** `planned`
+**Stato:** `done`
 
 Calcolare il flusso netto atteso della pensione spagnola per un residente fiscale italiano, includendo ritenute, imposte italiane, credito per imposte estere quando applicabile e periodicità.
 
@@ -148,6 +152,8 @@ Calcolare il flusso netto atteso della pensione spagnola per un residente fiscal
 - Output: `spanish-pension-net-it-resident/v1` con lordo, imposte per Paese, credito, netto e confidence.
 - Test: assenza/presenza di ritenuta spagnola, credito capiente/non capiente, cambio di aliquote, dato incompleto.
 - Done quando: il pension income composer può usare un netto fiscale spiegabile senza confondere stima previdenziale e tassazione.
+
+Esito: completato con knowledge note su pensione spagnola netta per residente italiano, rule pack `it.spanish-pension-net-it-resident.2026.v1`, contratto `spanish-pension-net-it-resident/v1`, servizio deterministico, fixture sintetiche, CLI build/demo e test su assenza/presenza di ritenuta spagnola, credito capiente, credito limitato da capienza dichiarata, ritenuta non definitiva, classificazione mancante e anno non coperto. Il servizio usa pension income, classificazione IT-ES, input fiscale esplicito e rule pack IRPEF nazionale; non calcola detrazioni, addizionali, acconti, rimborsi, imposte spagnole da aliquote spagnole o dichiarazione completa.
 
 ### V4.6c — Italy–Spain foreign asset monitoring
 
@@ -172,6 +178,22 @@ Comporre pensione, attività finanziarie, monitoraggio e doppia imposizione in u
 - Output: `cross-border-it-es/v1` con flussi, obblighi, tax events, documenti mancanti, rischi e azioni operative.
 - Test: pensione con asset spagnoli, sola pensione, soli asset, cambio di residenza e classificazione bloccante.
 - Done quando: il piano distingue diritti previdenziali, tassazione del reddito e monitoraggio patrimoniale, indicando chiaramente le verifiche professionali richieste.
+
+### V4.6e — Italy–Spain EU pension entitlement and pro-rata estimate
+
+**Stato:** `done`
+
+Calcolare il diritto pensionistico spagnolo in regime UE e la quota spagnola pro-rata usando periodi assicurativi italiani e spagnoli datati, senza trasferire o fondere contributi.
+
+- Dipende da: V3.5c, V3.5d e fonti istituzionali UE/Spagna aggiornate.
+- Repository: `knowledge`, `rules`, `engine`, `workspace`.
+- Output: `it-es-eu-pension-pro-rata/v1` con diritto autonomo/totalizzato, periodi non sovrapposti, importo teorico spagnolo, quota pro-rata, assunzioni, gap e provenance.
+- Test: requisito autonomo, diritto per totalizzazione, sovrapposizioni IT-ES, requisito recente, dati futuri mancanti, quota pro-rata e regole/anno non coperti.
+- Done quando: la stima distingue diritto e importo, non usa i periodi italiani come basi spagnole e produce un blocco esplicito quando mancano cronologia INPS o assunzioni future.
+
+Motivazione di priorita': il simulatore pubblico spagnolo non consente la simulazione del caso misto dell'utente; questo incremento abilita l'uso corretto dei dati reali prima della composizione del dossier transfrontaliero.
+
+Esito: completato con knowledge note UE/Spagna verificata il 2026-07-23, rule pack `eu.it-es.pension-coordination.2026.v2` con requisiti spagnoli 2026 e metodo art. 52, contratto `it-es-eu-pension-pro-rata/v1`, servizio deterministico, fixture sintetica, CLI prepare/build/demo, guide API/CLI/input e test. Il sistema distingue diritto autonomo spagnolo e diritto per totalizzazione, verifica validita' temporale del rule pack, eta' ordinaria, anchor del requisito recente e completezza delle assunzioni, conta le sovrapposizioni una sola volta nel denominatore UE, calcola la quota spagnola pro-rata solo da importo teorico esplicito con provenance spagnola e produce gap bloccanti se mancano precondizioni. Non calcola pensione INPS normativa, fiscalita', netto, P1 ufficiale, basi spagnole da periodi italiani o contribuzione futura non dichiarata.
 
 ### V4.7 — Real-estate planning
 

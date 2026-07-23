@@ -630,6 +630,136 @@ Lo snapshot risultante viene scritto in:
 
 Il contratto `pension-contribution-options/v1` confronta opzioni esplicite con rule pack di deducibilita' previdenza complementare. I test coprono plafond ordinario, contributo datore, extra prima occupazione, TFR separato, vincolo liquidita', anno non coperto e CLI demo. Non vengono calcolati IRPEF completa, rendimenti, matching contrattuale non dichiarato, ottimizzazioni o raccomandazioni.
 
+## Tax-aware Portfolio
+
+Verifica contratto portafoglio fiscalmente consapevole V4 con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_tax_aware_portfolio
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+fo planning tax-aware-portfolio build
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning tax-aware-portfolio demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning tax-aware-portfolio demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\tax-aware-portfolio.snapshot.json
+```
+
+Il contratto `tax-aware-portfolio/v1` confronta opzioni esplicite con rule pack fiscale investimenti. I test coprono aliquota 26%, aliquota 12,5% documentata, costi, turnover, bollo, IVAFE, uso minusvalenze, regime incompatibile, anno non coperto e CLI demo. Non vengono calcolati rendimenti attesi, fiscalita' estera completa, dichiarazione, PIR, cripto-attivita', ottimizzazioni o raccomandazioni.
+
+## IT-ES Pension Tax Classification
+
+Verifica contratto classificazione fiscale pensioni Italia-Spagna V4 con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_it_es_pension_tax_classification
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+fo planning it-es-pension-tax classify
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning it-es-pension-tax demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning it-es-pension-tax demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\it-es-pension-tax-classification.snapshot.json
+```
+
+Il contratto `it-es-pension-tax-classification/v1` classifica stream pensionistici transfrontalieri usando pension income e rule pack Convenzione Italia-Spagna. I test coprono residente italiano, cambio di residenza, pensione pubblica, pensione privata, eccezione di nazionalita', classificazione incerta, anno non coperto e CLI demo. Non vengono calcolati ritenute effettive, IRPEF, IRPF spagnola, crediti d'imposta, netto pensionistico o dichiarazione completa.
+
+## Spanish Pension Net IT Resident
+
+Verifica contratto netto pensione spagnola per residente fiscale italiano V4 con fixture sintetiche:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_spanish_pension_net_it_resident
+```
+
+Verifica CLI sul workspace privato:
+
+```text
+fo planning spanish-pension-net build
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning spanish-pension-net demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning spanish-pension-net demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\spanish-pension-net-it-resident.snapshot.json
+```
+
+Il contratto `spanish-pension-net-it-resident/v1` calcola un ponte lordo-netto usando pension income, classificazione IT-ES, input fiscale esplicito, rule pack netto e IRPEF nazionale. I test coprono assenza/presenza ritenuta spagnola, credito capiente, credito limitato da capienza dichiarata, ritenuta non definitiva, classificazione mancante, anno non coperto e CLI demo. Non vengono calcolati detrazioni, addizionali, acconti, rimborsi, imposte spagnole da aliquote spagnole o dichiarazione completa.
+
+## IT-ES EU Pension Pro-Rata
+
+Verifica contratto diritto spagnolo UE e quota pro-rata V4:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_it_es_eu_pension_pro_rata
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning it-es-eu-pension demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning it-es-eu-pension demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\it-es-eu-pension-pro-rata.snapshot.json
+```
+
+Il contratto `it-es-eu-pension-pro-rata/v1` usa periodi assicurativi datati IT/ES e importo teorico spagnolo esplicito. I test coprono diritto autonomo, diritto per totalizzazione, sovrapposizioni, requisito recente, importo teorico mancante, fonti non ufficiali e quota pro-rata. Non vengono calcolati pensione INPS normativa, fiscalita', netto, P1 ufficiale, basi spagnole da periodi italiani o contribuzione futura non dichiarata.
+
 Verifica riconciliazione documentale:
 
 ```text

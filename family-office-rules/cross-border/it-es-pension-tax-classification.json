@@ -1,0 +1,115 @@
+{
+  "schema_version": "it-es-pension-tax-classification-rule-pack/v1",
+  "rule_pack_id": "it-es.pension-tax-classification.2026.v1",
+  "jurisdictions": [
+    "IT",
+    "ES"
+  ],
+  "currency": "EUR",
+  "description": "Italy-Spain treaty classification of pension income streams for tax year 2026.",
+  "status": "versioned_rule_not_advice",
+  "knowledge_refs": [
+    "family-office-knowledge/international/it-es-pension-tax-classification.md"
+  ],
+  "source_refs": [
+    {
+      "source_id": "mef.def.convenzione-it-es.art18",
+      "title": "MEF, Convenzione Italia-Spagna, articolo 18 Pensioni",
+      "url": "https://def.finanze.it/DocTribFrontend/getAttoNormativoDetail.do?ACTION=getArticolo&articolo=Articolo+18&codiceOrdinamento=200001800000000&id=%7B7913F6DF-FFD7-436F-9416-CC6F2E1C6962%7D",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "boe.convenio-es-it.articles-18-19",
+      "title": "BOE, Convenio Espana-Italia, articulos 18 y 19",
+      "url": "https://boe.es/buscar/act.php?id=BOE-A-1980-27501",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "agenziaentrate.fiscooggi.risposta-246-2019-spagna",
+      "title": "FiscoOggi, risposta Agenzia Entrate n. 246/2019, pensionato residente in Spagna",
+      "url": "https://www.fiscooggi.it/rubrica/normativa-e-prassi/articolo/se-pensionato-risiede-spagna-tasse-versate-si-recuperano-italia",
+      "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "agenciatributaria.italia-pensiones",
+      "title": "Agencia Tributaria, Italia, pensiones",
+      "url": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/folletos/folletos-residentes-rentas-extranjeras/italia.html",
+      "verified_on": "2026-07-23"
+    }
+  ],
+  "limitations": [
+    "Classifies taxing power only; does not calculate gross pension, withholding, IRPEF, Spanish IRPF, foreign tax credit, net income, refunds or full tax return outcomes.",
+    "Requires explicit fiscal residence, nationality when Article 19 exception may apply, payer country and public/private service nature.",
+    "Hybrid entities, special social-security agreements, professional funds with uncertain status and optional resident regimes require human review."
+  ],
+  "rules": [
+    {
+      "rule_id": "it-es.treaty.private-pension.article-18.2026",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "treaty_article": "18",
+      "classification": "private_previous_employment_pension",
+      "required_fields": [
+        "recipient_fiscal_residence",
+        "payer_country",
+        "service_sector"
+      ],
+      "service_sector": "private",
+      "taxing_power": {
+        "type": "exclusive_residence_state",
+        "withholding_expected": false
+      },
+      "required_documents": [
+        "fiscal_residence_certificate",
+        "pension_award_or_payer_statement",
+        "private_employment_evidence"
+      ]
+    },
+    {
+      "rule_id": "it-es.treaty.public-pension.article-19-2-source.2026",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "treaty_article": "19.2",
+      "classification": "public_service_pension_source_state",
+      "required_fields": [
+        "recipient_fiscal_residence",
+        "recipient_nationalities",
+        "payer_country",
+        "service_sector"
+      ],
+      "service_sector": "public",
+      "taxing_power": {
+        "type": "exclusive_payer_state",
+        "withholding_expected": true
+      },
+      "required_documents": [
+        "fiscal_residence_certificate",
+        "nationality_evidence",
+        "public_service_payer_statement"
+      ]
+    },
+    {
+      "rule_id": "it-es.treaty.public-pension.article-19-2-residence-national.2026",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "treaty_article": "19.2.b",
+      "classification": "public_service_pension_residence_state_national",
+      "required_fields": [
+        "recipient_fiscal_residence",
+        "recipient_nationalities",
+        "payer_country",
+        "service_sector"
+      ],
+      "service_sector": "public",
+      "taxing_power": {
+        "type": "exclusive_residence_state_when_resident_is_national",
+        "withholding_expected": false
+      },
+      "required_documents": [
+        "fiscal_residence_certificate",
+        "nationality_evidence",
+        "public_service_payer_statement"
+      ]
+    }
+  ]
+}

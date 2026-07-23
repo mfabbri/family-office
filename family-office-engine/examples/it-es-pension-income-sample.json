@@ -1,0 +1,66 @@
+{
+  "schema_version": "pension-income/v1",
+  "record_type": "PensionIncomeSnapshot",
+  "status": "complete",
+  "sources": {
+    "spanish_statutory_pension": "synthetic"
+  },
+  "income_streams": [
+    {
+      "stream_id": "spanish_public_pension",
+      "country": "ES",
+      "payer": "Seguridad Social",
+      "benefit_type": "public_statutory_pension",
+      "source_type": "internal_estimate",
+      "status": "estimated",
+      "start_date": "2040-01",
+      "periodicity": "annualized_recurring",
+      "gross": {
+        "monthly_amount": "1500.00",
+        "annual_amount": "21000.00",
+        "currency": "EUR",
+        "payments_per_year": 14
+      },
+      "net": {
+        "status": "not_calculated",
+        "data_gap_code": "net_tax_not_implemented"
+      },
+      "confidence": "medium",
+      "data_gaps": []
+    },
+    {
+      "stream_id": "spanish_civil_service_pension",
+      "country": "ES",
+      "payer": "Spanish public administration",
+      "benefit_type": "public_service_pension",
+      "source_type": "synthetic",
+      "status": "estimated",
+      "start_date": "2040-01",
+      "periodicity": "annualized_recurring",
+      "gross": {
+        "monthly_amount": "900.00",
+        "annual_amount": "12600.00",
+        "currency": "EUR",
+        "payments_per_year": 14
+      },
+      "net": {
+        "status": "not_calculated",
+        "data_gap_code": "net_tax_not_implemented"
+      },
+      "confidence": "low",
+      "data_gaps": []
+    }
+  ],
+  "summary": {
+    "stream_count": 2,
+    "gross_annual_recurring_total": "33600.00",
+    "gross_annual_recurring_total_currency": "EUR",
+    "gross_annual_recurring_total_included_stream_ids": [
+      "spanish_public_pension",
+      "spanish_civil_service_pension"
+    ],
+    "gross_annual_recurring_total_excluded_stream_ids": [],
+    "data_gap_count": 0
+  },
+  "data_gaps": []
+}

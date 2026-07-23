@@ -50,7 +50,7 @@ class EuPensionCoordinationTest(unittest.TestCase):
             path = Path(tmp_dir) / "rules.json"
             path.write_text(json.dumps(broken), encoding="utf-8")
 
-            with self.assertRaisesRegex(EuPensionCoordinationError, "official EU URL"):
+            with self.assertRaisesRegex(EuPensionCoordinationError, "official EU or Spanish URL"):
                 load_rule_pack(path)
 
     def _coordinate(self, inps: dict, spanish: dict, italian_months: int | None) -> dict:

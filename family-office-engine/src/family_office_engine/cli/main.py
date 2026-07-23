@@ -74,6 +74,10 @@ from family_office_engine.services.eu_pension_coordination import (
     EuPensionCoordinationError,
     coordinate_it_es_pensions,
 )
+from family_office_engine.services.it_es_eu_pension_pro_rata import (
+    ItEsEuPensionProRataError,
+    build_it_es_eu_pension_pro_rata,
+)
 from family_office_engine.services.pension_income import (
     PensionIncomeError,
     compose_pension_income,
@@ -122,6 +126,18 @@ from family_office_engine.services.decumulation_strategy import (
 from family_office_engine.services.pension_contribution_options import (
     PensionContributionOptionsError,
     build_pension_contribution_options,
+)
+from family_office_engine.services.tax_aware_portfolio import (
+    TaxAwarePortfolioError,
+    build_tax_aware_portfolio,
+)
+from family_office_engine.services.it_es_pension_tax_classification import (
+    ItEsPensionTaxClassificationError,
+    classify_it_es_pension_tax,
+)
+from family_office_engine.services.spanish_pension_net_it_resident import (
+    SpanishPensionNetItResidentError,
+    build_spanish_pension_net_it_resident,
 )
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
@@ -235,8 +251,36 @@ def default_eu_pension_coordination_rule_pack() -> Path:
     return resolve_repo("rules") / "cross-border" / "eu-pension-coordination-it-es.json"
 
 
+def default_it_es_pension_tax_classification_rule_pack() -> Path:
+    return resolve_repo("rules") / "cross-border" / "it-es-pension-tax-classification.json"
+
+
+def default_spanish_pension_net_it_resident_rule_pack() -> Path:
+    return resolve_repo("rules") / "cross-border" / "spanish-pension-net-it-resident.json"
+
+
 def default_eu_pension_coordination_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "eu-pension-coordination-it-es.snapshot.json"
+
+
+def default_it_es_eu_pension_pro_rata_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "it-es-eu-pension-pro-rata-input.json"
+
+
+def default_it_es_eu_pension_pro_rata_draft() -> Path:
+    return resolve_repo("workspace") / "planning" / "it-es-eu-pension-pro-rata-input.draft.json"
+
+
+def default_it_es_eu_pension_pro_rata_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "it-es-eu-pension-pro-rata-input-sample.json"
+
+
+def default_it_es_eu_pension_pro_rata_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "it-es-eu-pension-pro-rata.snapshot.json"
+
+
+def default_it_es_eu_pension_pro_rata_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-it-es-eu-pension-pro-rata.synthetic.snapshot.json"
 
 
 def default_pension_income_output() -> Path:
@@ -342,6 +386,10 @@ def default_italy_tax_rule_pack() -> Path:
 
 def default_pension_contribution_rule_pack() -> Path:
     return resolve_repo("rules") / "italy" / "2026" / "pension-contribution-deduction.json"
+
+
+def default_tax_aware_investment_rule_pack() -> Path:
+    return resolve_repo("rules") / "italy" / "2026" / "tax-aware-investment.json"
 
 
 def default_tax_calculation_output() -> Path:
@@ -496,6 +544,62 @@ def default_pension_contribution_output() -> Path:
 
 def default_pension_contribution_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-pension-contribution-options.synthetic.snapshot.json"
+
+
+def default_tax_aware_portfolio_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "tax-aware-portfolio-input.json"
+
+
+def default_tax_aware_portfolio_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "tax-aware-portfolio-input-sample.json"
+
+
+def default_tax_aware_portfolio_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "tax-aware-portfolio.snapshot.json"
+
+
+def default_tax_aware_portfolio_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-tax-aware-portfolio.synthetic.snapshot.json"
+
+
+def default_it_es_pension_tax_classification_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "it-es-pension-tax-classification-input.json"
+
+
+def default_it_es_pension_tax_classification_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "it-es-pension-tax-classification-input-sample.json"
+
+
+def default_it_es_pension_income_sample() -> Path:
+    return resolve_repo("engine") / "examples" / "it-es-pension-income-sample.json"
+
+
+def default_it_es_pension_tax_classification_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "it-es-pension-tax-classification.snapshot.json"
+
+
+def default_it_es_pension_tax_classification_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-it-es-pension-tax-classification.synthetic.snapshot.json"
+
+
+def default_spanish_pension_net_it_resident_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "spanish-pension-net-it-resident-input.json"
+
+
+def default_spanish_pension_net_it_resident_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "spanish-pension-net-it-resident-input-sample.json"
+
+
+def default_spanish_pension_net_it_resident_sample_classification() -> Path:
+    return resolve_repo("engine") / "examples" / "spanish-pension-net-it-es-classification-sample.json"
+
+
+def default_spanish_pension_net_it_resident_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "spanish-pension-net-it-resident.snapshot.json"
+
+
+def default_spanish_pension_net_it_resident_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-spanish-pension-net-it-resident.synthetic.snapshot.json"
 
 
 def default_decumulation_policy_set_sample_input() -> Path:
@@ -667,6 +771,25 @@ def prepare_planning_goals_input(draft_path: Path, input_path: Path, overwrite: 
         "status": "prepared",
         "draft_path": str(draft_path),
         "input_path": str(input_path),
+    }
+
+
+def prepare_it_es_eu_pension_pro_rata_input(template_path: Path, draft_path: Path, overwrite: bool = False) -> dict[str, str]:
+    if not template_path.exists():
+        raise ItEsEuPensionProRataError(f"IT-ES EU pension pro-rata template not found: {template_path}")
+    if draft_path.exists() and not overwrite:
+        raise ItEsEuPensionProRataError(
+            f"IT-ES EU pension pro-rata draft already exists: {draft_path}; use --overwrite to replace it"
+        )
+    try:
+        draft_path.parent.mkdir(parents=True, exist_ok=True)
+        draft_path.write_text(template_path.read_text(encoding="utf-8"), encoding="utf-8")
+    except OSError as exc:
+        raise ItEsEuPensionProRataError(f"Cannot prepare IT-ES EU pension pro-rata draft: {draft_path}") from exc
+    return {
+        "status": "prepared",
+        "template_path": str(template_path),
+        "draft_path": str(draft_path),
     }
 
 
@@ -1987,6 +2110,207 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_pension_contribution_demo_output(),
         help="Output synthetic pension contribution options snapshot JSON path",
     )
+    planning_tax_aware_portfolio_parser = planning_subparsers.add_parser(
+        "tax-aware-portfolio",
+        help="Compare tax-aware portfolio options",
+    )
+    planning_tax_aware_portfolio_subparsers = planning_tax_aware_portfolio_parser.add_subparsers(
+        dest="planning_tax_aware_portfolio_command"
+    )
+    planning_tax_aware_portfolio_build_parser = planning_tax_aware_portfolio_subparsers.add_parser(
+        "build",
+        help="Build tax-aware-portfolio/v1 from explicit input and rule pack",
+    )
+    planning_tax_aware_portfolio_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_tax_aware_portfolio_input(),
+        help="Input tax-aware portfolio JSON path",
+    )
+    planning_tax_aware_portfolio_build_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_tax_aware_investment_rule_pack(),
+        help="Input tax-aware investment rule pack JSON path",
+    )
+    planning_tax_aware_portfolio_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_tax_aware_portfolio_output(),
+        help="Output tax-aware portfolio snapshot JSON path",
+    )
+    planning_tax_aware_portfolio_demo_parser = planning_tax_aware_portfolio_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic tax-aware portfolio check with bundled examples",
+    )
+    planning_tax_aware_portfolio_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_tax_aware_portfolio_demo_output(),
+        help="Output synthetic tax-aware portfolio snapshot JSON path",
+    )
+    planning_it_es_pension_tax_parser = planning_subparsers.add_parser(
+        "it-es-pension-tax",
+        help="Classify Italy-Spain pension tax treaty treatment",
+    )
+    planning_it_es_pension_tax_subparsers = planning_it_es_pension_tax_parser.add_subparsers(
+        dest="planning_it_es_pension_tax_command"
+    )
+    planning_it_es_pension_tax_classify_parser = planning_it_es_pension_tax_subparsers.add_parser(
+        "classify",
+        help="Build it-es-pension-tax-classification/v1 from explicit stream facts",
+    )
+    planning_it_es_pension_tax_classify_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_it_es_pension_tax_classification_input(),
+        help="Input IT-ES pension tax classification JSON path",
+    )
+    planning_it_es_pension_tax_classify_parser.add_argument(
+        "--pension-income-snapshot",
+        type=Path,
+        default=default_pension_income_output(),
+        help="Input pension income snapshot JSON path",
+    )
+    planning_it_es_pension_tax_classify_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_it_es_pension_tax_classification_rule_pack(),
+        help="Input IT-ES pension tax classification rule pack JSON path",
+    )
+    planning_it_es_pension_tax_classify_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_it_es_pension_tax_classification_output(),
+        help="Output IT-ES pension tax classification snapshot JSON path",
+    )
+    planning_it_es_pension_tax_demo_parser = planning_it_es_pension_tax_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic IT-ES pension tax classification check with bundled examples",
+    )
+    planning_it_es_pension_tax_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_it_es_pension_tax_classification_demo_output(),
+        help="Output synthetic IT-ES pension tax classification snapshot JSON path",
+    )
+    planning_spanish_pension_net_parser = planning_subparsers.add_parser(
+        "spanish-pension-net",
+        help="Build net Spanish pension for an Italian tax resident",
+    )
+    planning_spanish_pension_net_subparsers = planning_spanish_pension_net_parser.add_subparsers(
+        dest="planning_spanish_pension_net_command"
+    )
+    planning_spanish_pension_net_build_parser = planning_spanish_pension_net_subparsers.add_parser(
+        "build",
+        help="Build spanish-pension-net-it-resident/v1 from explicit tax inputs",
+    )
+    planning_spanish_pension_net_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_spanish_pension_net_it_resident_input(),
+        help="Input Spanish pension net JSON path",
+    )
+    planning_spanish_pension_net_build_parser.add_argument(
+        "--pension-income-snapshot",
+        type=Path,
+        default=default_pension_income_output(),
+        help="Input pension income snapshot JSON path",
+    )
+    planning_spanish_pension_net_build_parser.add_argument(
+        "--classification-snapshot",
+        type=Path,
+        default=default_it_es_pension_tax_classification_output(),
+        help="Input IT-ES pension tax classification snapshot JSON path",
+    )
+    planning_spanish_pension_net_build_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_spanish_pension_net_it_resident_rule_pack(),
+        help="Input Spanish pension net rule pack JSON path",
+    )
+    planning_spanish_pension_net_build_parser.add_argument(
+        "--irpef-rule-pack",
+        type=Path,
+        default=default_italy_tax_rule_pack(),
+        help="Input Italian IRPEF rule pack JSON path",
+    )
+    planning_spanish_pension_net_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_spanish_pension_net_it_resident_output(),
+        help="Output Spanish pension net snapshot JSON path",
+    )
+    planning_spanish_pension_net_demo_parser = planning_spanish_pension_net_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic Spanish pension net check with bundled examples",
+    )
+    planning_spanish_pension_net_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_spanish_pension_net_it_resident_demo_output(),
+        help="Output synthetic Spanish pension net snapshot JSON path",
+    )
+    planning_it_es_eu_pension_parser = planning_subparsers.add_parser(
+        "it-es-eu-pension",
+        help="Estimate Spain EU entitlement and pro-rata pension share",
+    )
+    planning_it_es_eu_pension_subparsers = planning_it_es_eu_pension_parser.add_subparsers(
+        dest="planning_it_es_eu_pension_command"
+    )
+    planning_it_es_eu_pension_prepare_parser = planning_it_es_eu_pension_subparsers.add_parser(
+        "prepare",
+        help="Create a guided synthetic draft input in the private workspace",
+    )
+    planning_it_es_eu_pension_prepare_parser.add_argument(
+        "--template",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_sample_input(),
+        help="Template IT-ES EU pension pro-rata JSON path",
+    )
+    planning_it_es_eu_pension_prepare_parser.add_argument(
+        "--draft",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_draft(),
+        help="Output draft IT-ES EU pension pro-rata JSON path",
+    )
+    planning_it_es_eu_pension_prepare_parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing draft",
+    )
+    planning_it_es_eu_pension_build_parser = planning_it_es_eu_pension_subparsers.add_parser(
+        "build",
+        help="Build it-es-eu-pension-pro-rata/v1 from dated periods and explicit theoretical amount",
+    )
+    planning_it_es_eu_pension_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_input(),
+        help="Input IT-ES EU pension pro-rata JSON path",
+    )
+    planning_it_es_eu_pension_build_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_eu_pension_coordination_rule_pack(),
+        help="Input EU pension coordination rule pack JSON path",
+    )
+    planning_it_es_eu_pension_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_output(),
+        help="Output IT-ES EU pension pro-rata snapshot JSON path",
+    )
+    planning_it_es_eu_pension_demo_parser = planning_it_es_eu_pension_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic IT-ES EU pension pro-rata check with bundled examples",
+    )
+    planning_it_es_eu_pension_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_demo_output(),
+        help="Output synthetic IT-ES EU pension pro-rata snapshot JSON path",
+    )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
     tax_documents_import_parser = tax_documents_subparsers.add_parser(
@@ -3122,6 +3446,218 @@ def main(argv: list[str] | None = None) -> int:
             f"best={snapshot['summary']['best_option_id'] or 'n/a'}, "
             f"{snapshot['summary']['data_gap_count']} gaps, "
             f"{snapshot['summary']['constraint_count']} constraints "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "tax-aware-portfolio"
+        and args.planning_tax_aware_portfolio_command == "build"
+    ):
+        try:
+            snapshot = build_tax_aware_portfolio(args.input, args.rule_pack, args.output)
+        except TaxAwarePortfolioError as exc:
+            print(f"planning tax-aware-portfolio: ERROR ({exc})")
+            return 1
+        print(
+            "planning tax-aware-portfolio: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['option_count']} options, "
+            f"best={snapshot['summary']['best_option_id'] or 'n/a'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['constraint_count']} constraints "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "tax-aware-portfolio"
+        and args.planning_tax_aware_portfolio_command == "demo"
+    ):
+        try:
+            snapshot = build_tax_aware_portfolio(
+                default_tax_aware_portfolio_sample_input(),
+                default_tax_aware_investment_rule_pack(),
+                args.output,
+            )
+        except TaxAwarePortfolioError as exc:
+            print(f"planning tax-aware-portfolio demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning tax-aware-portfolio demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['option_count']} options, "
+            f"best={snapshot['summary']['best_option_id'] or 'n/a'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['constraint_count']} constraints "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "it-es-pension-tax"
+        and args.planning_it_es_pension_tax_command == "classify"
+    ):
+        try:
+            snapshot = classify_it_es_pension_tax(
+                args.input,
+                args.pension_income_snapshot,
+                args.rule_pack,
+                args.output,
+            )
+        except ItEsPensionTaxClassificationError as exc:
+            print(f"planning it-es-pension-tax: ERROR ({exc})")
+            return 1
+        print(
+            "planning it-es-pension-tax: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['classified_stream_count']}/{snapshot['summary']['stream_count']} classified, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['warning_count']} warnings "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "it-es-pension-tax"
+        and args.planning_it_es_pension_tax_command == "demo"
+    ):
+        try:
+            snapshot = classify_it_es_pension_tax(
+                default_it_es_pension_tax_classification_sample_input(),
+                default_it_es_pension_income_sample(),
+                default_it_es_pension_tax_classification_rule_pack(),
+                args.output,
+            )
+        except ItEsPensionTaxClassificationError as exc:
+            print(f"planning it-es-pension-tax demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning it-es-pension-tax demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['classified_stream_count']}/{snapshot['summary']['stream_count']} classified, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['warning_count']} warnings "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "spanish-pension-net"
+        and args.planning_spanish_pension_net_command == "build"
+    ):
+        try:
+            snapshot = build_spanish_pension_net_it_resident(
+                args.input,
+                args.pension_income_snapshot,
+                args.classification_snapshot,
+                args.rule_pack,
+                args.irpef_rule_pack,
+                args.output,
+            )
+        except SpanishPensionNetItResidentError as exc:
+            print(f"planning spanish-pension-net: ERROR ({exc})")
+            return 1
+        print(
+            "planning spanish-pension-net: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['complete_stream_count']}/{snapshot['summary']['stream_count']} complete, "
+            f"net={snapshot['summary']['net_annual_total'] or 'n/a'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['warning_count']} warnings "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "spanish-pension-net"
+        and args.planning_spanish_pension_net_command == "demo"
+    ):
+        try:
+            snapshot = build_spanish_pension_net_it_resident(
+                default_spanish_pension_net_it_resident_sample_input(),
+                default_it_es_pension_income_sample(),
+                default_spanish_pension_net_it_resident_sample_classification(),
+                default_spanish_pension_net_it_resident_rule_pack(),
+                default_italy_tax_rule_pack(),
+                args.output,
+            )
+        except SpanishPensionNetItResidentError as exc:
+            print(f"planning spanish-pension-net demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning spanish-pension-net demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['complete_stream_count']}/{snapshot['summary']['stream_count']} complete, "
+            f"net={snapshot['summary']['net_annual_total'] or 'n/a'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['warning_count']} warnings "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "it-es-eu-pension"
+        and args.planning_it_es_eu_pension_command == "prepare"
+    ):
+        try:
+            result = prepare_it_es_eu_pension_pro_rata_input(args.template, args.draft, args.overwrite)
+        except ItEsEuPensionProRataError as exc:
+            print(f"planning it-es-eu-pension prepare: ERROR ({exc})")
+            return 1
+        print(
+            "planning it-es-eu-pension prepare: prepared "
+            f"({result['draft_path']}; review it, then run `fo planning it-es-eu-pension build --input {result['draft_path']}`)"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "it-es-eu-pension"
+        and args.planning_it_es_eu_pension_command == "build"
+    ):
+        try:
+            snapshot = build_it_es_eu_pension_pro_rata(args.input, args.rule_pack, args.output)
+        except ItEsEuPensionProRataError as exc:
+            print(f"planning it-es-eu-pension: ERROR ({exc})")
+            return 1
+        print(
+            "planning it-es-eu-pension: "
+            f"{snapshot['status']} "
+            f"entitlement={snapshot['spanish_entitlement']['status']}, "
+            f"pro-rata={snapshot['spanish_pro_rata_pension']['status']}, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "it-es-eu-pension"
+        and args.planning_it_es_eu_pension_command == "demo"
+    ):
+        try:
+            snapshot = build_it_es_eu_pension_pro_rata(
+                default_it_es_eu_pension_pro_rata_sample_input(),
+                default_eu_pension_coordination_rule_pack(),
+                args.output,
+            )
+        except ItEsEuPensionProRataError as exc:
+            print(f"planning it-es-eu-pension demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning it-es-eu-pension demo: "
+            f"{snapshot['status']} "
+            f"entitlement={snapshot['spanish_entitlement']['status']}, "
+            f"pro-rata={snapshot['spanish_pro_rata_pension']['status']}, "
+            f"{len(snapshot['data_gaps'])} gaps "
             f"({args.output})"
         )
         return 0
