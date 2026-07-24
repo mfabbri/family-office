@@ -732,6 +732,90 @@ Lo snapshot risultante viene scritto in:
 
 Il contratto `spanish-pension-net-it-resident/v1` calcola un ponte lordo-netto usando pension income, classificazione IT-ES, input fiscale esplicito, rule pack netto e IRPEF nazionale. I test coprono assenza/presenza ritenuta spagnola, credito capiente, credito limitato da capienza dichiarata, ritenuta non definitiva, classificazione mancante, anno non coperto e CLI demo. Non vengono calcolati detrazioni, addizionali, acconti, rimborsi, imposte spagnole da aliquote spagnole o dichiarazione completa.
 
+## IT-ES Foreign Assets
+
+Verifica contratto monitoraggio asset esteri Italia-Spagna V4:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_it_es_foreign_assets
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning it-es-foreign-assets demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning it-es-foreign-assets demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\it-es-foreign-assets.snapshot.json
+```
+
+Il contratto `it-es-foreign-assets/v1` usa input esplicito e rule pack RW/IVAFE/IVIE. I test coprono conto, fondi, piano pensionistico, immobile, intermediario italiano documentato, dato non classificato e anno non coperto. Non vengono calcolati dichiarazione completa, redditi esteri, crediti esteri, fiscalita' spagnola, cripto-attivita' o raccomandazioni.
+
+## Cross-Border IT-ES Dossier
+
+Verifica dossier transfrontaliero Italia-Spagna V4:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_cross_border_it_es_dossier
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning cross-border-it-es demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning cross-border-it-es demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\cross-border-it-es.snapshot.json
+```
+
+Il contratto `cross-border-it-es/v1` compone snapshot deterministici di scenario pensionistico, pensione, fiscalita' pensionistica, quota pro-rata UE e asset spagnoli. I test coprono pensione con asset, sola pensione, soli asset, cambio di residenza, classificazione bloccante, gap annidati, `blocked_not_eligible`, mismatch di contesto, pension income senza contesto, scenario pensionistico sintetico rifiutato per household personali, fonte configurata mancante, vincolo privacy su output fuori workspace e assenza totale di fonti. Non vengono ricalcolati pensioni, imposte, crediti, valori patrimoniali, dichiarazioni o raccomandazioni.
+
+## Pension Scenario
+
+Verifica contratto assunzioni pensionistiche Italia-Spagna V4:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_pension_scenario
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning pension-scenario demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning pension-scenario demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\pension-scenario.snapshot.json
+```
+
+Il contratto `pension-scenario/v1` registra baseline, alternative, pensionamento, residenza, trasferimenti post-pensionamento, contributi futuri e provenance. I test coprono baseline Italia, trasferimento in Spagna, data trasferimento mancante, assunzioni contributive mancanti o contraddittorie, provenance mancante e rifiuto di fonti sintetiche per household personali. Non vengono calcolati pensioni, imposte, netto, diritto UE, pro-rata o raccomandazioni.
+
 ## IT-ES EU Pension Pro-Rata
 
 Verifica contratto diritto spagnolo UE e quota pro-rata V4:

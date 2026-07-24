@@ -530,6 +530,69 @@ Fixture:
 - `examples/spanish-pension-net-it-resident-input-sample.json`
 - `examples/spanish-pension-net-it-es-classification-sample.json`
 
+## IT-ES Foreign Assets
+
+Modulo:
+
+```text
+family_office_engine.services.it_es_foreign_assets
+```
+
+Funzione principale:
+
+- `build_it_es_foreign_assets(input_path, rule_pack_path, output_path)`: classifica attivita' spagnole detenute da residente fiscale italiano e scrive `it-es-foreign-assets/v1`.
+
+`it-es-foreign-assets/v1` legge input esplicito `it-es-foreign-assets-input/v1` e rule pack `it-es.foreign-asset-monitoring.2026.v2`. Il servizio copre conti/depositi spagnoli, prodotti finanziari, piani pensionistici esteri con classificazione strutturata e immobili esteri; produce obbligo RW, motivazione, categoria di monitoraggio, documenti richiesti, basi dichiarate, IVAFE/IVIE calcolate da valori, quote, giorni o mesi dichiarati, tax events, warning e data gaps.
+
+Intermediari italiani o sostituti d'imposta sono trattati come esenzione/area di review solo quando l'input documenta la condizione. Attivita' non classificate, valori mancanti, piano pensionistico non qualificato e anno non coperto diventano gap. Il servizio non prepara la dichiarazione, non assegna ogni codice RW, non calcola redditi esteri, crediti esteri, fiscalita' spagnola, cripto-attivita' o raccomandazioni.
+
+Fixture:
+
+- `examples/it-es-foreign-assets-input-sample.json`
+
+## Cross-Border IT-ES Dossier
+
+Modulo:
+
+```text
+family_office_engine.services.cross_border_it_es_dossier
+```
+
+Funzione principale:
+
+- `build_cross_border_it_es_dossier(output_path, pension_scenario_snapshot_path=None, pension_income_snapshot_path=None, pension_tax_classification_snapshot_path=None, spanish_pension_net_snapshot_path=None, eu_pension_pro_rata_snapshot_path=None, foreign_assets_snapshot_path=None)`: compone snapshot IT-ES deterministici e scrive `cross-border-it-es/v1`.
+
+`cross-border-it-es/v1` aggrega scenario pensionistico esplicito, pension income, classificazione fiscale pensione, netto pensione spagnola, quota pro-rata UE e monitoraggio asset esteri senza ricalcolare imposte, pensioni o valori patrimoniali. Il dossier separa assunzioni future, flussi pensionistici, diritti previdenziali, tassazione del reddito pensionistico, monitoraggio patrimoniale, tax events, documenti richiesti, rischi, azioni operative, provenance, rule pack/source refs/limitations disponibili e hash delle fonti.
+
+Snapshot mancanti o bloccati diventano gap o `blocked_source`; il dossier mantiene comunque le sezioni disponibili. Il servizio non prepara dichiarazioni, non calcola nuovi crediti d'imposta, non stima prestazioni, non ottimizza strategie e non produce raccomandazioni automatiche.
+
+Fixture:
+
+- `examples/cross-border-spanish-pension-net-sample.json`
+- `examples/cross-border-it-es-eu-pension-pro-rata-sample.json`
+- `examples/cross-border-it-es-foreign-assets-sample.json`
+
+## Pension Scenario
+
+Modulo:
+
+```text
+family_office_engine.services.pension_scenario
+```
+
+Funzione principale:
+
+- `build_pension_scenario(input_path, output_path)`: valida assunzioni pensionistiche Italia-Spagna esplicite e scrive `pension-scenario/v1`.
+
+`pension-scenario/v1` registra scenario selezionato, alternative, data di conferma, pensionamento, residenza fiscale iniziale, trasferimenti post-pensionamento, contributi futuri IT/ES e provenance. Le fixture sintetiche sono ammesse solo per household sintetici; per household personali il servizio le rifiuta.
+
+Il servizio non calcola pensioni, basi contributive, imposte, netto, diritto UE, pro-rata o raccomandazioni.
+
+Fixture:
+
+- `examples/pension-scenario-sample.json`
+- `examples/pension-scenario-snapshot-sample.json`
+
 ## IT-ES EU Pension Pro-Rata
 
 Modulo:

@@ -1,0 +1,121 @@
+{
+  "schema_version": "it-es-foreign-assets-input/v1",
+  "record_type": "ItEsForeignAssetsInput",
+  "household_id": "SYNTHETIC-HOUSEHOLD",
+  "as_of_date": "2026-12-31",
+  "tax_year": 2026,
+  "base_currency": "EUR",
+  "taxpayer": {
+    "person_id": "SYNTHETIC_PERSON",
+    "fiscal_residence": "IT"
+  },
+  "assets": [
+    {
+      "asset_id": "es_bank_account",
+      "label": "Synthetic Spanish current account",
+      "asset_type": "foreign_bank_account",
+      "jurisdiction": "ES",
+      "intermediary_residence": "ES",
+      "ownership_share": "1.0000",
+      "days_held": 365,
+      "period_end_value": "12000.00",
+      "max_value": "18000.00",
+      "average_balance": "6400.00",
+      "source_document_types": ["bank_statement", "year_end_balance", "average_balance_statement", "ownership_evidence"],
+      "source_documents": ["synthetic-bank-year-end-statement"],
+      "tax_events": [
+        {
+          "event_id": "bank_interest",
+          "event_type": "interest_income",
+          "amount": "24.00",
+          "documented": true
+        }
+      ]
+    },
+    {
+      "asset_id": "es_fund",
+      "label": "Synthetic Spanish fund",
+      "asset_type": "foreign_financial_product",
+      "jurisdiction": "ES",
+      "intermediary_residence": "ES",
+      "ownership_share": "1.0000",
+      "days_held": 365,
+      "period_end_value": "50000.00",
+      "source_document_types": ["broker_or_fund_statement", "year_end_value", "ownership_evidence"],
+      "source_documents": ["synthetic-fund-statement"]
+    },
+    {
+      "asset_id": "es_pension_plan",
+      "label": "Synthetic Spanish pension plan",
+      "asset_type": "foreign_pension_plan",
+      "jurisdiction": "ES",
+      "intermediary_residence": "ES",
+      "ownership_share": "1.0000",
+      "days_held": 365,
+      "period_end_value": "30000.00",
+      "classification": {
+        "outcome": "monitorable_financial_product",
+        "plan_nature": "voluntary_individual_pension_plan",
+        "source_ref": "synthetic-classification-memo",
+        "classified_on": "2026-12-31",
+        "valid_for_tax_year": true,
+        "documented": true
+      },
+      "source_document_types": ["pension_plan_statement", "tax_classification_memo", "year_end_value", "ownership_evidence"],
+      "source_documents": ["synthetic-pension-plan-statement", "synthetic-classification-memo"]
+    },
+    {
+      "asset_id": "es_property",
+      "label": "Synthetic Spanish real estate",
+      "asset_type": "foreign_real_estate",
+      "jurisdiction": "ES",
+      "intermediary_residence": "none",
+      "ownership_share": "0.5000",
+      "days_held": 365,
+      "months_held": 12,
+      "period_end_value": "160000.00",
+      "valuation_basis": "spanish_cadastral_or_tax_value",
+      "foreign_property_tax_credit": "420.00",
+      "source_document_types": ["title_or_deed", "cadastral_or_tax_value", "foreign_property_tax_receipt", "ownership_evidence"],
+      "source_documents": ["synthetic-title", "synthetic-cadastral-value"],
+      "tax_events": [
+        {
+          "event_id": "ibi",
+          "event_type": "foreign_property_tax_paid",
+          "amount": "420.00",
+          "documented": true
+        }
+      ]
+    },
+    {
+      "asset_id": "it_custody_spanish_fund",
+      "label": "Synthetic Spanish fund through Italian intermediary",
+      "asset_type": "foreign_financial_product",
+      "jurisdiction": "ES",
+      "intermediary_residence": "IT",
+      "italian_tax_substitute_documented": true,
+      "domestic_intermediary_evidence": {
+        "managed_or_administered_by_italian_intermediary": true,
+        "income_subject_to_italian_withholding_or_substitute_tax": true,
+        "intermediary_documented": true
+      },
+      "ownership_share": "1.0000",
+      "days_held": 365,
+      "period_end_value": "25000.00",
+      "source_document_types": ["broker_or_fund_statement", "year_end_value", "ownership_evidence"],
+      "source_documents": ["synthetic-italian-custody-statement"]
+    },
+    {
+      "asset_id": "unclassified_asset",
+      "label": "Synthetic unclassified Spanish holding",
+      "asset_type": "unknown",
+      "jurisdiction": "ES",
+      "intermediary_residence": "ES",
+      "ownership_share": "1.0000",
+      "days_held": 365,
+      "period_end_value": "7000.00",
+      "source_documents": []
+    }
+  ],
+  "data_gaps": []
+}

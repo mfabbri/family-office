@@ -1,0 +1,57 @@
+{
+  "schema_version": "spanish-pension-net-it-resident/v1",
+  "record_type": "SpanishPensionNetItResidentSnapshot",
+  "status": "complete",
+  "input": {
+    "household_id": "synthetic_household",
+    "as_of_date": "2026-07-23",
+    "tax_year": 2026,
+    "resident_country": "IT",
+    "other_italian_taxable_income": "30000.00"
+  },
+  "rule_pack": {
+    "rule_pack_id": "it.spanish-pension-net-it-resident.2026.v1",
+    "schema_version": "spanish-pension-net-it-resident-rule-pack/v1"
+  },
+  "streams": [
+    {
+      "stream_id": "spanish_public_pension",
+      "status": "complete",
+      "gross": {
+        "annual_amount": "21000.00",
+        "currency": "EUR"
+      },
+      "classification": {
+        "taxing_power_country": "IT",
+        "treaty_article": "18"
+      },
+      "spanish_tax": {
+        "withheld": "0.00",
+        "definitive": false
+      },
+      "italian_tax": {
+        "incremental_tax": "7350.00"
+      },
+      "foreign_tax_credit": {
+        "status": "not_applicable",
+        "amount": "0.00"
+      },
+      "net": {
+        "annual_amount": "13650.00",
+        "currency": "EUR"
+      },
+      "data_gaps": []
+    }
+  ],
+  "summary": {
+    "stream_count": 1,
+    "complete_stream_count": 1,
+    "net_annual_total": "13650.00",
+    "data_gap_count": 0,
+    "warning_count": 0
+  },
+  "data_gaps": [],
+  "reproducibility": {
+    "content_hash": "synthetic-spanish-pension-net"
+  }
+}

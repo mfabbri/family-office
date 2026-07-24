@@ -139,6 +139,18 @@ from family_office_engine.services.spanish_pension_net_it_resident import (
     SpanishPensionNetItResidentError,
     build_spanish_pension_net_it_resident,
 )
+from family_office_engine.services.it_es_foreign_assets import (
+    ItEsForeignAssetsError,
+    build_it_es_foreign_assets,
+)
+from family_office_engine.services.cross_border_it_es_dossier import (
+    CrossBorderItEsDossierError,
+    build_cross_border_it_es_dossier,
+)
+from family_office_engine.services.pension_scenario import (
+    PensionScenarioError,
+    build_pension_scenario,
+)
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -257,6 +269,38 @@ def default_it_es_pension_tax_classification_rule_pack() -> Path:
 
 def default_spanish_pension_net_it_resident_rule_pack() -> Path:
     return resolve_repo("rules") / "cross-border" / "spanish-pension-net-it-resident.json"
+
+
+def default_it_es_foreign_assets_rule_pack() -> Path:
+    return resolve_repo("rules") / "cross-border" / "it-es-foreign-asset-monitoring-v2.json"
+
+
+def default_cross_border_it_es_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cross-border-it-es.snapshot.json"
+
+
+def default_cross_border_it_es_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-cross-border-it-es.synthetic.snapshot.json"
+
+
+def default_pension_scenario_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "pension-scenario.json"
+
+
+def default_pension_scenario_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "pension-scenario-sample.json"
+
+
+def default_pension_scenario_sample_snapshot() -> Path:
+    return resolve_repo("engine") / "examples" / "pension-scenario-snapshot-sample.json"
+
+
+def default_pension_scenario_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "pension-scenario.snapshot.json"
+
+
+def default_pension_scenario_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-pension-scenario.synthetic.snapshot.json"
 
 
 def default_eu_pension_coordination_output() -> Path:
@@ -600,6 +644,34 @@ def default_spanish_pension_net_it_resident_output() -> Path:
 
 def default_spanish_pension_net_it_resident_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-spanish-pension-net-it-resident.synthetic.snapshot.json"
+
+
+def default_it_es_foreign_assets_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "it-es-foreign-assets-input.json"
+
+
+def default_it_es_foreign_assets_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "it-es-foreign-assets-input-sample.json"
+
+
+def default_it_es_foreign_assets_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "it-es-foreign-assets.snapshot.json"
+
+
+def default_it_es_foreign_assets_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-it-es-foreign-assets.synthetic.snapshot.json"
+
+
+def default_cross_border_it_es_sample_net() -> Path:
+    return resolve_repo("engine") / "examples" / "cross-border-spanish-pension-net-sample.json"
+
+
+def default_cross_border_it_es_sample_pro_rata() -> Path:
+    return resolve_repo("engine") / "examples" / "cross-border-it-es-eu-pension-pro-rata-sample.json"
+
+
+def default_cross_border_it_es_sample_foreign_assets() -> Path:
+    return resolve_repo("engine") / "examples" / "cross-border-it-es-foreign-assets-sample.json"
 
 
 def default_decumulation_policy_set_sample_input() -> Path:
@@ -2251,6 +2323,141 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_spanish_pension_net_it_resident_demo_output(),
         help="Output synthetic Spanish pension net snapshot JSON path",
     )
+    planning_it_es_foreign_assets_parser = planning_subparsers.add_parser(
+        "it-es-foreign-assets",
+        help="Build Italy-Spain RW, IVAFE and IVIE foreign asset monitoring",
+    )
+    planning_it_es_foreign_assets_subparsers = planning_it_es_foreign_assets_parser.add_subparsers(
+        dest="planning_it_es_foreign_assets_command"
+    )
+    planning_it_es_foreign_assets_build_parser = planning_it_es_foreign_assets_subparsers.add_parser(
+        "build",
+        help="Build it-es-foreign-assets/v1 from explicit asset facts and rule pack",
+    )
+    planning_it_es_foreign_assets_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_it_es_foreign_assets_input(),
+        help="Input IT-ES foreign assets JSON path",
+    )
+    planning_it_es_foreign_assets_build_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_it_es_foreign_assets_rule_pack(),
+        help="Input IT-ES foreign asset monitoring rule pack JSON path",
+    )
+    planning_it_es_foreign_assets_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_it_es_foreign_assets_output(),
+        help="Output IT-ES foreign assets snapshot JSON path",
+    )
+    planning_it_es_foreign_assets_demo_parser = planning_it_es_foreign_assets_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic IT-ES foreign assets check with bundled examples",
+    )
+    planning_it_es_foreign_assets_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_it_es_foreign_assets_demo_output(),
+        help="Output synthetic IT-ES foreign assets snapshot JSON path",
+    )
+    planning_cross_border_it_es_parser = planning_subparsers.add_parser(
+        "cross-border-it-es",
+        help="Compose Italy-Spain pension, tax and foreign asset dossier",
+    )
+    planning_cross_border_it_es_subparsers = planning_cross_border_it_es_parser.add_subparsers(
+        dest="planning_cross_border_it_es_command"
+    )
+    planning_cross_border_it_es_build_parser = planning_cross_border_it_es_subparsers.add_parser(
+        "build",
+        help="Build cross-border-it-es/v1 from deterministic source snapshots",
+    )
+    planning_cross_border_it_es_build_parser.add_argument(
+        "--pension-scenario-snapshot",
+        type=Path,
+        default=default_pension_scenario_output(),
+        help="Input pension-scenario/v1 snapshot JSON path",
+    )
+    planning_cross_border_it_es_build_parser.add_argument(
+        "--pension-income-snapshot",
+        type=Path,
+        default=default_pension_income_output(),
+        help="Input pension-income/v1 snapshot JSON path",
+    )
+    planning_cross_border_it_es_build_parser.add_argument(
+        "--pension-tax-classification-snapshot",
+        type=Path,
+        default=default_it_es_pension_tax_classification_output(),
+        help="Input IT-ES pension tax classification snapshot JSON path",
+    )
+    planning_cross_border_it_es_build_parser.add_argument(
+        "--spanish-pension-net-snapshot",
+        type=Path,
+        default=default_spanish_pension_net_it_resident_output(),
+        help="Input Spanish pension net snapshot JSON path",
+    )
+    planning_cross_border_it_es_build_parser.add_argument(
+        "--eu-pension-pro-rata-snapshot",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_output(),
+        help="Input IT-ES EU pension pro-rata snapshot JSON path",
+    )
+    planning_cross_border_it_es_build_parser.add_argument(
+        "--foreign-assets-snapshot",
+        type=Path,
+        default=default_it_es_foreign_assets_output(),
+        help="Input IT-ES foreign assets snapshot JSON path",
+    )
+    planning_cross_border_it_es_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_cross_border_it_es_output(),
+        help="Output IT-ES cross-border dossier snapshot JSON path",
+    )
+    planning_cross_border_it_es_demo_parser = planning_cross_border_it_es_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic IT-ES cross-border dossier check with bundled examples",
+    )
+    planning_cross_border_it_es_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_cross_border_it_es_demo_output(),
+        help="Output synthetic IT-ES cross-border dossier snapshot JSON path",
+    )
+    planning_pension_scenario_parser = planning_subparsers.add_parser(
+        "pension-scenario",
+        help="Build explicit multi-scenario retirement assumptions",
+    )
+    planning_pension_scenario_subparsers = planning_pension_scenario_parser.add_subparsers(
+        dest="planning_pension_scenario_command"
+    )
+    planning_pension_scenario_build_parser = planning_pension_scenario_subparsers.add_parser(
+        "build",
+        help="Build pension-scenario/v1 from explicit assumptions",
+    )
+    planning_pension_scenario_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_pension_scenario_input(),
+        help="Input pension scenario JSON path",
+    )
+    planning_pension_scenario_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_pension_scenario_output(),
+        help="Output pension scenario snapshot JSON path",
+    )
+    planning_pension_scenario_demo_parser = planning_pension_scenario_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic pension scenario check with bundled examples",
+    )
+    planning_pension_scenario_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_pension_scenario_demo_output(),
+        help="Output synthetic pension scenario snapshot JSON path",
+    )
     planning_it_es_eu_pension_parser = planning_subparsers.add_parser(
         "it-es-eu-pension",
         help="Estimate Spain EU entitlement and pro-rata pension share",
@@ -3598,6 +3805,150 @@ def main(argv: list[str] | None = None) -> int:
             f"net={snapshot['summary']['net_annual_total'] or 'n/a'}, "
             f"{snapshot['summary']['data_gap_count']} gaps, "
             f"{snapshot['summary']['warning_count']} warnings "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "it-es-foreign-assets"
+        and args.planning_it_es_foreign_assets_command == "build"
+    ):
+        try:
+            snapshot = build_it_es_foreign_assets(args.input, args.rule_pack, args.output)
+        except ItEsForeignAssetsError as exc:
+            print(f"planning it-es-foreign-assets: ERROR ({exc})")
+            return 1
+        print(
+            "planning it-es-foreign-assets: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['asset_count']} assets, "
+            f"{snapshot['summary']['rw_required_count']} RW-required, "
+            f"IVAFE={snapshot['summary']['ivafe_due']}, "
+            f"IVIE={snapshot['summary']['ivie_due']}, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "it-es-foreign-assets"
+        and args.planning_it_es_foreign_assets_command == "demo"
+    ):
+        try:
+            snapshot = build_it_es_foreign_assets(
+                default_it_es_foreign_assets_sample_input(),
+                default_it_es_foreign_assets_rule_pack(),
+                args.output,
+            )
+        except ItEsForeignAssetsError as exc:
+            print(f"planning it-es-foreign-assets demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning it-es-foreign-assets demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['asset_count']} assets, "
+            f"{snapshot['summary']['rw_required_count']} RW-required, "
+            f"IVAFE={snapshot['summary']['ivafe_due']}, "
+            f"IVIE={snapshot['summary']['ivie_due']}, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "cross-border-it-es"
+        and args.planning_cross_border_it_es_command == "build"
+    ):
+        try:
+            snapshot = build_cross_border_it_es_dossier(
+                args.output,
+                pension_scenario_snapshot_path=args.pension_scenario_snapshot,
+                pension_income_snapshot_path=args.pension_income_snapshot,
+                pension_tax_classification_snapshot_path=args.pension_tax_classification_snapshot,
+                spanish_pension_net_snapshot_path=args.spanish_pension_net_snapshot,
+                eu_pension_pro_rata_snapshot_path=args.eu_pension_pro_rata_snapshot,
+                foreign_assets_snapshot_path=args.foreign_assets_snapshot,
+            )
+        except CrossBorderItEsDossierError as exc:
+            print(f"planning cross-border-it-es: ERROR ({exc})")
+            return 1
+        print(
+            "planning cross-border-it-es: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['source_count']} sources, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['action_item_count']} actions "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "cross-border-it-es"
+        and args.planning_cross_border_it_es_command == "demo"
+    ):
+        try:
+            snapshot = build_cross_border_it_es_dossier(
+                args.output,
+                pension_scenario_snapshot_path=default_pension_scenario_sample_snapshot(),
+                pension_income_snapshot_path=default_it_es_pension_income_sample(),
+                pension_tax_classification_snapshot_path=default_spanish_pension_net_it_resident_sample_classification(),
+                spanish_pension_net_snapshot_path=default_cross_border_it_es_sample_net(),
+                eu_pension_pro_rata_snapshot_path=default_cross_border_it_es_sample_pro_rata(),
+                foreign_assets_snapshot_path=default_cross_border_it_es_sample_foreign_assets(),
+            )
+        except CrossBorderItEsDossierError as exc:
+            print(f"planning cross-border-it-es demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning cross-border-it-es demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['source_count']} sources, "
+            f"{snapshot['summary']['data_gap_count']} gaps, "
+            f"{snapshot['summary']['action_item_count']} actions "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "pension-scenario"
+        and args.planning_pension_scenario_command == "build"
+    ):
+        try:
+            snapshot = build_pension_scenario(args.input, args.output)
+        except PensionScenarioError as exc:
+            print(f"planning pension-scenario: ERROR ({exc})")
+            return 1
+        print(
+            "planning pension-scenario: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['scenario_count']} scenarios, "
+            f"selected={snapshot['selected_scenario_id']}, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "pension-scenario"
+        and args.planning_pension_scenario_command == "demo"
+    ):
+        try:
+            snapshot = build_pension_scenario(default_pension_scenario_sample_input(), args.output)
+        except PensionScenarioError as exc:
+            print(f"planning pension-scenario demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning pension-scenario demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['scenario_count']} scenarios, "
+            f"selected={snapshot['selected_scenario_id']}, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )
         return 0

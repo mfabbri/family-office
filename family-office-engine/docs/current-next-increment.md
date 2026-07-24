@@ -2,7 +2,7 @@
 
 ## ID e titolo
 
-V4.6c - Italy-Spain foreign asset monitoring.
+V4.7 - Real-estate planning.
 
 ## Stato
 
@@ -14,43 +14,45 @@ V4.6c - Italy-Spain foreign asset monitoring.
 
 ## Motivazione e dipendenze
 
-V4.6e e' completato. Il prossimo incremento selezionabile torna alla sequenza V4 pianificata: integrare attivita' finanziarie, piani pensionistici e immobili spagnoli con monitoraggio fiscale italiano, IVAFE/IVIE, tax events e documenti.
+V4.6g e' completato: il motore ora dispone di `pension-scenario/v1` per separare assunzioni pensionistiche personali da output previdenziali, fiscali e dossier IT-ES. L'audit cadence non richiede un nuovo audit prima di V4.7.
 
-L'incremento e' T4: tocca fiscalita' e monitoraggio patrimoniale transfrontaliero. Si applica il flusso `knowledge -> rules -> tests -> engine`.
+V4.7 dipende da V3.2 e V3.4, gia' completati secondo la roadmap. L'incremento e' T4 se introduce calcoli fiscali/immobiliari normativi; sara' T2 solo per modellazione puramente strutturale senza regole fiscali.
 
 ## Piano operativo
 
-Da definire all'avvio dell'implementazione V4.6c.
+1. Verificare contratti esistenti per ownership, asset availability, net worth e fiscalita' immobiliare gia' versionata.
+2. Definire input minimo `real-estate-plan/v1` per immobile, proprieta', locazione, costi, vacancy, vendita e liquidita'.
+3. Implementare il servizio deterministico minimo senza dedurre valori mancanti.
+4. Aggiungere fixture sintetiche e test su locazione, vacancy, vendita, costi e titolarita' del coniuge.
+5. Collegare CLI e documentazione soltanto per i comandi necessari.
+6. Eseguire test mirati e regression appropriata prima di segnare `done`.
 
 ## Perimetro previsto
 
-- Classificazione di conti, fondi, piani pensionistici e immobili spagnoli.
-- Rule pack per obblighi di monitoraggio, basi imponibili ed esenzioni motivate.
-- Contratto `it-es-foreign-assets/v1`, servizio deterministico e CLI.
-- Fixture sintetiche e test su conto, fondi, piano pensionistico, immobile, intermediario residente/non residente e dato non classificato.
+- Modellazione e confronto deterministico di alternative immobiliari.
+- Nessun LLM nei calcoli; valori patrimoniali, costi, imposte e ipotesi devono essere espliciti o derivare da rule pack deterministici.
+- Nessuna raccomandazione legale, fiscale o patrimoniale senza revisione professionale dichiarata.
 
 ## Input personali necessari
 
-- Rendiconti e dati di titolarita' per attivita' spagnole detenute o movimentate nel periodo d'imposta.
-- Classificazione dell'intermediario e paese di detenzione.
-- Valori di fine periodo, giorni di detenzione e movimenti rilevanti dove richiesti.
+Da definire prima dell'implementazione: immobili rilevanti, quota/titolarita', stato d'uso, canone o ipotesi di vacancy, costi ricorrenti, eventuale prezzo di vendita stimato e provenance. Usare fixture sintetiche finche' non esiste input personale nel workspace.
 
 ## Stato implementazione
 
-Non iniziato. Piano operativo da salvare prima di modificare knowledge, rules, engine o workspace.
+Pianificato. V4.6g e' stato completato con test mirati e regression completa; nessuno snapshot personale e' stato rigenerato per assenza di `family-office-workspace/planning/pension-scenario.json`.
 
 ## Criteri di completamento
 
-- Obblighi dichiarativi e impatti sono esposti senza dedurre esenzioni non documentate.
-- Titolarita', intermediario, giurisdizione e provenance restano trasparenti.
-- Nessun valore fiscale e' hard-coded nell'engine.
-- Test pertinenti e regression appropriata verdi; review indipendente delle fonti completata.
+- Il piano immobiliare confronta mantenimento, locazione e vendita su input espliciti.
+- Titolarita', liquidita', costi e vacancy sono tracciati con provenance e gap.
+- Le imposte sono calcolate solo da rule pack versionati oppure esposte come gap.
+- Test mirati e regression pertinente verdi.
 
 ## Incrementi successivi
 
-V4.6d - Italy-Spain cross-border dossier.
+V4.8 - Insurance and family protection.
 
 ## Rischi, esclusioni e blocker
 
-- Possibile blocker: dati patrimoniali esteri incompleti o classificazione dell'intermediario non documentata.
-- Fuori perimetro iniziale: dichiarazione completa, ottimizzazione fiscale, Paesi diversi da Italia/Spagna, strumenti non classificabili.
+- Possibile impatto fiscale e successorio: seguire `knowledge -> rules -> tests -> engine` se servono regole nuove.
+- Fuori perimetro iniziale: perizie ufficiali, atti notarili, dichiarazioni fiscali complete e raccomandazioni legali.

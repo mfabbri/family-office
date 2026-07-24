@@ -20,7 +20,10 @@ Questo file deve restare breve. È una mappa, non un manuale completo.
    - `family-office-engine/docs/roadmap/roadmap-index.md`;
    - `family-office-engine/docs/current-next-increment.md`;
    - la sola roadmap attiva.
-5. Consultare decision log, long-term roadmap o altre roadmap solo in presenza di una dipendenza concreta.
+5. Prima di selezionare o implementare il prossimo incremento eseguire
+   `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py`;
+   un errore blocca gli incrementi funzionali finche' la cadenza audit non e' ripristinata.
+6. Consultare decision log, long-term roadmap o altre roadmap solo in presenza di una dipendenza concreta.
 
 ## Playbook
 

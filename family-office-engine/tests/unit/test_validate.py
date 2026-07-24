@@ -1650,6 +1650,32 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(written["schema_version"], "spanish-pension-net-it-resident/v1")
             self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.spanish-pension-net-it-resident.2026.v1")
 
+    def test_main_planning_pension_scenario_demo_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "pension-scenario.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "pension-scenario",
+                        "demo",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn(
+                "planning pension-scenario demo: complete 2 scenarios, selected=baseline_it_retirement, 0 gaps",
+                stdout.getvalue(),
+            )
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "pension-scenario/v1")
+            self.assertEqual(written["selected_scenario"]["initial_fiscal_residence"], "IT")
+
     def test_main_tax_reconcile_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

@@ -1,0 +1,45 @@
+{
+  "schema_version": "it-es-eu-pension-pro-rata/v1",
+  "record_type": "ItEsEuPensionProRataEstimate",
+  "status": "complete",
+  "retirement_date": "2026-12",
+  "scenario": "ordinary",
+  "rule_pack": {
+    "rule_pack_id": "eu.it-es.pension-coordination.2026.v2",
+    "schema_version": "eu-pension-coordination-rule-pack/v1"
+  },
+  "sources": [
+    {
+      "source_id": "synthetic-it-es-periods",
+      "type": "synthetic_fixture"
+    }
+  ],
+  "spanish_entitlement": {
+    "status": "eligible_by_totalization",
+    "autonomous": {
+      "eligible": false,
+      "spanish_months": 60
+    },
+    "totalized": {
+      "eligible": true,
+      "total_eu_months": 240,
+      "aggregation_for_entitlement_only": true
+    }
+  },
+  "spanish_pro_rata_pension": {
+    "status": "calculated",
+    "amounts": {
+      "annual_gross_amount": "6000.00",
+      "monthly_gross_amount": "500.00",
+      "currency": "EUR",
+      "payments_per_year": 12
+    },
+    "ratio": {
+      "spain_months": 60,
+      "total_eu_non_overlapping_months": 240,
+      "value": "0.250000"
+    }
+  },
+  "data_gaps": [],
+  "warnings": []
+}

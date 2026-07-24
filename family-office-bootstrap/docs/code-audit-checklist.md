@@ -41,3 +41,11 @@ Aggiornare:
 ## Cadenza
 
 La cadenza si conta sugli incrementi funzionali completati, escludendo audit, patch puramente documentali e micro-incrementi creati solo per aggiornare la governance. Dopo 4 incrementi funzionali senza audit, il prossimo incremento selezionabile deve essere un audit prima di proseguire.
+
+La roadmap deve dichiarare il `Tipo` di ogni incremento. Verificare il gate con:
+
+```text
+python family-office-engine/src/family_office_engine/governance/roadmap_audit.py
+```
+
+Il controllo viene eseguito anche dalla regression unit dell'engine tramite `test_roadmap_audit_cadence.py`.

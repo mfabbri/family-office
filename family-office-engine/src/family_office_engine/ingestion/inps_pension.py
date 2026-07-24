@@ -17,6 +17,7 @@ def import_inps_pension(input_dir: Path, output_path: Path) -> dict[str, Any]:
     contribution_position = _merge_first_present(
         document.get("contribution_position", {}) for document in recognized
     )
+    contribution_periods = _merge_contribution_periods(recognized)
     data_gaps = _data_gaps(projection, contribution_position, recognized)
 
     snapshot = {
@@ -30,6 +31,7 @@ def import_inps_pension(input_dir: Path, output_path: Path) -> dict[str, Any]:
         "documents": documents,
         "projection": projection,
         "contribution_position": contribution_position,
+        "contribution_periods": contribution_periods,
         "data_gaps": data_gaps,
         "notes": "INPS pension PDFs parsed deterministically; no pension or tax calculation performed.",
     }
@@ -66,11 +68,13 @@ def parse_inps_pension_text(text: str) -> dict[str, Any]:
             "document_type": "unknown",
             "projection": {},
             "contribution_position": {},
+            "contribution_periods": [],
             "data_gaps": [],
         }
 
     projection = _parse_projection(normalized)
     contribution_position = _parse_contribution_position(normalized)
+    contribution_periods = _parse_contribution_periods(normalized)
     document_type = _document_type(normalized)
 
     return {
@@ -78,6 +82,7 @@ def parse_inps_pension_text(text: str) -> dict[str, Any]:
         "document_type": document_type,
         "projection": projection,
         "contribution_position": contribution_position,
+        "contribution_periods": contribution_periods,
         "data_gaps": _document_data_gaps(document_type, projection, contribution_position),
     }
 
@@ -94,6 +99,7 @@ def _load_inps_pension_pdf(path: Path) -> dict[str, Any]:
             "error": str(exc),
             "projection": {},
             "contribution_position": {},
+            "contribution_periods": [],
             "data_gaps": [{"code": "pdf_text_error", "message": str(exc)}],
         }
 
@@ -190,6 +196,79 @@ def _parse_contribution_position(text: str) -> dict[str, str]:
     return position
 
 
+def _parse_contribution_periods(text: str) -> list[dict[str, Any]]:
+    periods: list[dict[str, Any]] = []
+    periods.extend(_parse_ordinary_contribution_periods(text))
+    periods.extend(_parse_separate_management_periods(text))
+    return periods
+
+
+def _parse_ordinary_contribution_periods(text: str) -> list[dict[str, Any]]:
+    pattern = re.compile(
+        r"(?P<start>\d{2}/\d{2}/\d{4})\s+"
+        r"(?P<right_weeks>\d+)\s+settimane\s+"
+        r"(?P<calc_weeks>\d+)\s+settimane\s+"
+        r"€\s*(?P<income>[\d.]+,\d{2})\s+"
+        r"(?P<contribution_type>.+?)\s+"
+        r"(?P<end>\d{2}/\d{2}/\d{4})",
+        flags=re.IGNORECASE,
+    )
+    periods: list[dict[str, Any]] = []
+    for match in pattern.finditer(text):
+        contribution_type = match.group("contribution_type").strip()
+        right_weeks = int(match.group("right_weeks"))
+        period_status = _period_status(contribution_type, right_weeks)
+        periods.append(
+            {
+                "country": "IT",
+                "scheme": "FPLD",
+                "source_section": "Estratto Conto",
+                "start_date": _italian_date_to_iso(match.group("start")),
+                "end_date": _italian_date_to_iso(match.group("end")),
+                "contribution_type": contribution_type,
+                "weeks_for_right": right_weeks,
+                "weeks_for_calculation": int(match.group("calc_weeks")),
+                "income_amount": _italian_money_to_decimal(match.group("income")),
+                "currency": "EUR",
+                "period_status": period_status,
+            }
+        )
+    return periods
+
+
+def _parse_separate_management_periods(text: str) -> list[dict[str, Any]]:
+    section = text.split("Estratto Conto Gestione Separata", 1)
+    if len(section) < 2:
+        return []
+    pattern = re.compile(
+        r"(?P<year>\d{4})\s+"
+        r"(?P<weeks>\d+)\s+settimane\s+"
+        r"€\s*(?P<income>[\d.]+,\d{2})\s+"
+        r"(?P<contribution_type>[^\n]+)",
+        flags=re.IGNORECASE,
+    )
+    periods: list[dict[str, Any]] = []
+    for match in pattern.finditer(section[1]):
+        year = int(match.group("year"))
+        weeks = int(match.group("weeks"))
+        periods.append(
+            {
+                "country": "IT",
+                "scheme": "GESTIONE_SEPARATA",
+                "source_section": "Estratto Conto Gestione Separata",
+                "start_date": f"{year:04d}-01-01",
+                "end_date": f"{year:04d}-12-31",
+                "contribution_type": match.group("contribution_type").strip(),
+                "weeks_for_right": weeks,
+                "weeks_for_calculation": weeks,
+                "income_amount": _italian_money_to_decimal(match.group("income")),
+                "currency": "EUR",
+                "period_status": "usable" if weeks > 0 else "zero_weeks",
+            }
+        )
+    return periods
+
+
 def _document_data_gaps(
     document_type: str,
     projection: dict[str, str],
@@ -239,12 +318,49 @@ def _merge_first_present(sources: Any) -> dict[str, str]:
     return merged
 
 
+def _merge_contribution_periods(documents: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_key: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for document in documents:
+        source_document = document.get("filename")
+        for period in document.get("contribution_periods", []):
+            item = dict(period)
+            if source_document:
+                item["source_document"] = source_document
+            key = (
+                item.get("scheme"),
+                item.get("start_date"),
+                item.get("end_date"),
+                item.get("contribution_type"),
+                item.get("weeks_for_right"),
+                item.get("income_amount"),
+            )
+            by_key.setdefault(key, item)
+    return sorted(by_key.values(), key=lambda item: (item["start_date"], item["scheme"], item["contribution_type"]))
+
+
+def _period_status(contribution_type: str, weeks: int) -> str:
+    if weeks == 0:
+        return "zero_weeks"
+    if "teoric" in contribution_type.lower():
+        return "projected"
+    return "usable"
+
+
 def _search_date(text: str, pattern: str) -> str | None:
     value = _search_value(text, pattern)
     if value is None:
         return None
     day, month, year = value.split("/")
     return f"{year}-{month}-{day}"
+
+
+def _italian_date_to_iso(value: str) -> str:
+    day, month, year = value.split("/")
+    return f"{year}-{month}-{day}"
+
+
+def _italian_money_to_decimal(value: str) -> str:
+    return value.replace(".", "").replace(",", ".")
 
 
 def _search_decimal(text: str, pattern: str) -> str | None:

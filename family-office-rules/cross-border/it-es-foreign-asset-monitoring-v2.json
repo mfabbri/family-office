@@ -1,0 +1,121 @@
+{
+  "schema_version": "it-es-foreign-asset-monitoring-rule-pack/v2",
+  "rule_pack_id": "it-es.foreign-asset-monitoring.2026.v2",
+  "jurisdictions": ["IT", "ES"],
+  "currency": "EUR",
+  "description": "Italian RW, IVAFE and IVIE monitoring baseline for Spanish foreign assets held by an Italian tax resident in tax year 2026, corrected after independent T4 review.",
+  "status": "versioned_rule_not_advice",
+  "verified_on": "2026-07-24",
+  "knowledge_refs": ["family-office-knowledge/taxation/rw-ivafe.md"],
+  "source_refs": [
+    {
+      "source_id": "agenziaentrate.precompilata.quadro-rw-2026",
+      "title": "Agenzia Entrate, dichiarazione precompilata 2026, Quadro RW",
+      "url": "https://infoprecompilata.agenziaentrate.gov.it/portale/quadro-rw",
+      "verified_on": "2026-07-24"
+    },
+    {
+      "source_id": "agenziaentrate.precompilata.estero-cripto-2026",
+      "title": "Agenzia Entrate, dichiarazione precompilata 2026, Estero e cripto attivita'",
+      "url": "https://infoprecompilata.agenziaentrate.gov.it/portale/semplificata-mod-estero-e-cripto-attivit%C3%A0",
+      "verified_on": "2026-07-24"
+    },
+    {
+      "source_id": "camera.temi-tassazione-immobili-ivie-2026",
+      "title": "Camera dei deputati, Bonus edilizi e tassazione immobiliare, paragrafo IVIE",
+      "url": "https://temi.camera.it/temi/19_tl18_tassazione_immobili.html",
+      "verified_on": "2026-07-24"
+    },
+    {
+      "source_id": "normattiva.dl-167-1990.art4",
+      "title": "DL 28 giugno 1990, n. 167, articolo 4",
+      "url": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legge:1990-06-28;167~art4",
+      "verified_on": "2026-07-24"
+    },
+    {
+      "source_id": "mef.def.prassi-ivafe",
+      "title": "MEF, Documentazione economica e finanziaria, prassi IVAFE",
+      "url": "https://def.finanze.it/DocTribFrontend/getPrassiDetail.do?id=%7B8FDC5F14-47CD-43FB-A4CE-637D71401DE6%7D",
+      "verified_on": "2026-07-24"
+    }
+  ],
+  "limitations": [
+    "The 2026 web model pages can describe the declaration workflow for prior-year holdings; rule validity is tied to the underlying statutory/practice sources referenced in this pack.",
+    "Covers Spanish bank accounts/deposits, foreign financial products, explicitly classified foreign pension plans and foreign real estate for Italian resident individuals.",
+    "Does not prepare a tax return, assign every RW line code, calculate foreign income tax, handle crypto-assets, trusts, business assets, non-Spanish countries or complex beneficial ownership.",
+    "Domestic intermediary exclusions are applied only for financial assets and only when all documented intermediary conditions in this pack are satisfied.",
+    "Pension plans require a structured classification object with documented outcome; otherwise the engine must produce a data gap."
+  ],
+  "monitoring": {
+    "resident_country": "IT",
+    "source_country": "ES",
+    "bank_account_max_value_threshold": "15000.00",
+    "bank_account_aggregation_required_when_count_gt": 1,
+    "domestic_intermediary_exemption": {
+      "allowed_asset_types": ["foreign_bank_account", "foreign_financial_product", "foreign_pension_plan"],
+      "required_true_fields": ["managed_or_administered_by_italian_intermediary", "income_subject_to_italian_withholding_or_substitute_tax", "intermediary_documented"]
+    }
+  },
+  "wealth_taxes": {
+    "ivafe_bank_account": {
+      "tax_type": "IVAFE",
+      "method": "fixed",
+      "fixed_amount": "34.20",
+      "average_balance_threshold": "5000.00",
+      "period_fraction_basis": "days_held_over_365"
+    },
+    "ivafe_financial_product": {
+      "tax_type": "IVAFE",
+      "method": "proportional",
+      "rate": "0.0020",
+      "period_fraction_basis": "days_held_over_365"
+    },
+    "ivie_real_estate": {
+      "tax_type": "IVIE",
+      "method": "proportional",
+      "ordinary_rate": "0.0106",
+      "primary_residence_luxury_rate": "0.0040",
+      "primary_residence_luxury_deduction": "200.00",
+      "payment_threshold_before_share_period_and_credits": "200.00",
+      "period_fraction_basis": "months_held_over_12",
+      "month_count_rule": "count_month_when_possession_at_least_15_days"
+    }
+  },
+  "asset_type_rules": {
+    "foreign_bank_account": {
+      "rw_category": "foreign_bank_account_or_deposit",
+      "wealth_tax_rule": "ivafe_bank_account",
+      "required_value_fields": ["max_value", "average_balance"],
+      "required_documents": ["bank_statement", "year_end_balance", "average_balance_statement", "ownership_evidence"]
+    },
+    "foreign_financial_product": {
+      "rw_category": "foreign_financial_product",
+      "wealth_tax_rule": "ivafe_financial_product",
+      "required_value_fields": ["period_end_value"],
+      "required_documents": ["broker_or_fund_statement", "year_end_value", "ownership_evidence"]
+    },
+    "foreign_pension_plan": {
+      "rw_category": "foreign_pension_or_insurance_product",
+      "wealth_tax_rule": "ivafe_financial_product",
+      "requires_structured_classification": true,
+      "required_value_fields": ["period_end_value"],
+      "required_documents": ["pension_plan_statement", "tax_classification_memo", "year_end_value", "ownership_evidence"]
+    },
+    "foreign_real_estate": {
+      "rw_category": "foreign_real_estate",
+      "wealth_tax_rule": "ivie_real_estate",
+      "required_value_fields": ["period_end_value", "months_held"],
+      "required_documents": ["title_or_deed", "cadastral_or_tax_value", "foreign_property_tax_receipt", "ownership_evidence"]
+    }
+  },
+  "rules": [
+    {
+      "rule_id": "it-es.foreign-asset-monitoring.2026.v2",
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "taxpayer_residence": "IT",
+      "asset_jurisdiction": "ES",
+      "supported_asset_types": ["foreign_bank_account", "foreign_financial_product", "foreign_pension_plan", "foreign_real_estate"]
+    }
+  ]
+}

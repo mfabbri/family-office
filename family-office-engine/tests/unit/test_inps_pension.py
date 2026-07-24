@@ -31,6 +31,21 @@ Data elaborazione: 09/07/2026
 367 settimane Contributi utili ai fini della pensione:
 533 settimane Contributi utili in Gestione Separata:
 Estratto Conto
+Periodo
+Tipo contributoRetribuzione
+o RedditoMatricolaContributi utili alla Pensione
+Dal al Diritto al Calcolo Al
+15/04/2019 37 settimane 37 settimane € 75.063,00 Lavoro dipendente 31/12/2019 SYNTHETIC EMPLOYER
+01/01/2020 0 settimane 0 settimane € 494,00 Donazione sangue (int.) 31/12/2020 SYNTHETIC EMPLOYER
+01/01/2020 52 settimane 52 settimane € 100.950,00 Lavoro dipendente 31/12/2020 SYNTHETIC EMPLOYER
+01/01/2038 52 settimane 52 settimane € 100.000,00 Contribuzione teorica 31/12/2038 SYNTHETIC PROJECTION
+Estratto Conto Gestione Separata
+Periodo
+Tipo contributoRetribuzione
+o RedditoMatricolaContributi utili alla Pensione
+Anno al Diritto
+1998 22 settimane € 5.151,00 Collaboratore
+1999 43 settimane € 10.144,00 Collaboratore
 """
 
 
@@ -52,6 +67,15 @@ class InpsPensionTest(unittest.TestCase):
         self.assertEqual(result["document_type"], "current_contribution_position")
         self.assertEqual(result["contribution_position"]["pension_contribution_weeks"], "367")
         self.assertEqual(result["contribution_position"]["separate_management_weeks"], "533")
+        self.assertEqual(len(result["contribution_periods"]), 6)
+        self.assertEqual(result["contribution_periods"][0]["scheme"], "FPLD")
+        self.assertEqual(result["contribution_periods"][0]["start_date"], "2019-04-15")
+        self.assertEqual(result["contribution_periods"][0]["end_date"], "2019-12-31")
+        self.assertEqual(result["contribution_periods"][0]["weeks_for_right"], 37)
+        self.assertEqual(result["contribution_periods"][0]["income_amount"], "75063.00")
+        self.assertEqual(result["contribution_periods"][3]["period_status"], "projected")
+        self.assertEqual(result["contribution_periods"][-1]["scheme"], "GESTIONE_SEPARATA")
+        self.assertEqual(result["contribution_periods"][-1]["start_date"], "1999-01-01")
 
     def test_parse_non_inps_text_is_not_recognized(self):
         result = parse_inps_pension_text("Sintesi Posizione Individuale Fon.Te")
@@ -81,6 +105,8 @@ class InpsPensionTest(unittest.TestCase):
             self.assertEqual(written["extraction_status"], "extracted")
             self.assertEqual(written["projection"]["monthly_gross_pension"], "3562.00")
             self.assertEqual(written["contribution_position"]["pension_contribution_weeks"], "367")
+            self.assertEqual(len(written["contribution_periods"]), 6)
+            self.assertEqual(written["contribution_periods"][0]["source_document"], "situazione.pdf")
 
     def test_import_rejects_missing_directory(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

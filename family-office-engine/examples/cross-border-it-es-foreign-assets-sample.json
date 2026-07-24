@@ -1,0 +1,86 @@
+{
+  "schema_version": "it-es-foreign-assets/v1",
+  "record_type": "ItEsForeignAssetsSnapshot",
+  "status": "complete",
+  "input": {
+    "household_id": "synthetic_household",
+    "as_of_date": "2026-07-23",
+    "tax_year": 2026,
+    "base_currency": "EUR",
+    "taxpayer": {
+      "person_id": "person_self",
+      "fiscal_residence": "IT"
+    }
+  },
+  "rule_pack": {
+    "rule_pack_id": "it-es.foreign-asset-monitoring.2026.v2",
+    "schema_version": "it-es-foreign-asset-monitoring-rule-pack/v2",
+    "applied_rule_id": "it-es.foreign-asset-monitoring.2026.v2",
+    "source_refs": [
+      {
+        "source_id": "synthetic-rw-ivafe-ivie-source",
+        "title": "Synthetic RW IVAFE IVIE source"
+      }
+    ],
+    "limitations": ["Synthetic fixture for dossier composition tests."]
+  },
+  "assets": [
+    {
+      "asset_id": "es_fund",
+      "asset_type": "foreign_financial_product",
+      "jurisdiction": "ES",
+      "rw_monitoring": {
+        "required": true,
+        "reason": "foreign_financial_asset_subject_to_monitoring",
+        "category": "foreign_financial_product"
+      },
+      "wealth_tax": {
+        "tax_type": "IVAFE",
+        "method": "proportional",
+        "amount": "100.00",
+        "calculation_status": "calculated"
+      },
+      "required_documents": ["broker_or_fund_statement", "year_end_value", "ownership_evidence"],
+      "tax_events": [],
+      "data_gaps": []
+    },
+    {
+      "asset_id": "es_property",
+      "asset_type": "foreign_real_estate",
+      "jurisdiction": "ES",
+      "rw_monitoring": {
+        "required": true,
+        "reason": "foreign_real_estate_subject_to_monitoring",
+        "category": "foreign_real_estate"
+      },
+      "wealth_tax": {
+        "tax_type": "IVIE",
+        "method": "proportional",
+        "amount": "428.00",
+        "calculation_status": "calculated"
+      },
+      "required_documents": ["title_or_deed", "cadastral_or_tax_value", "foreign_property_tax_receipt", "ownership_evidence"],
+      "tax_events": [
+        {
+          "event_id": "ibi",
+          "event_type": "foreign_property_tax_paid",
+          "amount": "420.00",
+          "currency": "EUR",
+          "documented": true
+        }
+      ],
+      "data_gaps": []
+    }
+  ],
+  "totals": {
+    "ivafe_due": "100.00",
+    "ivie_due": "428.00",
+    "total_wealth_tax_due": "528.00"
+  },
+  "summary": {
+    "asset_count": 2,
+    "rw_required_count": 2,
+    "data_gap_count": 0
+  },
+  "data_gaps": []
+}

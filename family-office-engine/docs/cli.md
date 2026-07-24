@@ -852,6 +852,131 @@ Default demo:
 
 Il comando produce `spanish-pension-net-it-resident/v1` con lordo, ritenuta spagnola dichiarata, IRPEF nazionale incrementale, credito art. 165 quando applicabile, netto, warning e confidence. Non calcola detrazioni, addizionali, acconti, rimborsi, imposte spagnole o dichiarazione completa.
 
+## `fo planning it-es-foreign-assets build`
+
+Classifica attivita' spagnole di residente fiscale italiano ai fini RW, IVAFE e IVIE:
+
+```text
+../family-office-workspace/snapshots/it-es-foreign-assets.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning it-es-foreign-assets build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning it-es-foreign-assets demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning it-es-foreign-assets demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/it-es-foreign-assets-input.json`
+- rule pack: `../family-office-rules/cross-border/it-es-foreign-asset-monitoring-v2.json`
+- output: `../family-office-workspace/snapshots/it-es-foreign-assets.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/it-es-foreign-assets-input-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-it-es-foreign-assets.synthetic.snapshot.json`
+
+Il comando produce `it-es-foreign-assets/v1` con obbligo RW, categoria monitoraggio, documenti richiesti, IVAFE/IVIE calcolate da valori espliciti, tax events dichiarati, warning e data gaps. Non prepara la dichiarazione, non calcola imposte estere o redditi finanziari, non copre cripto-attivita' e non deduce esenzioni non documentate.
+
+## `fo planning cross-border-it-es build`
+
+Compone pensione, tassazione e monitoraggio patrimoniale Italia-Spagna:
+
+```text
+../family-office-workspace/snapshots/cross-border-it-es.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning cross-border-it-es build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning cross-border-it-es demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning cross-border-it-es demo
+```
+
+Default:
+
+- scenario pensionistico: `../family-office-workspace/snapshots/pension-scenario.snapshot.json`
+- pension income: `../family-office-workspace/snapshots/pension-income.snapshot.json`
+- classificazione pensione: `../family-office-workspace/snapshots/it-es-pension-tax-classification.snapshot.json`
+- netto pensione spagnola: `../family-office-workspace/snapshots/spanish-pension-net-it-resident.snapshot.json`
+- quota pro-rata UE: `../family-office-workspace/snapshots/it-es-eu-pension-pro-rata.snapshot.json`
+- asset esteri: `../family-office-workspace/snapshots/it-es-foreign-assets.snapshot.json`
+- output: `../family-office-workspace/snapshots/cross-border-it-es.snapshot.json`
+
+Default demo:
+
+- scenario pensionistico sintetico: `examples/pension-scenario-snapshot-sample.json`
+- pension income sintetico: `examples/it-es-pension-income-sample.json`
+- classificazione sintetica: `examples/spanish-pension-net-it-es-classification-sample.json`
+- netto sintetico: `examples/cross-border-spanish-pension-net-sample.json`
+- pro-rata sintetico: `examples/cross-border-it-es-eu-pension-pro-rata-sample.json`
+- asset sintetici: `examples/cross-border-it-es-foreign-assets-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-cross-border-it-es.synthetic.snapshot.json`
+
+Il comando produce `cross-border-it-es/v1` con scenario pensionistico selezionato, diritti previdenziali, tassazione pensionistica, monitoraggio asset, tax events, documenti richiesti, rischi e azioni operative. Non ricalcola pensioni, imposte, crediti, valori patrimoniali, dichiarazioni o raccomandazioni.
+
+## `fo planning pension-scenario build`
+
+Registra assunzioni pensionistiche Italia-Spagna esplicite:
+
+```text
+../family-office-workspace/snapshots/pension-scenario.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning pension-scenario build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning pension-scenario demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning pension-scenario demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/pension-scenario.json`
+- output: `../family-office-workspace/snapshots/pension-scenario.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/pension-scenario-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-pension-scenario.synthetic.snapshot.json`
+
+Il comando produce `pension-scenario/v1` con scenario selezionato, alternative, pensionamento, residenza iniziale, trasferimenti post-pensionamento, contributi futuri IT/ES, provenance e gap. Non calcola pensioni, basi contributive, imposte, netto, diritto UE, pro-rata o raccomandazioni.
+
 ## `fo planning it-es-eu-pension build`
 
 Stima diritto pensionistico spagnolo in coordinamento UE e quota pro-rata:

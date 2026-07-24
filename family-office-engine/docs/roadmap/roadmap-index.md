@@ -14,7 +14,7 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `planned` |
 | 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `planned` |
 
-La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `in_progress`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b e V4.6e sono completati. V4.6c e' il prossimo incremento pianificato; V4.6d resta dipendente da V4.6c.
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `in_progress`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f e V4.6g sono completati. V4.7 e' il prossimo incremento pianificato.
 
 `done_with_gaps` indica che la capability è disponibile ma alcuni formati o fonti reali restano da aggiungere tramite incrementi mirati. Non blocca la roadmap successiva se i gap non sono prerequisiti dell'incremento selezionato.
 
@@ -28,16 +28,24 @@ La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministic
 
 Lo stato non deve essere dedotto dai commit o dal codice: deve essere scritto nella roadmap.
 
+Ogni incremento deve inoltre dichiarare `**Tipo:**` con uno dei valori:
+
+- `functional`: introduce o modifica una capability di prodotto e conta nella cadenza audit;
+- `audit`: verifica periodica e azzera la cadenza quando passa a `done`;
+- `governance`: modifica soltanto policy o automazioni di governo;
+- `docs`: modifica soltanto documentazione o guide.
+
 ## Algoritmo di selezione
 
 1. Leggere `family-office-engine/docs/current-next-increment.md`.
-2. Se contiene uno stato `planned` o `in_progress`, continuare quell'incremento.
-3. Se lo stato è `blocked`, creare come incremento corrente il più piccolo lavoro necessario a rimuovere il blocco. Non saltare a una roadmap successiva.
-4. Se l'incremento corrente è `done`, aprire la prima roadmap non completata nell'ordine della tabella.
-5. Prima di selezionare il prossimo incremento funzionale, verificare la cadenza di code audit: dopo 4 incrementi funzionali completati senza audit, selezionare il micro-incremento di audit nella roadmap attiva. Se manca, crearlo con suffisso alfabetico senza rinumerare gli incrementi già tracciati.
-6. Selezionare il primo incremento con stato `planned` le cui dipendenze risultano `done` o `deferred` con motivazione compatibile.
-7. Salvare il piano concreto in `current-next-increment.md` prima di modificare codice, regole, knowledge o workspace.
-8. Al completamento, aggiornare nello stesso cambiamento:
+2. Eseguire `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py` dalla root del progetto. Un errore blocca la selezione di un incremento funzionale.
+3. Se contiene uno stato `planned` o `in_progress`, continuare quell'incremento.
+4. Se lo stato è `blocked`, creare come incremento corrente il più piccolo lavoro necessario a rimuovere il blocco. Non saltare a una roadmap successiva.
+5. Se l'incremento corrente è `done`, aprire la prima roadmap non completata nell'ordine della tabella.
+6. Prima di selezionare il prossimo incremento funzionale, verificare la cadenza di code audit: dopo 4 incrementi funzionali completati senza audit, selezionare il micro-incremento di audit nella roadmap attiva. Se manca, crearlo con suffisso alfabetico senza rinumerare gli incrementi già tracciati.
+7. Selezionare il primo incremento con stato `planned` le cui dipendenze risultano `done` o `deferred` con motivazione compatibile.
+8. Salvare il piano concreto in `current-next-increment.md` prima di modificare codice, regole, knowledge o workspace.
+9. Al completamento, aggiornare nello stesso cambiamento:
    - stato dell'incremento nella roadmap;
    - `current-next-increment.md`;
    - test e contratti impattati;

@@ -26,13 +26,14 @@ Se un documento manca, l'agente deve segnalarlo, creare un incremento documental
 
 Applicare integralmente l'algoritmo in `roadmap-index.md`:
 
-1. continuare l'incremento corrente se `planned` o `in_progress`;
-2. se `blocked`, risolvere il blocker con un micro-incremento abilitante;
-3. se `done`, selezionare la prima roadmap non completata;
-4. prima di scegliere il prossimo incremento funzionale, verificare la cadenza audit: dopo 4 incrementi funzionali completati senza audit, selezionare o creare il micro-incremento di code audit nella roadmap attiva;
-5. scegliere il primo incremento `planned` con dipendenze soddisfatte;
-6. non saltare a V5 per sostituire capacità deterministiche non implementate;
-7. non usare dati reali nei test del repository software.
+1. eseguire `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py` dalla root e fermare gli incrementi funzionali se fallisce;
+2. continuare l'incremento corrente se `planned` o `in_progress`;
+3. se `blocked`, risolvere il blocker con un micro-incremento abilitante;
+4. se `done`, selezionare la prima roadmap non completata;
+5. prima di scegliere il prossimo incremento funzionale, verificare la cadenza audit: dopo 4 incrementi funzionali completati senza audit, selezionare o creare il micro-incremento di code audit nella roadmap attiva;
+6. scegliere il primo incremento `planned` con dipendenze soddisfatte;
+7. non saltare a V5 per sostituire capacità deterministiche non implementate;
+8. non usare dati reali nei test del repository software.
 
 ## Piano da salvare
 

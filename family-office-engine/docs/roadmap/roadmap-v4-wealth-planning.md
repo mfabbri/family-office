@@ -17,6 +17,7 @@ Gli incrementi V4 devono mantenere semplice l'uso della CLI: preferire comandi c
 ### V4.1 — Goals and constraints model
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Formalizzare obiettivi, priorità, soglie minime, orizzonte, rischio, liquidità, eventi familiari e vincoli legali.
 
@@ -30,6 +31,7 @@ Esito: completato con contratto e snapshot `planning-goals/v1`, validatore deter
 ### V4.2 — Liquidity buckets and emergency reserve
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Dividere gli asset in riserva, breve, medio e lungo termine tenendo conto di vincoli, volatilità e date di disponibilità.
 
@@ -44,6 +46,7 @@ Esito: completato con contratto e snapshot `liquidity-plan/v1`, builder determin
 ### V4.2a — Code audit after liquidity plan
 
 **Stato:** `done`
+**Tipo:** `audit`
 
 Audit periodico dopo quattro o piu' incrementi funzionali completati dall'ultimo audit V3.10a.
 
@@ -58,6 +61,7 @@ Esito: audit completato sul perimetro `liquidity-plan/v1` con piano operativo, c
 ### V4.3 — Retirement decumulation strategies
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Confrontare ordine dei prelievi, cash buffer, ribilanciamento, RITA, prestazioni pensionistiche e uso degli asset imponibili.
 
@@ -72,6 +76,7 @@ Esito: completato con contratto e snapshot `decumulation-strategy/v1`, builder d
 ### V4.3a — CLI and JSON input guides
 
 **Stato:** `done`
+**Tipo:** `docs`
 
 Ridurre la compilazione manuale fragile documentando in modo operativo ogni JSON che l'utente deve compilare e una guida generale alle funzioni disponibili da CLI.
 
@@ -86,6 +91,7 @@ Esito: completato con guida generale CLI, mappa degli input JSON attivi, guida c
 ### V4.3b — Interactive JSON input wizard
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Ridurre ulteriormente la compilazione manuale dei JSON aggiungendo supporto CLI guidato da domande concrete, con salvataggio di draft validabili nel workspace.
 
@@ -102,6 +108,7 @@ Esito: completato con wizard CLI per `planning-goals/v1`, `liquidity-plan-input/
 ### V4.4 — Pension contribution optimizer
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Valutare contribuzioni future a previdenza complementare, TFR, deducibilità, liquidità persa e beneficio atteso.
 
@@ -116,6 +123,7 @@ Esito: completato con knowledge note italiana, rule pack `it.pension-contributio
 ### V4.5 — Tax-aware investment planning
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Confrontare regimi amministrato, gestito e dichiarativo, fiscal drag, minusvalenze, bollo/IVAFE e strumenti compatibili con gli obiettivi.
 
@@ -130,6 +138,7 @@ Esito: completato con knowledge note italiana, rule pack `it.tax-aware-investmen
 ### V4.6a — Italy–Spain pension tax classification
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Classificare la pensione spagnola e gli altri flussi previdenziali transfrontalieri secondo residenza fiscale, natura della prestazione, soggetto erogatore e convenzione applicabile.
 
@@ -144,6 +153,7 @@ Esito: completato con knowledge note Convenzione Italia-Spagna, rule pack `it-es
 ### V4.6b — Net Spanish pension for an Italian tax resident
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Calcolare il flusso netto atteso della pensione spagnola per un residente fiscale italiano, includendo ritenute, imposte italiane, credito per imposte estere quando applicabile e periodicità.
 
@@ -157,7 +167,8 @@ Esito: completato con knowledge note su pensione spagnola netta per residente it
 
 ### V4.6c — Italy–Spain foreign asset monitoring
 
-**Stato:** `planned`
+**Stato:** `done`
+**Tipo:** `functional`
 
 Integrare conti, fondi, piani pensionistici e immobili spagnoli con quadro RW, IVAFE/IVIE, tax events e relativi documenti.
 
@@ -167,9 +178,12 @@ Integrare conti, fondi, piani pensionistici e immobili spagnoli con quadro RW, I
 - Test: conto, fondi, piano pensionistico, immobile, intermediario residente/non residente e dato non classificato.
 - Done quando: lo scenario mostra obblighi dichiarativi e impatti senza occultare titolarità e senza dedurre esenzioni non documentate.
 
+Esito: completato con knowledge note RW/IVAFE/IVIE verificata il 2026-07-24, rule pack `it-es.foreign-asset-monitoring.2026.v2`, contratto `it-es-foreign-assets/v1`, servizio deterministico, fixture sintetica, CLI build/demo e test su conto, fondi, piano pensionistico, immobile, intermediario italiano documentato, dato non classificato, soglie aggregate conto, IVIE a mesi/soglia/credito, valuta, hash e anno non coperto. Il sistema espone obbligo RW, basi dichiarate, digest rule pack, regola applicata, IVAFE/IVIE, tax events, documenti richiesti, warning e gap; non prepara dichiarazioni, non assegna ogni codice RW, non calcola redditi esteri, credito estero non dichiarato, fiscalita' spagnola, cripto-attivita' o raccomandazioni.
+
 ### V4.6d — Italy–Spain cross-border dossier
 
-**Stato:** `planned`
+**Stato:** `done`
+**Tipo:** `functional`
 
 Comporre pensione, attività finanziarie, monitoraggio e doppia imposizione in un dossier transfrontaliero unico e verificabile.
 
@@ -179,9 +193,12 @@ Comporre pensione, attività finanziarie, monitoraggio e doppia imposizione in u
 - Test: pensione con asset spagnoli, sola pensione, soli asset, cambio di residenza e classificazione bloccante.
 - Done quando: il piano distingue diritti previdenziali, tassazione del reddito e monitoraggio patrimoniale, indicando chiaramente le verifiche professionali richieste.
 
+Esito: completato con contratto `cross-border-it-es/v1`, servizio deterministico, fixture sintetiche, CLI build/demo e test su pensione con asset, sola pensione, soli asset, cambio residenza, classificazione bloccante, gap annidati, `blocked_*`, mismatch di contesto, pension income senza contesto, provenance e vincolo privacy output. Il dossier compone flussi pensionistici, diritto/pro-rata UE, tassazione pensionistica, monitoraggio asset, tax events, documenti, rischi e azioni operative senza ricalcolare pensioni, imposte, crediti, valori patrimoniali, dichiarazioni o raccomandazioni.
+
 ### V4.6e — Italy–Spain EU pension entitlement and pro-rata estimate
 
 **Stato:** `done`
+**Tipo:** `functional`
 
 Calcolare il diritto pensionistico spagnolo in regime UE e la quota spagnola pro-rata usando periodi assicurativi italiani e spagnoli datati, senza trasferire o fondere contributi.
 
@@ -195,9 +212,45 @@ Motivazione di priorita': il simulatore pubblico spagnolo non consente la simula
 
 Esito: completato con knowledge note UE/Spagna verificata il 2026-07-23, rule pack `eu.it-es.pension-coordination.2026.v2` con requisiti spagnoli 2026 e metodo art. 52, contratto `it-es-eu-pension-pro-rata/v1`, servizio deterministico, fixture sintetica, CLI prepare/build/demo, guide API/CLI/input e test. Il sistema distingue diritto autonomo spagnolo e diritto per totalizzazione, verifica validita' temporale del rule pack, eta' ordinaria, anchor del requisito recente e completezza delle assunzioni, conta le sovrapposizioni una sola volta nel denominatore UE, calcola la quota spagnola pro-rata solo da importo teorico esplicito con provenance spagnola e produce gap bloccanti se mancano precondizioni. Non calcola pensione INPS normativa, fiscalita', netto, P1 ufficiale, basi spagnole da periodi italiani o contribuzione futura non dichiarata.
 
+### V4.6f — Code audit cadence and deterministic selection gate
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Eseguire l'audit periodico dovuto dopo V4.2a e rendere la cadenza verificabile automaticamente prima della selezione di un incremento funzionale.
+
+- Dipende da: V4.6e.
+- Repository: `bootstrap`, `engine`.
+- Output: audit checklist, classificazione esplicita degli incrementi e validatore deterministico della cadenza.
+- Test: soglia 0-3, quarto incremento, quinto bloccato, reset dopo audit, metadati mancanti e selezione corrente incoerente.
+- Done quando: i risultati dell'audit e gli eventuali follow-up sono tracciati, la regression e' verde e V4.7 non puo' essere selezionato quando un audit e' dovuto.
+
+Esito: audit completato sul perimetro V4.3-V4.6e con checklist di cadenza, validatore deterministico `roadmap_audit.py`, classificazione esplicita `Tipo` degli incrementi, test mirati su soglie/metadati/selezione corrente e regression engine completa. La suite passa con 391 test e il comando `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py` verifica la coerenza della roadmap attiva. Non sono emersi dati personali reali nei repository software, nuove dipendenze non dichiarate o blocker per V4.7. Follow-up non bloccante: valutare in un futuro audit se spezzare `tests/unit/test_validate.py`, che resta molto grande ma stabile.
+
+### V4.6g — Multi-scenario Italy–Spain retirement assumptions and provenance
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Introdurre uno scenario pensionistico personale versionato che renda espliciti contributi futuri, paese e data di pensionamento, residenza fiscale iniziale e successivi trasferimenti, senza dedurli da documenti storici o fixture sintetiche.
+
+- Dipende da: V4.6a, V4.6b, V4.6d, V4.6e e V4.6f.
+- Repository: `knowledge`, `rules`, `engine`, `workspace`.
+- Output: `pension-scenario/v1` nel workspace, con provenance, data di conferma, scenari alternativi e riferimenti ai dossier IT-ES.
+- Scenario base da supportare: nessun contributo spagnolo futuro, soli contributi italiani fino al pensionamento, pensionamento e residenza iniziale in Italia.
+- Scenari alternativi da supportare: permanenza o trasferimento in Spagna dopo il pensionamento, con data di efficacia e residenza fiscale esplicite; nessuna residenza o contribuzione futura puo' essere inferita automaticamente.
+- Vincoli: i dati sintetici/demo non possono essere selezionati come input di una simulazione personale; i contributi italiani restano distinti dalle basi spagnole; la totalizzazione UE resta limitata al diritto e al pro-rata previsti dalle regole applicabili.
+- Test: scenario base Italia, trasferimento post-pensionamento in Spagna, data di trasferimento mancante, assunzioni contributive mancanti o contraddittorie, provenance incompleta, fixture sintetica rifiutata e composizione del dossier con piu' scenari.
+- Done quando: il motore puo' confrontare combinazioni riproducibili senza confondere dati documentati, assunzioni future e risultati normativi/fiscali; ogni output identifica lo scenario selezionato e i relativi gap.
+
+Motivazione di priorita': i documenti previdenziali spagnoli sono gia' presenti e importati; il limite attuale e' l'assenza di una fonte di verita' per le assunzioni future. Il dossier `cross-border-it-es/v1` esistente compone fonti a monte e non puo' fungere da scenario personale, in particolare quando una sua fonte e' una fixture sintetica.
+
+Esito: completato con contratto `pension-scenario/v1`, servizio deterministico, fixture sintetiche baseline/trasferimento, CLI `planning pension-scenario build/demo`, integrazione opzionale nel dossier `cross-border-it-es/v1`, documentazione API/CLI/input/testing e test. Il sistema registra assunzioni future esplicite su contribuzione IT/ES, pensionamento, residenza iniziale e trasferimenti post-pensionamento, propaga scenario id/provenance/gap nel dossier e rifiuta fonti sintetiche per scenari o dossier personali. Non calcola pensioni, basi contributive, fiscalita', netto, diritto UE, pro-rata, trasferimenti amministrativi o raccomandazioni. Snapshot personali non rigenerati per assenza di `family-office-workspace/planning/pension-scenario.json`; la capability e' verificata con fixture sintetiche e CLI demo.
+
 ### V4.7 — Real-estate planning
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Modellare immobile, proprietà, locazione, imposte, manutenzione, vendita, successione e liquidità.
 
@@ -210,6 +263,7 @@ Modellare immobile, proprietà, locazione, imposte, manutenzione, vendita, succe
 ### V4.8 — Insurance and family protection
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Valutare polizze vita, beneficiari, coperture, riscatti, costi, eventi morte/inabilità e fabbisogno familiare.
 
@@ -222,6 +276,7 @@ Valutare polizze vita, beneficiari, coperture, riscatti, costi, eventi morte/ina
 ### V4.9 — Succession and donation planning V2
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Estendere la V2 con quote di legittima, attribuzioni, liquidità per imposte, beneficiari, donazioni pregresse e alternative operative.
 
@@ -234,6 +289,7 @@ Estendere la V2 con quote di legittima, attribuzioni, liquidità per imposte, be
 ### V4.10 — Strategy optimizer and implementation plan
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Combinare le opzioni V4 in pacchetti coerenti e produrre piano 90/180 giorni, costi, dipendenze, reversibilità e controlli.
 

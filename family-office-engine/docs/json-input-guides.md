@@ -133,6 +133,17 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - `spanish_theoretical_pension` dichiara importo lordo mensile e/o annuo coerente, valuta, paghe annue, fonte, `source_country: ES` e `basis: spanish_only_bases`.
 - Nota: i periodi italiani servono solo per verificare il diritto per totalizzazione UE. Il comando non usa contributi italiani come basi spagnole e non deduce contribuzione futura.
 
+## `pension-scenario/v1`
+
+- Default: `../family-office-workspace/planning/pension-scenario.json`.
+- Esempio: `examples/pension-scenario-sample.json`.
+- Comandi: `planning pension-scenario build`, `planning pension-scenario demo`.
+- Campi: `household_id`, `as_of_date`, `confirmed_at`, `selected_scenario_id`, `sources`, `scenarios`, `data_gaps`.
+- Ogni scenario dichiara `scenario_id`, `label`, `assumption_status`, `retirement`, `initial_fiscal_residence`, `future_contributions`, `post_retirement_residence_changes` e `provenance`.
+- `future_contributions` deve dichiarare separatamente Italia e Spagna; per il baseline Spagna usa `status: none`.
+- Ogni trasferimento post-pensionamento richiede `effective_date` e `fiscal_residence`.
+- Nota: il contratto registra assunzioni personali versionate. Non deduce residenza o contribuzione futura e non calcola effetti fiscali/previdenziali.
+
 ## Scenario decisionale
 
 ### `decision-scenario-v2.json`

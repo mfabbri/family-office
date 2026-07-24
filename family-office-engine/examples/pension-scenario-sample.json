@@ -1,0 +1,95 @@
+{
+  "schema_version": "pension-scenario/v1",
+  "record_type": "PensionScenarioSet",
+  "household_id": "synthetic_household",
+  "as_of_date": "2026-07-23",
+  "confirmed_at": "2026-07-23",
+  "selected_scenario_id": "baseline_it_retirement",
+  "sources": [
+    {
+      "source_id": "synthetic-retirement-assumptions",
+      "type": "synthetic_fixture"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "baseline_it_retirement",
+      "label": "Baseline Italy retirement",
+      "assumption_status": "explicit",
+      "retirement": {
+        "date": "2040-01",
+        "country": "IT",
+        "source": "synthetic explicit assumption"
+      },
+      "initial_fiscal_residence": "IT",
+      "future_contributions": [
+        {
+          "country": "IT",
+          "from_date": "2026-08",
+          "to_date": "2039-12",
+          "status": "continues",
+          "basis": "italian_declared_future_work",
+          "source": "synthetic explicit assumption"
+        },
+        {
+          "country": "ES",
+          "from_date": "2026-08",
+          "to_date": "2039-12",
+          "status": "none",
+          "basis": "no_future_spanish_contributions",
+          "source": "synthetic explicit assumption"
+        }
+      ],
+      "post_retirement_residence_changes": [],
+      "provenance": [
+        {
+          "source_id": "synthetic-retirement-assumptions",
+          "type": "synthetic_fixture"
+        }
+      ]
+    },
+    {
+      "scenario_id": "post_retirement_transfer_es",
+      "label": "Transfer to Spain after retirement",
+      "assumption_status": "explicit",
+      "retirement": {
+        "date": "2040-01",
+        "country": "IT",
+        "source": "synthetic explicit assumption"
+      },
+      "initial_fiscal_residence": "IT",
+      "future_contributions": [
+        {
+          "country": "IT",
+          "from_date": "2026-08",
+          "to_date": "2039-12",
+          "status": "continues",
+          "basis": "italian_declared_future_work",
+          "source": "synthetic explicit assumption"
+        },
+        {
+          "country": "ES",
+          "from_date": "2026-08",
+          "to_date": "2039-12",
+          "status": "none",
+          "basis": "no_future_spanish_contributions",
+          "source": "synthetic explicit assumption"
+        }
+      ],
+      "post_retirement_residence_changes": [
+        {
+          "effective_date": "2041-01",
+          "fiscal_residence": "ES",
+          "source": "synthetic explicit assumption"
+        }
+      ],
+      "provenance": [
+        {
+          "source_id": "synthetic-retirement-assumptions",
+          "type": "synthetic_fixture"
+        }
+      ]
+    }
+  ],
+  "data_gaps": []
+}

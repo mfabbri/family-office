@@ -1,0 +1,70 @@
+{
+  "schema_version": "pension-scenario/v1",
+  "record_type": "PensionScenarioSnapshot",
+  "status": "complete",
+  "input": {
+    "household_id": "synthetic_household",
+    "as_of_date": "2026-07-23",
+    "confirmed_at": "2026-07-23"
+  },
+  "selected_scenario_id": "baseline_it_retirement",
+  "selected_scenario": {
+    "scenario_id": "baseline_it_retirement",
+    "label": "Baseline Italy retirement",
+    "assumption_status": "explicit",
+    "retirement": {
+      "date": "2040-01",
+      "country": "IT",
+      "source": "synthetic explicit assumption"
+    },
+    "initial_fiscal_residence": "IT",
+    "future_contributions": [
+      {
+        "country": "IT",
+        "from_date": "2026-08",
+        "to_date": "2039-12",
+        "status": "continues",
+        "basis": "italian_declared_future_work",
+        "amount": null,
+        "source": "synthetic explicit assumption"
+      },
+      {
+        "country": "ES",
+        "from_date": "2026-08",
+        "to_date": "2039-12",
+        "status": "none",
+        "basis": "no_future_spanish_contributions",
+        "amount": null,
+        "source": "synthetic explicit assumption"
+      }
+    ],
+    "post_retirement_residence_changes": [],
+    "provenance": [
+      {
+        "source_id": "synthetic-retirement-assumptions",
+        "type": "synthetic_fixture"
+      }
+    ],
+    "data_gaps": []
+  },
+  "scenarios": [],
+  "sources": [
+    {
+      "source_id": "synthetic-retirement-assumptions",
+      "type": "synthetic_fixture"
+    }
+  ],
+  "summary": {
+    "scenario_count": 2,
+    "data_gap_count": 0,
+    "selected_fiscal_residence": "IT",
+    "selected_retirement_country": "IT",
+    "review_required": true
+  },
+  "data_gaps": [],
+  "reproducibility": {
+    "hash_algorithm": "sha256",
+    "content_hash": "synthetic-example"
+  },
+  "notes": "Synthetic example pension scenario snapshot."
+}
