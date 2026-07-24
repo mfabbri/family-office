@@ -139,6 +139,13 @@ Verifica contratto classificazione e disponibilita' asset con fixture sintetica:
 $env:PYTHONPATH='src'; python -m family_office_engine.cli.main household availability validate --input examples/asset-availability-sample.json
 ```
 
+Verifica CLI sul workspace privato:
+
+```text
+fo household availability wizard
+fo household availability validate --skip-ownership-check
+```
+
 Lo snapshot risultante viene scritto in:
 
 ```text
@@ -151,7 +158,7 @@ Il file reale privato atteso e':
 ..\family-office-workspace\household\asset-availability.json
 ```
 
-Il repository workspace contiene un draft vuoto in `household/asset-availability.draft.json` e una guida compilabile in `household/household-input-guide.md`.
+Il repository workspace contiene un draft vuoto in `household/asset-availability.draft.json` e una guida compilabile in `household/household-input-guide.md`. Il wizard parte dagli asset del net worth, valida input come paese e data, salva progressivamente e permette `unknown` per disponibilita' non nota; `--skip-ownership-check` serve quando gli asset classificati arrivano dal net worth e il grafo ownership non e' ancora allineato.
 
 ## Timeline Events
 
@@ -528,6 +535,7 @@ Verifica CLI sul workspace privato:
 
 ```text
 fo planning liquidity build
+fo planning liquidity explain
 ```
 
 Da checkout sorgente:
@@ -554,7 +562,7 @@ Lo snapshot risultante viene scritto in:
 ..\family-office-workspace\snapshots\liquidity-plan.snapshot.json
 ```
 
-Il contratto `liquidity-plan/v1` assegna asset valorizzati a riserva, breve, medio, lungo termine e restricted usando net worth, asset availability e planning goals. I test coprono shortfall di riserva, asset bloccati per spese correnti, valuta estera senza conversione e senza funding della riserva, concentrazione, hash stabile e input mancanti. Non vengono calcolati rendimenti, imposte, cambi valuta, ottimizzazioni, scoring o raccomandazioni.
+Il contratto `liquidity-plan/v1` assegna asset valorizzati a riserva, breve, medio, lungo termine e restricted usando net worth, asset availability e planning goals. I test coprono shortfall di riserva, asset bloccati per spese correnti, spiegazione CLI degli asset non usabili, valuta estera senza conversione e senza funding della riserva, concentrazione, hash stabile e input mancanti. Non vengono calcolati rendimenti, imposte, cambi valuta, ottimizzazioni, scoring o raccomandazioni.
 
 ## Decumulation Strategy
 
@@ -567,6 +575,7 @@ $env:PYTHONPATH='src'; python -m unittest tests.unit.test_decumulation_strategy
 Verifica CLI sul workspace privato:
 
 ```text
+fo planning decumulation wizard
 fo planning decumulation build
 ```
 
@@ -594,7 +603,7 @@ Lo snapshot risultante viene scritto in:
 ..\family-office-workspace\snapshots\decumulation-strategy.snapshot.json
 ```
 
-Il contratto `decumulation-strategy/v1` confronta policy dichiarate usando net worth, liquidity plan, pension income e RITA options. I test coprono piu' eta' di pensionamento, sequenza rendimenti, longevita', RITA si'/no, hash stabile e input mancanti. Non vengono calcolati fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
+Il contratto `decumulation-strategy/v1` confronta policy dichiarate usando net worth, liquidity plan, pension income e RITA options. I test coprono piu' eta' di pensionamento, sequenza rendimenti, longevita', RITA si'/no, wizard con contesto goals/liquidita', salvataggio progressivo, aliquote ignote come gap, hash stabile e input mancanti. Non vengono calcolati fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
 
 ## Pension Contribution Options
 
@@ -607,6 +616,7 @@ $env:PYTHONPATH='src'; python -m unittest tests.unit.test_pension_contribution_o
 Verifica CLI sul workspace privato:
 
 ```text
+fo planning pension-contributions wizard
 fo planning pension-contributions build
 ```
 
@@ -628,7 +638,7 @@ Lo snapshot risultante viene scritto in:
 ..\family-office-workspace\snapshots\pension-contribution-options.snapshot.json
 ```
 
-Il contratto `pension-contribution-options/v1` confronta opzioni esplicite con rule pack di deducibilita' previdenza complementare. I test coprono plafond ordinario, contributo datore, extra prima occupazione, TFR separato, vincolo liquidita', anno non coperto e CLI demo. Non vengono calcolati IRPEF completa, rendimenti, matching contrattuale non dichiarato, ottimizzazioni o raccomandazioni.
+Il contratto `pension-contribution-options/v1` confronta opzioni esplicite con rule pack di deducibilita' previdenza complementare. I test coprono plafond ordinario, contributo datore, extra prima occupazione, TFR separato, vincolo liquidita', wizard da contesto liquidita', errore missing-input con next step, anno non coperto e CLI demo. Non vengono calcolati IRPEF completa, rendimenti, matching contrattuale non dichiarato, ottimizzazioni o raccomandazioni.
 
 ## Tax-aware Portfolio
 
@@ -815,6 +825,62 @@ Lo snapshot risultante viene scritto in:
 ```
 
 Il contratto `pension-scenario/v1` registra baseline, alternative, pensionamento, residenza, trasferimenti post-pensionamento, contributi futuri e provenance. I test coprono baseline Italia, trasferimento in Spagna, data trasferimento mancante, assunzioni contributive mancanti o contraddittorie, provenance mancante e rifiuto di fonti sintetiche per household personali. Non vengono calcolati pensioni, imposte, netto, diritto UE, pro-rata o raccomandazioni.
+
+## Real Estate Plan
+
+Verifica contratto pianificazione immobiliare V4:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_real_estate_plan
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning real-estate demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning real-estate demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\real-estate-plan.snapshot.json
+```
+
+Il contratto `real-estate-plan/v1` confronta mantenimento, locazione e vendita usando immobili, quote di titolarita', costi, imposte dichiarate, canone, vacancy e prezzo di vendita espliciti. I test coprono locazione, vacancy mancante, vendita, costi, titolarita' del coniuge, gap fiscali e quote non valide. Non vengono calcolati imposte normative, successione, perizie, finanziamenti, FX, dichiarazioni o raccomandazioni.
+
+## Protection Gap
+
+Verifica contratto protezione familiare V4:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_protection_gap
+```
+
+Demo sintetica senza ricordare path JSON:
+
+```text
+fo planning protection demo
+```
+
+Da checkout sorgente:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning protection demo
+```
+
+Lo snapshot risultante viene scritto in:
+
+```text
+..\family-office-workspace\snapshots\protection-gap.snapshot.json
+```
+
+Il contratto `protection-gap/v1` confronta fabbisogni familiari e polizze usando beneficiari, capitali assicurati, premi, riscatti e provenance espliciti. I test coprono beneficiario mancante, capitale insufficiente, distinzione tra polizza investimento e protezione, share beneficiario non valida e smoke CLI. Non vengono calcolati consulenza assicurativa, sanitaria, attuariale, legale, fiscale, underwriting, successione o raccomandazioni.
 
 ## IT-ES EU Pension Pro-Rata
 

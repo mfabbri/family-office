@@ -17,6 +17,17 @@ Non eseguire ripetutamente l'intera suite durante modifiche locali se i test mir
 - T3: review high-effort, eventualmente subagent read-only.
 - T4–T5: review indipendente, fonti/assunzioni e scenari avversi.
 
+## CLI UX checks
+
+Quando cambia un comando CLI o un wizard, verificare almeno:
+
+- comando corto `fo ...` o wrapper locale documentato;
+- errore recuperabile con prossimo comando esplicito;
+- output riepilogativo leggibile senza aprire JSON;
+- wizard con default da workspace/snapshot quando disponibili;
+- salvataggio progressivo e ripresa con `--overwrite`;
+- valori incerti registrati come `data_gaps`.
+
 ## Completion report
 
 Riportare soltanto:

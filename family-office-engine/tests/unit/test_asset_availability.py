@@ -115,6 +115,22 @@ class AssetAvailabilityTest(unittest.TestCase):
 
         self.assertEqual(gaps, [])
 
+    def test_validate_accepts_unknown_first_available_date_as_gap(self):
+        availability = valid_availability()
+        availability["classifications"][0].update(
+            {
+                "asset_class": "pension_fund",
+                "constraints": ["pension_lock"],
+                "first_available_date": "unknown",
+                "liquidity_tier": "locked_until_date",
+                "tax_treatment": "pension_taxation",
+            }
+        )
+
+        gaps = validate_asset_availability(availability, ownership_snapshot())
+
+        self.assertIn("missing_first_available_date", [gap["code"] for gap in gaps])
+
 
 if __name__ == "__main__":
     unittest.main()

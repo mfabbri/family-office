@@ -4,6 +4,29 @@ Guida generale e ordine d'uso: `docs/cli-workflow.md`.
 
 Mappa degli input JSON compilabili: `docs/json-input-guides.md`.
 
+La CLI utente e' `fo`. Installarla una volta dal repository engine:
+
+```powershell
+cd family-office-engine
+.\.venv\Scripts\python -m pip install -e .
+```
+
+Uso normale:
+
+```powershell
+fo validate
+fo planning goals wizard
+```
+
+Dalla root del progetto sono disponibili anche wrapper locali, ad esempio `.\fo.ps1 validate`. I comandi `python -m family_office_engine.cli.main ...` nelle sezioni sotto sono fallback tecnici da checkout sorgente, non il percorso operativo preferito.
+
+PowerShell non esegue comandi dalla cartella corrente con il solo nome. Per usare `fo` senza prefisso `.\`, prepara la sessione dalla root:
+
+```powershell
+. .\use-family-office.ps1
+fo validate
+```
+
 ## `fo payroll import`
 
 Importa buste paga PDF dal workspace privato e scrive:
@@ -193,12 +216,31 @@ Valida e normalizza un file privato `asset-availability/v1`.
 Uso:
 
 ```text
-python -m family_office_engine.cli.main household availability validate
+fo household availability validate
+```
+
+Wizard da net worth:
+
+```text
+fo household availability wizard
+```
+
+Rivedere classificazioni gia' inserite:
+
+```text
+fo household availability wizard --overwrite
+```
+
+Validare per il piano liquidita' quando gli asset arrivano dal net worth e non sono ancora allineati al grafo ownership:
+
+```text
+fo household availability validate --skip-ownership-check
 ```
 
 Default:
 
 - input: `../family-office-workspace/household/asset-availability.json`
+- net worth per wizard: `../family-office-workspace/snapshots/net-worth.snapshot.json`
 - ownership snapshot: `../family-office-workspace/snapshots/ownership-beneficiary-graph.snapshot.json`
 - output: `../family-office-workspace/snapshots/asset-availability.snapshot.json`
 
@@ -208,7 +250,7 @@ Per testare il contratto senza dati reali:
 python -m family_office_engine.cli.main household availability validate --input examples/asset-availability-sample.json
 ```
 
-Il comando controlla asset class, rischio, valuta, giurisdizione, liquidita', vincoli, trattamento fiscale dichiarativo, prima data di disponibilita', provenance e riferimenti ad asset quando lo snapshot ownership e' disponibile. Non calcola imposte, rendimenti o raccomandazioni.
+Il comando controlla asset class, rischio, valuta, giurisdizione, liquidita', vincoli, trattamento fiscale dichiarativo, prima data di disponibilita', provenance e riferimenti ad asset quando lo snapshot ownership e' disponibile. Se stai classificando asset generati dal net worth prima di aggiornare ownership, usa `--skip-ownership-check`. Il wizard parte dagli asset nel net worth, propone default conservativi per classe asset, salva progressivamente dopo ogni asset e scrive l'input privato; con `--overwrite` permette di rivedere classificazioni gia' inserite. Valida subito paese e data, e per asset bloccati o incerti la prima data di disponibilita' puo' essere `unknown`, che resta un gap esplicito. Non calcola imposte, rendimenti o raccomandazioni.
 
 ## `fo household timeline validate`
 
@@ -528,7 +570,7 @@ fo planning goals wizard
 
 `status` non modifica file e mostra il punto del workflow: input mancante, draft ancora da compilare, input pronto o snapshot gia' presente. Il draft contiene `draft_notes` e `draft_examples` per spiegare i campi e i valori ammessi; queste sezioni sono guida umana e possono restare nel file durante la compilazione.
 
-`wizard` pone domande deterministiche, scrive il JSON privato e lo valida a livello di contratto input. Le risposte lasciate incerte restano tracciate in `data_gaps`; non calcola rendimenti, imposte, ottimizzazioni o raccomandazioni.
+`wizard` pone domande deterministiche, scrive il JSON privato e lo valida a livello di contratto input. Se l'input esiste gia', non richiede di reinserire dati: suggerisce il comando successivo o `--overwrite` per rivederlo usando i valori esistenti come default. Durante la compilazione salva progressivamente le risposte, cosi' un'interruzione puo' essere ripresa con `fo planning goals wizard --overwrite`. Il fabbisogno pensionistico viene derivato da spesa netta mensile corrente e crescita annua dichiarata del costo della vita; se disponibile, la spesa mensile gia' inserita in `liquidity-plan-input/v1` viene proposta come default. Le risposte lasciate incerte restano tracciate in `data_gaps`; non calcola rendimenti, imposte, ottimizzazioni o raccomandazioni.
 
 Da checkout sorgente:
 
@@ -574,6 +616,12 @@ Uso:
 
 ```text
 fo planning liquidity build
+```
+
+Spiegazione dello snapshot gia' costruito:
+
+```text
+fo planning liquidity explain
 ```
 
 Wizard interattivo input:
@@ -622,7 +670,11 @@ Default demo:
 
 Il comando produce `liquidity-plan/v1` con riserva minima, bucket asset, asset bloccati per spese correnti, warning e data gaps. Non converte valute e non calcola rendimenti, imposte, ottimizzazioni, scoring o raccomandazioni.
 
-`fo planning liquidity wizard` crea `liquidity-plan-input/v1` nel workspace, rifiuta overwrite salvo `--overwrite` e valida il JSON senza richiedere snapshot esterni.
+L'output CLI mostra anche shortfall di riserva, numero di asset non usabili per spese correnti, bucket patrimoniali, primi gap e prossimo passo operativo.
+
+`fo planning liquidity explain` legge lo snapshot esistente e traduce le assegnazioni asset per asset: quali sono utilizzabili, quali sono esclusi dalle spese correnti e quali vincoli o livelli di liquidabilita' hanno prodotto la classificazione.
+
+`fo planning liquidity wizard` crea `liquidity-plan-input/v1` nel workspace e valida il JSON senza richiedere snapshot esterni. Se l'input esiste gia', non richiede di reinserire metadati tecnici come nucleo, data e valuta: li mostra come contesto e chiede solo spese mensili, mesi di riserva e soglia di concentrazione. Con `--overwrite` rimuove anche il placeholder `replace_with_known_gap_or_remove` se non viene sostituito da un gap reale.
 
 ## `fo planning decumulation build`
 
@@ -687,7 +739,7 @@ Default demo:
 
 Il comando produce `decumulation-strategy/v1` con cashflow annui per policy, ranking tecnico, metriche nette, warning e data gaps. I tassi netti sono solo quelli dichiarati nell'input; non calcola fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
 
-`fo planning decumulation wizard` crea una prima policy esplicita `decumulation-policy-set/v1`; asset, rendimenti e tassi restano assunzioni dichiarate dall'utente e vanno revisionati prima del build.
+`fo planning decumulation wizard` crea una prima policy esplicita `decumulation-policy-set/v1`. Usa goals e piano liquidita' gia salvati come contesto per nucleo, data, valuta, fabbisogno annuo, cuscinetto di liquidita' e asset prelevabili; chiede solo eta', orizzonte, ordine di prelievo e assunzioni esplicite su rendimenti/aliquote. Se un'aliquota non e' nota, lascia `0.00`: il wizard la salva come gap da stimare, non come ipotesi fiscale definitiva. Se l'input esiste gia', non richiede di reinserire dati e usa `--overwrite` solo per revisione esplicita. Salva progressivamente le risposte, cosi' un'interruzione puo' essere ripresa con `fo planning decumulation wizard --overwrite`. Asset, rendimenti e tassi restano assunzioni dichiarate dall'utente e vanno revisionati prima del build.
 
 ## `fo planning pension-contributions build`
 
@@ -701,6 +753,12 @@ Uso:
 
 ```text
 fo planning pension-contributions build
+```
+
+Wizard interattivo input:
+
+```text
+fo planning pension-contributions wizard
 ```
 
 Demo sintetica senza path JSON:
@@ -727,6 +785,8 @@ Default demo:
 - output sintetico: `../family-office-workspace/snapshots/cli-check-pension-contribution-options.synthetic.snapshot.json`
 
 Il comando produce `pension-contribution-options/v1` con deducibilita', beneficio fiscale stimato da aliquota marginale dichiarata, costo opportunita', liquidita' persa, vincoli e ranking tecnico. Non calcola IRPEF completa, rendimenti, matching contrattuale non dichiarato o raccomandazioni.
+
+`fo planning pension-contributions wizard` crea `pension-contribution-input/v1` usando il piano liquidita' gia salvato come contesto per data, liquidita' disponibile e cuscinetto minimo da preservare. Se aliquota marginale, contributi gia dedotti, extra deducibilita o costo opportunita' non sono noti, lascia `0.00`: il wizard li salva come gap da stimare, non come ipotesi definitiva.
 
 ## `fo planning tax-aware-portfolio build`
 
@@ -976,6 +1036,82 @@ Default demo:
 - output sintetico: `../family-office-workspace/snapshots/cli-check-pension-scenario.synthetic.snapshot.json`
 
 Il comando produce `pension-scenario/v1` con scenario selezionato, alternative, pensionamento, residenza iniziale, trasferimenti post-pensionamento, contributi futuri IT/ES, provenance e gap. Non calcola pensioni, basi contributive, imposte, netto, diritto UE, pro-rata o raccomandazioni.
+
+## `fo planning real-estate build`
+
+Confronta alternative immobiliari dichiarative:
+
+```text
+../family-office-workspace/snapshots/real-estate-plan.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning real-estate build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning real-estate demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning real-estate demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/real-estate-plan.json`
+- output: `../family-office-workspace/snapshots/real-estate-plan.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/real-estate-plan-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-real-estate-plan.synthetic.snapshot.json`
+
+Il comando produce `real-estate-plan/v1` con immobili, quote di titolarita', costi, imposte dichiarate, vacancy, locazione, vendita, alternative `hold`/`rent`/`sell`, liquidita', provenance e gap. Non calcola imposte normative, successione, perizie, finanziamenti, FX, dichiarazioni o raccomandazioni.
+
+## `fo planning protection build`
+
+Confronta fabbisogni familiari e polizze assicurative dichiarative:
+
+```text
+../family-office-workspace/snapshots/protection-gap.snapshot.json
+```
+
+Uso:
+
+```text
+fo planning protection build
+```
+
+Demo sintetica senza path JSON:
+
+```text
+fo planning protection demo
+```
+
+Da checkout sorgente:
+
+```text
+python -m family_office_engine.cli.main planning protection demo
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/protection-gap.json`
+- output: `../family-office-workspace/snapshots/protection-gap.snapshot.json`
+
+Default demo:
+
+- input sintetico: `examples/protection-gap-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-protection-gap.synthetic.snapshot.json`
+
+Il comando produce `protection-gap/v1` con fabbisogni familiari, polizze rischio/inabilita'/miste/investimento, beneficiari, capitali assicurati, premi, riscatti, gap di protezione, provenance e data gap. Non calcola consulenza assicurativa, sanitaria, attuariale, legale, fiscale, underwriting, successione o raccomandazioni.
 
 ## `fo planning it-es-eu-pension build`
 

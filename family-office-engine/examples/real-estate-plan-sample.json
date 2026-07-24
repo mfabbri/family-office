@@ -1,0 +1,84 @@
+{
+  "schema_version": "real-estate-plan/v1",
+  "record_type": "RealEstatePlanInput",
+  "household_id": "synthetic_household",
+  "as_of_date": "2026-07-24",
+  "base_currency": "EUR",
+  "properties": [
+    {
+      "property_id": "asset_family_home",
+      "asset_id": "asset_family_home",
+      "label": "Synthetic family home",
+      "jurisdiction": "IT",
+      "currency": "EUR",
+      "market_value": "240000.00",
+      "ownership": [
+        {
+          "owner_person_id": "self",
+          "relationship": "self",
+          "share": "0.50",
+          "provenance": "synthetic ownership graph"
+        },
+        {
+          "owner_person_id": "spouse",
+          "relationship": "spouse",
+          "share": "0.50",
+          "provenance": "synthetic ownership graph"
+        }
+      ],
+      "annual_costs": [
+        {
+          "code": "ordinary_maintenance",
+          "label": "Ordinary maintenance reserve",
+          "amount": "2400.00",
+          "provenance": "synthetic explicit assumption"
+        },
+        {
+          "code": "condominium",
+          "label": "Condominium and utilities while vacant",
+          "amount": "1800.00",
+          "provenance": "synthetic explicit assumption"
+        }
+      ],
+      "declared_taxes": [
+        {
+          "code": "declared_property_taxes",
+          "label": "Explicit property taxes and local charges",
+          "amount": "900.00",
+          "provenance": "synthetic explicit tax input"
+        }
+      ],
+      "rent_assumption": {
+        "monthly_gross_rent": "1100.00",
+        "vacancy_months": 2,
+        "letting_costs": [
+          {
+            "code": "letting_management",
+            "label": "Letting management and minor turnover costs",
+            "amount": "900.00",
+            "provenance": "synthetic explicit assumption"
+          }
+        ]
+      },
+      "sale_assumption": {
+        "estimated_sale_price": "238000.00",
+        "months_to_liquidity": 9,
+        "selling_costs": [
+          {
+            "code": "agency_and_closing",
+            "label": "Agency and closing costs",
+            "amount": "7200.00",
+            "provenance": "synthetic explicit assumption"
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "source_id": "synthetic-real-estate-plan",
+          "type": "synthetic_fixture"
+        }
+      ]
+    }
+  ],
+  "data_gaps": []
+}

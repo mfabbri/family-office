@@ -9,6 +9,7 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Usa date ISO `YYYY-MM-DD` e valute ISO maiuscole come `EUR`.
 - Metti le incertezze note in `data_gaps` invece di trasformarle in dati certi.
 - Non inserire calcoli fiscali, pensionistici o finanziari stimati a mano se il campo richiede un fatto osservato.
+- Preferisci i wizard disponibili prima di modificare JSON a mano; usano i dati gia' salvati come contesto e salvano progressivamente le risposte.
 
 ## `base-assumptions.json`
 
@@ -38,8 +39,9 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Default: `../family-office-workspace/household/asset-availability.json`.
 - Esempio: `examples/asset-availability-sample.json`.
 - Draft/guida: `../family-office-workspace/household/asset-availability.draft.json`, `asset-availability-guide.md`.
-- Comando: `household availability validate`.
+- Comandi: `household availability wizard`, `household availability validate`.
 - Campi: `asset_id`, asset class, rischio, valuta, giurisdizione, liquidita', vincoli, trattamento fiscale dichiarativo, prima disponibilita' e provenance.
+- Nota: per il piano liquidita' puoi validare asset provenienti dal net worth anche prima dell'allineamento ownership con `household availability validate --skip-ownership-check`.
 
 ## `timeline-events/v1`
 
@@ -70,8 +72,9 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Esempio: `examples/liquidity-plan-input-sample.json`.
 - Guida: `examples/liquidity-plan-input-guide.md`.
 - Draft: `../family-office-workspace/planning/liquidity-plan-input.draft.json`.
-- Comandi: `planning liquidity wizard`, `planning liquidity build`, `planning liquidity demo`.
+- Comandi: `planning liquidity wizard`, `planning liquidity build`, `planning liquidity explain`, `planning liquidity demo`.
 - Campi: `household_id`, `as_of_date`, `base_currency`, `monthly_expenses`, `minimum_reserve_months`, `concentration_threshold`, `data_gaps`.
+- Nota: `explain` traduce lo snapshot costruito in asset utilizzabili/non utilizzabili e motivi leggibili.
 
 ## `decumulation-policy-set/v1`
 
@@ -82,15 +85,16 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Comandi: `planning decumulation wizard`, `planning decumulation build`, `planning decumulation demo`.
 - Campi: `household_id`, `as_of_date`, `base_currency`, `current_age`, `policies`, `data_gaps`.
 - Ogni policy dichiara `policy_id`, `label`, `retirement_age`, `end_age`, `annual_spending_need`, `cash_buffer_target`, `withdrawal_order`, `annual_return_sequence`, tassi espliciti e `include_rita`.
+- Nota: il wizard deriva nucleo, data, valuta, fabbisogno annuo, cuscinetto e asset prelevabili da goals/liquidita'. Aliquote lasciate a `0.00` restano gap da stimare, non ipotesi fiscali definitive.
 
 ## `pension-contribution-input/v1`
 
 - Default: `../family-office-workspace/planning/pension-contribution-input.json`.
 - Esempio: `examples/pension-contribution-input-sample.json`.
-- Comandi: `planning pension-contributions build`, `planning pension-contributions demo`.
+- Comandi: `planning pension-contributions wizard`, `planning pension-contributions build`, `planning pension-contributions demo`.
 - Campi: `household_id`, `as_of_date`, `tax_year`, `jurisdiction`, `marginal_tax_rate`, `already_deducted_contributions`, `first_employment_extra_deduction_room`, `available_liquidity`, `minimum_liquidity_after_contributions`, `options`, `data_gaps`.
 - Ogni opzione dichiara `option_id`, `label`, `employee_contribution`, `employer_contribution`, `tfr_transfer`, `opportunity_cost_rate` e `horizon_years`.
-- Nota: `marginal_tax_rate`, liquidita', costo opportunita' e contributi sono input dichiarati; il motore non calcola IRPEF completa o rendimenti.
+- Nota: il wizard usa il piano liquidita' come contesto per liquidita' disponibile e minimo da preservare. `marginal_tax_rate`, contributi gia dedotti, extra deducibilita', costo opportunita' e contributi sono input dichiarati; se lasci `0.00` dove indicato, il valore resta gap da stimare. Il motore non calcola IRPEF completa o rendimenti.
 
 ## `tax-aware-portfolio-input/v1`
 
@@ -143,6 +147,29 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - `future_contributions` deve dichiarare separatamente Italia e Spagna; per il baseline Spagna usa `status: none`.
 - Ogni trasferimento post-pensionamento richiede `effective_date` e `fiscal_residence`.
 - Nota: il contratto registra assunzioni personali versionate. Non deduce residenza o contribuzione futura e non calcola effetti fiscali/previdenziali.
+
+## `real-estate-plan/v1`
+
+- Default: `../family-office-workspace/planning/real-estate-plan.json`.
+- Esempio: `examples/real-estate-plan-sample.json`.
+- Comandi: `planning real-estate build`, `planning real-estate demo`.
+- Campi: `household_id`, `as_of_date`, `base_currency`, `properties`, `data_gaps`.
+- Ogni immobile dichiara `property_id`, `asset_id`, `label`, `jurisdiction`, `currency`, `market_value`, `ownership`, `annual_costs`, `declared_taxes`, `rent_assumption`, `sale_assumption` e `provenance`.
+- `ownership` richiede quote esplicite; una quota del coniuge resta tracciata e non viene fusa con quella personale.
+- `rent_assumption` richiede `monthly_gross_rent` e `vacancy_months` per confrontare la locazione.
+- `sale_assumption` richiede `estimated_sale_price`, `months_to_liquidity` e costi di vendita espliciti per confrontare la vendita.
+- Nota: imposte, costi, canoni, vacancy e prezzo di vendita sono input espliciti. Il motore non calcola fiscalita' immobiliare normativa, successione, perizie, finanziamenti, FX o raccomandazioni.
+
+## `protection-gap/v1`
+
+- Default: `../family-office-workspace/planning/protection-gap.json`.
+- Esempio: `examples/protection-gap-sample.json`.
+- Comandi: `planning protection build`, `planning protection demo`.
+- Campi: `household_id`, `as_of_date`, `base_currency`, `family_needs`, `policies`, `data_gaps`.
+- Ogni bisogno familiare dichiara `need_id`, `event_type`, `required_capital`, persone coperte e `provenance`.
+- Ogni polizza dichiara `policy_id`, `policy_type`, contraente, assicurati, beneficiari, eventi coperti, capitale assicurato, premio, riscatto e `provenance`.
+- Le polizze investimento sono tracciate per valore di riscatto ma non contano come copertura rischio.
+- Nota: beneficiari, capitali, fabbisogni, premi e riscatti sono input espliciti. Il motore non calcola consulenza assicurativa, sanitaria, attuariale, legale, fiscale, underwriting, successione o raccomandazioni.
 
 ## Scenario decisionale
 

@@ -4,17 +4,28 @@ Questa guida orienta l'uso della CLI senza dover leggere il codice. I dati reali
 
 ## Comandi base
 
-Esegui i comandi da `family-office-engine`:
+L'interfaccia operativa e' `fo`. Dalla root del progetto puoi usare il wrapper locale:
 
-```text
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main validate
+```powershell
+.\fo.ps1 validate
 ```
 
-Se hai installato un wrapper locale `fo`, i comandi documentati in `docs/cli.md` possono essere letti come:
+Per usare `fo` senza prefisso `.\`, prepara la sessione PowerShell dalla root:
 
-```text
-fo <area> <azione>
+```powershell
+. .\use-family-office.ps1
+fo validate
 ```
+
+In alternativa installa l'engine in editable mode una volta sola:
+
+```powershell
+cd family-office-engine
+.\.venv\Scripts\python -m pip install -e .
+fo validate
+```
+
+I comandi `python -m family_office_engine.cli.main ...` restano fallback tecnici da checkout sorgente, non il percorso operativo preferito.
 
 ## Ordine consigliato
 
@@ -32,10 +43,10 @@ fo <area> <azione>
 Quando disponibili, preferisci i demo sintetici per controllare che una capability funzioni senza preparare JSON reali:
 
 ```text
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals demo
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning liquidity demo
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning decumulation demo
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning pension-contributions demo
+fo planning goals demo
+fo planning liquidity demo
+fo planning decumulation demo
+fo planning pension-contributions demo
 ```
 
 Gli output demo vanno in `family-office-workspace/snapshots/cli-check-*.synthetic.snapshot.json`.
@@ -45,12 +56,22 @@ Gli output demo vanno in `family-office-workspace/snapshots/cli-check-*.syntheti
 Per i principali input V4 puoi creare un primo JSON privato senza editarlo a mano:
 
 ```text
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning goals wizard
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning liquidity wizard
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning decumulation wizard
+fo planning goals wizard
+fo household availability wizard
+fo planning liquidity wizard
+fo planning decumulation wizard
+fo planning pension-contributions wizard
 ```
 
-I wizard fanno domande deterministiche, scrivono solo nel workspace o nel path passato con `--input`, rifiutano overwrite salvo `--overwrite` e validano il contratto input. Non deducono valori mancanti: le risposte lasciate incerte restano in `data_gaps` per revisione.
+I wizard fanno domande deterministiche, scrivono solo nel workspace o nel path passato con `--input`, rifiutano overwrite salvo `--overwrite` e validano il contratto input. Non devono chiedere di nuovo metadati gia' disponibili da input o snapshot esistenti: li mostrano come contesto e chiedono solo decisioni o assunzioni operative. Salvano progressivamente le risposte, cosi' un'interruzione puo' essere ripresa con `--overwrite`.
+
+Se un valore fiscale, rendimento, costo opportunita', liquidabilita' o altro dato tecnico non e' noto, lascia il default incerto o `0.00` quando indicato dal prompt: il wizard lo registra come `data_gaps`, non come valore certo.
+
+Per capire uno snapshot gia' costruito senza aprire JSON, usa i comandi di spiegazione quando disponibili:
+
+```text
+fo planning liquidity explain
+```
 
 ## Quando compilare JSON
 

@@ -17,6 +17,15 @@ class PensionContributionOptionsError(ValueError):
     pass
 
 
+def validate_pension_contribution_input(data: dict[str, Any]) -> list[dict[str, Any]]:
+    errors: list[str] = []
+    data_gaps: list[dict[str, Any]] = []
+    _validate_input(data, errors, data_gaps)
+    if errors:
+        raise PensionContributionOptionsError("; ".join(errors))
+    return data_gaps
+
+
 def build_pension_contribution_options(
     input_path: Path,
     rule_pack_path: Path,

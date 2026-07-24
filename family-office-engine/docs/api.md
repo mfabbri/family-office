@@ -593,6 +593,46 @@ Fixture:
 - `examples/pension-scenario-sample.json`
 - `examples/pension-scenario-snapshot-sample.json`
 
+## Real Estate Plan
+
+Modulo:
+
+```text
+family_office_engine.services.real_estate_plan
+```
+
+Funzione principale:
+
+- `build_real_estate_plan(input_path, output_path)`: confronta alternative immobiliari esplicite e scrive `real-estate-plan/v1`.
+
+`real-estate-plan/v1` normalizza immobili, quote di titolarita', costi annui, imposte dichiarate, ipotesi di locazione, vacancy e vendita. Produce alternative `hold`, `rent` e `sell` con cashflow/proventi annui, liquidita' attesa, gap e hash riproducibile.
+
+Il servizio non calcola imposte normative, successione, perizie, finanziamenti, FX, raccomandazioni o dichiarazioni. Imposte, costi, canoni, vacancy e prezzo di vendita devono essere espliciti nell'input oppure diventano data gap.
+
+Fixture:
+
+- `examples/real-estate-plan-sample.json`
+
+## Protection Gap
+
+Modulo:
+
+```text
+family_office_engine.services.protection_gap
+```
+
+Funzione principale:
+
+- `build_protection_gap(input_path, output_path)`: confronta fabbisogni familiari e polizze assicurative esplicite e scrive `protection-gap/v1`.
+
+`protection-gap/v1` normalizza bisogni familiari, polizze vita/rischio, inabilita', miste e investimento, beneficiari, capitali assicurati, premi e riscatti. Produce gap di protezione per evento coperto, separando la copertura rischio dal valore di riscatto investimento.
+
+Il servizio non calcola consulenza assicurativa, sanitaria, attuariale, legale, fiscale, underwriting, successione o raccomandazioni. Beneficiari, capitali, fabbisogni, premi e riscatti devono essere espliciti oppure diventano gap.
+
+Fixture:
+
+- `examples/protection-gap-sample.json`
+
 ## IT-ES EU Pension Pro-Rata
 
 Modulo:

@@ -249,7 +249,7 @@ Esito: completato con contratto `pension-scenario/v1`, servizio deterministico, 
 
 ### V4.7 — Real-estate planning
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Modellare immobile, proprietà, locazione, imposte, manutenzione, vendita, successione e liquidità.
@@ -260,9 +260,11 @@ Modellare immobile, proprietà, locazione, imposte, manutenzione, vendita, succe
 - Test: locazione, vacancy, vendita, costi e titolarità del coniuge.
 - Done quando: mantenere, vendere o trasferire l'immobile può essere confrontato su basi omogenee.
 
+Esito: completato con contratto `real-estate-plan/v1`, servizio deterministico, fixture sintetica, CLI `planning real-estate build/demo`, documentazione API/CLI/input/testing e test. Il sistema confronta alternative `hold`, `rent` e `sell` usando valore immobile, quote di titolarita', costi, imposte dichiarate, canone, vacancy, prezzo di vendita e tempi di liquidita' espliciti; conserva provenance, gap e hash riproducibile. Le imposte immobiliari sono input espliciti o data gap, senza calcolo normativo. Non calcola successione, perizie, finanziamenti, FX, dichiarazioni, ottimizzazioni o raccomandazioni.
+
 ### V4.8 — Insurance and family protection
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Valutare polizze vita, beneficiari, coperture, riscatti, costi, eventi morte/inabilità e fabbisogno familiare.
@@ -272,6 +274,8 @@ Valutare polizze vita, beneficiari, coperture, riscatti, costi, eventi morte/ina
 - Output: `protection-gap/v1`.
 - Test: beneficiario mancante, capitale insufficiente, polizza investimento vs protezione.
 - Done quando: coperture e gap sono separati dalla mera valorizzazione patrimoniale.
+
+Esito: completato con contratto `protection-gap/v1`, servizio deterministico, fixture sintetica, CLI `planning protection build/demo`, documentazione API/CLI/input/testing e test. Il sistema confronta fabbisogni familiari e polizze usando beneficiari, capitali assicurati, eventi coperti, premi, riscatti e provenance espliciti; separa polizze rischio, inabilita', miste e investimento, tracciando il valore di riscatto investimento senza contarlo come copertura rischio. Non calcola consulenza assicurativa, sanitaria, attuariale, legale, fiscale, underwriting, successione, ottimizzazioni o raccomandazioni.
 
 ### V4.9 — Succession and donation planning V2
 

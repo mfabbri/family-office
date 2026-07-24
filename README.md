@@ -27,6 +27,32 @@ L'obiettivo iniziale non è generare subito strategie fiscali, ma consolidare un
 - motore software;
 - metodo operativo dell'agente.
 
+## CLI breve
+
+L'interfaccia operativa e' `fo`, non il modulo Python grezzo.
+
+Setup consigliato:
+
+```powershell
+cd family-office-engine
+.\.venv\Scripts\python -m pip install -e .
+fo validate
+```
+
+Dalla root del progetto sono disponibili anche wrapper locali:
+
+```powershell
+.\fo.ps1 validate
+.\fo.ps1 planning goals wizard
+```
+
+Per usare `fo` senza prefisso `.\`, prepara la sessione PowerShell:
+
+```powershell
+. .\use-family-office.ps1
+fo validate
+```
+
 ## Roadmap operativa
 
 Il prossimo incremento viene scelto automaticamente usando:

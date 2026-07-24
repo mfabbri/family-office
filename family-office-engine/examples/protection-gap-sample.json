@@ -1,0 +1,137 @@
+{
+  "schema_version": "protection-gap/v1",
+  "record_type": "ProtectionGapInput",
+  "household_id": "synthetic_household",
+  "as_of_date": "2026-07-24",
+  "base_currency": "EUR",
+  "family_needs": [
+    {
+      "need_id": "survivor_liquidity",
+      "label": "Survivor liquidity and transition reserve",
+      "event_type": "death",
+      "required_capital": "220000.00",
+      "covered_person_ids": [
+        "spouse",
+        "child_1"
+      ],
+      "provenance": [
+        {
+          "source_id": "synthetic-protection-gap",
+          "type": "synthetic_fixture"
+        }
+      ]
+    },
+    {
+      "need_id": "disability_income_buffer",
+      "label": "Disability income buffer",
+      "event_type": "disability",
+      "required_capital": "90000.00",
+      "covered_person_ids": [
+        "self",
+        "spouse"
+      ],
+      "provenance": [
+        {
+          "source_id": "synthetic-protection-gap",
+          "type": "synthetic_fixture"
+        }
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "policy_id": "risk_life_self",
+      "label": "Synthetic term life policy",
+      "policy_type": "risk_life",
+      "policyholder_person_id": "self",
+      "insured_person_ids": [
+        "self"
+      ],
+      "currency": "EUR",
+      "annual_premium": "720.00",
+      "surrender_value": "0.00",
+      "beneficiaries": [
+        {
+          "beneficiary_person_id": "spouse",
+          "relationship": "spouse",
+          "share": "1.00",
+          "provenance": "synthetic explicit beneficiary"
+        }
+      ],
+      "coverage_events": [
+        {
+          "event_type": "death",
+          "insured_capital": "150000.00",
+          "provenance": "synthetic explicit coverage"
+        }
+      ],
+      "provenance": [
+        {
+          "source_id": "synthetic-protection-gap",
+          "type": "synthetic_fixture"
+        }
+      ]
+    },
+    {
+      "policy_id": "disability_cover_self",
+      "label": "Synthetic disability cover",
+      "policy_type": "disability",
+      "policyholder_person_id": "self",
+      "insured_person_ids": [
+        "self"
+      ],
+      "currency": "EUR",
+      "annual_premium": "360.00",
+      "surrender_value": "0.00",
+      "beneficiaries": [
+        {
+          "beneficiary_person_id": "self",
+          "relationship": "self",
+          "share": "1.00",
+          "provenance": "synthetic explicit beneficiary"
+        }
+      ],
+      "coverage_events": [
+        {
+          "event_type": "disability",
+          "insured_capital": "90000.00",
+          "provenance": "synthetic explicit coverage"
+        }
+      ],
+      "provenance": [
+        {
+          "source_id": "synthetic-protection-gap",
+          "type": "synthetic_fixture"
+        }
+      ]
+    },
+    {
+      "policy_id": "investment_wrapper",
+      "label": "Synthetic investment policy",
+      "policy_type": "investment",
+      "policyholder_person_id": "self",
+      "insured_person_ids": [
+        "self"
+      ],
+      "currency": "EUR",
+      "annual_premium": "1200.00",
+      "surrender_value": "25000.00",
+      "beneficiaries": [
+        {
+          "beneficiary_person_id": "spouse",
+          "relationship": "spouse",
+          "share": "1.00",
+          "provenance": "synthetic explicit beneficiary"
+        }
+      ],
+      "coverage_events": [],
+      "provenance": [
+        {
+          "source_id": "synthetic-protection-gap",
+          "type": "synthetic_fixture"
+        }
+      ]
+    }
+  ],
+  "data_gaps": []
+}

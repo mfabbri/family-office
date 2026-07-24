@@ -296,7 +296,7 @@ def _validate_availability_date(
 ) -> None:
     liquidity_tier = item.get("liquidity_tier")
     first_available_date = item.get("first_available_date")
-    if first_available_date in (None, ""):
+    if first_available_date in (None, "", "unknown"):
         gaps.append(_gap("missing_first_available_date", asset_id, "first_available_date is missing."))
         return
     parsed = _parse_date(first_available_date, f"{label}.first_available_date", errors)
