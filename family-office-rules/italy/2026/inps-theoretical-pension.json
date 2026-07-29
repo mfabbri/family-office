@@ -1,0 +1,87 @@
+{
+  "schema_version": "inps-theoretical-pension-rule-pack/v1",
+  "rule_pack_id": "it.inps-theoretical-pension.2026.v1",
+  "jurisdiction": "IT",
+  "currency": "EUR",
+  "valid_from": "2026-01-01",
+  "valid_to": "2026-12-31",
+  "status": "deterministic_internal_estimate_not_official_inps_decision",
+  "source_refs": [
+    {
+      "source_id": "inps.calcolo-pensione",
+      "title": "INPS, Il calcolo della pensione",
+      "url": "https://www.inps.it/it/it/dettaglio-approfondimento.schede-informative.49949.il-calcolo-della-pensione.html",
+      "retrieved_on": "2026-07-29",
+      "provisions": [
+        "metodo contributivo",
+        "montante individuale",
+        "coefficiente di trasformazione"
+      ]
+    },
+    {
+      "source_id": "inps.montante-contributivo",
+      "title": "INPS, Montante contributivo",
+      "url": "https://www.inps.it/it/it/dettaglio-approfondimento.schede-informative.49951.montante-contributivo.html",
+      "retrieved_on": "2026-07-29",
+      "provisions": [
+        "aliquota computo dipendenti 33%",
+        "rivalutazione composta"
+      ]
+    },
+    {
+      "source_id": "minlav.coefficienti-2025",
+      "title": "Ministero del Lavoro, Decreto direttoriale 20 novembre 2024",
+      "url": "https://www.lavoro.gov.it/documenti-e-norme/normative/pagine/decreto-direttoriale-del-20112024",
+      "retrieved_on": "2026-07-29",
+      "provisions": [
+        "coefficienti di trasformazione dal 1 gennaio 2025"
+      ]
+    }
+  ],
+  "contributory_method": {
+    "default_employee_computation_rate": "0.33",
+    "annual_gross_payments_for_planning": 13,
+    "montante_revaluation_timing": "compound_at_year_end_excluding_last_worked_year",
+    "historical_montante_required_when_annual_bases_missing": true
+  },
+  "transformation_coefficients": {
+    "official_period": {
+      "valid_from": "2025-01-01",
+      "valid_to": "2026-12-31",
+      "values_by_age": {
+        "57": "0.04204",
+        "58": "0.04308",
+        "59": "0.04419",
+        "60": "0.04536",
+        "61": "0.04661",
+        "62": "0.04795",
+        "63": "0.04936",
+        "64": "0.05088",
+        "65": "0.05250",
+        "66": "0.05423",
+        "67": "0.05608",
+        "68": "0.05808",
+        "69": "0.06024",
+        "70": "0.06258",
+        "71": "0.06510"
+      }
+    }
+  },
+  "planning_projection": {
+    "status": "planning_projection_not_official_future_law",
+    "valid_from": "2027-01-01",
+    "valid_to": "2045-12-31",
+    "coefficient_method": "reuse_latest_official_table_by_age_until_updated",
+    "default_annual_revaluation_rate": "0.0150",
+    "limitations": [
+      "Projection for planning only; not a prediction of future Italian pension law.",
+      "Future coefficients, GDP revaluation, eligibility windows and administrative decorrenze must be replaced by updated official rule packs.",
+      "Mixed/retributive quotas, ricongiunzioni, riscatti, APE, opzione donna and special early-retirement channels are outside this rule pack."
+    ]
+  },
+  "limitations": [
+    "Gross contributory estimate only.",
+    "No tax, net pension, survivor pension, official INPS certification, P1 decision or administrative filing.",
+    "Documentary INPS projections must remain separate benchmarks and must not be overwritten by internal estimates."
+  ]
+}

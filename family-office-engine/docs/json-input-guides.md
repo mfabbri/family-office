@@ -218,3 +218,13 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Esempio: `examples/decision-dossier-input-sample.json`.
 - Comando: `scenarios dossier`.
 - Campi: titolo dossier, sezioni, alternative incluse, note di revisione e limiti.
+
+## `work-exit-feasibility-input/v1`
+
+- Default: `../family-office-workspace/planning/work-exit-feasibility.json`.
+- Esempio: `examples/work-exit-feasibility-sample.json`.
+- Comandi: `planning work-exit build`, `planning work-exit demo`.
+- Campi chiave: `as_of_date`, `candidate_dates` o `candidate_grid`, `sustainability_constraints`, `adults`.
+- Ogni adulto deve dichiarare `person_id`, `role`, `date_of_birth` e, se stimabile, `inps_contributory_estimate` con montante storico o basi annue e contributi futuri espliciti.
+- La pensione del coniuge deve essere presente come stream separato o come stima deterministica; se manca, il build produce un data gap bloccante.
+- Le date future usano il rule pack INPS proiettivo di pianificazione, non una previsione ufficiale di legge futura.

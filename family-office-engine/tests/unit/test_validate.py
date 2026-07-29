@@ -2211,6 +2211,22 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(written["schema_version"], "spanish-eu-theoretical-pension/v1")
             self.assertEqual(written["rule_pack"]["rule_pack_id"], "eu.es.spanish-eu-theoretical-pension.2026.v1")
 
+    def test_main_planning_work_exit_demo_returns_first_sustainable_date(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "work-exit.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(["planning", "work-exit", "demo", "--output", str(output_path)])
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("planning work-exit demo: complete first=2039-01-01, 2 candidates, 0 gaps", stdout.getvalue())
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "work-exit-feasibility/v1")
+            self.assertEqual(written["first_sustainable_exit_date"], "2039-01-01")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.inps-theoretical-pension.2026.v1")
+
     def test_main_planning_it_es_eu_pension_build_uses_default_theoretical_snapshot(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

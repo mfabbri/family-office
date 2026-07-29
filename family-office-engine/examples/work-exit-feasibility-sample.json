@@ -1,0 +1,61 @@
+{
+  "schema_version": "work-exit-feasibility-input/v1",
+  "record_type": "WorkExitFeasibilityInput",
+  "household_id": "synthetic_it_es_household",
+  "as_of_date": "2026-07-29",
+  "candidate_granularity": "explicit_dates",
+  "candidate_dates": [
+    "2037-01-01",
+    "2039-01-01"
+  ],
+  "sustainability_constraints": {
+    "annual_spending_need": "90000.00",
+    "available_bridge_assets": "10000.00",
+    "minimum_terminal_assets": "0.00",
+    "horizon_years": 30
+  },
+  "adults": [
+    {
+      "person_id": "primary",
+      "role": "primary",
+      "date_of_birth": "1970-05-20",
+      "inps_contributory_estimate": {
+        "calculation_scope": "contributory_only",
+        "as_of_year": 2026,
+        "historical_montante": "520000.00",
+        "annual_revaluation_rate": "0.0150",
+        "future_contributions": {
+          "annual_taxable_income": "95000.00",
+          "computation_rate": "0.33",
+          "through_year": 2039
+        }
+      }
+    },
+    {
+      "person_id": "spouse",
+      "role": "spouse",
+      "date_of_birth": "1972-03-10",
+      "inps_contributory_estimate": {
+        "calculation_scope": "contributory_only",
+        "as_of_year": 2026,
+        "historical_montante": "180000.00",
+        "annual_revaluation_rate": "0.0150",
+        "future_contributions": {
+          "annual_taxable_income": "32000.00",
+          "computation_rate": "0.33",
+          "through_year": 2039
+        }
+      },
+      "declared_pension_streams": [
+        {
+          "source_type": "declared_spouse_private_pension",
+          "country": "IT",
+          "payer": "Declared spouse pension",
+          "start_date": "2039-01-01",
+          "annual_gross_amount": "9000.00"
+        }
+      ]
+    }
+  ],
+  "data_gaps": []
+}

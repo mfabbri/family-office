@@ -954,3 +954,31 @@ Lo snapshot risultante viene scritto in:
 ```
 
 CU e dichiarazioni reali restano nel workspace. I test usano solo testi sintetici.
+
+## Work-exit feasibility
+
+Test mirati:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_work_exit_feasibility
+```
+
+Smoke CLI:
+
+```text
+fo planning work-exit demo
+```
+
+Fallback tecnico:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning work-exit demo
+```
+
+Output personale previsto:
+
+```text
+..\family-office-workspace\snapshots\work-exit-feasibility.snapshot.json
+```
+
+Il contratto `work-exit-feasibility/v1` cerca la prima data sostenibile di uscita dal lavoro usando date candidate, vincoli di spesa/patrimonio, stime `inps-theoretical-pension/v1`, quota spagnola pro-rata e pensione del coniuge come stream lordi separati. I test coprono 2037 vs 2039, prima data trovata, nessuna data sostenibile, benchmark documentale INPS, pensione del coniuge mancante, rule pack proiettivo e data gaps. Non vengono calcolati netto fiscale, certificazioni INPS, P1, ricongiunzioni, riscatti, decorrenze amministrative o raccomandazioni.

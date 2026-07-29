@@ -1,0 +1,14 @@
+{
+  "schema_version": "it-es-eu-pension-pro-rata/v1",
+  "record_type": "ItEsEuPensionProRataEstimate",
+  "status": "complete",
+  "retirement_date": "2039-01-01",
+  "spanish_pro_rata_pension": {
+    "status": "estimated",
+    "monthly_gross_amount": "420.00",
+    "annual_gross_amount": "5880.00",
+    "payments_per_year": 14,
+    "currency": "EUR"
+  },
+  "data_gaps": []
+}

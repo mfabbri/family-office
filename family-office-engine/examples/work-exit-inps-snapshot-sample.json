@@ -1,0 +1,16 @@
+{
+  "schema_version": "inps-pension/v1",
+  "record_type": "InpsPensionSnapshot",
+  "extraction_status": "extracted",
+  "projection": {
+    "retirement_date": "2039-01-01",
+    "monthly_gross_pension": "4300.00",
+    "prices_year": "2026"
+  },
+  "contribution_position": {
+    "pension_contribution_weeks": "1456",
+    "separate_management_weeks": "0"
+  },
+  "contribution_periods": [],
+  "data_gaps": []
+}

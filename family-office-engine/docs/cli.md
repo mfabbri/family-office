@@ -1261,3 +1261,31 @@ python -m family_office_engine.cli.main tax-documents import
 ```
 
 Lo snapshot `tax-documents/v1` registra document type, anno/modello e campi fiscali riconosciuti con provenance. Non calcola IRPEF, addizionali, detrazioni o conguagli.
+
+## `fo planning work-exit build`
+
+Trova la prima data sostenibile di uscita dal lavoro del nucleo componendo stima INPS interna, benchmark INPS documentale, quota spagnola pro-rata, pensione del coniuge, patrimonio ponte e spese dichiarate.
+
+Uso:
+
+```text
+fo planning work-exit build
+```
+
+Smoke sintetico:
+
+```text
+fo planning work-exit demo
+```
+
+Default principali:
+
+- input: `../family-office-workspace/planning/work-exit-feasibility.json`
+- rule pack: `../family-office-rules/italy/2026/inps-theoretical-pension.json`
+- INPS documentale: `../family-office-workspace/snapshots/inps-pension.snapshot.json`
+- Spagna pro-rata: `../family-office-workspace/snapshots/it-es-eu-pension-pro-rata.snapshot.json`
+- output: `../family-office-workspace/snapshots/work-exit-feasibility.snapshot.json`
+- input sintetico: `examples/work-exit-feasibility-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-work-exit.synthetic.snapshot.json`
+
+Il comando produce `work-exit-feasibility/v1`: elenca candidate valutate, prima data sostenibile o blocco, motivi delle date scartate, `inps-theoretical-pension/v1` per candidato/persona, stream lordi separati per persona e fonte e data gaps. La stima INPS interna e' contributiva e proiettiva per pianificazione; non sostituisce INPS, non calcola netto fiscale, P1, ricongiunzioni, riscatti, decorrenze amministrative o raccomandazioni.

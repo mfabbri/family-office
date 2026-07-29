@@ -311,7 +311,7 @@ Esito: audit completato sul perimetro V4.6g-V4.8a con checklist su confini modul
 
 ### V4.8c — Earliest work-exit date with internal INPS estimate
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Trovare la prima data sostenibile, a partire da oggi, in cui il nucleo puo' smettere di lavorare secondo vincoli dichiarati, stimando internamente la pensione INPS lorda lungo una griglia di date candidate e componendola con quota spagnola pro-rata, pensione del coniuge, patrimonio, spese e opzioni ponte disponibili.
@@ -323,6 +323,8 @@ Trovare la prima data sostenibile, a partire da oggi, in cui il nucleo puo' smet
 - Done quando: l'utente puo' lanciare un comando CLI breve per trovare la prima data di uscita dal lavoro sostenibile del nucleo e ottenere importi lordi separati per persona e fonte, totale congiunto, vincoli verificati e spiegazione delle date scartate, senza edit manuale di JSON e senza usare LLM per calcoli previdenziali o finanziari.
 
 Note di perimetro: seguire `knowledge -> rules -> tests -> engine`. Le date target esplicite, come 2037, sono solo candidate diagnostiche dentro la ricerca, non l'obiettivo primario. La pensione del coniuge deve entrare nel calcolo household come stream separato; se non e' disponibile o stimabile, lo snapshot deve produrre un gap esplicito invece di calcolare una data di uscita incompleta. Per anni futuri non osservabili usare solo assunzioni proiettive dichiarate nel rule pack, marcate come stima di pianificazione e non come legge futura ufficiale. La stima INPS interna deve restare distinta dalla proiezione documentale INPS importata; quando entrambe esistono, il sistema deve mostrare provenance e differenze invece di sovrascrivere il dato documentale. Fuori perimetro: certificazione ufficiale INPS, P1 ufficiale, netto fiscale non gia' disponibile, decorrenze amministrative non codificate, ricongiunzioni, riscatto laurea, opzione donna/APE/quote speciali e raccomandazioni.
+
+Esito: completato con knowledge note INPS verificata il 2026-07-29, rule pack `it.inps-theoretical-pension.2026.v1`, contratto `work-exit-feasibility/v1`, componente `inps-theoretical-pension/v1`, servizio deterministico, fixture sintetiche, CLI `planning work-exit build/demo`, documentazione API/CLI/input/testing e test. Il sistema cerca date candidate, conserva importi lordi separati per persona e fonte, integra stima INPS interna, benchmark documentale INPS, quota spagnola pro-rata e pensione del coniuge, segnala data gaps bloccanti se manca la pensione del coniuge e spiega le date scartate. Le regole future sono marcate come proiezione di pianificazione, non come legge futura ufficiale. Non calcola netto fiscale, certificazioni INPS, P1, ricongiunzioni, riscatti, decorrenze amministrative, opzioni speciali o raccomandazioni. Verifiche: 5 test mirati OK, test CLI work-exit demo OK, smoke CLI `planning work-exit demo` OK (`first=2039-01-01`), regression unit engine 446 test OK, `roadmap_audit.py` OK.
 
 ### V4.9 — Succession and donation planning V2
 

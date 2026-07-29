@@ -685,3 +685,23 @@ Funzioni principali:
 - `parse_tax_document_text(text, filename, document_group)`: parser deterministico del testo PDF.
 
 Il modulo registra solo valori esplicitamente presenti nei documenti fiscali e mantiene provenance per documento. Non esegue calcoli fiscali.
+
+## Work-exit Feasibility
+
+Modulo:
+
+```text
+family_office_engine.services.work_exit_feasibility
+```
+
+Funzione principale:
+
+- `build_work_exit_feasibility(input_path, rule_pack_path, output_path, ...)`: cerca la prima data sostenibile di uscita dal lavoro e scrive `work-exit-feasibility/v1`.
+
+`work-exit-feasibility/v1` valuta date candidate esplicite, stima `inps-theoretical-pension/v1` per persona con rule pack INPS contributivo, compone pensione INPS interna, benchmark documentale INPS, quota spagnola pro-rata e pensioni dichiarate del coniuge come stream separati. La sostenibilita' usa solo vincoli patrimoniali e di spesa dichiarati; non calcola netto fiscale, decorrenze amministrative, raccomandazioni o pensioni ufficiali.
+
+Fixture:
+
+- `examples/work-exit-feasibility-sample.json`
+- `examples/work-exit-inps-snapshot-sample.json`
+- `examples/work-exit-pro-rata-sample.json`

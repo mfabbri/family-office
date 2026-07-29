@@ -171,6 +171,10 @@ from family_office_engine.services.protection_gap import (
     ProtectionGapError,
     build_protection_gap,
 )
+from family_office_engine.services.work_exit_feasibility import (
+    WorkExitFeasibilityError,
+    build_work_exit_feasibility,
+)
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -408,6 +412,34 @@ def default_or_existing_spanish_theoretical_snapshot(explicit_path: Path | None)
 
 def default_pension_income_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "pension-income.snapshot.json"
+
+
+def default_work_exit_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "work-exit-feasibility.json"
+
+
+def default_work_exit_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "work-exit-feasibility-sample.json"
+
+
+def default_work_exit_rule_pack() -> Path:
+    return resolve_repo("rules") / "italy" / "2026" / "inps-theoretical-pension.json"
+
+
+def default_work_exit_sample_inps_snapshot() -> Path:
+    return resolve_repo("engine") / "examples" / "work-exit-inps-snapshot-sample.json"
+
+
+def default_work_exit_sample_pro_rata_snapshot() -> Path:
+    return resolve_repo("engine") / "examples" / "work-exit-pro-rata-sample.json"
+
+
+def default_work_exit_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "work-exit-feasibility.snapshot.json"
+
+
+def default_work_exit_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-work-exit.synthetic.snapshot.json"
 
 
 def default_lifecycle_expenses_input() -> Path:
@@ -4371,6 +4403,81 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_spanish_eu_theoretical_pension_demo_output(),
         help="Output synthetic Spanish EU theoretical pension snapshot JSON path",
     )
+    planning_work_exit_parser = planning_subparsers.add_parser(
+        "work-exit",
+        help="Find the earliest sustainable household work-exit date",
+    )
+    planning_work_exit_subparsers = planning_work_exit_parser.add_subparsers(
+        dest="planning_work_exit_command"
+    )
+    planning_work_exit_build_parser = planning_work_exit_subparsers.add_parser(
+        "build",
+        help="Build work-exit-feasibility/v1 from household constraints and pension snapshots",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_work_exit_input(),
+        help="Input work-exit feasibility JSON path",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_work_exit_rule_pack(),
+        help="Input INPS theoretical pension rule pack JSON path",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--inps-snapshot",
+        type=Path,
+        default=default_inps_pension_output(),
+        help="Optional INPS documentary projection snapshot JSON path",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--pro-rata-snapshot",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_output(),
+        help="Optional IT-ES EU pro-rata snapshot JSON path",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--pension-income-snapshot",
+        type=Path,
+        default=default_pension_income_output(),
+        help="Optional pension income snapshot JSON path",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--net-worth-snapshot",
+        type=Path,
+        default=default_net_worth_output(),
+        help="Optional net worth snapshot JSON path",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--liquidity-plan-snapshot",
+        type=Path,
+        default=default_liquidity_plan_output(),
+        help="Optional liquidity plan snapshot JSON path",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--lifecycle-expenses-snapshot",
+        type=Path,
+        default=default_lifecycle_expenses_output(),
+        help="Optional lifecycle expenses snapshot JSON path",
+    )
+    planning_work_exit_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_work_exit_output(),
+        help="Output work-exit feasibility snapshot JSON path",
+    )
+    planning_work_exit_demo_parser = planning_work_exit_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic work-exit feasibility check",
+    )
+    planning_work_exit_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_work_exit_demo_output(),
+        help="Output synthetic work-exit feasibility snapshot JSON path",
+    )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
     tax_documents_import_parser = tax_documents_subparsers.add_parser(
@@ -6109,6 +6216,62 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['status']} "
             f"entitlement={snapshot['spanish_entitlement']['status']}, "
             f"pro-rata={snapshot['spanish_pro_rata_pension']['status']}, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "work-exit"
+        and args.planning_work_exit_command == "build"
+    ):
+        try:
+            snapshot = build_work_exit_feasibility(
+                args.input,
+                args.rule_pack,
+                args.output,
+                inps_snapshot_path=args.inps_snapshot,
+                pro_rata_snapshot_path=args.pro_rata_snapshot,
+                pension_income_snapshot_path=args.pension_income_snapshot,
+                net_worth_snapshot_path=args.net_worth_snapshot,
+                liquidity_plan_snapshot_path=args.liquidity_plan_snapshot,
+                lifecycle_expenses_snapshot_path=args.lifecycle_expenses_snapshot,
+            )
+        except WorkExitFeasibilityError as exc:
+            print(f"planning work-exit: ERROR ({exc})")
+            return 1
+        print(
+            "planning work-exit: "
+            f"{snapshot['status']} "
+            f"first={snapshot['first_sustainable_exit_date'] or 'not_found'}, "
+            f"{snapshot['search']['candidate_count']} candidates, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "work-exit"
+        and args.planning_work_exit_command == "demo"
+    ):
+        try:
+            snapshot = build_work_exit_feasibility(
+                default_work_exit_sample_input(),
+                default_work_exit_rule_pack(),
+                args.output,
+                inps_snapshot_path=default_work_exit_sample_inps_snapshot(),
+                pro_rata_snapshot_path=default_work_exit_sample_pro_rata_snapshot(),
+            )
+        except WorkExitFeasibilityError as exc:
+            print(f"planning work-exit demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning work-exit demo: "
+            f"{snapshot['status']} "
+            f"first={snapshot['first_sustainable_exit_date'] or 'not_found'}, "
+            f"{snapshot['search']['candidate_count']} candidates, "
             f"{len(snapshot['data_gaps'])} gaps "
             f"({args.output})"
         )
