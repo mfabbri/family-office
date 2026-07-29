@@ -1,0 +1,155 @@
+{
+  "schema_version": "spanish-eu-theoretical-pension-rule-pack/v1",
+  "rule_pack_id": "eu.es.spanish-eu-theoretical-pension.2026.v1",
+  "jurisdictions": [
+    "ES",
+    "EU"
+  ],
+  "currency": "EUR",
+  "status": "deterministic_internal_estimate_not_official_decision",
+  "valid_from": "2026-01-01",
+  "valid_to": "2026-12-31",
+  "planning_projection": {
+    "status": "planning_projection_not_official_future_law",
+    "valid_from": "2027-01-01",
+    "valid_to": "2045-12-31",
+    "source": "internal deterministic planning assumption for long-horizon scenarios; replace with updated official rule pack when available",
+    "base_reguladora": {
+      "lookback_months": 300,
+      "selected_highest_bases": 300,
+      "divisor": "350.00",
+      "source_provision": "planning projection using a 25-year base-reguladora-style window"
+    },
+    "ipc_projection": {
+      "from_month": "2019-04",
+      "to_month": "2045-12",
+      "base_value": "1.000000",
+      "annual_rate": "0.0200",
+      "method": "monthly_compounded_from_declared_annual_rate"
+    },
+    "limitations": [
+      "Projection for planning only; not a prediction of Spanish law or inflation.",
+      "Must be replaced by official rule packs and IPC series as they become available.",
+      "Human review is required before relying on the result."
+    ]
+  },
+  "source_refs": [
+    {
+      "source_id": "eurlex.reg-883-2004.art52",
+      "title": "Regulation (EC) No 883/2004 on the coordination of social security systems",
+      "url": "https://eur-lex.europa.eu/eli/reg/2004/883/oj/eng",
+      "retrieved_on": "2026-07-24",
+      "provisions": [
+        "Article 52"
+      ]
+    },
+    {
+      "source_id": "seg-social.eu-reglamentos-comunitarios",
+      "title": "Seguridad Social, Reglamentos Comunitarios, determinacion de la base reguladora",
+      "url": "https://www.seg-social.es/wps/portal/wss/internet/InformacionUtil/32078/966/1819/1823?changeLanguage=es",
+      "retrieved_on": "2026-07-24",
+      "provisions": [
+        "Determinacion de la base reguladora"
+      ]
+    },
+    {
+      "source_id": "seg-social.jubilacion.cuantia",
+      "title": "Seguridad Social, Prestaciones/Pensiones de Trabajadores, cuantia",
+      "url": "https://www.seg-social.es/wps/portal/wss/internet/Trabajadores/PrestacionesPensionesTrabajadores/10963/28393/28396/28475?changeLanguage=es",
+      "retrieved_on": "2026-07-24",
+      "provisions": [
+        "Base reguladora",
+        "Actualizacion de bases de cotizacion",
+        "Porcentaje"
+      ]
+    },
+    {
+      "source_id": "boe.lgss.rdl-8-2015.consolidated-2026",
+      "title": "Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social",
+      "url": "https://boe.es/buscar/act.php?id=BOE-A-2015-11724&p=20260204&tn=1",
+      "retrieved_on": "2026-07-24",
+      "provisions": [
+        "Articulo 209",
+        "Articulo 210"
+      ]
+    }
+  ],
+  "theoretical_amount_method": {
+    "legal_basis": "Regulation (EC) No 883/2004 Article 52",
+    "foreign_period_basis": "nearest_spanish_real_contribution_base_updated_by_ipc",
+    "italian_periods_used_as_spanish_bases": false,
+    "requires_dated_eu_periods": true,
+    "requires_official_spanish_bases": true,
+    "requires_ipc_index_for_updated_months": true,
+    "revaluation_after_last_spanish_contribution": "not_encoded"
+  },
+  "base_reguladora": {
+    "year": 2026,
+    "lookback_months": 304,
+    "selected_highest_bases": 302,
+    "divisor": "352.33",
+    "nominal_recent_months": 24,
+    "source_provision": "Seguridad Social cuantia and BOE LGSS articulo 209"
+  },
+  "pension_percentage": {
+    "first_15_years_rate": "0.50",
+    "first_15_years_months": 180,
+    "additional_month_schedule": [
+      {
+        "from_year": 2023,
+        "to_year": 2026,
+        "segments": [
+          {
+            "from_additional_month": 1,
+            "to_additional_month": 49,
+            "monthly_rate": "0.0021"
+          },
+          {
+            "from_additional_month": 50,
+            "to_additional_month": 258,
+            "monthly_rate": "0.0019"
+          }
+        ],
+        "source_provision": "Disposicion transitoria novena"
+      }
+    ],
+    "maximum_rate": "1.00",
+    "source_provision": "Articulo 210"
+  },
+  "payment_schedule": {
+    "ordinary_payments_per_year": 14,
+    "ordinary_monthly_payments": 12,
+    "extra_payment_months": [
+      6,
+      11
+    ],
+    "source_provision": "Spanish ordinary pension payment schedule"
+  },
+  "ipc_index": {
+    "status": "synthetic_regression_only",
+    "base_value": "1.000000",
+    "identity_ranges": [
+      {
+        "from_month": "2001-08",
+        "to_month": "2026-11",
+        "source": "synthetic regression fixture; replace with official IPC series before personal use"
+      }
+    ],
+    "values": {
+      "2001-08": "1.000000",
+      "2024-12": "1.000000"
+    }
+  },
+  "rounding": {
+    "money_decimals": 2,
+    "mode": "ROUND_HALF_UP"
+  },
+  "limitations": [
+    "Internal deterministic estimate only; not an official Seguridad Social or P1 decision.",
+    "Uses ordinary retirement rules for 2026 only.",
+    "Italian periods are used only as EU totalized periods and never as Spanish contribution bases.",
+    "Requires official Spanish contribution bases and versioned IPC index values; missing IPC produces data gaps.",
+    "Does not calculate taxation, net amounts, minimum or maximum pension caps, supplements, early/deferred retirement, special regimes, administrative filing or recommendations.",
+    "Post-contribution pension revaluations are not encoded in this rule pack."
+  ]
+}

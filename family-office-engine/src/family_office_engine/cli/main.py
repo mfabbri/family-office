@@ -1,4 +1,5 @@
 import argparse
+import calendar
 import hashlib
 import json
 import os
@@ -79,6 +80,10 @@ from family_office_engine.services.eu_pension_coordination import (
 from family_office_engine.services.it_es_eu_pension_pro_rata import (
     ItEsEuPensionProRataError,
     build_it_es_eu_pension_pro_rata,
+)
+from family_office_engine.services.spanish_eu_theoretical_pension import (
+    SpanishEuTheoreticalPensionError,
+    build_spanish_eu_theoretical_pension,
 )
 from family_office_engine.services.pension_income import (
     PensionIncomeError,
@@ -372,6 +377,33 @@ def default_it_es_eu_pension_pro_rata_output() -> Path:
 
 def default_it_es_eu_pension_pro_rata_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-it-es-eu-pension-pro-rata.synthetic.snapshot.json"
+
+
+def default_spanish_eu_theoretical_pension_rule_pack() -> Path:
+    return resolve_repo("rules") / "cross-border" / "spanish-eu-theoretical-pension.json"
+
+
+def default_spanish_eu_theoretical_pension_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "spanish-eu-theoretical-pension-pro-rata-input-sample.json"
+
+
+def default_spanish_eu_theoretical_pension_sample_reconciliation() -> Path:
+    return resolve_repo("engine") / "examples" / "spanish-eu-theoretical-pension-reconciliation-sample.json"
+
+
+def default_spanish_eu_theoretical_pension_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "spanish-eu-theoretical-pension.snapshot.json"
+
+
+def default_spanish_eu_theoretical_pension_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-spanish-eu-theoretical-pension.synthetic.snapshot.json"
+
+
+def default_or_existing_spanish_theoretical_snapshot(explicit_path: Path | None) -> Path | None:
+    if explicit_path is not None:
+        return explicit_path
+    default_path = default_spanish_eu_theoretical_pension_output()
+    return default_path if default_path.exists() else None
 
 
 def default_pension_income_output() -> Path:
@@ -910,6 +942,53 @@ def prepare_it_es_eu_pension_pro_rata_input(template_path: Path, draft_path: Pat
         "template_path": str(template_path),
         "draft_path": str(draft_path),
     }
+
+
+def run_it_es_eu_pension_wizard(input_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    existing = _read_optional_wizard_json(input_path, ItEsEuPensionProRataError, "IT-ES EU pension pro-rata input")
+    if existing is not None and not overwrite:
+        return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
+
+    defaults = _it_es_eu_pension_wizard_defaults(existing)
+    print("planning it-es-eu-pension wizard: crea un input personale esplicito, senza usare fixture sintetiche.")
+    print("planning it-es-eu-pension wizard: i contributi italiani servono solo per il diritto UE, non come basi spagnole.")
+    print(
+        "contesto spagnolo riconciliato: "
+        f"mesi_ES={defaults['spain_months']}, ultimo_mese_ES={defaults['spain_end_month']}"
+    )
+    retirement_date = _prompt_month("Mese pensionamento da verificare (YYYY-MM)", defaults["retirement_date"])
+    date_of_birth = _prompt_date("Data di nascita (YYYY-MM-DD)", defaults["date_of_birth"])
+    recent_anchor = _prompt_date(
+        "Data anchor requisito recente spagnolo; di solito mese pensionamento o ultima contribuzione utile",
+        defaults["recent_contribution_anchor_date"],
+    )
+    italy_months = _prompt_int("Mesi contributivi italiani normalizzati da includere per totalizzazione UE", defaults["italy_months"])
+    italy_end_month = _prompt_month("Ultimo mese contributivo italiano incluso (YYYY-MM)", defaults["italy_end_month"])
+    spain_months = _prompt_int("Mesi contributivi spagnoli documentati/assunti", defaults["spain_months"])
+    spain_end_month = _prompt_month("Ultimo mese contributivo spagnolo incluso (YYYY-MM)", defaults["spain_end_month"])
+    no_future_es = _prompt_bool("Confermi nessun contributo spagnolo futuro dopo quel mese?", defaults["no_future_spanish_contributions"])
+    monthly_theoretical = _prompt_decimal_text(
+        "Pensione teorica spagnola lorda mensile da sole basi ES; 0.00 se non nota",
+        defaults["spanish_theoretical_monthly"],
+    )
+    payments_per_year = _prompt_int("Mensilita annue della pensione teorica spagnola", defaults["payments_per_year"])
+
+    data = _it_es_eu_pension_input_data(
+        {
+            "retirement_date": retirement_date,
+            "date_of_birth": date_of_birth,
+            "recent_contribution_anchor_date": recent_anchor,
+            "italy_months": italy_months,
+            "italy_end_month": italy_end_month,
+            "spain_months": spain_months,
+            "spain_end_month": spain_end_month,
+            "no_future_spanish_contributions": no_future_es,
+            "spanish_theoretical_monthly": monthly_theoretical,
+            "payments_per_year": payments_per_year,
+        }
+    )
+    _write_wizard_json(input_path, data, True, ItEsEuPensionProRataError, "IT-ES EU pension pro-rata input")
+    return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(data.get("data_gaps", []))}
 
 
 def run_planning_goals_wizard(input_path: Path, overwrite: bool = False) -> dict[str, Any]:
@@ -2218,6 +2297,154 @@ def _pension_contribution_input_data(values: dict[str, Any], data_gaps: list[dic
     }
 
 
+def _it_es_eu_pension_wizard_defaults(existing: dict[str, Any] | None) -> dict[str, Any]:
+    reconciliation = _read_optional_wizard_json(
+        default_spanish_contribution_reconciliation_output(),
+        ItEsEuPensionProRataError,
+        "Spanish contribution reconciliation snapshot",
+    )
+    es_months = _reconciliation_covered_months(reconciliation)
+    if existing:
+        periods = existing.get("insurance_periods") if isinstance(existing.get("insurance_periods"), list) else []
+        it_period = next((item for item in periods if isinstance(item, dict) and item.get("country") == "IT"), {})
+        es_period = next((item for item in periods if isinstance(item, dict) and item.get("country") == "ES"), {})
+        theoretical = existing.get("spanish_theoretical_pension") if isinstance(existing.get("spanish_theoretical_pension"), dict) else {}
+        return {
+            "retirement_date": str(existing.get("retirement_date") or "2035-12"),
+            "date_of_birth": str(existing.get("date_of_birth") or "1968-01-01"),
+            "recent_contribution_anchor_date": str(existing.get("recent_contribution_anchor_date") or "2035-12-01"),
+            "italy_months": _period_month_count(it_period, 180),
+            "italy_end_month": str(it_period.get("end_date", "2035-12")[:7]),
+            "spain_months": _period_month_count(es_period, len(es_months) or 1),
+            "spain_end_month": str(es_period.get("end_date", (max(es_months) if es_months else "2019-04"))[:7]),
+            "no_future_spanish_contributions": True,
+            "spanish_theoretical_monthly": str(theoretical.get("monthly_gross_amount") or "0.00"),
+            "payments_per_year": _int_or_default(theoretical.get("payments_per_year"), 14),
+        }
+    return {
+        "retirement_date": "2035-12",
+        "date_of_birth": "1968-01-01",
+        "recent_contribution_anchor_date": "2035-12-01",
+        "italy_months": 180,
+        "italy_end_month": "2035-12",
+        "spain_months": len(es_months) or 1,
+        "spain_end_month": max(es_months) if es_months else "2019-04",
+        "no_future_spanish_contributions": True,
+        "spanish_theoretical_monthly": "0.00",
+        "payments_per_year": 14,
+    }
+
+
+def _it_es_eu_pension_input_data(values: dict[str, Any]) -> dict[str, Any]:
+    italy_months = max(0, int(values["italy_months"]))
+    spain_months = max(0, int(values["spain_months"]))
+    data_gaps = _wizard_gaps(
+        [
+            (italy_months <= 0, "missing_italian_contribution_months", "Italian contribution months must be declared."),
+            (spain_months <= 0, "missing_spanish_contribution_months", "Spanish contribution months must be declared."),
+            (
+                values["no_future_spanish_contributions"] is not True,
+                "future_spanish_contributions_not_confirmed",
+                "Future Spanish contribution assumption must be explicitly confirmed.",
+            ),
+            (
+                str(values["spanish_theoretical_monthly"]) == "0.00",
+                "missing_spanish_theoretical_amount",
+                "Spanish theoretical pension from Spanish-only bases must be supplied before pro-rata can be calculated.",
+            ),
+        ]
+    )
+    periods = []
+    if italy_months > 0:
+        periods.append(_wizard_period("IT", italy_months, values["italy_end_month"], "explicit-italian-contribution-history"))
+    if spain_months > 0:
+        periods.append(_wizard_period("ES", spain_months, values["spain_end_month"], "reconciled-spanish-contribution-history"))
+
+    data: dict[str, Any] = {
+        "schema_version": "it-es-eu-pension-pro-rata-input/v1",
+        "scenario": "ordinary",
+        "retirement_date": values["retirement_date"],
+        "date_of_birth": values["date_of_birth"],
+        "recent_contribution_anchor_date": values["recent_contribution_anchor_date"],
+        "inps_history_status": "complete_dated_history" if italy_months > 0 else "missing",
+        "future_assumptions_status": "explicit" if values["no_future_spanish_contributions"] else "missing",
+        "sources": [
+            {"source_id": "it-es-eu-pension-wizard", "type": "user_declared_assumptions"},
+            {"source_id": "no-future-spanish-contributions", "type": "explicit_future_assumption"},
+        ],
+        "insurance_periods": periods,
+        "data_gaps": data_gaps,
+    }
+    if str(values["spanish_theoretical_monthly"]) != "0.00":
+        monthly = Decimal(str(values["spanish_theoretical_monthly"]))
+        payments = int(values["payments_per_year"])
+        data["spanish_theoretical_pension"] = {
+            "monthly_gross_amount": str(monthly.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)),
+            "annual_gross_amount": str((monthly * Decimal(payments)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)),
+            "currency": "EUR",
+            "payments_per_year": payments,
+            "source": "explicit user input or professional estimate",
+            "source_country": "ES",
+            "basis": "spanish_only_bases",
+        }
+    return data
+
+
+def _wizard_period(country: str, months: int, end_month: str, source_document: str) -> dict[str, Any]:
+    start_month = _add_months(end_month, -(months - 1))
+    return {
+        "country": country,
+        "start_date": f"{start_month}-01",
+        "end_date": _month_end_date(end_month),
+        "period_type": "compulsory",
+        "source_document": source_document,
+    }
+
+
+def _reconciliation_covered_months(reconciliation: dict[str, Any] | None) -> list[str]:
+    if not reconciliation:
+        return []
+    months = reconciliation.get("months")
+    if not isinstance(months, list):
+        return []
+    result = [
+        str(item["month"])
+        for item in months
+        if isinstance(item, dict) and item.get("covered_by_vida_laboral") and isinstance(item.get("month"), str)
+    ]
+    return sorted(result)
+
+
+def _period_month_count(period: dict[str, Any], default: int) -> int:
+    start = period.get("start_date")
+    end = period.get("end_date")
+    if not isinstance(start, str) or not isinstance(end, str):
+        return default
+    return max(1, _month_index_cli(end[:7]) - _month_index_cli(start[:7]) + 1)
+
+
+def _add_months(month: str, delta: int) -> str:
+    index = _month_index_cli(month) + delta
+    year = index // 12
+    month_number = index % 12 + 1
+    return f"{year:04d}-{month_number:02d}"
+
+
+def _month_index_cli(month: str) -> int:
+    if len(month) != 7 or month[4] != "-" or not month[:4].isdigit() or not month[5:7].isdigit():
+        raise ItEsEuPensionProRataError(f"Month must be YYYY-MM: {month}")
+    month_number = int(month[5:7])
+    if month_number < 1 or month_number > 12:
+        raise ItEsEuPensionProRataError(f"Month must be YYYY-MM: {month}")
+    return int(month[:4]) * 12 + month_number - 1
+
+
+def _month_end_date(month: str) -> str:
+    year = int(month[:4])
+    month_number = int(month[5:7])
+    return f"{month}-{calendar.monthrange(year, month_number)[1]:02d}"
+
+
 def _int_or_default(value: Any, default: int) -> int:
     return value if isinstance(value, int) else default
 
@@ -2262,6 +2489,17 @@ def _prompt_date(label: str, default: str) -> str:
             date.fromisoformat(value)
         except ValueError:
             print("Valore non valido: inserisci una data YYYY-MM-DD.")
+            continue
+        return value
+
+
+def _prompt_month(label: str, default: str) -> str:
+    while True:
+        value = _prompt_text(label, default)
+        try:
+            _month_index_cli(value)
+        except ItEsEuPensionProRataError:
+            print("Valore non valido: inserisci un mese YYYY-MM.")
             continue
         return value
 
@@ -4035,6 +4273,21 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Overwrite existing draft",
     )
+    planning_it_es_eu_pension_wizard_parser = planning_it_es_eu_pension_subparsers.add_parser(
+        "wizard",
+        help="Interactively create a private mixed IT-ES pension pro-rata input",
+    )
+    planning_it_es_eu_pension_wizard_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_input(),
+        help="Output IT-ES EU pension pro-rata input JSON path",
+    )
+    planning_it_es_eu_pension_wizard_parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing input",
+    )
     planning_it_es_eu_pension_build_parser = planning_it_es_eu_pension_subparsers.add_parser(
         "build",
         help="Build it-es-eu-pension-pro-rata/v1 from dated periods and explicit theoretical amount",
@@ -4057,6 +4310,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_it_es_eu_pension_pro_rata_output(),
         help="Output IT-ES EU pension pro-rata snapshot JSON path",
     )
+    planning_it_es_eu_pension_build_parser.add_argument(
+        "--spanish-theoretical-snapshot",
+        type=Path,
+        default=None,
+        help="Optional spanish-eu-theoretical-pension/v1 snapshot used to fill the theoretical amount",
+    )
     planning_it_es_eu_pension_demo_parser = planning_it_es_eu_pension_subparsers.add_parser(
         "demo",
         help="Run the synthetic IT-ES EU pension pro-rata check with bundled examples",
@@ -4066,6 +4325,51 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=default_it_es_eu_pension_pro_rata_demo_output(),
         help="Output synthetic IT-ES EU pension pro-rata snapshot JSON path",
+    )
+    planning_spanish_eu_theoretical_parser = planning_subparsers.add_parser(
+        "spanish-eu-theoretical-pension",
+        help="Estimate the Spanish EU theoretical gross pension amount",
+    )
+    planning_spanish_eu_theoretical_subparsers = planning_spanish_eu_theoretical_parser.add_subparsers(
+        dest="planning_spanish_eu_theoretical_command"
+    )
+    planning_spanish_eu_theoretical_build_parser = planning_spanish_eu_theoretical_subparsers.add_parser(
+        "build",
+        help="Build spanish-eu-theoretical-pension/v1 from pro-rata periods and Spanish bases",
+    )
+    planning_spanish_eu_theoretical_build_parser.add_argument(
+        "--pro-rata-input",
+        type=Path,
+        default=default_it_es_eu_pension_pro_rata_input(),
+        help="Input IT-ES EU pension pro-rata JSON path with dated IT/ES periods",
+    )
+    planning_spanish_eu_theoretical_build_parser.add_argument(
+        "--spanish-reconciliation-snapshot",
+        type=Path,
+        default=default_spanish_contribution_reconciliation_output(),
+        help="Input Spanish contribution reconciliation snapshot JSON path",
+    )
+    planning_spanish_eu_theoretical_build_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_spanish_eu_theoretical_pension_rule_pack(),
+        help="Input Spanish EU theoretical pension rule pack JSON path",
+    )
+    planning_spanish_eu_theoretical_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_spanish_eu_theoretical_pension_output(),
+        help="Output Spanish EU theoretical pension snapshot JSON path",
+    )
+    planning_spanish_eu_theoretical_demo_parser = planning_spanish_eu_theoretical_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic Spanish EU theoretical pension check",
+    )
+    planning_spanish_eu_theoretical_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_spanish_eu_theoretical_pension_demo_output(),
+        help="Output synthetic Spanish EU theoretical pension snapshot JSON path",
     )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
@@ -5686,10 +5990,43 @@ def main(argv: list[str] | None = None) -> int:
     if (
         args.command == "planning"
         and args.planning_command == "it-es-eu-pension"
+        and args.planning_it_es_eu_pension_command == "wizard"
+    ):
+        try:
+            result = run_it_es_eu_pension_wizard(args.input, args.overwrite)
+        except (EOFError, KeyboardInterrupt):
+            print("planning it-es-eu-pension wizard: interrupted")
+            return 1
+        except ItEsEuPensionProRataError as exc:
+            print(f"planning it-es-eu-pension wizard: ERROR ({exc})")
+            return 1
+        if result["status"] == "existing":
+            print(
+                "planning it-es-eu-pension wizard: existing input "
+                f"({result['input_path']}; run `fo planning it-es-eu-pension build`, or rerun with `--overwrite` to revise it)"
+            )
+            return 0
+        print(
+            "planning it-es-eu-pension wizard: prepared "
+            f"{result['data_gap_count']} gaps "
+            f"({result['input_path']}; run `fo planning it-es-eu-pension build`)"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "it-es-eu-pension"
         and args.planning_it_es_eu_pension_command == "build"
     ):
         try:
-            snapshot = build_it_es_eu_pension_pro_rata(args.input, args.rule_pack, args.output)
+            snapshot = build_it_es_eu_pension_pro_rata(
+                args.input,
+                args.rule_pack,
+                args.output,
+                spanish_theoretical_snapshot_path=default_or_existing_spanish_theoretical_snapshot(
+                    args.spanish_theoretical_snapshot
+                ),
+            )
         except ItEsEuPensionProRataError as exc:
             print(f"planning it-es-eu-pension: ERROR ({exc})")
             return 1
@@ -5698,6 +6035,56 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['status']} "
             f"entitlement={snapshot['spanish_entitlement']['status']}, "
             f"pro-rata={snapshot['spanish_pro_rata_pension']['status']}, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "spanish-eu-theoretical-pension"
+        and args.planning_spanish_eu_theoretical_command == "build"
+    ):
+        try:
+            snapshot = build_spanish_eu_theoretical_pension(
+                args.pro_rata_input,
+                args.spanish_reconciliation_snapshot,
+                args.rule_pack,
+                args.output,
+            )
+        except SpanishEuTheoreticalPensionError as exc:
+            print(f"planning spanish-eu-theoretical-pension: ERROR ({exc})")
+            return 1
+        theoretical = snapshot.get("spanish_theoretical_pension") or {}
+        print(
+            "planning spanish-eu-theoretical-pension: "
+            f"{snapshot['status']} "
+            f"theoretical={theoretical.get('monthly_gross_amount', 'not_calculable')}, "
+            f"{len(snapshot['data_gaps'])} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "spanish-eu-theoretical-pension"
+        and args.planning_spanish_eu_theoretical_command == "demo"
+    ):
+        try:
+            snapshot = build_spanish_eu_theoretical_pension(
+                default_spanish_eu_theoretical_pension_sample_input(),
+                default_spanish_eu_theoretical_pension_sample_reconciliation(),
+                default_spanish_eu_theoretical_pension_rule_pack(),
+                args.output,
+            )
+        except SpanishEuTheoreticalPensionError as exc:
+            print(f"planning spanish-eu-theoretical-pension demo: ERROR ({exc})")
+            return 1
+        theoretical = snapshot.get("spanish_theoretical_pension") or {}
+        print(
+            "planning spanish-eu-theoretical-pension demo: "
+            f"{snapshot['status']} "
+            f"theoretical={theoretical.get('monthly_gross_amount', 'not_calculable')}, "
             f"{len(snapshot['data_gaps'])} gaps "
             f"({args.output})"
         )

@@ -25,7 +25,7 @@ cd family-office-engine
 fo validate
 ```
 
-I comandi `python -m family_office_engine.cli.main ...` restano fallback tecnici da checkout sorgente, non il percorso operativo preferito.
+I comandi `python -m family_office_engine.cli.main ...` restano fallback tecnici da checkout sorgente, non il percorso operativo preferito. Le procedure utente devono mostrare comandi `fo ...` e appoggiarsi ai default del workspace, evitando path JSON nelle istruzioni ordinarie.
 
 ## Ordine consigliato
 
@@ -33,10 +33,22 @@ I comandi `python -m family_office_engine.cli.main ...` restano fallback tecnici
 2. `documents inventory` e `documents organize`: controlla e classifica i documenti nel workspace.
 3. Import documentali: `payroll`, `investments`, `bank-insurance`, `tax-documents`, `fonte`, `pension import-spain`.
 4. Normalizzazioni household: `household validate`, `household ownership validate`, `household availability validate`, `household timeline validate`.
-5. Pensione e cashflow: `pension reconcile-spain`, `pension estimate-spain`, `pension coordinate-it-es`, `pension compose-income`, `expenses build-lifecycle`.
+5. Pensione e cashflow: `pension import-inps`, `pension reconcile-spain`; per pensione spagnola autonoma calcolabile `pension estimate-spain`; per caso misto Italia-Spagna `planning it-es-eu-pension wizard`, `planning spanish-eu-theoretical-pension build`, `planning it-es-eu-pension build`; poi `pension compose-income` ed `expenses build-lifecycle`.
 6. Patrimonio e pianificazione: `net-worth consolidate`, `planning goals`, `planning liquidity`, `planning decumulation`, `planning pension-contributions`.
 7. Scenario decisionale: `scenarios compose-v2`, `scenarios evaluate`, `scenarios sensitivity`, `scenarios score`, `scenarios dossier`.
 8. Report e dashboard: `dashboard build`, `report build`.
+
+## Obiettivo Pensione
+
+L'obiettivo operativo non e' scegliere a mano una data di pensionamento e calcolarla isolatamente. Il percorso corretto e' trovare la prima data sostenibile, partendo da oggi, in cui il nucleo puo' smettere di lavorare secondo vincoli dichiarati.
+
+Capability pianificata in V4.8c:
+
+```text
+fo planning work-exit build
+```
+
+Questo comando non e' ancora disponibile. Quando implementato dovra' usare i default del workspace e scansionare date candidate, producendo `work-exit-feasibility/v1` con prima data sostenibile, motivi delle date scartate, stima INPS interna per candidato, quota spagnola pro-rata, pensione del coniuge, eventuali bridge, patrimonio/spese e data gaps. Date esplicite come `2037` saranno solo candidate diagnostiche o filtri, non l'obiettivo primario. Se la pensione del coniuge non e' disponibile o stimabile, il comando dovra' produrre un gap esplicito per evitare una data di uscita household incompleta.
 
 ## Comandi demo
 
@@ -47,6 +59,8 @@ fo planning goals demo
 fo planning liquidity demo
 fo planning decumulation demo
 fo planning pension-contributions demo
+fo planning spanish-eu-theoretical-pension demo
+fo planning it-es-eu-pension demo
 ```
 
 Gli output demo vanno in `family-office-workspace/snapshots/cli-check-*.synthetic.snapshot.json`.
@@ -61,6 +75,7 @@ fo household availability wizard
 fo planning liquidity wizard
 fo planning decumulation wizard
 fo planning pension-contributions wizard
+fo planning it-es-eu-pension wizard
 ```
 
 I wizard fanno domande deterministiche, scrivono solo nel workspace o nel path passato con `--input`, rifiutano overwrite salvo `--overwrite` e validano il contratto input. Non devono chiedere di nuovo metadati gia' disponibili da input o snapshot esistenti: li mostrano come contesto e chiedono solo decisioni o assunzioni operative. Salvano progressivamente le risposte, cosi' un'interruzione puo' essere ripresa con `--overwrite`.

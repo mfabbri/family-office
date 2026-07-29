@@ -2131,6 +2131,129 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(written["schema_version"], "pension-scenario/v1")
             self.assertEqual(written["selected_scenario"]["initial_fiscal_residence"], "IT")
 
+    def test_main_planning_it_es_eu_pension_wizard_writes_mixed_case_input(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "it-es-eu-pension-pro-rata-input.json"
+            reconciliation_path = root / "spanish-contribution-reconciliation.snapshot.json"
+            reconciliation_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "spanish-contribution-reconciliation/v1",
+                        "status": "complete",
+                        "months": [
+                            {"month": "2021-01", "covered_by_vida_laboral": True},
+                            {"month": "2021-02", "covered_by_vida_laboral": True},
+                            {"month": "2021-03", "covered_by_vida_laboral": True},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            answers = [
+                "2026-12",
+                "1960-01-01",
+                "2026-12-01",
+                "180",
+                "2020-12",
+                "60",
+                "2025-12",
+                "yes",
+                "2000.00",
+                "12",
+            ]
+            stdout = io.StringIO()
+
+            with (
+                patch(
+                    "family_office_engine.cli.main.default_spanish_contribution_reconciliation_output",
+                    return_value=reconciliation_path,
+                ),
+                patch("builtins.input", side_effect=answers),
+                redirect_stdout(stdout),
+            ):
+                exit_code = main(["planning", "it-es-eu-pension", "wizard", "--input", str(input_path)])
+
+            self.assertEqual(exit_code, 0)
+            written = json.loads(input_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "it-es-eu-pension-pro-rata-input/v1")
+            self.assertEqual(written["future_assumptions_status"], "explicit")
+            self.assertNotIn("synthetic_fixture", json.dumps(written))
+            self.assertEqual(written["insurance_periods"][1]["country"], "ES")
+            self.assertEqual(written["insurance_periods"][1]["end_date"], "2025-12-31")
+            self.assertEqual(written["spanish_theoretical_pension"]["basis"], "spanish_only_bases")
+            self.assertEqual(written["data_gaps"], [])
+            self.assertIn("planning it-es-eu-pension wizard: prepared 0 gaps", stdout.getvalue())
+
+    def test_main_planning_spanish_eu_theoretical_pension_demo_returns_success(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "spanish-eu-theoretical-pension.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "planning",
+                        "spanish-eu-theoretical-pension",
+                        "demo",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn(
+                "planning spanish-eu-theoretical-pension demo: complete theoretical=1916.76, 0 gaps",
+                stdout.getvalue(),
+            )
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "spanish-eu-theoretical-pension/v1")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "eu.es.spanish-eu-theoretical-pension.2026.v1")
+
+    def test_main_planning_it_es_eu_pension_build_uses_default_theoretical_snapshot(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            theoretical_path = root / "spanish-eu-theoretical-pension.snapshot.json"
+            output_path = root / "it-es-eu-pension-pro-rata.snapshot.json"
+            stdout = io.StringIO()
+
+            with (
+                patch(
+                    "family_office_engine.cli.main.default_spanish_eu_theoretical_pension_output",
+                    return_value=theoretical_path,
+                ),
+                redirect_stdout(stdout),
+            ):
+                theoretical_exit = main(
+                    [
+                        "planning",
+                        "spanish-eu-theoretical-pension",
+                        "demo",
+                        "--output",
+                        str(theoretical_path),
+                    ]
+                )
+                pro_rata_exit = main(
+                    [
+                        "planning",
+                        "it-es-eu-pension",
+                        "build",
+                        "--input",
+                        str(REPOSITORY_ROOT / "family-office-engine" / "examples" / "spanish-eu-theoretical-pension-pro-rata-input-sample.json"),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+
+            self.assertEqual(theoretical_exit, 0)
+            self.assertEqual(pro_rata_exit, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn(
+                "planning it-es-eu-pension: complete entitlement=eligible_by_totalization, pro-rata=calculated, 0 gaps",
+                stdout.getvalue(),
+            )
+
     def test_main_planning_protection_demo_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "protection-gap.snapshot.json"

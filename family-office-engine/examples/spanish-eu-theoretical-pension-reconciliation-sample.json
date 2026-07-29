@@ -1,0 +1,166 @@
+{
+  "schema_version": "spanish-contribution-reconciliation/v1",
+  "record_type": "SpanishContributionReconciliationSnapshot",
+  "status": "complete",
+  "summary": {
+    "covered_month_count": 12,
+    "usable_month_count": 12,
+    "data_gap_count": 0,
+    "anomaly_count": 0
+  },
+  "months": [
+    {
+      "month": "2021-01",
+      "covered_by_vida_laboral": true,
+      "periods": [
+        {
+          "source_document": "synthetic-vida-laboral"
+        }
+      ],
+      "official_bases": [
+        {
+          "base_amount": "3000.00",
+          "source_document": "synthetic-bases.csv"
+        }
+      ],
+      "payroll_bases": [],
+      "selected_base": {
+        "month": "2021-01",
+        "base_amount": "3000.00",
+        "currency": "EUR",
+        "source_type": "official_bases",
+        "confidence": "high",
+        "source_documents": [
+          "synthetic-bases.csv"
+        ],
+        "component_count": 1
+      },
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-02",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-02", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-03",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-03", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-04",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-04", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-05",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-05", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-06",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-06", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-07",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-07", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-08",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-08", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-09",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-09", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-10",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-10", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-11",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-11", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    },
+    {
+      "month": "2021-12",
+      "covered_by_vida_laboral": true,
+      "periods": [{"source_document": "synthetic-vida-laboral"}],
+      "official_bases": [{"base_amount": "3000.00", "source_document": "synthetic-bases.csv"}],
+      "payroll_bases": [],
+      "selected_base": {"month": "2021-12", "base_amount": "3000.00", "currency": "EUR", "source_type": "official_bases", "confidence": "high", "source_documents": ["synthetic-bases.csv"], "component_count": 1},
+      "usable_for_estimator": true,
+      "data_gap_codes": [],
+      "anomaly_codes": []
+    }
+  ],
+  "data_gaps": [],
+  "anomalies": []
+}

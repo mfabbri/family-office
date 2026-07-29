@@ -896,10 +896,19 @@ Demo sintetica senza ricordare path JSON:
 fo planning it-es-eu-pension demo
 ```
 
-Da checkout sorgente:
+Demo sintetiche senza path JSON:
 
 ```text
-$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning it-es-eu-pension demo
+fo planning spanish-eu-theoretical-pension demo
+fo planning it-es-eu-pension demo
+```
+
+Percorso personale ordinario senza path JSON:
+
+```text
+fo planning it-es-eu-pension wizard
+fo planning spanish-eu-theoretical-pension build
+fo planning it-es-eu-pension build
 ```
 
 Lo snapshot risultante viene scritto in:
@@ -908,7 +917,7 @@ Lo snapshot risultante viene scritto in:
 ..\family-office-workspace\snapshots\it-es-eu-pension-pro-rata.snapshot.json
 ```
 
-Il contratto `it-es-eu-pension-pro-rata/v1` usa periodi assicurativi datati IT/ES e importo teorico spagnolo esplicito. I test coprono diritto autonomo, diritto per totalizzazione, sovrapposizioni, requisito recente, importo teorico mancante, fonti non ufficiali e quota pro-rata. Non vengono calcolati pensione INPS normativa, fiscalita', netto, P1 ufficiale, basi spagnole da periodi italiani o contribuzione futura non dichiarata.
+Il contratto `spanish-eu-theoretical-pension/v1` calcola l'importo teorico spagnolo lordo usando basi ES ufficiali e basi ES piu' vicine aggiornate IPC per mesi UE esteri nella finestra; `it-es-eu-pension-pro-rata/v1` puo' usare lo snapshot teorico senza edit manuale dell'input. I test coprono diritto autonomo, diritto per totalizzazione, sovrapposizioni, requisito recente, importo teorico mancante, fonti non ufficiali, IPC mancante, anno non coperto, nessun uso di contributi italiani come basi spagnole e quota pro-rata. Non vengono calcolati pensione INPS normativa, fiscalita', netto, P1 ufficiale, basi spagnole da periodi italiani o contribuzione futura non dichiarata.
 
 Verifica riconciliazione documentale:
 

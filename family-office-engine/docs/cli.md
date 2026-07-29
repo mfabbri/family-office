@@ -18,7 +18,7 @@ fo validate
 fo planning goals wizard
 ```
 
-Dalla root del progetto sono disponibili anche wrapper locali, ad esempio `.\fo.ps1 validate`. I comandi `python -m family_office_engine.cli.main ...` nelle sezioni sotto sono fallback tecnici da checkout sorgente, non il percorso operativo preferito.
+Dalla root del progetto sono disponibili anche wrapper locali, ad esempio `.\fo.ps1 validate`. I comandi `python -m family_office_engine.cli.main ...` sono fallback tecnici da checkout sorgente, non il percorso operativo preferito. Le procedure utente devono documentare prima il percorso `fo ...`, usando default del workspace, wizard e comandi senza path JSON.
 
 PowerShell non esegue comandi dalla cartella corrente con il solo nome. Per usare `fo` senza prefisso `.\`, prepara la sessione dalla root:
 
@@ -289,7 +289,7 @@ Importa documenti previdenziali spagnoli classificati nel workspace privato e sc
 Uso:
 
 ```text
-python -m family_office_engine.cli.main pension import-spain
+fo pension import-spain
 ```
 
 Default input:
@@ -310,7 +310,7 @@ Riconcilia lo snapshot spagnolo importato e scrive:
 Uso:
 
 ```text
-python -m family_office_engine.cli.main pension reconcile-spain
+fo pension reconcile-spain
 ```
 
 Default:
@@ -331,8 +331,10 @@ Stima la pensione ordinaria pubblica spagnola lorda da basi contributive riconci
 Uso:
 
 ```text
-python -m family_office_engine.cli.main pension estimate-spain --retirement-year 2026
+fo pension estimate-spain --retirement-year 2026
 ```
+
+Per il caso misto Italia-Spagna in cui il diritto spagnolo nasce da totalizzazione UE e la pensione autonoma spagnola non e' calcolabile, non usare `estimate-spain` come percorso principale. Usa invece il flusso guidato `fo planning it-es-eu-pension wizard`, `fo planning spanish-eu-theoretical-pension build`, `fo planning it-es-eu-pension build`.
 
 Default:
 
@@ -353,7 +355,7 @@ Costruisce un dossier di coordinamento pensionistico UE Italia-Spagna:
 Uso:
 
 ```text
-python -m family_office_engine.cli.main pension coordinate-it-es --italian-contribution-months 240
+fo pension coordinate-it-es --italian-contribution-months 240
 ```
 
 Default:
@@ -376,7 +378,7 @@ Compone i flussi pensionistici disponibili in uno snapshot unico:
 Uso:
 
 ```text
-python -m family_office_engine.cli.main pension compose-income
+fo pension compose-income
 ```
 
 Default:
@@ -392,7 +394,7 @@ Il comando mantiene separati flussi documentali, stime interne e opzioni. Il rie
 Per escludere le opzioni RITA:
 
 ```text
-python -m family_office_engine.cli.main pension compose-income --no-rita
+fo pension compose-income --no-rita
 ```
 
 ## `fo expenses build-lifecycle`
@@ -1121,10 +1123,21 @@ Stima diritto pensionistico spagnolo in coordinamento UE e quota pro-rata:
 ../family-office-workspace/snapshots/it-es-eu-pension-pro-rata.snapshot.json
 ```
 
-Uso:
+Uso ordinario per caso personale misto Italia-Spagna:
 
 ```text
+fo planning it-es-eu-pension wizard
+fo planning spanish-eu-theoretical-pension build
 fo planning it-es-eu-pension build
+```
+
+Il build pro-rata usa automaticamente lo snapshot teorico di default se `fo planning spanish-eu-theoretical-pension build` lo ha prodotto. Non serve passare path JSON.
+
+Demo sintetiche senza path JSON:
+
+```text
+fo planning spanish-eu-theoretical-pension demo
+fo planning it-es-eu-pension demo
 ```
 
 Prepara una bozza sintetica nel workspace privato:
@@ -1133,16 +1146,16 @@ Prepara una bozza sintetica nel workspace privato:
 fo planning it-es-eu-pension prepare
 ```
 
+Wizard per caso personale misto Italia-Spagna:
+
+```text
+fo planning it-es-eu-pension wizard
+```
+
 Demo sintetica senza path JSON:
 
 ```text
 fo planning it-es-eu-pension demo
-```
-
-Da checkout sorgente:
-
-```text
-python -m family_office_engine.cli.main planning it-es-eu-pension demo
 ```
 
 Default:
@@ -1151,13 +1164,40 @@ Default:
 - draft prepare: `../family-office-workspace/planning/it-es-eu-pension-pro-rata-input.draft.json`
 - rule pack: `../family-office-rules/cross-border/eu-pension-coordination-it-es.json`
 - output: `../family-office-workspace/snapshots/it-es-eu-pension-pro-rata.snapshot.json`
+- importo teorico calcolato: `../family-office-workspace/snapshots/spanish-eu-theoretical-pension.snapshot.json`
 
 Default demo:
 
 - input sintetico: `examples/it-es-eu-pension-pro-rata-input-sample.json`
+- input teorico sintetico: `examples/spanish-eu-theoretical-pension-pro-rata-input-sample.json`
+- riconciliazione ES sintetica: `examples/spanish-eu-theoretical-pension-reconciliation-sample.json`
 - output sintetico: `../family-office-workspace/snapshots/cli-check-it-es-eu-pension-pro-rata.synthetic.snapshot.json`
 
-Il comando produce `it-es-eu-pension-pro-rata/v1` con data nascita, scenario pensionamento, anchor del requisito recente, periodi IT/ES datati, mesi non sovrapposti, diritto spagnolo autonomo e totalizzato, importo teorico spagnolo esplicito con provenance solo spagnola, quota pro-rata, warning e data gaps. Non calcola pensione INPS normativa, fiscalita', netto, P1 ufficiale, basi spagnole da periodi italiani o contribuzione futura non dichiarata.
+Il comando produce `it-es-eu-pension-pro-rata/v1` con data nascita, scenario pensionamento, anchor del requisito recente, periodi IT/ES datati, mesi non sovrapposti, diritto spagnolo autonomo e totalizzato, importo teorico spagnolo esplicito o calcolato con provenance solo spagnola, quota pro-rata, warning e data gaps. Non calcola pensione INPS normativa, fiscalita', netto, P1 ufficiale, basi spagnole da periodi italiani o contribuzione futura non dichiarata.
+
+`fo planning spanish-eu-theoretical-pension build` produce `spanish-eu-theoretical-pension/v1` da input pro-rata, riconciliazione contributiva spagnola e rule pack `spanish-eu-theoretical-pension`. Per anni futuri non osservabili, come il 2039, usa solo assunzioni proiettive dichiarate nel rule pack e marca lo snapshot come `planning_projection_not_official_future_law`: e' una stima di pianificazione, non una regola ufficiale futura. Per mesi UE non spagnoli nella finestra di base usa solo la base spagnola reale piu' vicina nel tempo aggiornata con IPC ufficiale o proiettato; se IPC, basi ES o copertura mensile non sono disponibili, scrive data gaps. `fo planning it-es-eu-pension wizard` crea l'input personale guidato senza fixture sintetiche: propone i mesi spagnoli dalla riconciliazione disponibile, chiede mesi italiani normalizzati, mese di pensionamento, conferma esplicita di nessun contributo spagnolo futuro e importo teorico spagnolo da sole basi ES. Se l'importo teorico non e' noto, lo registra come data gap invece di inventarlo.
+
+## `fo planning work-exit build` planned
+
+Capability pianificata in V4.8c, non ancora disponibile nella CLI.
+
+Obiettivo: trovare la prima data sostenibile per smettere di lavorare partendo da oggi, non valutare soltanto una data target statica.
+
+Uso previsto:
+
+```text
+fo planning work-exit build
+```
+
+Default previsti:
+
+- INPS: `../family-office-workspace/snapshots/inps-pension.snapshot.json`
+- Spagna teorica/pro-rata: `../family-office-workspace/snapshots/spanish-eu-theoretical-pension.snapshot.json` e `../family-office-workspace/snapshots/it-es-eu-pension-pro-rata.snapshot.json`
+- pension income: `../family-office-workspace/snapshots/pension-income.snapshot.json`
+- patrimonio/liquidita'/spese: snapshot del workspace gia' prodotti dai comandi dedicati
+- output: `../family-office-workspace/snapshots/work-exit-feasibility.snapshot.json`
+
+Il comando dovra' produrre `work-exit-feasibility/v1` con date candidate, prima data sostenibile oppure blocco spiegato, motivi delle date scartate, stima INPS interna per candidato/persona, quota spagnola pro-rata, pensione del coniuge, totale lordo separato per persona e fonte, eventuali bridge e data gaps. Date esplicite come `2037` sono candidate diagnostiche o filtri della ricerca, non l'obiettivo primario. Se la pensione del coniuge non e' disponibile o stimabile, il comando dovra' produrre un gap esplicito per evitare una data household incompleta. Per anni futuri non osservabili usera' solo assunzioni proiettive dichiarate nei rule pack; non calcolera' certificazioni ufficiali INPS, P1 ufficiale, netto fiscale non gia' disponibile o raccomandazioni.
 
 ## `fo retirement simulate`
 

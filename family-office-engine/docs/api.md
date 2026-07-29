@@ -643,15 +643,18 @@ family_office_engine.services.it_es_eu_pension_pro_rata
 
 Funzione principale:
 
-- `build_it_es_eu_pension_pro_rata(input_path, rule_pack_path, output_path)`: stima diritto spagnolo in coordinamento UE e scrive `it-es-eu-pension-pro-rata/v1`.
+- `build_it_es_eu_pension_pro_rata(input_path, rule_pack_path, output_path, spanish_theoretical_snapshot_path=None)`: stima diritto spagnolo in coordinamento UE e scrive `it-es-eu-pension-pro-rata/v1`.
+- `build_spanish_eu_theoretical_pension(pro_rata_input_path, reconciliation_snapshot_path, rule_pack_path, output_path)`: calcola `spanish-eu-theoretical-pension/v1` da periodi IT/ES datati, basi spagnole riconciliate e rule pack UE/Spagna.
 
-`it-es-eu-pension-pro-rata/v1` legge periodi assicurativi IT/ES datati e un importo teorico spagnolo esplicito. Il servizio normalizza i mesi, conta una sola volta le sovrapposizioni nel denominatore UE, distingue diritto autonomo spagnolo e diritto per totalizzazione, quindi calcola la quota pro-rata spagnola da importo teorico e rapporto ES/UE.
+`spanish-eu-theoretical-pension/v1` valorizza la finestra spagnola con basi ufficiali ES e, per mesi UE esteri nella finestra, con la base ES piu' vicina aggiornata tramite IPC versionato nel rule pack. I periodi italiani restano periodi UE totalizzati e non diventano basi contributive spagnole. `it-es-eu-pension-pro-rata/v1` legge periodi assicurativi IT/ES datati e un importo teorico spagnolo esplicito oppure uno snapshot teorico completo. Il servizio normalizza i mesi, conta una sola volta le sovrapposizioni nel denominatore UE, distingue diritto autonomo spagnolo e diritto per totalizzazione, quindi calcola la quota pro-rata spagnola da importo teorico e rapporto ES/UE.
 
 Il servizio non calcola pensione INPS normativa, P1 ufficiale, fiscalita', netto, basi spagnole da periodi italiani, Paesi diversi da Italia/Spagna o contribuzione futura non dichiarata.
 
 Fixture:
 
 - `examples/it-es-eu-pension-pro-rata-input-sample.json`
+- `examples/spanish-eu-theoretical-pension-pro-rata-input-sample.json`
+- `examples/spanish-eu-theoretical-pension-reconciliation-sample.json`
 
 ## Tax Reconciliation
 

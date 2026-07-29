@@ -277,6 +277,53 @@ Valutare polizze vita, beneficiari, coperture, riscatti, costi, eventi morte/ina
 
 Esito: completato con contratto `protection-gap/v1`, servizio deterministico, fixture sintetica, CLI `planning protection build/demo`, documentazione API/CLI/input/testing e test. Il sistema confronta fabbisogni familiari e polizze usando beneficiari, capitali assicurati, eventi coperti, premi, riscatti e provenance espliciti; separa polizze rischio, inabilita', miste e investimento, tracciando il valore di riscatto investimento senza contarlo come copertura rischio. Non calcola consulenza assicurativa, sanitaria, attuariale, legale, fiscale, underwriting, successione, ottimizzazioni o raccomandazioni.
 
+### V4.8a — Spanish EU theoretical pension amount
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Calcolare l'importo teorico spagnolo in regime UE quando la pensione spagnola autonoma non e' simulabile per carenza contributiva nazionale, ma il diritto puo' essere raggiunto per totalizzazione Italia-Spagna.
+
+- Dipende da: V4.6e, V4.6g e V4.8.
+- Repository: `knowledge`, `rules`, `engine`, `workspace`.
+- Output: `spanish-eu-theoretical-pension/v1`, collegabile a `it-es-eu-pension-pro-rata/v1`.
+- Test: nessun contributo spagnolo futuro, periodi IT usati solo per totalizzazione, basi ES reali, periodi esteri nella finestra base reguladora valorizzati con la base ES piu' vicina nel tempo aggiornata IPC, anno non coperto, importo teorico mancante e pro-rata alimentato automaticamente.
+- Done quando: il caso misto IT-ES puo' produrre una pensione teorica spagnola lorda da regole UE/Spagna versionate senza usare LLM, senza fondere contributi italiani con basi spagnole e senza richiedere edit manuale del JSON.
+
+Note di perimetro: seguire `knowledge -> rules -> tests -> engine`; servono fonti ufficiali UE/Spagna e rule pack che coprano l'anno di pensionamento simulato. Fuori perimetro: P1 ufficiale, domanda amministrativa, minimi/massimali non codificati, fiscalita', netto, rivalutazioni non versionate e raccomandazioni.
+
+Esito: completato con knowledge note aggiornata su Reg. UE 883/2004 art. 52 e metodo spagnolo, rule pack `eu.es.spanish-eu-theoretical-pension.2026.v1`, contratto `spanish-eu-theoretical-pension/v1`, servizio deterministico, fixture sintetiche, CLI `planning spanish-eu-theoretical-pension build/demo`, opzione `--spanish-theoretical-snapshot` per alimentare `it-es-eu-pension-pro-rata/v1`, documentazione API/CLI/testing e test. Il sistema calcola l'importo teorico lordo da basi spagnole ufficiali e, per mesi UE esteri nella finestra, dalla base spagnola reale piu' vicina aggiornata tramite IPC versionato; se IPC, anno o basi non sono coperti produce data gaps. I periodi italiani restano usati solo come periodi UE totalizzati e non diventano basi contributive spagnole. Non calcola P1 ufficiale, fiscalita', netto, minimi/massimali, rivalutazioni non versionate, domanda amministrativa o raccomandazioni. Verifiche: 17 test mirati OK, smoke CLI teorico/pro-rata OK, regression unit engine 434 test OK.
+
+### V4.8b — Code audit after Spanish EU theoretical pension
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Audit periodico dovuto dopo quattro incrementi funzionali completati dall'ultimo audit V4.6f: V4.6g, V4.7, V4.8 e V4.8a.
+
+- Dipende da: V4.8a.
+- Repository: `engine`, `rules`, `knowledge`.
+- Output: audit checklist e follow-up espliciti, se presenti.
+- Test: suite pertinente e verifica allineamento knowledge, rule pack, schema, builder, CLI, fixture, docs e privacy.
+- Done quando: eventuali debiti non corretti sono registrati e non bloccano o bloccano esplicitamente V4.9.
+
+Esito: audit completato sul perimetro V4.6g-V4.8a con checklist su confini modulo, allineamento knowledge/rules/engine/docs, copertura test, CLI, data gaps, privacy, dipendenze e roadmap. Corretto un gap di copertura aggiungendo test CLI per `planning spanish-eu-theoretical-pension demo` e rimossa una helper pubblica non usata da `spanish_eu_theoretical_pension.py`. Verifiche: 44 test mirati OK sul perimetro audit, smoke CLI `pension-scenario`, `real-estate`, `protection`, `spanish-eu-theoretical-pension` e pro-rata da snapshot teorico OK, regression unit engine 435 test OK, `roadmap_audit.py` OK. Nessun blocker per V4.9. Follow-up non bloccante: valutare in un futuro audit se estrarre i subcomandi `planning` da `cli/main.py`, che resta grande ma coperto da test.
+
+### V4.8c — Earliest work-exit date with internal INPS estimate
+
+**Stato:** `planned`
+**Tipo:** `functional`
+
+Trovare la prima data sostenibile, a partire da oggi, in cui il nucleo puo' smettere di lavorare secondo vincoli dichiarati, stimando internamente la pensione INPS lorda lungo una griglia di date candidate e componendola con quota spagnola pro-rata, pensione del coniuge, patrimonio, spese e opzioni ponte disponibili.
+
+- Dipende da: V3.5e, V4.6e, V4.6g, V4.8a e V4.8b.
+- Repository: `knowledge`, `rules`, `engine`, `workspace`.
+- Output: `work-exit-feasibility/v1` con date candidate, prima data sostenibile, motivi di fallimento delle date precedenti, adulti del nucleo inclusi, `inps-theoretical-pension/v1` per candidato/persona e totale lordo separato per persona e fonte.
+- Test: ricerca da oggi, candidata 2037 vs 2039, prima data trovata, nessuna data sostenibile, importo documentale INPS disponibile come benchmark, importo documentale mancante, pensione del coniuge presente/mancante, contributi italiani storici/proiettati, totalizzazione UE, Spagna pro-rata, anno futuro proiettivo e gap per regole mancanti.
+- Done quando: l'utente puo' lanciare un comando CLI breve per trovare la prima data di uscita dal lavoro sostenibile del nucleo e ottenere importi lordi separati per persona e fonte, totale congiunto, vincoli verificati e spiegazione delle date scartate, senza edit manuale di JSON e senza usare LLM per calcoli previdenziali o finanziari.
+
+Note di perimetro: seguire `knowledge -> rules -> tests -> engine`. Le date target esplicite, come 2037, sono solo candidate diagnostiche dentro la ricerca, non l'obiettivo primario. La pensione del coniuge deve entrare nel calcolo household come stream separato; se non e' disponibile o stimabile, lo snapshot deve produrre un gap esplicito invece di calcolare una data di uscita incompleta. Per anni futuri non osservabili usare solo assunzioni proiettive dichiarate nel rule pack, marcate come stima di pianificazione e non come legge futura ufficiale. La stima INPS interna deve restare distinta dalla proiezione documentale INPS importata; quando entrambe esistono, il sistema deve mostrare provenance e differenze invece di sovrascrivere il dato documentale. Fuori perimetro: certificazione ufficiale INPS, P1 ufficiale, netto fiscale non gia' disponibile, decorrenze amministrative non codificate, ricongiunzioni, riscatto laurea, opzione donna/APE/quote speciali e raccomandazioni.
+
 ### V4.9 — Succession and donation planning V2
 
 **Stato:** `planned`
@@ -284,7 +331,7 @@ Esito: completato con contratto `protection-gap/v1`, servizio deterministico, fi
 
 Estendere la V2 con quote di legittima, attribuzioni, liquidità per imposte, beneficiari, donazioni pregresse e alternative operative.
 
-- Dipende da: V2.8, V3.2 e V4.7–V4.8.
+- Dipende da: V2.8, V3.2, V4.7-V4.8 e V4.8a.
 - Repository: `knowledge`, `rules`, `engine`.
 - Output: `estate-plan/v2` e scenari comparati.
 - Test: coniuge e due figli, asset illiquidi, polizze, estero e dati incompleti.

@@ -85,6 +85,38 @@ class ItEsEuPensionProRataTest(unittest.TestCase):
         self.assertIn("missing_spanish_theoretical_pension", {gap["code"] for gap in result["data_gaps"]})
         self.assertEqual(result["spanish_pro_rata_pension"]["status"], "not_calculable")
 
+    def test_complete_theoretical_snapshot_resolves_stale_declared_missing_amount_gap(self):
+        payload = _input([_period("IT", "2006-01-01", "2020-12-31"), _period("ES", "2021-01-01", "2025-12-31")])
+        payload.pop("spanish_theoretical_pension")
+        payload["data_gaps"] = [
+            {
+                "code": "missing_spanish_theoretical_amount",
+                "message": "Spanish theoretical pension is not available yet.",
+            }
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "it-es-eu-pension-pro-rata-input.json"
+            snapshot_path = root / "spanish-eu-theoretical-pension.snapshot.json"
+            output_path = root / "it-es-eu-pension-pro-rata.snapshot.json"
+            input_path.write_text(json.dumps(payload), encoding="utf-8")
+            snapshot_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "spanish-eu-theoretical-pension/v1",
+                        "status": "complete",
+                        "spanish_theoretical_pension": _input([])["spanish_theoretical_pension"],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = build_it_es_eu_pension_pro_rata(input_path, RULE_PACK, output_path, snapshot_path)
+
+        self.assertEqual(result["status"], "complete")
+        self.assertNotIn("missing_spanish_theoretical_amount", {gap["code"] for gap in result["data_gaps"]})
+
     def test_blocks_uncovered_retirement_year_instead_of_using_2026_pack(self):
         payload = _input([_period("IT", "2006-01-01", "2020-12-31"), _period("ES", "2021-01-01", "2025-12-31")])
         payload["retirement_date"] = "2039-12"

@@ -130,12 +130,23 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Default: `../family-office-workspace/planning/it-es-eu-pension-pro-rata-input.json`.
 - Esempio: `examples/it-es-eu-pension-pro-rata-input-sample.json`.
 - Draft: `../family-office-workspace/planning/it-es-eu-pension-pro-rata-input.draft.json`.
-- Comandi: `planning it-es-eu-pension prepare`, `planning it-es-eu-pension build`, `planning it-es-eu-pension demo`.
+- Comandi: `planning it-es-eu-pension wizard`, `planning it-es-eu-pension prepare`, `planning it-es-eu-pension build`, `planning it-es-eu-pension demo`, `planning spanish-eu-theoretical-pension build`, `planning spanish-eu-theoretical-pension demo`.
 - Campi: `scenario`, `retirement_date`, `date_of_birth`, `recent_contribution_anchor_date`, `inps_history_status`, `future_assumptions_status`, `sources`, `insurance_periods`, `spanish_theoretical_pension`, `data_gaps`.
 - Ogni periodo dichiara `country`, `start_date`, `end_date`, `period_type` e `source_document`; i Paesi ammessi nel contratto sono `IT` ed `ES`.
 - I periodi devono coprire mesi interi. Periodi parziali o successivi allo scenario vanno risolti prima dell'input oppure dichiarati come gap.
 - `spanish_theoretical_pension` dichiara importo lordo mensile e/o annuo coerente, valuta, paghe annue, fonte, `source_country: ES` e `basis: spanish_only_bases`.
 - Nota: i periodi italiani servono solo per verificare il diritto per totalizzazione UE. Il comando non usa contributi italiani come basi spagnole e non deduce contribuzione futura.
+- Il wizard crea un input personale nel workspace: chiede conferma esplicita di nessun contributo spagnolo futuro e registra come gap l'importo teorico spagnolo se non e' disponibile.
+- `planning spanish-eu-theoretical-pension build` genera lo snapshot teorico usando i default del workspace; per anni futuri usa assunzioni proiettive dichiarate e marcate come non ufficiali. `planning it-es-eu-pension build` lo usa automaticamente se esiste, senza edit manuale dell'importo e senza passare path JSON.
+
+## `work-exit-feasibility-input/v1` planned
+
+- Stato: pianificato in V4.8c; non ancora disponibile nella CLI.
+- Comando previsto: `planning work-exit build`.
+- Obiettivo: cercare la prima data sostenibile per smettere di lavorare, non calcolare solo una data predefinita.
+- Default previsto: usare snapshot gia' presenti nel workspace per INPS, pro-rata spagnolo, pensione del coniuge, pension income, patrimonio, liquidita' e spese.
+- Campi probabili: data di partenza ricerca, granularita' date candidate, adulti del nucleo inclusi, vincoli minimi di sostenibilita', assunzioni future esplicite, riferimenti a snapshot e data gaps.
+- Nota: date come `2037` devono essere candidate o filtri diagnostici; il risultato primario resta la prima data sostenibile con spiegazione delle date scartate. La pensione del coniuge e' parte del calcolo household; se manca, deve restare un gap esplicito.
 
 ## `pension-scenario/v1`
 

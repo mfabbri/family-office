@@ -51,6 +51,40 @@ deve provenire da una stima spagnola deterministica o da un input esplicito
 con provenance. La quota pro-rata spagnola applica al teorico il rapporto tra
 periodi spagnoli non sovrapposti e periodi UE totali non sovrapposti.
 
+### Importo teorico spagnolo da periodi UE
+
+Verifica fonti: 2026-07-24.
+
+Nel calcolo pro-rata dell'articolo 52 del Regolamento (CE) n. 883/2004,
+l'importo teorico e' la prestazione che l'interessato potrebbe chiedere se
+tutti i periodi assicurativi maturati in altri Stati membri fossero stati
+maturati sotto la legislazione applicata dall'istituzione competente alla data
+di liquidazione.
+
+Per la Spagna, la Seguridad Social espone una regola operativa specifica per
+il caso in cui siano stati totalizzati periodi di altri Stati membri: la
+prestazione teorica spagnola si determina sulle basi reali di contribuzione
+della persona negli anni immediatamente anteriori all'ultima contribuzione alla
+Seguridad Social spagnola; quando nella finestra di riferimento devono essere
+computati periodi coperti sotto la legislazione di altri Stati membri, per quei
+periodi si usa la base di contribuzione spagnola piu' vicina nel tempo,
+aggiornata secondo l'indice dei prezzi al consumo (IPC). L'importo cosi'
+ottenuto e' poi incrementato con le rivalutazioni delle pensioni della stessa
+natura per gli anni successivi, se tali rivalutazioni sono codificate.
+
+Per il perimetro family office, questa regola diventa eseguibile solo se:
+
+- i periodi IT/ES datati sono espliciti e non fusi;
+- le basi spagnole ufficiali sono disponibili dalla riconciliazione;
+- l'IPC necessario e' versionato nel rule pack o dichiarato come gap;
+- l'anno di pensionamento e' coperto dai parametri spagnoli applicabili;
+- rivalutazioni successive non codificate restano escluse o diventano gap.
+
+I mesi italiani nella finestra di base reguladora non diventano contributi
+italiani usati come basi spagnole: servono solo a identificare mesi UE
+totalizzati, valorizzati con una base spagnola reale vicina nel tempo e IPC
+versionato.
+
 ## Uso operativo
 
 Il motore deve produrre un dossier che mantenga separate le prestazioni nazionali, dichiari i periodi usati per il coordinamento e blocchi il pro-rata quando mancano periodi normalizzati o importi teorici nazionali. Le stime interne non sostituiscono il documento P1 o le decisioni delle istituzioni competenti.

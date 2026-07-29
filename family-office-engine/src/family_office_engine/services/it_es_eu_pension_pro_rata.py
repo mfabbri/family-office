@@ -15,11 +15,19 @@ class ItEsEuPensionProRataError(ValueError):
     pass
 
 
-def build_it_es_eu_pension_pro_rata(input_path: Path, rule_pack_path: Path, output_path: Path) -> dict[str, Any]:
+def build_it_es_eu_pension_pro_rata(
+    input_path: Path,
+    rule_pack_path: Path,
+    output_path: Path,
+    spanish_theoretical_snapshot_path: Path | None = None,
+) -> dict[str, Any]:
     data = _read_json(input_path, "IT-ES EU pension pro-rata input")
     rule_pack = load_rule_pack(rule_pack_path)
     if data.get("schema_version") != INPUT_SCHEMA_VERSION:
         raise ItEsEuPensionProRataError(f"Unsupported IT-ES EU pension pro-rata input schema: {data.get('schema_version')}")
+    if spanish_theoretical_snapshot_path is not None:
+        data = dict(data)
+        data["spanish_theoretical_pension"] = _theoretical_from_snapshot(spanish_theoretical_snapshot_path)
 
     retirement_date = _retirement_date(data)
     date_of_birth = data.get("date_of_birth")
@@ -30,7 +38,7 @@ def build_it_es_eu_pension_pro_rata(input_path: Path, rule_pack_path: Path, outp
     theoretical = _spanish_theoretical_amount(data.get("spanish_theoretical_pension"))
     pro_rata = _spanish_pro_rata(theoretical, periods_result, entitlement, rule_pack)
     data_gaps = []
-    data_gaps.extend(data.get("data_gaps", []) if isinstance(data.get("data_gaps"), list) else [])
+    data_gaps.extend(_declared_data_gaps(data, theoretical))
     data_gaps.extend(input_gaps)
     data_gaps.extend(periods_result["data_gaps"])
     data_gaps.extend(_post_retirement_period_gaps(periods_result, retirement_date))
@@ -68,6 +76,17 @@ def build_it_es_eu_pension_pro_rata(input_path: Path, rule_pack_path: Path, outp
         ),
     }
     return _write_snapshot(snapshot, output_path)
+
+
+def _declared_data_gaps(data: dict[str, Any], theoretical: dict[str, Any]) -> list[dict[str, Any]]:
+    gaps = data.get("data_gaps", []) if isinstance(data.get("data_gaps"), list) else []
+    if theoretical.get("result") is None:
+        return list(gaps)
+    resolved_by_theoretical_snapshot = {
+        "missing_spanish_theoretical_amount",
+        "missing_spanish_theoretical_pension",
+    }
+    return [gap for gap in gaps if gap.get("code") not in resolved_by_theoretical_snapshot]
 
 
 def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
@@ -259,7 +278,7 @@ def _spanish_theoretical_amount(value: Any) -> dict[str, Any]:
     payments = value.get("payments_per_year")
     source_country = value.get("source_country")
     basis = value.get("basis")
-    gaps = []
+    gaps = value.get("data_gaps", []) if isinstance(value.get("data_gaps"), list) else []
     if source_country != "ES":
         gaps.append(
             {
@@ -314,6 +333,27 @@ def _spanish_theoretical_amount(value: Any) -> dict[str, Any]:
             "basis": basis,
         },
         "data_gaps": gaps,
+    }
+
+
+def _theoretical_from_snapshot(snapshot_path: Path) -> dict[str, Any]:
+    snapshot = _read_json(snapshot_path, "Spanish EU theoretical pension snapshot")
+    if snapshot.get("schema_version") != "spanish-eu-theoretical-pension/v1":
+        raise ItEsEuPensionProRataError(f"Unsupported Spanish theoretical pension snapshot schema: {snapshot.get('schema_version')}")
+    theoretical = snapshot.get("spanish_theoretical_pension")
+    if snapshot.get("status") == "complete" and isinstance(theoretical, dict):
+        return dict(theoretical)
+    return {
+        "source": str(snapshot_path),
+        "source_country": "ES",
+        "basis": "spanish_only_bases",
+        "data_gaps": [
+            {
+                "code": "spanish_theoretical_snapshot_not_complete",
+                "message": "Spanish EU theoretical pension snapshot is not complete.",
+                "source_status": snapshot.get("status"),
+            }
+        ],
     }
 
 
