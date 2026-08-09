@@ -1363,3 +1363,28 @@ Default principali:
 - output: `../family-office-workspace/snapshots/tool-registry.snapshot.json`
 
 Il comando produce `tool-registry/v1` con tool id, schema input/output, prerequisiti, rischio, policy di autorizzazione e note di perimetro. Non esegue tool di pianificazione e non abilita calcoli LLM.
+
+## `fo orchestration citations build`
+
+Costruisce l'indice locale delle fonti pubbliche, dei documenti knowledge e dei contratti registrati.
+
+Uso:
+
+```text
+fo orchestration citations build
+```
+
+Ricerca per testo, giurisdizione, tema e data:
+
+```text
+fo orchestration citations search --jurisdiction IT --topic taxation --as-of-date 2026-08-09
+fo orchestration citations search --query "pension coordination" --jurisdiction EU
+```
+
+Default principali:
+
+- catalogo: `../family-office-knowledge/sources/citation-catalog.json`
+- knowledge root: `../family-office-knowledge`
+- output: `../family-office-workspace/snapshots/citation-index.snapshot.json`
+
+`build` produce `citation-index/v1` con riepilogo di citazioni, documenti, contratti e gap. `search` esclude per default fonti future, scadute, abrogate o ritirate; `--include-inactive` le mostra con stato temporale esplicito. Se l'indice manca o non e' valido, l'errore indica di eseguire prima `fo orchestration citations build`.

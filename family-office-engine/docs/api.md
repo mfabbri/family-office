@@ -760,3 +760,22 @@ Funzioni principali:
 - `invoke_registered_tool(tool_id, requested_output_schema_version, parameters)`: invoca solo un tool registrato, valida versione output richiesta e parametri ammessi, quindi restituisce `tool-invocation/v1`.
 
 `tool-registry/v1` espone identificativo tool, schema input/output, parametri richiesti/opzionali, prerequisiti, rischio, policy di autorizzazione e note di perimetro. Il registry e' esplicito: non abilita discovery dinamica delle funzioni interne e non consente all'LLM di calcolare imposte, pensioni, rendimenti o valori finanziari.
+
+## Citation Index
+
+Modulo:
+
+```text
+family_office_engine.services.citation_index
+```
+
+Funzioni principali:
+
+- `build_citation_index(catalog_path, knowledge_root, contract_records=None, output_path=None, as_of_date=None)`: valida `knowledge-citation-catalog/v1` e costruisce `citation-index/v1`.
+- `search_citation_index(index_path, query=None, jurisdiction=None, topic=None, as_of_date=None, include_inactive=False)`: ricerca fonti per testo, giurisdizione, tema e data, restituendo `citation-search/v1`.
+
+`citation-index/v1` contiene fonti normalizzate, documenti knowledge con hash, contratti input/output derivati dal tool registry, alias deduplicati e data gaps. Le fonti sono ordinate per livello di autorita'; una fonte scaduta, abrogata, futura o ritirata non entra nei risultati correnti salvo richiesta esplicita `include_inactive`.
+
+Il servizio non scarica fonti, non interpreta norme e non crea metadati mancanti. Un documento senza citation ID strutturato resta nell'indice con `knowledge_document_citation_missing`. La ricerca `knowledge.citations.search` e' registrata nel tool registry come capability read-only.
+
+L'hash di `citation-index/v1` copre catalogo, hash dei documenti, data indice, gap e contratti input/output derivati dal tool registry. Di conseguenza l'aggiunta o la modifica di un tool cambia hash e conteggio dei contratti anche quando i file knowledge non cambiano; catalog hash e document hash permettono di distinguere le due cause.

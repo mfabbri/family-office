@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+from family_office_engine.services.citation_index import search_citation_index
 from family_office_engine.services.cross_border_it_es_dossier import build_cross_border_it_es_dossier
 from family_office_engine.services.estate_plan import build_estate_plan
 from family_office_engine.services.it_es_eu_pension_pro_rata import build_it_es_eu_pension_pro_rata
@@ -49,6 +50,19 @@ class RegisteredTool:
 
 
 TOOL_REGISTRY: tuple[RegisteredTool, ...] = (
+    RegisteredTool(
+        tool_id="knowledge.citations.search",
+        title="Search citation-index/v1",
+        callable_ref=search_citation_index,
+        input_schema_version="citation-search-query/v1",
+        output_schema_version="citation-search/v1",
+        required_parameters=("index_path",),
+        optional_parameters=("query", "jurisdiction", "topic", "as_of_date", "include_inactive"),
+        prerequisites=("citation-index/v1",),
+        risk_level="low",
+        authorization_policy=("read_only",),
+        notes="Returns only catalogued citations with temporal status and explicit corpus gaps.",
+    ),
     RegisteredTool(
         tool_id="planning.liquidity_plan.build",
         title="Build liquidity-plan/v1",

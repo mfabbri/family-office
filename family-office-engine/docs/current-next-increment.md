@@ -6,7 +6,7 @@ V5.2 - Knowledge corpus and citation index.
 
 ## Stato
 
-`planned`
+`done`
 
 ## Roadmap
 
@@ -49,6 +49,22 @@ python family-office-engine/src/family_office_engine/governance/roadmap_audit.py
 - Retrieval temporale, citazione mancante e deduplica sono coperti da test.
 - Nessun dato personale entra nei repository software o knowledge.
 
+## Stato implementazione
+
+Completato.
+
+- Catalogo `knowledge-citation-catalog/v1` nel repository knowledge con citation ID, autorita', giurisdizione, temi, validita' e stato.
+- Servizio deterministico `family_office_engine.services.citation_index` con output `citation-index/v1` e `citation-search/v1`.
+- Corpus iniziale: 11 citazioni, 13 documenti knowledge e 28 contratti input/output derivati dal tool registry.
+- 7 gap espliciti: cinque documenti senza citation ID strutturato e fonte RITA senza validita'/data di verifica documentate.
+- Deduplica per locator canonico, hash dei documenti, protezione path traversal e filtro temporale per fonti future, scadute, abrogate o ritirate.
+- Tool read-only `knowledge.citations.search` aggiunto al registry.
+- CLI `fo orchestration citations build/search` con default repository/workspace ed errore recuperabile.
+- 13 test mirati/integration OK.
+- Regression unit engine: 471 test OK.
+- Smoke CLI: build `complete_with_gaps 11 citations, 13 documents, 28 contracts, 7 gaps`; ricerca IT/taxation `complete 8 citations`.
+- `roadmap_audit.py`: OK (`functional_since_audit=2`, `audit_due=false`).
+
 ## Cadenza audit
 
-Il contatore verificato dopo V5.1 e' `functional_since_audit=1`. Completate V5.2, V5.3 e V5.4, l'incremento di audit V5.4a deve essere eseguito prima di V5.5.
+Il contatore verificato dopo V5.2 e' `functional_since_audit=2`. Completate V5.3 e V5.4, l'incremento di audit V5.4a deve essere eseguito prima di V5.5.

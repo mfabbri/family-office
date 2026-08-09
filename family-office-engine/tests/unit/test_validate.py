@@ -930,6 +930,52 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(written["schema_version"], "tool-registry/v1")
             self.assertGreaterEqual(written["tool_count"], 10)
 
+    def test_main_orchestration_citations_build_and_search(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "citation-index.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                build_exit_code = main(
+                    [
+                        "orchestration",
+                        "citations",
+                        "build",
+                        "--catalog",
+                        str(REPOSITORY_ROOT / "family-office-knowledge" / "sources" / "citation-catalog.json"),
+                        "--knowledge-root",
+                        str(REPOSITORY_ROOT / "family-office-knowledge"),
+                        "--as-of-date",
+                        "2026-08-09",
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+                search_exit_code = main(
+                    [
+                        "orchestration",
+                        "citations",
+                        "search",
+                        "--index",
+                        str(output_path),
+                        "--jurisdiction",
+                        "IT",
+                        "--topic",
+                        "taxation",
+                        "--as-of-date",
+                        "2026-08-09",
+                    ]
+                )
+
+            self.assertEqual(build_exit_code, 0)
+            self.assertEqual(search_exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("orchestration citations: complete_with_gaps", stdout.getvalue())
+            self.assertIn("orchestration citations search: complete", stdout.getvalue())
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "citation-index/v1")
+            self.assertGreaterEqual(written["summary"]["citation_count"], 10)
+
     def test_main_household_validate_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "household-facts.snapshot.json"

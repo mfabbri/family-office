@@ -181,6 +181,11 @@ from family_office_engine.services.tool_registry import (
     ToolRegistryError,
     build_tool_registry,
 )
+from family_office_engine.services.citation_index import (
+    CitationIndexError,
+    build_citation_index,
+    search_citation_index,
+)
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -633,6 +638,14 @@ def default_wealth_strategy_demo_output() -> Path:
 
 def default_tool_registry_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "tool-registry.snapshot.json"
+
+
+def default_citation_catalog() -> Path:
+    return resolve_repo("knowledge") / "sources" / "citation-catalog.json"
+
+
+def default_citation_index_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "citation-index.snapshot.json"
 
 
 def default_household_facts_input() -> Path:
@@ -4466,6 +4479,59 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional output tool-registry/v1 snapshot JSON path",
     )
+    orchestration_citations_parser = orchestration_subparsers.add_parser(
+        "citations",
+        help="Build and search the deterministic citation index",
+    )
+    orchestration_citations_subparsers = orchestration_citations_parser.add_subparsers(
+        dest="orchestration_citations_command"
+    )
+    orchestration_citations_build_parser = orchestration_citations_subparsers.add_parser(
+        "build",
+        help="Build citation-index/v1 from the public knowledge catalog",
+    )
+    orchestration_citations_build_parser.add_argument(
+        "--catalog",
+        type=Path,
+        default=default_citation_catalog(),
+        help="Input knowledge-citation-catalog/v1 JSON path",
+    )
+    orchestration_citations_build_parser.add_argument(
+        "--knowledge-root",
+        type=Path,
+        default=resolve_repo("knowledge"),
+        help="Knowledge repository root",
+    )
+    orchestration_citations_build_parser.add_argument(
+        "--as-of-date",
+        default=date.today().isoformat(),
+        help="Index date in YYYY-MM-DD format",
+    )
+    orchestration_citations_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_citation_index_output(),
+        help="Output citation-index/v1 snapshot JSON path",
+    )
+    orchestration_citations_search_parser = orchestration_citations_subparsers.add_parser(
+        "search",
+        help="Search citation-index/v1 with temporal filtering",
+    )
+    orchestration_citations_search_parser.add_argument(
+        "--index",
+        type=Path,
+        default=default_citation_index_output(),
+        help="Input citation-index/v1 snapshot JSON path",
+    )
+    orchestration_citations_search_parser.add_argument("--query", default="", help="Free-text citation query")
+    orchestration_citations_search_parser.add_argument("--jurisdiction", help="Optional jurisdiction code")
+    orchestration_citations_search_parser.add_argument("--topic", help="Optional exact topic")
+    orchestration_citations_search_parser.add_argument("--as-of-date", help="Optional query date in YYYY-MM-DD format")
+    orchestration_citations_search_parser.add_argument(
+        "--include-inactive",
+        action="store_true",
+        help="Include expired, abrogated or withdrawn citations",
+    )
     planning_it_es_eu_pension_parser = planning_subparsers.add_parser(
         "it-es-eu-pension",
         help="Estimate Spain EU entitlement and pro-rata pension share",
@@ -6430,6 +6496,62 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['tool_count']} tools "
             f"({args.output})"
         )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "citations"
+        and args.orchestration_citations_command == "build"
+    ):
+        try:
+            snapshot = build_citation_index(
+                args.catalog,
+                args.knowledge_root,
+                contract_records=build_tool_registry()["tools"],
+                output_path=args.output,
+                as_of_date=args.as_of_date,
+            )
+        except (CitationIndexError, ToolRegistryError) as exc:
+            print(f"orchestration citations: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration citations: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['citation_count']} citations, "
+            f"{snapshot['summary']['knowledge_document_count']} documents, "
+            f"{snapshot['summary']['contract_count']} contracts, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "citations"
+        and args.orchestration_citations_command == "search"
+    ):
+        try:
+            result = search_citation_index(
+                args.index,
+                query=args.query,
+                jurisdiction=args.jurisdiction,
+                topic=args.topic,
+                as_of_date=args.as_of_date,
+                include_inactive=args.include_inactive,
+            )
+        except CitationIndexError as exc:
+            print(
+                "orchestration citations search: ERROR "
+                f"({exc}); run `fo orchestration citations build` first"
+            )
+            return 1
+        print(f"orchestration citations search: {result['status']} {result['citation_count']} citations")
+        for citation in result["citations"]:
+            print(
+                f"- {citation['citation_id']} "
+                f"authority={citation['authority_level']} "
+                f"temporal={citation['temporal_status']}"
+            )
         return 0
 
     if (

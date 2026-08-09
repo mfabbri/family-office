@@ -1069,3 +1069,32 @@ Output personale previsto:
 ```
 
 Il contratto `tool-registry/v1` registra i tool deterministici invocabili da V5 con schema input/output, prerequisiti, rischio e policy. I test coprono snapshot registry, scrittura, tool inesistente, versione incompatibile, parametri mancanti e invocazione controllata di un tool registrato.
+
+## Citation index
+
+Test mirati:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_citation_index
+```
+
+Smoke CLI:
+
+```text
+fo orchestration citations build --as-of-date 2026-08-09
+fo orchestration citations search --jurisdiction IT --topic taxation --as-of-date 2026-08-09
+```
+
+Fallback tecnico:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main orchestration citations build --as-of-date 2026-08-09
+```
+
+Output locale previsto:
+
+```text
+..\family-office-workspace\snapshots\citation-index.snapshot.json
+```
+
+I test coprono catalogo reale, hash riproducibile, retrieval temporale, fonte abrogata, citation ID mancante, deduplica del locator, protezione dal path traversal, invocazione read-only tramite registry e smoke CLI build/search. I gap del corpus restano parte del contratto e non vengono risolti con metadati sintetici.

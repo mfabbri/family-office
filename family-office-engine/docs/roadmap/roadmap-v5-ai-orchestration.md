@@ -38,7 +38,7 @@ Esito: completato con contratto `tool-registry/v1`, servizio deterministico `fam
 
 ### V5.2 — Knowledge corpus and citation index
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Indicizzare knowledge, contratti e fonti normative con giurisdizione, data di validità, tema e livello di autorità.
@@ -50,6 +50,8 @@ Indicizzare knowledge, contratti e fonti normative con giurisdizione, data di va
 - Done quando: ogni affermazione normativa può rinviare a una fonte identificabile.
 
 Readiness: non richiede dati personali. Il corpus pubblico esistente e' sufficiente come base iniziale, ma i metadati non sono ancora uniformi tra le note. V5.2 deve normalizzare il template e produrre gap espliciti per giurisdizione, validita', autorita' o riferimento mancanti, senza escludere silenziosamente la fonte o dedurne l'autorevolezza. I gap V1 restano non bloccanti salvo perimetri dichiarati esaustivi.
+
+Esito: completato con catalogo `knowledge-citation-catalog/v1`, servizio deterministico `citation-index/v1`/`citation-search/v1`, hash dei documenti, deduplica, inventario contratti dal registry, filtro temporale e CLI `orchestration citations build/search`. Il corpus iniziale contiene 11 citazioni, 13 documenti e 28 contratti; 7 gap restano espliciti e non bloccanti, inclusi i documenti senza citation ID e la fonte RITA senza validita'/verifica documentate. `knowledge.citations.search` e' un tool registrato read-only. Verifiche: 13 test mirati/integration OK, smoke CLI build/search OK, regression unit engine 471 test OK, `roadmap_audit.py` OK (`functional_since_audit=2`, `audit_due=false`).
 
 ### V5.3 — Supported-question taxonomy
 
@@ -140,6 +142,7 @@ Comporre executive summary, alternative, motivazioni, numeri, fonti, assunzioni,
 - Repository: `engine`.
 - Output: `advisory-response/v1`.
 - Test: citazioni obbligatorie, numero non supportato, conflitto fra fonti e risposta parziale.
+- Vincolo evidenze: una citazione collegata al documento knowledge non supporta automaticamente ogni frase; il composer deve collegare ciascuna affermazione alla specifica evidenza pertinente oppure dichiararla non supportata.
 - Done quando: ogni numero e conclusione è collegato a un elemento del bundle.
 
 ### V5.9 — Guardrails, confidence and escalation
