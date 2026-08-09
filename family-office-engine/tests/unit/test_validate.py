@@ -885,6 +885,21 @@ class ValidateCliTest(unittest.TestCase):
             written = json.loads(output_path.read_text(encoding="utf-8"))
             self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.estate-baseline.current.v1")
 
+    def test_main_planning_estate_demo_returns_summary(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output_path = Path(tmp_dir) / "estate-plan.snapshot.json"
+            stdout = io.StringIO()
+
+            with redirect_stdout(stdout):
+                exit_code = main(["planning", "estate", "demo", "--output", str(output_path)])
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(output_path.exists())
+            self.assertIn("planning estate demo: partial 2 scenarios", stdout.getvalue())
+            written = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(written["schema_version"], "estate-plan/v2")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.estate-plan.2026.v2")
+
     def test_main_household_validate_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "household-facts.snapshot.json"

@@ -1,0 +1,40 @@
+{
+  "schema_version": "it-es-eu-pension-pro-rata-input/v1",
+  "scenario": "ordinary",
+  "retirement_date": "2026-12",
+  "date_of_birth": "1960-01-01",
+  "recent_contribution_anchor_date": "2026-12-01",
+  "inps_history_status": "complete_dated_history",
+  "future_assumptions_status": "explicit",
+  "sources": [
+    {
+      "source_id": "synthetic-it-es-periods",
+      "type": "synthetic_fixture"
+    }
+  ],
+  "insurance_periods": [
+    {
+      "country": "IT",
+      "start_date": "2006-01-01",
+      "end_date": "2020-12-31",
+      "period_type": "compulsory",
+      "source_document": "synthetic-inps-history"
+    },
+    {
+      "country": "ES",
+      "start_date": "2021-01-01",
+      "end_date": "2025-12-31",
+      "period_type": "compulsory",
+      "source_document": "synthetic-vida-laboral"
+    }
+  ],
+  "spanish_theoretical_pension": {
+    "monthly_gross_amount": "2000.00",
+    "annual_gross_amount": "24000.00",
+    "currency": "EUR",
+    "payments_per_year": 12,
+    "source": "synthetic Spanish theoretical estimate",
+    "source_country": "ES",
+    "basis": "spanish_only_bases"
+  }
+}

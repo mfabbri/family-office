@@ -115,6 +115,7 @@ from family_office_engine.services.decision_dossier import (
 )
 from family_office_engine.services.rita_options import RitaOptionsError, optimize_rita_options
 from family_office_engine.services.estate_baseline import EstateBaselineError, build_estate_baseline
+from family_office_engine.services.estate_plan import EstatePlanError, build_estate_plan
 from family_office_engine.services.household_facts import HouseholdFactsError, import_household_facts
 from family_office_engine.services.ownership_graph import OwnershipGraphError, import_ownership_graph
 from family_office_engine.services.asset_availability import (
@@ -585,8 +586,28 @@ def default_estate_rule_pack() -> Path:
     return resolve_repo("rules") / "succession" / "italy-current.json"
 
 
+def default_estate_plan_rule_pack() -> Path:
+    return resolve_repo("rules") / "succession" / "italy-2026-v2.json"
+
+
 def default_estate_baseline_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "estate-baseline.snapshot.json"
+
+
+def default_estate_plan_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "estate-plan.json"
+
+
+def default_estate_plan_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "estate-plan-sample.json"
+
+
+def default_estate_plan_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "estate-plan.snapshot.json"
+
+
+def default_estate_plan_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-estate-plan.synthetic.snapshot.json"
 
 
 def default_household_facts_input() -> Path:
@@ -4277,6 +4298,45 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_protection_gap_demo_output(),
         help="Output synthetic protection gap snapshot JSON path",
     )
+    planning_estate_parser = planning_subparsers.add_parser(
+        "estate",
+        help="Compare declared estate allocations, donations and beneficiary gaps",
+    )
+    planning_estate_subparsers = planning_estate_parser.add_subparsers(
+        dest="planning_estate_command"
+    )
+    planning_estate_build_parser = planning_estate_subparsers.add_parser(
+        "build",
+        help="Build estate-plan/v2 from explicit succession planning inputs",
+    )
+    planning_estate_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_estate_plan_input(),
+        help="Input estate plan JSON path",
+    )
+    planning_estate_build_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_estate_plan_rule_pack(),
+        help="Input estate plan V2 rule pack JSON path",
+    )
+    planning_estate_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_estate_plan_output(),
+        help="Output estate plan snapshot JSON path",
+    )
+    planning_estate_demo_parser = planning_estate_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic estate planning check with bundled examples",
+    )
+    planning_estate_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_estate_plan_demo_output(),
+        help="Output synthetic estate plan snapshot JSON path",
+    )
     planning_it_es_eu_pension_parser = planning_subparsers.add_parser(
         "it-es-eu-pension",
         help="Estimate Spain EU entitlement and pro-rata pension share",
@@ -6073,6 +6133,46 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['summary']['policy_count']} policies, "
             f"shortfall={snapshot['summary']['total_shortfall']} "
             f"{snapshot['base_currency']}, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "estate"
+        and args.planning_estate_command == "build"
+    ):
+        try:
+            snapshot = build_estate_plan(args.input, args.rule_pack, args.output)
+        except EstatePlanError as exc:
+            print(f"planning estate: ERROR ({exc})")
+            return 1
+        print(
+            "planning estate: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['scenario_count']} scenarios, "
+            f"{snapshot['summary']['conflict_count']} conflicts, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "estate"
+        and args.planning_estate_command == "demo"
+    ):
+        try:
+            snapshot = build_estate_plan(default_estate_plan_sample_input(), default_estate_plan_rule_pack(), args.output)
+        except EstatePlanError as exc:
+            print(f"planning estate demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning estate demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['scenario_count']} scenarios, "
+            f"{snapshot['summary']['conflict_count']} conflicts, "
             f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )

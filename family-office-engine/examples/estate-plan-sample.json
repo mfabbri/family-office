@@ -1,0 +1,110 @@
+{
+  "schema_version": "estate-plan/v2",
+  "record_type": "EstatePlanInput",
+  "household_id": "synthetic_household",
+  "as_of_date": "2026-07-29",
+  "base_currency": "EUR",
+  "decedent_person_id": "person_self",
+  "family": {
+    "has_spouse": true,
+    "children": [
+      {"person_id": "child_1", "relationship": "child"},
+      {"person_id": "child_2", "relationship": "child"}
+    ]
+  },
+  "assets": [
+    {
+      "asset_id": "home_it",
+      "label": "Synthetic Italian home",
+      "asset_class": "real_estate",
+      "jurisdiction": "IT",
+      "currency": "EUR",
+      "gross_value": "500000.00",
+      "ownership_share": "1",
+      "provenance": [{"source_id": "synthetic-estate-plan", "kind": "declared_value"}]
+    },
+    {
+      "asset_id": "portfolio_it",
+      "label": "Synthetic portfolio",
+      "asset_class": "investment",
+      "jurisdiction": "IT",
+      "currency": "EUR",
+      "gross_value": "180000.00",
+      "ownership_share": "1",
+      "provenance": [{"source_id": "synthetic-estate-plan", "kind": "declared_value"}]
+    },
+    {
+      "asset_id": "cash_it",
+      "label": "Synthetic cash",
+      "asset_class": "cash",
+      "jurisdiction": "IT",
+      "currency": "EUR",
+      "gross_value": "70000.00",
+      "ownership_share": "1",
+      "provenance": [{"source_id": "synthetic-estate-plan", "kind": "declared_value"}]
+    },
+    {
+      "asset_id": "flat_es",
+      "label": "Synthetic Spanish flat",
+      "asset_class": "real_estate",
+      "jurisdiction": "ES",
+      "currency": "EUR",
+      "gross_value": "120000.00",
+      "ownership_share": "1",
+      "provenance": [{"source_id": "synthetic-estate-plan", "kind": "declared_value"}]
+    }
+  ],
+  "insurance_policies": [
+    {
+      "policy_id": "life_policy_1",
+      "policy_type": "risk_life",
+      "death_benefit": "250000.00",
+      "estate_treatment": "outside_estate",
+      "currency": "EUR",
+      "beneficiaries": [
+        {"beneficiary_person_id": "spouse", "relationship": "spouse", "share": "1"}
+      ],
+      "provenance": [{"source_id": "synthetic-estate-plan", "kind": "policy_terms"}]
+    }
+  ],
+  "prior_donations": [
+    {
+      "donation_id": "donation_child_1",
+      "beneficiary_person_id": "child_1",
+      "relationship": "child",
+      "amount": "100000.00",
+      "currency": "EUR",
+      "include_in_notional_mass": true,
+      "provenance": [{"source_id": "synthetic-estate-plan", "kind": "declared_donation"}]
+    }
+  ],
+  "tax_liquidity": {
+    "available_immediate_liquidity": "70000.00",
+    "provenance": [{"source_id": "synthetic-estate-plan", "kind": "declared_liquidity"}]
+  },
+  "scenarios": [
+    {
+      "scenario_id": "will_home_to_spouse_cash_to_children",
+      "label": "Synthetic will draft with illiquid home to spouse",
+      "allocations": [
+        {"beneficiary_person_id": "spouse", "relationship": "spouse", "asset_id": "home_it", "share": "1"},
+        {"beneficiary_person_id": "child_1", "relationship": "child", "asset_id": "portfolio_it", "share": "0.5"},
+        {"beneficiary_person_id": "child_2", "relationship": "child", "asset_id": "portfolio_it", "share": "0.5"},
+        {"beneficiary_person_id": "child_2", "relationship": "child", "asset_id": "cash_it", "share": "1"}
+      ]
+    },
+    {
+      "scenario_id": "equalized_children_with_spouse_cash",
+      "label": "Synthetic equalized allocation",
+      "allocations": [
+        {"beneficiary_person_id": "spouse", "relationship": "spouse", "asset_id": "cash_it", "share": "1"},
+        {"beneficiary_person_id": "spouse", "relationship": "spouse", "asset_id": "portfolio_it", "share": "0.25"},
+        {"beneficiary_person_id": "child_1", "relationship": "child", "asset_id": "home_it", "share": "0.4"},
+        {"beneficiary_person_id": "child_2", "relationship": "child", "asset_id": "home_it", "share": "0.4"},
+        {"beneficiary_person_id": "child_1", "relationship": "child", "asset_id": "portfolio_it", "share": "0.375"},
+        {"beneficiary_person_id": "child_2", "relationship": "child", "asset_id": "portfolio_it", "share": "0.375"}
+      ]
+    }
+  ],
+  "data_gaps": []
+}

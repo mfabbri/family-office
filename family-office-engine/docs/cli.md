@@ -1289,3 +1289,29 @@ Default principali:
 - output sintetico: `../family-office-workspace/snapshots/cli-check-work-exit.synthetic.snapshot.json`
 
 Il comando produce `work-exit-feasibility/v1`: elenca candidate valutate, prima data sostenibile o blocco, motivi delle date scartate, `inps-theoretical-pension/v1` per candidato/persona, stream lordi separati per persona e fonte e data gaps. La stima INPS interna e' contributiva e proiettiva per pianificazione; non sostituisce INPS, non calcola netto fiscale, P1, ricongiunzioni, riscatti, decorrenze amministrative o raccomandazioni.
+
+## `fo planning estate build`
+
+Confronta attribuzioni successorie e donazioni pregresse con quote di riserva, beneficiari, polizze, estero e liquidita' fiscale dichiarata.
+
+Uso:
+
+```text
+fo planning estate build
+```
+
+Smoke sintetico:
+
+```text
+fo planning estate demo
+```
+
+Default principali:
+
+- input: `../family-office-workspace/planning/estate-plan.json`
+- rule pack: `../family-office-rules/succession/italy-2026-v2.json`
+- output: `../family-office-workspace/snapshots/estate-plan.snapshot.json`
+- input sintetico: `examples/estate-plan-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-estate-plan.synthetic.snapshot.json`
+
+Il comando produce `estate-plan/v2` con massa nota, massa fittizia dichiarata, quote di riserva, scenari comparati, conflitti, stime fiscali coperte dal rule pack e gap dati. Non calcola collazione, riduzione, base catastale, successione estera, trust, contenzioso o raccomandazioni.

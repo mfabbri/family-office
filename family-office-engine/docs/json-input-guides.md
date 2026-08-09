@@ -182,6 +182,19 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Le polizze investimento sono tracciate per valore di riscatto ma non contano come copertura rischio.
 - Nota: beneficiari, capitali, fabbisogni, premi e riscatti sono input espliciti. Il motore non calcola consulenza assicurativa, sanitaria, attuariale, legale, fiscale, underwriting, successione o raccomandazioni.
 
+## `estate-plan/v2`
+
+- Default: `../family-office-workspace/planning/estate-plan.json`.
+- Esempio: `examples/estate-plan-sample.json`.
+- Comandi: `planning estate build`, `planning estate demo`.
+- Campi: `household_id`, `as_of_date`, `base_currency`, `decedent_person_id`, `family`, `assets`, `prior_donations`, `insurance_policies`, `tax_liquidity`, `scenarios`, `data_gaps`.
+- `family` dichiara coniuge e figli; il rule pack V2 copre solo casi semplici con coniuge e/o figli.
+- Ogni asset richiede valore, quota di titolarita', giurisdizione, valuta e `provenance`; asset esteri o senza quota producono gap.
+- Ogni donazione pregressa richiede beneficiario, relazione, importo, flag `include_in_notional_mass` e `provenance`.
+- Ogni polizza deve dichiarare beneficiari e `estate_treatment`; se il trattamento successorio e' ignoto resta gap.
+- Ogni scenario assegna quote degli asset ai beneficiari. Quote incomplete, asset non allocati e relazioni fiscali non coperte restano gap.
+- Nota: il motore segnala conflitti e gap. Non calcola collazione, riduzione, base catastale, successione estera, trust, contenzioso o raccomandazioni.
+
 ## Scenario decisionale
 
 ### `decision-scenario-v2.json`

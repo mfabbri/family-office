@@ -1,0 +1,43 @@
+{
+  "as_of_date": "2026-07-15",
+  "base_currency": "EUR",
+  "current_age": 55,
+  "data_gaps": [
+    {
+      "code": "unknown_withdrawal_tax_rate",
+      "message": "Average tax rate on asset withdrawals must be estimated or reviewed."
+    },
+    {
+      "code": "unknown_pension_tax_rate",
+      "message": "Average tax rate on pension cashflows must be estimated or reviewed."
+    }
+  ],
+  "household_id": "my_household",
+  "policies": [
+    {
+      "annual_return_sequence": [
+        "0.03"
+      ],
+      "annual_spending_need": "88620.19",
+      "cash_buffer_target": "30000",
+      "end_age": 85,
+      "include_rita": false,
+      "label": "Wizard policy",
+      "pension_tax_rate": "0.00",
+      "policy_id": "wizard_policy",
+      "retirement_age": 68,
+      "rita_tax_rate": "0.00",
+      "withdrawal_order": [
+        "investment_10",
+        "investment_3",
+        "investment_5",
+        "bank_insurance_1",
+        "investment_11",
+        "investment_9"
+      ],
+      "withdrawal_tax_rate": "0.00"
+    }
+  ],
+  "record_type": "DecumulationPolicySet",
+  "schema_version": "decumulation-policy-set/v1"
+}

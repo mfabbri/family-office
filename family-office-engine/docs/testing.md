@@ -982,3 +982,31 @@ Output personale previsto:
 ```
 
 Il contratto `work-exit-feasibility/v1` cerca la prima data sostenibile di uscita dal lavoro usando date candidate, vincoli di spesa/patrimonio, stime `inps-theoretical-pension/v1`, quota spagnola pro-rata e pensione del coniuge come stream lordi separati. I test coprono 2037 vs 2039, prima data trovata, nessuna data sostenibile, benchmark documentale INPS, pensione del coniuge mancante, rule pack proiettivo e data gaps. Non vengono calcolati netto fiscale, certificazioni INPS, P1, ricongiunzioni, riscatti, decorrenze amministrative o raccomandazioni.
+
+## Estate plan V2
+
+Test mirati:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_estate_plan
+```
+
+Smoke CLI:
+
+```text
+fo planning estate demo
+```
+
+Fallback tecnico:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning estate demo
+```
+
+Output personale previsto:
+
+```text
+..\family-office-workspace\snapshots\estate-plan.snapshot.json
+```
+
+Il contratto `estate-plan/v2` confronta scenari di attribuzione dichiarati con quote di riserva, donazioni pregresse, beneficiari, polizze, estero e liquidita' fiscale. I test coprono coniuge e due figli, asset illiquidi, polizze, asset estero, conflitti civilistici, relazione fiscale non familiare, gap dati e smoke CLI. Non vengono calcolati collazione, riduzione, base catastale, successione estera, trust, contenzioso o raccomandazioni.

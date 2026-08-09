@@ -633,6 +633,26 @@ Fixture:
 
 - `examples/protection-gap-sample.json`
 
+## Estate Plan
+
+Modulo:
+
+```text
+family_office_engine.services.estate_plan
+```
+
+Funzione principale:
+
+- `build_estate_plan(input_path, rule_pack_path, output_path)`: confronta attribuzioni successorie dichiarate, donazioni pregresse, beneficiari, polizze e liquidita' fiscale e scrive `estate-plan/v2`.
+
+`estate-plan/v2` usa un rule pack versionato per casi italiani semplici con coniuge e/o figli. Calcola massa ereditaria nota, massa fittizia dichiarata, quote di riserva, conflitti civilistici, stime di imposta successione/donazione per relazioni coperte e gap per estero, polizze non documentate, attribuzioni incomplete e liquidita' fiscale mancante.
+
+Il servizio non calcola collazione, riduzione, base catastale, successione estera, trust, patti, contenzioso, dichiarazioni o raccomandazioni.
+
+Fixture:
+
+- `examples/estate-plan-sample.json`
+
 ## IT-ES EU Pension Pro-Rata
 
 Modulo:

@@ -1,0 +1,151 @@
+{
+  "schema_version": "estate-rule-pack/v2",
+  "rule_pack_id": "it.estate-plan.2026.v2",
+  "jurisdiction": "IT",
+  "currency": "EUR",
+  "status": "current_simple_estate_planning",
+  "valid_from": "2025-01-01",
+  "valid_to": null,
+  "verified_on": "2026-07-29",
+  "source_refs": [
+    {
+      "source_id": "normattiva.codice-civile.legittimari",
+      "title": "Codice civile, Libro II, successione necessaria e legittima",
+      "url": "https://www.normattiva.it/eli/id/1942/04/04/042U0262/CONSOLIDATED"
+    },
+    {
+      "source_id": "normattiva.dlgs-1990-346",
+      "title": "Decreto legislativo 31 ottobre 1990, n. 346",
+      "url": "https://www.normattiva.it/eli/id/1990/10/31/090G0380/CONSOLIDATED"
+    },
+    {
+      "source_id": "normattiva.dlgs-2024-139",
+      "title": "Decreto legislativo 18 settembre 2024, n. 139",
+      "url": "https://www.normattiva.it/atto/caricaDettaglioAtto?atto.codiceRedazionale=24G00157&atto.dataPubblicazioneGazzetta=2024-10-02"
+    }
+  ],
+  "forced_heir_rules": [
+    {
+      "rule_id": "it.reserve.spouse-only.2026",
+      "family_case": "spouse_only",
+      "spouse_reserved_share": "0.5",
+      "children_reserved_share": "0",
+      "available_share": "0.5",
+      "source_articles": ["540"]
+    },
+    {
+      "rule_id": "it.reserve.children-only-one.2026",
+      "family_case": "children_only_one",
+      "spouse_reserved_share": "0",
+      "children_reserved_share": "0.5",
+      "available_share": "0.5",
+      "source_articles": ["537"]
+    },
+    {
+      "rule_id": "it.reserve.children-only-multiple.2026",
+      "family_case": "children_only_multiple",
+      "spouse_reserved_share": "0",
+      "children_reserved_share": "0.6666666667",
+      "available_share": "0.3333333333",
+      "source_articles": ["537"]
+    },
+    {
+      "rule_id": "it.reserve.spouse-one-child.2026",
+      "family_case": "spouse_one_child",
+      "spouse_reserved_share": "0.3333333333",
+      "children_reserved_share": "0.3333333333",
+      "available_share": "0.3333333334",
+      "source_articles": ["542"]
+    },
+    {
+      "rule_id": "it.reserve.spouse-multiple-children.2026",
+      "family_case": "spouse_multiple_children",
+      "spouse_reserved_share": "0.25",
+      "children_reserved_share": "0.5",
+      "available_share": "0.25",
+      "source_articles": ["542"]
+    }
+  ],
+  "intestate_share_rules": [
+    {
+      "rule_id": "it.intestate.spouse-only.current",
+      "family_case": "spouse_only",
+      "spouse_share": "1",
+      "children_share": "0",
+      "source_articles": ["583"]
+    },
+    {
+      "rule_id": "it.intestate.children-only.current",
+      "family_case": "children_only",
+      "spouse_share": "0",
+      "children_share": "1",
+      "source_articles": ["566"]
+    },
+    {
+      "rule_id": "it.intestate.spouse-one-child.current",
+      "family_case": "spouse_one_child",
+      "spouse_share": "0.5",
+      "children_share": "0.5",
+      "source_articles": ["581"]
+    },
+    {
+      "rule_id": "it.intestate.spouse-multiple-children.current",
+      "family_case": "spouse_multiple_children",
+      "spouse_share": "0.3333333333",
+      "children_share": "0.6666666667",
+      "source_articles": ["581"]
+    }
+  ],
+  "transfer_tax_rules": [
+    {
+      "rule_id": "it.transfer-tax.spouse-lineal.2026",
+      "relationship_categories": ["spouse", "child", "parent", "lineal"],
+      "rate": "0.04",
+      "exemption_per_beneficiary": "1000000.00",
+      "source_articles": ["dlgs_346_1990_art_7", "dlgs_346_1990_art_56"]
+    },
+    {
+      "rule_id": "it.transfer-tax.sibling.2026",
+      "relationship_categories": ["sibling"],
+      "rate": "0.06",
+      "exemption_per_beneficiary": "100000.00",
+      "source_articles": ["dlgs_346_1990_art_7", "dlgs_346_1990_art_56"]
+    },
+    {
+      "rule_id": "it.transfer-tax.other-relative.2026",
+      "relationship_categories": ["other_relative"],
+      "rate": "0.06",
+      "exemption_per_beneficiary": "0.00",
+      "source_articles": ["dlgs_346_1990_art_7", "dlgs_346_1990_art_56"]
+    },
+    {
+      "rule_id": "it.transfer-tax.other.2026",
+      "relationship_categories": ["other"],
+      "rate": "0.08",
+      "exemption_per_beneficiary": "0.00",
+      "source_articles": ["dlgs_346_1990_art_7", "dlgs_346_1990_art_56"]
+    }
+  ],
+  "disabled_beneficiary_exemption": {
+    "rule_id": "it.transfer-tax.disability-exemption.2026",
+    "exemption_per_beneficiary": "1500000.00",
+    "source_articles": ["dlgs_346_1990_art_7", "dlgs_346_1990_art_56"]
+  },
+  "liquidity_classes": {
+    "cash": "immediate",
+    "deposit": "immediate",
+    "investment": "market_liquid",
+    "brokerage": "market_liquid",
+    "insurance": "beneficiary_review_required",
+    "pension": "restricted_or_beneficiary_review_required",
+    "real_estate": "illiquid",
+    "company_share": "illiquid",
+    "other": "unknown"
+  },
+  "limitations": [
+    "Covers only simple Italian planning cases with spouse and/or children as forced heirs.",
+    "Tax estimates use declared values, covered relationships and the rule pack rates/franchigie; cadastral bases, mortgage offsets, exemptions, disabled status evidence and filings are not inferred.",
+    "Donation collation, reduction actions, wills, debts, usufruct, trusts, family companies, foreign succession law and insurance legal characterization require professional review.",
+    "The engine must produce gaps for unsupported relationships, foreign assets, unknown insurance treatment or incomplete allocations."
+  ]
+}

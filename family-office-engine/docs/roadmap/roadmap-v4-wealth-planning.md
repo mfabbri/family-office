@@ -328,7 +328,7 @@ Esito: completato con knowledge note INPS verificata il 2026-07-29, rule pack `i
 
 ### V4.9 — Succession and donation planning V2
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Estendere la V2 con quote di legittima, attribuzioni, liquidità per imposte, beneficiari, donazioni pregresse e alternative operative.
@@ -338,6 +338,8 @@ Estendere la V2 con quote di legittima, attribuzioni, liquidità per imposte, be
 - Output: `estate-plan/v2` e scenari comparati.
 - Test: coniuge e due figli, asset illiquidi, polizze, estero e dati incompleti.
 - Done quando: il piano segnala conflitti civilistici e non propone schermi opachi.
+
+Esito: completato con knowledge note successoria verificata il 2026-07-29, rule pack `it.estate-plan.2026.v2`, contratto `estate-plan/v2`, servizio deterministico, fixture sintetica, CLI `planning estate build/demo`, documentazione API/CLI/input/testing e test. Il sistema confronta scenari di attribuzione dichiarati con massa nota, massa fittizia da donazioni pregresse dichiarate, quote di riserva per casi semplici con coniuge/figli, beneficiari, polizze, asset esteri, liquidita' fiscale e stime di imposta successione/donazione per relazioni coperte dal rule pack. Segnala conflitti civilistici, gap dati e flag operativi espliciti, incluso il divieto di proporre schermi opachi. Non calcola collazione, riduzione, base catastale, successione estera, trust, contenzioso, dichiarazioni o raccomandazioni. Verifiche: 5 test mirati OK, 2 test CLI successione OK, smoke CLI `planning estate demo` OK (`partial 2 scenarios, 3 conflicts, 4 gaps`), regression unit engine 452 test OK, `roadmap_audit.py` OK.
 
 ### V4.10 — Strategy optimizer and implementation plan
 

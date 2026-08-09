@@ -1,0 +1,41 @@
+{
+  "data_gaps": [
+    {
+      "code": "missing_spanish_theoretical_amount",
+      "message": "Spanish theoretical pension from Spanish-only bases must be supplied before pro-rata can be calculated."
+    }
+  ],
+  "date_of_birth": "1971-01-18",
+  "future_assumptions_status": "explicit",
+  "inps_history_status": "complete_dated_history",
+  "insurance_periods": [
+    {
+      "country": "IT",
+      "end_date": "2039-04-30",
+      "period_type": "compulsory",
+      "source_document": "explicit-italian-contribution-history",
+      "start_date": "2019-05-01"
+    },
+    {
+      "country": "ES",
+      "end_date": "2019-04-30",
+      "period_type": "compulsory",
+      "source_document": "reconciled-spanish-contribution-history",
+      "start_date": "2008-08-01"
+    }
+  ],
+  "recent_contribution_anchor_date": "2019-05-01",
+  "retirement_date": "2039-05",
+  "scenario": "ordinary",
+  "schema_version": "it-es-eu-pension-pro-rata-input/v1",
+  "sources": [
+    {
+      "source_id": "it-es-eu-pension-wizard",
+      "type": "user_declared_assumptions"
+    },
+    {
+      "source_id": "no-future-spanish-contributions",
+      "type": "explicit_future_assumption"
+    }
+  ]
+}
