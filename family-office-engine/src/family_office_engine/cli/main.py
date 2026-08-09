@@ -177,6 +177,10 @@ from family_office_engine.services.work_exit_feasibility import (
     build_work_exit_feasibility,
 )
 from family_office_engine.services.wealth_strategy import WealthStrategyError, build_wealth_strategy
+from family_office_engine.services.tool_registry import (
+    ToolRegistryError,
+    build_tool_registry,
+)
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -625,6 +629,10 @@ def default_wealth_strategy_output() -> Path:
 
 def default_wealth_strategy_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-wealth-strategy.synthetic.snapshot.json"
+
+
+def default_tool_registry_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "tool-registry.snapshot.json"
 
 
 def default_household_facts_input() -> Path:
@@ -4429,6 +4437,35 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_wealth_strategy_demo_output(),
         help="Output synthetic wealth strategy snapshot JSON path",
     )
+    orchestration = subparsers.add_parser("orchestration", help="Inspect deterministic orchestration contracts")
+    orchestration_subparsers = orchestration.add_subparsers(dest="orchestration_command")
+    orchestration_registry_parser = orchestration_subparsers.add_parser(
+        "tool-registry",
+        help="Build and inspect the deterministic tool registry",
+    )
+    orchestration_registry_subparsers = orchestration_registry_parser.add_subparsers(
+        dest="orchestration_tool_registry_command"
+    )
+    orchestration_registry_build_parser = orchestration_registry_subparsers.add_parser(
+        "build",
+        help="Build tool-registry/v1 for local deterministic capabilities",
+    )
+    orchestration_registry_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_tool_registry_output(),
+        help="Output tool-registry/v1 snapshot JSON path",
+    )
+    orchestration_registry_list_parser = orchestration_registry_subparsers.add_parser(
+        "list",
+        help="Print the registered deterministic tools",
+    )
+    orchestration_registry_list_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Optional output tool-registry/v1 snapshot JSON path",
+    )
     planning_it_es_eu_pension_parser = planning_subparsers.add_parser(
         "it-es-eu-pension",
         help="Estimate Spain EU entitlement and pro-rata pension share",
@@ -6375,6 +6412,46 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "tool-registry"
+        and args.orchestration_tool_registry_command == "build"
+    ):
+        try:
+            snapshot = build_tool_registry(args.output)
+        except ToolRegistryError as exc:
+            print(f"orchestration tool-registry: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration tool-registry: "
+            f"{snapshot['status']} "
+            f"{snapshot['tool_count']} tools "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "tool-registry"
+        and args.orchestration_tool_registry_command == "list"
+    ):
+        try:
+            snapshot = build_tool_registry(args.output)
+        except ToolRegistryError as exc:
+            print(f"orchestration tool-registry list: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration tool-registry list: "
+            f"{snapshot['status']} "
+            f"{snapshot['tool_count']} tools"
+        )
+        for tool in snapshot["tools"]:
+            print(
+                f"- {tool['tool_id']} -> {tool['output_schema_version']} "
+                f"risk={tool['risk_level']} policy={','.join(tool['authorization_policy'])}"
+            )
         return 0
 
     if (

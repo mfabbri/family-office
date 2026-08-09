@@ -24,7 +24,8 @@ L'output dell'LLM non diventa automaticamente un fatto del workspace.
 
 ### V5.1 — Tool registry and invocation contract
 
-**Stato:** `planned`
+**Stato:** `done`
+**Tipo:** `functional`
 
 Registrare tool disponibili, schema input/output, prerequisiti, livello di rischio e policy di autorizzazione.
 
@@ -33,9 +34,12 @@ Registrare tool disponibili, schema input/output, prerequisiti, livello di risch
 - Test: schema validation, tool inesistente, versione incompatibile.
 - Done quando: ogni capacità decisionale può essere invocata senza accesso diretto alle funzioni interne.
 
+Esito: completato con contratto `tool-registry/v1`, servizio deterministico `family_office_engine.services.tool_registry`, adapter locale `invoke_registered_tool`, CLI `orchestration tool-registry build/list`, documentazione API/CLI/testing e test. Il registry espone 15 tool decisionali con schema input/output, parametri richiesti/opzionali, prerequisiti, rischio, policy di autorizzazione e note di perimetro; l'adapter rifiuta tool non registrati, versioni output incompatibili, parametri mancanti o sconosciuti. Non abilita discovery dinamica delle funzioni interne e non usa LLM per calcoli fiscali, previdenziali o finanziari. Verifiche: 7 test mirati OK, smoke CLI build/list OK (`complete 15 tools`), regression unit engine 464 test OK, `roadmap_audit.py` OK.
+
 ### V5.2 — Knowledge corpus and citation index
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Indicizzare knowledge, contratti e fonti normative con giurisdizione, data di validità, tema e livello di autorità.
 
@@ -48,6 +52,7 @@ Indicizzare knowledge, contratti e fonti normative con giurisdizione, data di va
 ### V5.3 — Supported-question taxonomy
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Definire famiglie di domande, tool richiesti, dati minimi, output attesi e casi da rifiutare o rinviare a un professionista.
 
@@ -60,6 +65,7 @@ Definire famiglie di domande, tool richiesti, dati minimi, output attesi e casi 
 ### V5.4 — Intent router
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Classificare la domanda in uno o più intenti, estrarre entità e indicare dati mancanti senza eseguire calcoli.
 
@@ -72,6 +78,7 @@ Classificare la domanda in uno o più intenti, estrarre entità e indicare dati 
 ### V5.5 — Query planner
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Trasformare gli intenti in un DAG di tool con dipendenze, input, controlli e criteri di arresto.
 
@@ -84,6 +91,7 @@ Trasformare gli intenti in un DAG di tool con dipendenze, input, controlli e cri
 ### V5.6 — Natural-language scenario builder
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Convertire richieste come “pensione a 62 anni con università dei figli” in draft di scenario strutturato, mai direttamente in risultato.
 
@@ -96,6 +104,7 @@ Convertire richieste come “pensione a 62 anni con università dei figli” in 
 ### V5.7 — Deterministic executor and evidence bundle
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Eseguire il piano, raccogliere output, log, hash, fonti, errori e data gaps in un bundle unico.
 
@@ -108,6 +117,7 @@ Eseguire il piano, raccogliere output, log, hash, fonti, errori e data gaps in u
 ### V5.8 — Response composer with citations
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Comporre executive summary, alternative, motivazioni, numeri, fonti, assunzioni, rischi e azioni usando solo l'evidence bundle.
 
@@ -120,6 +130,7 @@ Comporre executive summary, alternative, motivazioni, numeri, fonti, assunzioni,
 ### V5.9 — Guardrails, confidence and escalation
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Bloccare richieste di evasione/opacità, risultati con dati insufficienti, azioni ad alto rischio o conclusioni normative non aggiornate.
 
@@ -132,6 +143,7 @@ Bloccare richieste di evasione/opacità, risultati con dati insufficienti, azion
 ### V5.10 — Decision memory and comparison history
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Memorizzare decisioni, scenari confrontati, assunzioni approvate e motivi, senza trasformare conversazioni non validate in facts.
 
@@ -144,6 +156,7 @@ Memorizzare decisioni, scenari confrontati, assunzioni approvate e motivi, senza
 ### V5.11 — AI evaluation suite
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Creare benchmark per routing, planning, tool use, citazioni, hallucination, privacy, fiscal safety e qualità delle spiegazioni.
 
@@ -156,6 +169,7 @@ Creare benchmark per routing, planning, tool use, citazioni, hallucination, priv
 ### V5.12 — Local API and conversational interface
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Esporre il flusso come API locale e interfaccia conversazionale con sessione, preview del piano e approvazioni.
 

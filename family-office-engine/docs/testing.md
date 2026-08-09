@@ -1040,3 +1040,32 @@ Output personale previsto:
 Il contratto `wealth-strategy/v1` compone pacchetti dichiarati usando snapshot V4 esistenti come evidenza. I test coprono ranking ponderato, sorgenti mancanti, componenti incompatibili, numero pacchetti e smoke CLI. Non vengono calcolati nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni.
 
 Nota operativa: `planning wealth-strategy demo` rigenera snapshot sintetici intermedi `cli-check-*` nel workspace prima di comporre `cli-check-wealth-strategy.synthetic.snapshot.json`. Questi output sono riproducibili e servono a verificare la catena demo, non a rappresentare dati personali.
+
+## Tool registry
+
+Test mirati:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_tool_registry
+```
+
+Smoke CLI:
+
+```text
+fo orchestration tool-registry build
+fo orchestration tool-registry list
+```
+
+Fallback tecnico:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main orchestration tool-registry build
+```
+
+Output personale previsto:
+
+```text
+..\family-office-workspace\snapshots\tool-registry.snapshot.json
+```
+
+Il contratto `tool-registry/v1` registra i tool deterministici invocabili da V5 con schema input/output, prerequisiti, rischio e policy. I test coprono snapshot registry, scrittura, tool inesistente, versione incompatibile, parametri mancanti e invocazione controllata di un tool registrato.

@@ -1341,3 +1341,25 @@ Default principali:
 - sorgenti default: liquidity, tax-aware portfolio, cross-border IT-ES, real estate, protection, estate plan e work-exit nel workspace snapshots
 
 Il comando produce `wealth-strategy/v1` con 2-4 pacchetti, componenti collegati agli snapshot sorgente, ranking ponderato, checklist 90/180 giorni, costi, dipendenze, reversibilita', controlli, rischi, scenari avversi e gap. Non calcola nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni.
+
+## `fo orchestration tool-registry build`
+
+Costruisce il registry dei tool deterministici invocabili dai futuri componenti AI.
+
+Uso:
+
+```text
+fo orchestration tool-registry build
+```
+
+Listing leggibile:
+
+```text
+fo orchestration tool-registry list
+```
+
+Default principali:
+
+- output: `../family-office-workspace/snapshots/tool-registry.snapshot.json`
+
+Il comando produce `tool-registry/v1` con tool id, schema input/output, prerequisiti, rischio, policy di autorizzazione e note di perimetro. Non esegue tool di pianificazione e non abilita calcoli LLM.

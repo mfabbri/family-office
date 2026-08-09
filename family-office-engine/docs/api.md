@@ -745,3 +745,18 @@ Fixture:
 - `examples/work-exit-feasibility-sample.json`
 - `examples/work-exit-inps-snapshot-sample.json`
 - `examples/work-exit-pro-rata-sample.json`
+
+## Tool Registry
+
+Modulo:
+
+```text
+family_office_engine.services.tool_registry
+```
+
+Funzioni principali:
+
+- `build_tool_registry(output_path=None)`: costruisce `tool-registry/v1` con i tool deterministici locali registrati.
+- `invoke_registered_tool(tool_id, requested_output_schema_version, parameters)`: invoca solo un tool registrato, valida versione output richiesta e parametri ammessi, quindi restituisce `tool-invocation/v1`.
+
+`tool-registry/v1` espone identificativo tool, schema input/output, parametri richiesti/opzionali, prerequisiti, rischio, policy di autorizzazione e note di perimetro. Il registry e' esplicito: non abilita discovery dinamica delle funzioni interne e non consente all'LLM di calcolare imposte, pensioni, rendimenti o valori finanziari.
