@@ -49,6 +49,8 @@ Indicizzare knowledge, contratti e fonti normative con giurisdizione, data di va
 - Test: retrieval temporale, fonte abrogata, citazione mancante, deduplica.
 - Done quando: ogni affermazione normativa può rinviare a una fonte identificabile.
 
+Readiness: non richiede dati personali. Il corpus pubblico esistente e' sufficiente come base iniziale, ma i metadati non sono ancora uniformi tra le note. V5.2 deve normalizzare il template e produrre gap espliciti per giurisdizione, validita', autorita' o riferimento mancanti, senza escludere silenziosamente la fonte o dedurne l'autorevolezza. I gap V1 restano non bloccanti salvo perimetri dichiarati esaustivi.
+
 ### V5.3 — Supported-question taxonomy
 
 **Stato:** `planned`
@@ -75,6 +77,19 @@ Classificare la domanda in uno o più intenti, estrarre entità e indicare dati 
 - Test: dataset sintetico, ambiguità, prompt injection e richiesta non supportata.
 - Done quando: il routing ha confidence e fallback deterministici.
 
+### V5.4a — Periodic code and contract audit
+
+**Stato:** `planned`
+**Tipo:** `audit`
+
+Verificare il primo blocco funzionale V5 prima di introdurre il query planner.
+
+- Dipende da: V5.2, V5.3 e V5.4.
+- Repository: `bootstrap`, `knowledge`, `engine`.
+- Checklist: `family-office-bootstrap/docs/code-audit-checklist.md`.
+- Test: regression pertinente, privacy, allineamento contratti/CLI/docs e `roadmap_audit.py`.
+- Done quando: citation index, tassonomia e router risultano coerenti e non restano blocker impliciti per V5.5.
+
 ### V5.5 — Query planner
 
 **Stato:** `planned`
@@ -82,7 +97,7 @@ Classificare la domanda in uno o più intenti, estrarre entità e indicare dati 
 
 Trasformare gli intenti in un DAG di tool con dipendenze, input, controlli e criteri di arresto.
 
-- Dipende da: V5.4.
+- Dipende da: V5.4a.
 - Repository: `engine`.
 - Output: `execution-plan/v1`.
 - Test: piano valido, ciclo, tool mancante, dato sensibile non autorizzato.

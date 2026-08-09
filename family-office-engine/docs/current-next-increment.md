@@ -2,11 +2,11 @@
 
 ## ID e titolo
 
-V5.1 - Tool registry and invocation contract.
+V5.2 - Knowledge corpus and citation index.
 
 ## Stato
 
-`done`
+`planned`
 
 ## Roadmap
 
@@ -14,41 +14,41 @@ V5.1 - Tool registry and invocation contract.
 
 ## Motivazione e dipendenze
 
-V4 e' stata completata con V4.10, che ha introdotto `wealth-strategy/v1` e il piano operativo 90/180 giorni. Il gate V4 -> V5 richiede tool deterministici versionati, output con fonti/ipotesi/limiti/confidence, casi sintetici e nessun calcolo fiscale o finanziario affidato a LLM.
+V5.1 e' completata e fornisce `tool-registry/v1` con 15 tool deterministici e adapter locale validato. V5.2 e' il primo incremento selezionabile e deve rendere le fonti knowledge recuperabili con citazioni identificabili, validita' temporale e livello di autorita'.
 
-V5.1 e' il primo incremento della roadmap V5 e registra i tool disponibili con schema input/output, prerequisiti, livello di rischio e policy di autorizzazione. Prima di selezionare o implementare l'incremento funzionale eseguire sempre:
+Non sono necessari dati personali per procedere: il corpus pubblico gia' presente in `family-office-knowledge` e' sufficiente come base iniziale. I gap di formati o fonti reali ancora aperti in V1 sono non bloccanti finche' V5.2 non dichiara il corpus esaustivo per quei perimetri.
+
+Prima dell'implementazione eseguire sempre:
 
 ```text
 python family-office-engine/src/family_office_engine/governance/roadmap_audit.py
 ```
 
-## Stato implementazione
+## Readiness e gap osservati
 
-Completato.
+- Le note knowledge piu' recenti riportano gia' parte dei metadati richiesti: giurisdizione, periodo applicabile, data di verifica e fonti ufficiali.
+- La copertura non e' uniforme tra tutte le note; alcuni documenti non espongono ancora gli stessi campi in forma strutturata.
+- `family-office-knowledge/sources/source-template.md` e' ancora minimale e andra' allineato al citation contract definito dall'incremento.
+- Una fonte priva di metadati obbligatori deve produrre un gap esplicito: non va esclusa silenziosamente e non va promossa per deduzione a fonte autorevole.
+- Eventuali verifiche o integrazioni normative devono seguire `knowledge -> rules -> tests -> engine`; V5.2 indicizza e qualifica le fonti, non introduce nuovi calcoli.
 
-V5.1 ha registrato:
+## Piano operativo V5.2
 
-- Contratto `tool-registry/v1`.
-- Servizio deterministico `family_office_engine.services.tool_registry`.
-- Adapter locale per invocare solo tool registrati, con versione richiesta e input validato.
-- CLI `orchestration tool-registry build/list`.
-- `orchestration tool-registry build` -> `complete 15 tools`.
-- `orchestration tool-registry list` -> listing leggibile di 15 tool con schema output, rischio e policy.
-- `$env:PYTHONPATH='family-office-engine/src'; python -m unittest family-office-engine.tests.unit.test_tool_registry family-office-engine.tests.unit.test_validate.ValidateCliTest.test_main_orchestration_tool_registry_build_returns_summary` -> 7 test OK.
-- `$env:PYTHONPATH='family-office-engine/src'; python -m unittest discover -s family-office-engine\tests\unit` -> 464 test OK.
-- `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py` -> OK (`functional_since_audit=1`, `audit_due=false`).
+1. Inventariare note knowledge, contratti e riferimenti normativi nel perimetro iniziale.
+2. Definire un citation contract versionato con identificativo, tema, giurisdizione, autorita', validita', stato temporale e provenance.
+3. Normalizzare il template delle fonti senza inventare metadati mancanti.
+4. Costruire un indice locale deterministico, riproducibile e deduplicato.
+5. Implementare retrieval temporale e gestione esplicita di fonti mancanti, scadute, abrogate o duplicate.
+6. Aggiungere test, CLI/documentazione impattata e verificare regression e roadmap audit.
 
-## Piano operativo V5.1
+## Criteri di completamento V5.2
 
-1. Confermati pattern locali per contratti, servizi, CLI e test.
-2. Definito perimetro minimo `tool-registry/v1`: identificativo tool, versioni I/O, prerequisiti, rischio, autorizzazione, data gaps, provenance.
-3. Implementato adapter deterministico che non esegue funzioni interne non registrate.
-4. Esposta CLI breve di build/list del registry.
-5. Nessun LLM produce calcoli, valori fiscali, previdenziali o finanziari.
+- Il corpus iniziale e' indicizzato con contratto versionato e hash riproducibile.
+- Ogni affermazione normativa supportata puo' rinviare a una fonte identificabile.
+- Metadati mancanti, fonti abrogate e conflitti temporali restano visibili come gap.
+- Retrieval temporale, citazione mancante e deduplica sono coperti da test.
+- Nessun dato personale entra nei repository software o knowledge.
 
-## Criteri di completamento V5.1
+## Cadenza audit
 
-- `tool-registry/v1` elenca le principali capability decisionali V4 con contratti versionati e policy.
-- Un adapter locale invoca solo tool registrati e rifiuta tool inesistenti o versioni incompatibili.
-- Test mirati e regression pertinente verdi.
-- Stato roadmap coerente e audit cadence verificata.
+Il contatore verificato dopo V5.1 e' `functional_since_audit=1`. Completate V5.2, V5.3 e V5.4, l'incremento di audit V5.4a deve essere eseguito prima di V5.5.
