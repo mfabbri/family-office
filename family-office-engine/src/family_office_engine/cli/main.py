@@ -176,6 +176,7 @@ from family_office_engine.services.work_exit_feasibility import (
     WorkExitFeasibilityError,
     build_work_exit_feasibility,
 )
+from family_office_engine.services.wealth_strategy import WealthStrategyError, build_wealth_strategy
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -608,6 +609,22 @@ def default_estate_plan_output() -> Path:
 
 def default_estate_plan_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-estate-plan.synthetic.snapshot.json"
+
+
+def default_wealth_strategy_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "wealth-strategy-input.json"
+
+
+def default_wealth_strategy_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "wealth-strategy-input-sample.json"
+
+
+def default_wealth_strategy_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "wealth-strategy.snapshot.json"
+
+
+def default_wealth_strategy_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-wealth-strategy.synthetic.snapshot.json"
 
 
 def default_household_facts_input() -> Path:
@@ -4337,6 +4354,81 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_estate_plan_demo_output(),
         help="Output synthetic estate plan snapshot JSON path",
     )
+    planning_wealth_strategy_parser = planning_subparsers.add_parser(
+        "wealth-strategy",
+        help="Compose V4 planning snapshots into comparable strategy packages",
+    )
+    planning_wealth_strategy_subparsers = planning_wealth_strategy_parser.add_subparsers(
+        dest="planning_wealth_strategy_command"
+    )
+    planning_wealth_strategy_build_parser = planning_wealth_strategy_subparsers.add_parser(
+        "build",
+        help="Build wealth-strategy/v1 from explicit packages and source snapshots",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_wealth_strategy_input(),
+        help="Input wealth strategy JSON path",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--liquidity-plan",
+        type=Path,
+        default=default_liquidity_plan_output(),
+        help="Input liquidity-plan/v1 snapshot path",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--tax-aware-portfolio",
+        type=Path,
+        default=default_tax_aware_portfolio_output(),
+        help="Input tax-aware-portfolio/v1 snapshot path",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--cross-border-it-es",
+        type=Path,
+        default=default_cross_border_it_es_output(),
+        help="Input cross-border-it-es/v1 snapshot path",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--real-estate-plan",
+        type=Path,
+        default=default_real_estate_plan_output(),
+        help="Input real-estate-plan/v1 snapshot path",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--protection-gap",
+        type=Path,
+        default=default_protection_gap_output(),
+        help="Input protection-gap/v1 snapshot path",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--estate-plan",
+        type=Path,
+        default=default_estate_plan_output(),
+        help="Input estate-plan/v2 snapshot path",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--work-exit",
+        type=Path,
+        default=default_work_exit_output(),
+        help="Input work-exit-feasibility/v1 snapshot path",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_wealth_strategy_output(),
+        help="Output wealth strategy snapshot JSON path",
+    )
+    planning_wealth_strategy_demo_parser = planning_wealth_strategy_subparsers.add_parser(
+        "demo",
+        help="Run the synthetic wealth strategy composer with bundled examples",
+    )
+    planning_wealth_strategy_demo_parser.add_argument(
+        "--output",
+        type=Path,
+        default=default_wealth_strategy_demo_output(),
+        help="Output synthetic wealth strategy snapshot JSON path",
+    )
     planning_it_es_eu_pension_parser = planning_subparsers.add_parser(
         "it-es-eu-pension",
         help="Estimate Spain EU entitlement and pro-rata pension share",
@@ -6173,6 +6265,113 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['status']} "
             f"{snapshot['summary']['scenario_count']} scenarios, "
             f"{snapshot['summary']['conflict_count']} conflicts, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "wealth-strategy"
+        and args.planning_wealth_strategy_command == "build"
+    ):
+        try:
+            snapshot = build_wealth_strategy(
+                args.input,
+                args.output,
+                liquidity_plan_snapshot_path=args.liquidity_plan,
+                tax_aware_portfolio_snapshot_path=args.tax_aware_portfolio,
+                cross_border_it_es_snapshot_path=args.cross_border_it_es,
+                real_estate_plan_snapshot_path=args.real_estate_plan,
+                protection_gap_snapshot_path=args.protection_gap,
+                estate_plan_snapshot_path=args.estate_plan,
+                work_exit_snapshot_path=args.work_exit,
+            )
+        except WealthStrategyError as exc:
+            print(f"planning wealth-strategy: ERROR ({exc})")
+            return 1
+        print(
+            "planning wealth-strategy: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['package_count']} packages, "
+            f"{snapshot['summary']['comparable_package_count']} comparable, "
+            f"top={snapshot['ranking'][0]['package_id'] if snapshot['ranking'] else 'none'}, "
+            f"{snapshot['summary']['data_gap_count']} gaps "
+            f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "wealth-strategy"
+        and args.planning_wealth_strategy_command == "demo"
+    ):
+        try:
+            liquidity_output = default_liquidity_plan_demo_output()
+            tax_output = default_tax_aware_portfolio_demo_output()
+            real_estate_output = default_real_estate_plan_demo_output()
+            protection_output = default_protection_gap_demo_output()
+            estate_output = default_estate_plan_demo_output()
+            work_exit_output = default_work_exit_demo_output()
+            cross_border_output = default_cross_border_it_es_demo_output()
+            asset_availability_output = resolve_repo("workspace") / "snapshots" / "cli-check-asset-availability.synthetic.snapshot.json"
+            import_asset_availability(default_asset_availability_sample_input(), asset_availability_output)
+            build_liquidity_plan(
+                default_liquidity_plan_sample_input(),
+                liquidity_output,
+                net_worth_snapshot_path=default_liquidity_plan_sample_net_worth(),
+                asset_availability_snapshot_path=asset_availability_output,
+            )
+            build_tax_aware_portfolio(default_tax_aware_portfolio_sample_input(), default_tax_aware_investment_rule_pack(), tax_output)
+            build_real_estate_plan(default_real_estate_plan_sample_input(), real_estate_output)
+            build_protection_gap(default_protection_gap_sample_input(), protection_output)
+            build_estate_plan(default_estate_plan_sample_input(), default_estate_plan_rule_pack(), estate_output)
+            build_work_exit_feasibility(
+                default_work_exit_sample_input(),
+                default_work_exit_rule_pack(),
+                work_exit_output,
+                inps_snapshot_path=default_work_exit_sample_inps_snapshot(),
+                pro_rata_snapshot_path=default_work_exit_sample_pro_rata_snapshot(),
+            )
+            build_cross_border_it_es_dossier(
+                cross_border_output,
+                pension_scenario_snapshot_path=default_pension_scenario_sample_snapshot(),
+                pension_income_snapshot_path=default_it_es_pension_income_sample(),
+                pension_tax_classification_snapshot_path=default_spanish_pension_net_it_resident_sample_classification(),
+                spanish_pension_net_snapshot_path=default_cross_border_it_es_sample_net(),
+                eu_pension_pro_rata_snapshot_path=default_cross_border_it_es_sample_pro_rata(),
+                foreign_assets_snapshot_path=default_cross_border_it_es_sample_foreign_assets(),
+            )
+            snapshot = build_wealth_strategy(
+                default_wealth_strategy_sample_input(),
+                args.output,
+                liquidity_plan_snapshot_path=liquidity_output,
+                tax_aware_portfolio_snapshot_path=tax_output,
+                cross_border_it_es_snapshot_path=cross_border_output,
+                real_estate_plan_snapshot_path=real_estate_output,
+                protection_gap_snapshot_path=protection_output,
+                estate_plan_snapshot_path=estate_output,
+                work_exit_snapshot_path=work_exit_output,
+            )
+        except (
+            LiquidityPlanError,
+            AssetAvailabilityError,
+            TaxAwarePortfolioError,
+            RealEstatePlanError,
+            ProtectionGapError,
+            EstatePlanError,
+            WorkExitFeasibilityError,
+            CrossBorderItEsDossierError,
+            WealthStrategyError,
+        ) as exc:
+            print(f"planning wealth-strategy demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning wealth-strategy demo: "
+            f"{snapshot['status']} "
+            f"{snapshot['summary']['package_count']} packages, "
+            f"{snapshot['summary']['comparable_package_count']} comparable, "
+            f"top={snapshot['ranking'][0]['package_id'] if snapshot['ranking'] else 'none'}, "
             f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )

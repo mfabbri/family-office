@@ -1010,3 +1010,33 @@ Output personale previsto:
 ```
 
 Il contratto `estate-plan/v2` confronta scenari di attribuzione dichiarati con quote di riserva, donazioni pregresse, beneficiari, polizze, estero e liquidita' fiscale. I test coprono coniuge e due figli, asset illiquidi, polizze, asset estero, conflitti civilistici, relazione fiscale non familiare, gap dati e smoke CLI. Non vengono calcolati collazione, riduzione, base catastale, successione estera, trust, contenzioso o raccomandazioni.
+
+## Wealth strategy
+
+Test mirati:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_wealth_strategy
+```
+
+Smoke CLI:
+
+```text
+fo planning wealth-strategy demo
+```
+
+Fallback tecnico:
+
+```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main planning wealth-strategy demo
+```
+
+Output personale previsto:
+
+```text
+..\family-office-workspace\snapshots\wealth-strategy.snapshot.json
+```
+
+Il contratto `wealth-strategy/v1` compone pacchetti dichiarati usando snapshot V4 esistenti come evidenza. I test coprono ranking ponderato, sorgenti mancanti, componenti incompatibili, numero pacchetti e smoke CLI. Non vengono calcolati nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni.
+
+Nota operativa: `planning wealth-strategy demo` rigenera snapshot sintetici intermedi `cli-check-*` nel workspace prima di comporre `cli-check-wealth-strategy.synthetic.snapshot.json`. Questi output sono riproducibili e servono a verificare la catena demo, non a rappresentare dati personali.

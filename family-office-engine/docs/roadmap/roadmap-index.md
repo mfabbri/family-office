@@ -14,7 +14,9 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `planned` |
 | 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `planned` |
 
-La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `in_progress`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c e V4.9 sono completati. V4.10 e' il prossimo incremento pianificato per comporre le opzioni V4 in pacchetti strategici.
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 resta la roadmap attiva: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. La roadmap V5 resta `planned` e richiede i tool deterministici V4 come base.
+
+Nota di governance: `roadmap_audit.py` richiede esattamente una roadmap con stato `in_progress`. Quando tutti gli incrementi della roadmap attiva sono `done`, mantenere quella roadmap `in_progress` fino a quando la transizione successiva non apre formalmente la nuova roadmap attiva nello stesso aggiornamento.
 
 `done_with_gaps` indica che la capability è disponibile ma alcuni formati o fonti reali restano da aggiungere tramite incrementi mirati. Non blocca la roadmap successiva se i gap non sono prerequisiti dell'incremento selezionato.
 
@@ -50,6 +52,7 @@ Ogni incremento deve inoltre dichiarare `**Tipo:**` con uno dei valori:
    - `current-next-increment.md`;
    - test e contratti impattati;
    - `decision-log.md`.
+10. Se il completamento chiude l'ultimo incremento della roadmap attiva, non lasciare l'indice senza roadmap `in_progress`: nello stesso aggiornamento mantenere temporaneamente la roadmap corrente attiva oppure aprire formalmente la roadmap successiva.
 
 ## Regola per i blocchi
 

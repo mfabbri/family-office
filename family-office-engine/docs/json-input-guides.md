@@ -195,6 +195,17 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Ogni scenario assegna quote degli asset ai beneficiari. Quote incomplete, asset non allocati e relazioni fiscali non coperte restano gap.
 - Nota: il motore segnala conflitti e gap. Non calcola collazione, riduzione, base catastale, successione estera, trust, contenzioso o raccomandazioni.
 
+## `wealth-strategy-input/v1`
+
+- Default: `../family-office-workspace/planning/wealth-strategy-input.json`.
+- Esempio: `examples/wealth-strategy-input-sample.json`.
+- Comandi: `planning wealth-strategy build`, `planning wealth-strategy demo`.
+- Campi: `household_id`, `as_of_date`, `base_currency`, `comparison_weights`, `packages`, `incompatibilities`, `data_gaps`.
+- Ogni pacchetto dichiara `package_id`, componenti, punteggi espliciti, azioni 90/180 giorni, costi, dipendenze, reversibilita', controlli, rischi e scenari avversi.
+- Ogni componente usa `source_key` e un selettore verso uno snapshot V4 esistente; se la sorgente manca, e' parziale/bloccata o il selettore non trova l'opzione dichiarata, il builder produce gap.
+- `incompatibilities` serve a dichiarare combinazioni non ammesse di componenti nello stesso pacchetto.
+- Nota: il ranking usa pesi e punteggi dichiarati. Il motore non inventa pacchetti, non ottimizza in modo opaco e non calcola nuove imposte, pensioni, rendimenti o raccomandazioni.
+
 ## Scenario decisionale
 
 ### `decision-scenario-v2.json`

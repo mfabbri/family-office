@@ -343,7 +343,7 @@ Esito: completato con knowledge note successoria verificata il 2026-07-29, rule 
 
 ### V4.10 — Strategy optimizer and implementation plan
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Combinare le opzioni V4 in pacchetti coerenti e produrre piano 90/180 giorni, costi, dipendenze, reversibilità e controlli.
@@ -353,6 +353,8 @@ Combinare le opzioni V4 in pacchetti coerenti e produrre piano 90/180 giorni, co
 - Output: `wealth-strategy/v1`, tabella comparativa e checklist operativa.
 - Test: vincoli, opzioni incompatibili, ranking, scenario avverso e gap bloccanti.
 - Done quando: il sistema propone 2–4 alternative comparabili e motivate, non una soluzione unica opaca.
+
+Esito: completato con contratto `wealth-strategy/v1`, servizio deterministico, input sintetico, input workspace default, CLI `planning wealth-strategy build/demo`, documentazione API/CLI/input/testing e test. Il sistema compone snapshot V4 esistenti in 2-4 pacchetti dichiarati con componenti verificati, hash sorgente, ranking ponderato, piano 90/180 giorni, costi, dipendenze, reversibilita', controlli, rischi, scenari avversi e data gaps. Gli snapshot mancanti, parziali, bloccati o selettori non risolti diventano gap e possono bloccare solo i pacchetti interessati. Non calcola nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni. Verifiche: 4 test mirati OK, test CLI wealth-strategy demo OK, smoke CLI `planning wealth-strategy demo` OK (`partial 3 packages, 3 comparable`), build default workspace OK con gap recuperabili, regression unit engine 457 test OK.
 
 ## Exit criteria V4
 

@@ -653,6 +653,26 @@ Fixture:
 
 - `examples/estate-plan-sample.json`
 
+## Wealth Strategy
+
+Modulo:
+
+```text
+family_office_engine.services.wealth_strategy
+```
+
+Funzione principale:
+
+- `build_wealth_strategy(input_path, output_path, ...)`: compone pacchetti strategici dichiarati e snapshot V4 esistenti in `wealth-strategy/v1`.
+
+`wealth-strategy/v1` verifica sorgenti, schema, status, hash e selettori dei componenti; produce 2-4 pacchetti comparabili con punteggi ponderati dichiarati, ranking, piano 90/180 giorni, costi, dipendenze, reversibilita', controlli, rischi, scenari avversi e data gaps.
+
+Il servizio non calcola nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni. I punteggi e i pacchetti sono input espliciti; gli snapshot sorgente restano l'evidenza deterministica.
+
+Fixture:
+
+- `examples/wealth-strategy-input-sample.json`
+
 ## IT-ES EU Pension Pro-Rata
 
 Modulo:

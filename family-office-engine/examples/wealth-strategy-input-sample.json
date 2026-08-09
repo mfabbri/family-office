@@ -1,0 +1,139 @@
+{
+  "schema_version": "wealth-strategy-input/v1",
+  "record_type": "WealthStrategyInput",
+  "household_id": "synthetic_household",
+  "as_of_date": "2026-07-30",
+  "base_currency": "EUR",
+  "comparison_weights": {
+    "liquidity": "0.20",
+    "retirement": "0.20",
+    "tax_efficiency": "0.15",
+    "protection": "0.15",
+    "succession": "0.15",
+    "cross_border": "0.10",
+    "reversibility": "0.05"
+  },
+  "packages": [
+    {
+      "package_id": "balanced_liquidity_first",
+      "label": "Balanced liquidity first",
+      "components": [
+        {"component_id": "liquidity_reserve", "source_key": "liquidity_plan", "selector": {"path": "status", "exists": true}},
+        {"component_id": "portfolio_domestic_admin", "source_key": "tax_aware_portfolio", "selector": {"collection": "options", "id_field": "option_id", "id": "domestic_admin_balanced"}},
+        {"component_id": "work_exit_2039", "source_key": "work_exit", "selector": {"path": "first_sustainable_exit_date", "equals": "2039-01-01"}},
+        {"component_id": "estate_equalized", "source_key": "estate_plan", "selector": {"collection": "scenarios", "id_field": "scenario_id", "id": "equalized_children_with_spouse_cash"}}
+      ],
+      "declared_scores": {
+        "liquidity": 5,
+        "retirement": 4,
+        "tax_efficiency": 3,
+        "protection": 3,
+        "succession": 4,
+        "cross_border": 3,
+        "reversibility": 4
+      },
+      "implementation": {
+        "actions_90_days": [
+          "Confirm emergency reserve target and cash accounts.",
+          "Review domestic amministrato allocation with adviser.",
+          "Collect notarial review for equalized estate scenario."
+        ],
+        "actions_180_days": [
+          "Run updated work-exit snapshot after new pension documents.",
+          "Reconcile policy beneficiaries with estate-plan scenario."
+        ]
+      },
+      "costs": [
+        {"code": "professional_review", "timing": "one_off", "amount": "1800.00", "currency": "EUR"},
+        {"code": "portfolio_costs", "timing": "annual", "amount": "160.00", "currency": "EUR"}
+      ],
+      "dependencies": ["Updated pension statements", "Notarial estate review"],
+      "reversibility": "medium",
+      "controls": ["Quarterly liquidity check", "Annual beneficiary review"],
+      "risks": ["Work-exit date depends on projected pension assumptions."],
+      "adverse_scenarios": ["Market drawdown before 2039", "Delayed pension start"]
+    },
+    {
+      "package_id": "tax_efficiency_cross_border",
+      "label": "Tax efficiency cross-border",
+      "components": [
+        {"component_id": "portfolio_foreign_declarative", "source_key": "tax_aware_portfolio", "selector": {"collection": "options", "id_field": "option_id", "id": "foreign_declarative_low_turnover"}},
+        {"component_id": "cross_border_dossier", "source_key": "cross_border_it_es", "selector": {"path": "status", "equals": "complete"}},
+        {"component_id": "real_estate_sell", "source_key": "real_estate_plan", "selector": {"collection": "alternatives", "id_field": "strategy", "id": "sell"}}
+      ],
+      "declared_scores": {
+        "liquidity": 4,
+        "retirement": 3,
+        "tax_efficiency": 5,
+        "protection": 2,
+        "succession": 3,
+        "cross_border": 5,
+        "reversibility": 2
+      },
+      "implementation": {
+        "actions_90_days": [
+          "Validate foreign intermediary reporting workflow.",
+          "Obtain real-estate sale valuation and timeline."
+        ],
+        "actions_180_days": [
+          "Update foreign asset monitoring after broker decision.",
+          "Refresh cross-border dossier before any residence change."
+        ]
+      },
+      "costs": [
+        {"code": "tax_adviser", "timing": "annual", "amount": "1200.00", "currency": "EUR"},
+        {"code": "real_estate_sale_costs", "timing": "one_off", "amount": "7200.00", "currency": "EUR"}
+      ],
+      "dependencies": ["Tax adviser review", "Foreign asset monitoring documents"],
+      "reversibility": "low",
+      "controls": ["Annual RW/IVAFE/IVIE checklist", "Pre-trade tax location check"],
+      "risks": ["Foreign declarative workflow increases compliance burden."],
+      "adverse_scenarios": ["Incomplete foreign statements", "Sale takes longer than declared"]
+    },
+    {
+      "package_id": "protection_and_succession_repair",
+      "label": "Protection and succession repair",
+      "components": [
+        {"component_id": "protection_gap", "source_key": "protection_gap", "selector": {"path": "summary.total_shortfall", "exists": true}},
+        {"component_id": "estate_home_to_spouse", "source_key": "estate_plan", "selector": {"collection": "scenarios", "id_field": "scenario_id", "id": "will_home_to_spouse_cash_to_children"}},
+        {"component_id": "real_estate_hold", "source_key": "real_estate_plan", "selector": {"collection": "alternatives", "id_field": "strategy", "id": "hold"}}
+      ],
+      "declared_scores": {
+        "liquidity": 2,
+        "retirement": 3,
+        "tax_efficiency": 2,
+        "protection": 5,
+        "succession": 5,
+        "cross_border": 2,
+        "reversibility": 4
+      },
+      "implementation": {
+        "actions_90_days": [
+          "Resolve protection shortfall with explicit coverage quotes.",
+          "Review estate reserve conflicts with notary."
+        ],
+        "actions_180_days": [
+          "Update estate-plan snapshot after beneficiary and policy changes.",
+          "Recheck home holding costs against liquidity plan."
+        ]
+      },
+      "costs": [
+        {"code": "insurance_premiums", "timing": "annual", "amount": "1080.00", "currency": "EUR"},
+        {"code": "notarial_review", "timing": "one_off", "amount": "1400.00", "currency": "EUR"}
+      ],
+      "dependencies": ["Insurance quotes", "Notarial estate review"],
+      "reversibility": "medium",
+      "controls": ["Annual policy beneficiary check", "Estate allocation review after donations"],
+      "risks": ["Estate scenario has reserve conflicts until revised."],
+      "adverse_scenarios": ["Death/disability event before new coverage", "Illiquid home cannot fund taxes"]
+    }
+  ],
+  "incompatibilities": [
+    {
+      "code": "foreign_declarative_and_domestic_admin_are_alternatives",
+      "component_ids": ["portfolio_domestic_admin", "portfolio_foreign_declarative"],
+      "message": "The same investable portfolio cannot be managed simultaneously under both package components."
+    }
+  ],
+  "data_gaps": []
+}

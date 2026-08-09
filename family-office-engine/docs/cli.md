@@ -1315,3 +1315,29 @@ Default principali:
 - output sintetico: `../family-office-workspace/snapshots/cli-check-estate-plan.synthetic.snapshot.json`
 
 Il comando produce `estate-plan/v2` con massa nota, massa fittizia dichiarata, quote di riserva, scenari comparati, conflitti, stime fiscali coperte dal rule pack e gap dati. Non calcola collazione, riduzione, base catastale, successione estera, trust, contenzioso o raccomandazioni.
+
+## `fo planning wealth-strategy build`
+
+Compone gli snapshot V4 in pacchetti strategici comparabili con piano operativo 90/180 giorni.
+
+Uso:
+
+```text
+fo planning wealth-strategy build
+```
+
+Smoke sintetico:
+
+```text
+fo planning wealth-strategy demo
+```
+
+Default principali:
+
+- input: `../family-office-workspace/planning/wealth-strategy-input.json`
+- output: `../family-office-workspace/snapshots/wealth-strategy.snapshot.json`
+- input sintetico: `examples/wealth-strategy-input-sample.json`
+- output sintetico: `../family-office-workspace/snapshots/cli-check-wealth-strategy.synthetic.snapshot.json`
+- sorgenti default: liquidity, tax-aware portfolio, cross-border IT-ES, real estate, protection, estate plan e work-exit nel workspace snapshots
+
+Il comando produce `wealth-strategy/v1` con 2-4 pacchetti, componenti collegati agli snapshot sorgente, ranking ponderato, checklist 90/180 giorni, costi, dipendenze, reversibilita', controlli, rischi, scenari avversi e gap. Non calcola nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni.

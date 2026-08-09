@@ -6,7 +6,7 @@ V4.10 - Strategy optimizer and implementation plan.
 
 ## Stato
 
-`planned`
+`done`
 
 ## Roadmap
 
@@ -24,25 +24,26 @@ python family-office-engine/src/family_office_engine/governance/roadmap_audit.py
 
 ## Stato implementazione
 
-Pianificato.
+Completato.
 
-V4.9 ha registrato:
+V4.10 ha registrato:
 
-- Knowledge note successoria verificata il 2026-07-29 e rule pack `it.estate-plan.2026.v2`.
-- Contratto `estate-plan/v2`.
-- CLI `planning estate build/demo` con default del workspace e fixture sintetica.
-- `planning estate demo` -> `partial 2 scenarios, 3 conflicts, 4 gaps`.
-- `$env:PYTHONPATH='src'; python -m unittest tests.unit.test_estate_plan` -> 5 test OK.
-- `$env:PYTHONPATH='src'; python -m unittest tests.unit.test_validate.ValidateCliTest.test_main_estate_baseline_returns_success tests.unit.test_validate.ValidateCliTest.test_main_planning_estate_demo_returns_summary` -> 2 test OK.
-- `$env:PYTHONPATH='src'; python -m unittest discover -s tests\unit` -> 452 test OK.
-- `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py` -> OK.
+- Contratto `wealth-strategy/v1`.
+- Servizio deterministico `family_office_engine.services.wealth_strategy`.
+- Input sintetico `examples/wealth-strategy-input-sample.json` e input workspace default `family-office-workspace/planning/wealth-strategy-input.json`.
+- CLI `planning wealth-strategy build/demo` con default del workspace e demo sintetica.
+- `planning wealth-strategy demo` -> `partial 3 packages, 3 comparable, 20 gaps`.
+- `planning wealth-strategy build` con default workspace -> `blocked_insufficient_comparable_packages` con gap recuperabili quando mancano snapshot personali standard.
+- `$env:PYTHONPATH='family-office-engine/src'; python -m unittest family-office-engine.tests.unit.test_wealth_strategy family-office-engine.tests.unit.test_validate.ValidateCliTest.test_main_planning_wealth_strategy_demo_returns_summary` -> 5 test OK.
+- `$env:PYTHONPATH='family-office-engine/src'; python -m unittest discover -s family-office-engine\tests\unit` -> 457 test OK.
+- `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py` -> OK (`functional_since_audit=3`, `audit_due=false`).
 
 ## Piano operativo V4.10
 
-1. Confermare contratti e snapshot V4 disponibili: goals, liquidity, decumulation, contribution, tax-aware portfolio, cross-border IT-ES, real estate, protection, estate plan e work-exit.
-2. Definire il perimetro minimo `wealth-strategy/v1`: 2-4 pacchetti coerenti, costi/dipendenze/reversibilita', checklist 90/180 giorni, rischi e gap.
-3. Evitare nuove regole fiscali/finanziarie se non strettamente necessarie; in caso contrario applicare `knowledge -> rules -> tests -> engine`.
-4. Implementare solo composizione deterministica sopra output gia' prodotti, senza ottimizzazione opaca o raccomandazioni non supportate.
+1. Confermati contratti e snapshot V4 disponibili per composizione.
+2. Definito perimetro minimo `wealth-strategy/v1`: 2-4 pacchetti coerenti, costi/dipendenze/reversibilita', checklist 90/180 giorni, rischi e gap.
+3. Nessuna nuova regola fiscale/finanziaria introdotta.
+4. Implementata composizione deterministica sopra output gia' prodotti, senza ottimizzazione opaca o raccomandazioni non supportate.
 
 ## Criteri di completamento V4.10
 
