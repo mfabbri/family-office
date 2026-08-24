@@ -6,10 +6,16 @@ Consentire domande in linguaggio naturale e risposte sofisticate usando retrieva
 
 ## Prerequisiti
 
-- Gate V4 completato.
+- Gate V4 completato; per V5.3+ deve essere completato anche il gate V4B Work Transition.
 - Tool deterministici con input/output versionati.
 - Knowledge con fonti e validità temporale.
 - Golden scenarios per le decisioni principali.
+
+## Sequencing note — V4B Work Transition
+
+V5.1 e V5.2 restano completati e i loro contratti/tool non vengono annullati. La prosecuzione da V5.3 e' intenzionalmente sospesa mentre `roadmap-v4b-work-transition.md` completa il golden use case full-time → part-time → ponte → pensioni. Alla chiusura del gate V4B → V5, il tool registry V5.1 deve includere i nuovi tool deterministici e V5 riprende dal primo incremento `planned`.
+
+Questa sospensione non autorizza l'LLM a stimare in proprio redditi netti, contributi, decorrenze, RITA, decumulo o date di uscita.
 
 ## Principio architetturale
 
@@ -60,7 +66,7 @@ Esito: completato con catalogo `knowledge-citation-catalog/v1`, servizio determi
 
 Definire famiglie di domande, tool richiesti, dati minimi, output attesi e casi da rifiutare o rinviare a un professionista.
 
-- Dipende da: V5.1 e V5.2.
+- Dipende da: V5.1, V5.2 e V4.20.
 - Repository: `bootstrap`, `engine`.
 - Output: catalogo versionato di intenti e capability matrix.
 - Test: copertura, intenti sovrapposti e domanda fuori perimetro.

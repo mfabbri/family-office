@@ -2,21 +2,21 @@
 
 ## ID e titolo
 
-V5.2 - Knowledge corpus and citation index.
+V4.11 - Work-transition data readiness and lineage gate.
 
 ## Stato
 
-`done`
+`planned`
 
 ## Roadmap
 
-`docs/roadmap/roadmap-v5-ai-orchestration.md`
+`docs/roadmap/roadmap-v4b-work-transition.md`
 
 ## Motivazione e dipendenze
 
-V5.1 e' completata e fornisce `tool-registry/v1` con 15 tool deterministici e adapter locale validato. V5.2 e' il primo incremento selezionabile e deve rendere le fonti knowledge recuperabili con citazioni identificabili, validita' temporale e livello di autorita'.
+La baseline corrente dispone di `work-exit-feasibility/v1`, ma quel servizio valuta un hard stop annuale: non rappresenta fasi FTE, non accumula risparmio pre-uscita, non separa cessazione e decorrenza pensionistica e non ricostruisce un household cashflow coerente da fonti con freshness diverse. Prima di aggiungere nuovi calcoli occorre quindi un gate deterministico che selezioni, riconcili e qualifichi gli snapshot realmente utilizzabili dal nuovo pipeline Work Transition.
 
-Non sono necessari dati personali per procedere: il corpus pubblico gia' presente in `family-office-knowledge` e' sufficiente come base iniziale. I gap di formati o fonti reali ancora aperti in V1 sono non bloccanti finche' V5.2 non dichiara il corpus esaustivo per quei perimetri.
+Dipendenze disponibili: V4.2 liquidita', V4.3 decumulo, V4.6e/V4.8a pensione Spagna-UE, V4.8c work-exit legacy, V5.1 tool registry e V5.2 citation index. V5.1 e V5.2 restano completati; V5.3+ sono sospesi fino alla chiusura della roadmap V4B.
 
 Prima dell'implementazione eseguire sempre:
 
@@ -24,47 +24,43 @@ Prima dell'implementazione eseguire sempre:
 python family-office-engine/src/family_office_engine/governance/roadmap_audit.py
 ```
 
-## Readiness e gap osservati
+## Piano operativo V4.11
 
-- Le note knowledge piu' recenti riportano gia' parte dei metadati richiesti: giurisdizione, periodo applicabile, data di verifica e fonti ufficiali.
-- La copertura non e' uniforme tra tutte le note; alcuni documenti non espongono ancora gli stessi campi in forma strutturata.
-- `family-office-knowledge/sources/source-template.md` e' ancora minimale e andra' allineato al citation contract definito dall'incremento.
-- Una fonte priva di metadati obbligatori deve produrre un gap esplicito: non va esclusa silenziosamente e non va promossa per deduzione a fonte autorevole.
-- Eventuali verifiche o integrazioni normative devono seguire `knowledge -> rules -> tests -> engine`; V5.2 indicizza e qualifica le fonti, non introduce nuovi calcoli.
+1. Definire `work-transition-readiness/v1` e il contratto input senza dati personali nei repository software.
+2. Inventariare le sorgenti candidate per reddito proprio/coniuge, spese, patrimonio, liquidita', RITA/previdenza complementare, INPS, Spagna/UE e altri redditi.
+3. Definire una policy deterministica di freshness e precedence basata su provenance/as-of date, senza sovrascrivere conflitti.
+4. Rilevare doppio conteggio, periodi mancanti, snapshot stale, importi gross/net incompatibili e stream senza start/end.
+5. Produrre un readiness snapshot che distingua `ready`, `partial` e `blocked`, con gap bloccanti per qualunque input necessario al calcolo della data.
+6. Aggiungere CLI breve `fo planning work-transition readiness` o equivalente, fixture sintetiche e test.
+7. Aggiornare roadmap, decision log e documentazione solo a criteri di completamento verificati.
 
-## Piano operativo V5.2
+## File previsti
 
-1. Inventariare note knowledge, contratti e riferimenti normativi nel perimetro iniziale.
-2. Definire un citation contract versionato con identificativo, tema, giurisdizione, autorita', validita', stato temporale e provenance.
-3. Normalizzare il template delle fonti senza inventare metadati mancanti.
-4. Costruire un indice locale deterministico, riproducibile e deduplicato.
-5. Implementare retrieval temporale e gestione esplicita di fonti mancanti, scadute, abrogate o duplicate.
-6. Aggiungere test, CLI/documentazione impattata e verificare regression e roadmap audit.
+- `family-office-engine/schemas/` per i contratti Work Transition;
+- `family-office-engine/src/family_office_engine/services/` per il readiness builder;
+- `family-office-engine/src/family_office_engine/cli/main.py` o modulo CLI estratto se l'audit lo richiede;
+- `family-office-engine/tests/` con fixture esclusivamente sintetiche;
+- documentazione API/CLI/input guide e roadmap V4B.
 
-## Criteri di completamento V5.2
+## Test e verifiche
 
-- Il corpus iniziale e' indicizzato con contratto versionato e hash riproducibile.
-- Ogni affermazione normativa supportata puo' rinviare a una fonte identificabile.
-- Metadati mancanti, fonti abrogate e conflitti temporali restano visibili come gap.
-- Retrieval temporale, citazione mancante e deduplica sono coperti da test.
-- Nessun dato personale entra nei repository software o knowledge.
+- selezione della fonte piu' recente senza perdere provenance;
+- conflitto tra manual assumptions e payroll documentale;
+- gross/net mismatch;
+- asset duplicato o non liquidabile;
+- pension snapshot senza decorrenza;
+- household member mancante;
+- path Windows/Linux;
+- test mirati, regression appropriata e `roadmap_audit.py`.
 
-## Stato implementazione
+## Criteri di completamento
 
-Completato.
+- il pipeline Work Transition ha un unico readiness snapshot riproducibile come punto di ingresso;
+- nessun valore stale o duplicato viene scelto silenziosamente;
+- ogni dato usato o escluso ha provenance, as-of e motivo;
+- un gap critico blocca l'ottimizzazione invece di produrre una data apparente;
+- V4.12 puo' modellare le fasi lavorative senza dover riconciliare nuovamente le fonti.
 
-- Catalogo `knowledge-citation-catalog/v1` nel repository knowledge con citation ID, autorita', giurisdizione, temi, validita' e stato.
-- Servizio deterministico `family_office_engine.services.citation_index` con output `citation-index/v1` e `citation-search/v1`.
-- Corpus iniziale: 11 citazioni, 13 documenti knowledge e 28 contratti input/output derivati dal tool registry.
-- 7 gap espliciti: cinque documenti senza citation ID strutturato e fonte RITA senza validita'/data di verifica documentate.
-- Deduplica per locator canonico, hash dei documenti, protezione path traversal e filtro temporale per fonti future, scadute, abrogate o ritirate.
-- Tool read-only `knowledge.citations.search` aggiunto al registry.
-- CLI `fo orchestration citations build/search` con default repository/workspace ed errore recuperabile.
-- 13 test mirati/integration OK.
-- Regression unit engine: 471 test OK.
-- Smoke CLI: build `complete_with_gaps 11 citations, 13 documents, 28 contracts, 7 gaps`; ricerca IT/taxation `complete 8 citations`.
-- `roadmap_audit.py`: OK (`functional_since_audit=2`, `audit_due=false`).
+## Rischi ed esclusioni
 
-## Cadenza audit
-
-Il contatore verificato dopo V5.2 e' `functional_since_audit=2`. Completate V5.3 e V5.4, l'incremento di audit V5.4a deve essere eseguito prima di V5.5.
+V4.11 non calcola imposte, pensioni, RITA, rendimenti o date di uscita. Non corregge manualmente dati personali e non copia dati reali nei repository software. Eventuali incoerenze nel workspace diventano data gaps o azioni di onboarding, non assunzioni implicite.
