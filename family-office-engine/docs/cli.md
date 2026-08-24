@@ -4,6 +4,10 @@ Guida generale e ordine d'uso: `docs/cli-workflow.md`.
 
 Mappa degli input JSON compilabili: `docs/json-input-guides.md`.
 
+Gate Work Transition e manifest sorgenti: `docs/work-transition-readiness.md`.
+
+Scenario mensile Work Transition: `docs/work-transition-scenario.md`.
+
 La CLI utente e' `fo`. Installarla una volta dal repository engine:
 
 ```powershell
@@ -742,6 +746,23 @@ Default demo:
 Il comando produce `decumulation-strategy/v1` con cashflow annui per policy, ranking tecnico, metriche nette, warning e data gaps. I tassi netti sono solo quelli dichiarati nell'input; non calcola fiscalita' normativa, rendimenti attesi, cambi valuta, ottimizzazioni o raccomandazioni.
 
 `fo planning decumulation wizard` crea una prima policy esplicita `decumulation-policy-set/v1`. Usa goals e piano liquidita' gia salvati come contesto per nucleo, data, valuta, fabbisogno annuo, cuscinetto di liquidita' e asset prelevabili; chiede solo eta', orizzonte, ordine di prelievo e assunzioni esplicite su rendimenti/aliquote. Se un'aliquota non e' nota, lascia `0.00`: il wizard la salva come gap da stimare, non come ipotesi fiscale definitiva. Se l'input esiste gia', non richiede di reinserire dati e usa `--overwrite` solo per revisione esplicita. Salva progressivamente le risposte, cosi' un'interruzione puo' essere ripresa con `fo planning decumulation wizard --overwrite`. Asset, rendimenti e tassi restano assunzioni dichiarate dall'utente e vanno revisionati prima del build.
+
+## `fo planning investment-opportunity build`
+
+Costruisce `investment-opportunity/v1` da scenari di opportunita' generica:
+
+```text
+fo planning investment-opportunity build
+fo planning investment-opportunity demo
+```
+
+Il default legge `../family-office-workspace/planning/investment-opportunity.json`
+e scrive `../family-office-workspace/snapshots/investment-opportunity.snapshot.json`.
+Il core calcola solo acquisition basis, ricavi/costi operativi, NOI, free cash
+flow annuale, costo del tempo proprietario e valore residuo espliciti. Il
+beneficio di uso personale e' separato dal cash flow; fiscalita', classificazione
+dell'attivita', financing, utilizzo e valori non dichiarati sono data gap o
+competenza degli adapter/rule pack successivi.
 
 ## `fo planning pension-contributions build`
 

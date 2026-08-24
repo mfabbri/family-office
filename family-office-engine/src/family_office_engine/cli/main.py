@@ -168,6 +168,10 @@ from family_office_engine.services.real_estate_plan import (
     RealEstatePlanError,
     build_real_estate_plan,
 )
+from family_office_engine.services.investment_opportunity import (
+    InvestmentOpportunityError,
+    build_investment_opportunity,
+)
 from family_office_engine.services.protection_gap import (
     ProtectionGapError,
     build_protection_gap,
@@ -175,6 +179,14 @@ from family_office_engine.services.protection_gap import (
 from family_office_engine.services.work_exit_feasibility import (
     WorkExitFeasibilityError,
     build_work_exit_feasibility,
+)
+from family_office_engine.services.work_transition_readiness import (
+    WorkTransitionReadinessError,
+    build_work_transition_readiness,
+)
+from family_office_engine.services.work_transition_scenario import (
+    WorkTransitionScenarioError,
+    build_work_transition_scenario,
 )
 from family_office_engine.services.wealth_strategy import WealthStrategyError, build_wealth_strategy
 from family_office_engine.services.tool_registry import (
@@ -354,6 +366,22 @@ def default_real_estate_plan_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-real-estate-plan.synthetic.snapshot.json"
 
 
+def default_investment_opportunity_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "investment-opportunity.json"
+
+
+def default_investment_opportunity_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "investment-opportunity-income-property-sample.json"
+
+
+def default_investment_opportunity_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "investment-opportunity.snapshot.json"
+
+
+def default_investment_opportunity_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-investment-opportunity.synthetic.snapshot.json"
+
+
 def default_protection_gap_input() -> Path:
     return resolve_repo("workspace") / "planning" / "protection-gap.json"
 
@@ -451,6 +479,42 @@ def default_work_exit_output() -> Path:
 
 def default_work_exit_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-work-exit.synthetic.snapshot.json"
+
+
+def default_work_transition_readiness_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "work-transition-readiness.json"
+
+
+def default_work_transition_readiness_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "work-transition-readiness-input-sample.json"
+
+
+def default_work_transition_readiness_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "work-transition-readiness.snapshot.json"
+
+
+def default_work_transition_readiness_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-work-transition-readiness.synthetic.snapshot.json"
+
+
+def default_work_transition_scenario_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "work-transition-scenario.json"
+
+
+def default_work_transition_scenario_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "work-transition-scenario-input-sample.json"
+
+
+def default_work_transition_scenario_readiness() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "work-transition-readiness.snapshot.json"
+
+
+def default_work_transition_scenario_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "work-transition-scenario.snapshot.json"
+
+
+def default_work_transition_scenario_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-work-transition-scenario.synthetic.snapshot.json"
 
 
 def default_lifecycle_expenses_input() -> Path:
@@ -4303,6 +4367,28 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_real_estate_plan_demo_output(),
         help="Output synthetic real estate plan snapshot JSON path",
     )
+    planning_investment_opportunity_parser = planning_subparsers.add_parser(
+        "investment-opportunity",
+        help="Build generic deterministic investment opportunity scenarios",
+    )
+    planning_investment_opportunity_subparsers = planning_investment_opportunity_parser.add_subparsers(
+        dest="planning_investment_opportunity_command"
+    )
+    planning_investment_opportunity_build_parser = planning_investment_opportunity_subparsers.add_parser(
+        "build", help="Build investment-opportunity/v1 from explicit scenario assumptions"
+    )
+    planning_investment_opportunity_build_parser.add_argument(
+        "--input", type=Path, default=default_investment_opportunity_input(), help="Input investment opportunity JSON path"
+    )
+    planning_investment_opportunity_build_parser.add_argument(
+        "--output", type=Path, default=default_investment_opportunity_output(), help="Output investment opportunity snapshot JSON path"
+    )
+    planning_investment_opportunity_demo_parser = planning_investment_opportunity_subparsers.add_parser(
+        "demo", help="Run the synthetic generic investment opportunity check"
+    )
+    planning_investment_opportunity_demo_parser.add_argument(
+        "--output", type=Path, default=default_investment_opportunity_demo_output(), help="Output synthetic investment opportunity snapshot JSON path"
+    )
     planning_protection_parser = planning_subparsers.add_parser(
         "protection",
         help="Compare explicit insurance policies and family protection needs",
@@ -4732,6 +4818,61 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=default_work_exit_demo_output(),
         help="Output synthetic work-exit feasibility snapshot JSON path",
+    )
+    planning_work_transition_parser = planning_subparsers.add_parser(
+        "work-transition",
+        help="Prepare phased work-transition planning inputs",
+    )
+    planning_work_transition_subparsers = planning_work_transition_parser.add_subparsers(
+        dest="planning_work_transition_command"
+    )
+    planning_work_transition_readiness_parser = planning_work_transition_subparsers.add_parser(
+        "readiness",
+        help="Build work-transition-readiness/v1 with source lineage and blocking gaps",
+    )
+    planning_work_transition_readiness_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_work_transition_readiness_input(),
+        help="Input work-transition readiness manifest JSON path",
+    )
+    planning_work_transition_readiness_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Output snapshot path (defaults to personal or synthetic workspace output)",
+    )
+    planning_work_transition_readiness_parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Use the synthetic readiness manifest included with the engine",
+    )
+    planning_work_transition_scenario_parser = planning_work_transition_subparsers.add_parser(
+        "scenario",
+        help="Build work-transition-scenario/v1 monthly FTE phases",
+    )
+    planning_work_transition_scenario_parser.add_argument(
+        "--input",
+        type=Path,
+        default=default_work_transition_scenario_input(),
+        help="Input work-transition scenario JSON path",
+    )
+    planning_work_transition_scenario_parser.add_argument(
+        "--readiness-snapshot",
+        type=Path,
+        default=default_work_transition_scenario_readiness(),
+        help="Input work-transition readiness snapshot JSON path",
+    )
+    planning_work_transition_scenario_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Output scenario snapshot path (defaults to personal or synthetic workspace output)",
+    )
+    planning_work_transition_scenario_parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Use synthetic readiness and scenario fixtures included with the engine",
     )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
@@ -5618,6 +5759,40 @@ def main(argv: list[str] | None = None) -> int:
         print(
             "planning goals: prepared "
             f"({result['input_path']}; edit it, then run `fo planning goals validate`)"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "investment-opportunity"
+        and args.planning_investment_opportunity_command == "build"
+    ):
+        try:
+            snapshot = build_investment_opportunity(args.input, args.output)
+        except InvestmentOpportunityError as exc:
+            print(f"planning investment-opportunity: ERROR ({exc})")
+            return 1
+        print(
+            "planning investment-opportunity: "
+            f"{snapshot['status']} {snapshot['summary']['scenario_count']} scenarios, "
+            f"{snapshot['summary']['data_gap_count']} gaps ({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "investment-opportunity"
+        and args.planning_investment_opportunity_command == "demo"
+    ):
+        try:
+            snapshot = build_investment_opportunity(default_investment_opportunity_sample_input(), args.output)
+        except InvestmentOpportunityError as exc:
+            print(f"planning investment-opportunity demo: ERROR ({exc})")
+            return 1
+        print(
+            "planning investment-opportunity demo: "
+            f"{snapshot['status']} {snapshot['summary']['scenario_count']} scenarios, "
+            f"{snapshot['summary']['data_gap_count']} gaps ({args.output})"
         )
         return 0
 
@@ -6746,6 +6921,64 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['search']['candidate_count']} candidates, "
             f"{len(snapshot['data_gaps'])} gaps "
             f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "work-transition"
+        and args.planning_work_transition_command == "readiness"
+    ):
+        input_path = default_work_transition_readiness_sample_input() if args.demo else args.input
+        output_path = args.output or (
+            default_work_transition_readiness_demo_output() if args.demo else default_work_transition_readiness_output()
+        )
+        try:
+            snapshot = build_work_transition_readiness(input_path, output_path)
+        except WorkTransitionReadinessError as exc:
+            print(f"planning work-transition readiness: ERROR ({exc})")
+            return 1
+        print(
+            "planning work-transition readiness: "
+            f"{snapshot['status']} "
+            f"selected={snapshot['summary']['selected_input_count']}/"
+            f"{snapshot['summary']['required_input_count']}, "
+            f"{snapshot['summary']['blocking_gap_count']} blockers, "
+            f"{snapshot['summary']['warning_count']} warnings "
+            f"({output_path})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "work-transition"
+        and args.planning_work_transition_command == "scenario"
+    ):
+        input_path = default_work_transition_scenario_sample_input() if args.demo else args.input
+        output_path = args.output or (
+            default_work_transition_scenario_demo_output() if args.demo else default_work_transition_scenario_output()
+        )
+        readiness_path = args.readiness_snapshot
+        if args.demo:
+            readiness_path = output_path.with_name("cli-check-work-transition-readiness.synthetic.snapshot.json")
+            try:
+                build_work_transition_readiness(default_work_transition_readiness_sample_input(), readiness_path)
+            except WorkTransitionReadinessError as exc:
+                print(f"planning work-transition scenario: ERROR ({exc})")
+                return 1
+        try:
+            snapshot = build_work_transition_scenario(input_path, readiness_path, output_path)
+        except WorkTransitionScenarioError as exc:
+            print(f"planning work-transition scenario: ERROR ({exc})")
+            return 1
+        print(
+            "planning work-transition scenario: "
+            f"{snapshot['status']} "
+            f"members={snapshot['summary']['member_count']}, "
+            f"phases={snapshot['summary']['phase_count']}, "
+            f"months={snapshot['summary']['timeline_month_count']}, "
+            f"{snapshot['summary']['blocking_gap_count']} blockers "
+            f"({output_path})"
         )
         return 0
 

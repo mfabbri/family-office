@@ -1,0 +1,5 @@
+{
+  "schema_version": "investment-opportunity/v1", "record_type": "InvestmentOpportunityInput", "opportunity_id": "synthetic-rentable-movable", "label": "Synthetic rentable movable asset", "asset_type": "rentable_movable_asset", "as_of_date": "2026-08-24", "base_currency": "EUR", "horizon_years": 7,
+  "assumptions": [{"assumption_id": "synthetic-rentable-movable-adverse", "version": "v1", "source": "synthetic fixture"}], "provenance": [{"origin": "synthetic fixture"}],
+  "scenarios": [{"scenario_id": "adverse", "label": "Adverse", "provenance": [{"origin": "synthetic fixture"}], "acquisition": {"purchase_price": [{"code": "vehicle_price", "amount": "60000"}], "costs": [], "initial_capex": [{"code": "fit_out", "amount": "3000"}]}, "operations": {"revenue": [{"code": "rental_revenue", "amount": "12000"}], "costs": [{"code": "maintenance", "amount": "4500"}], "taxes_fees": []}, "exit": {"residual_value": [{"code": "explicit_residual", "amount": "25000"}], "costs": []}, "owner_time": {"annual_hours": "35", "hourly_value": "25"}, "personal_use": {"annual_economic_benefit": "3000"}}]
+}

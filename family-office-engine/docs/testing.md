@@ -1098,3 +1098,73 @@ Output locale previsto:
 ```
 
 I test coprono catalogo reale, hash riproducibile, retrieval temporale, fonte abrogata, citation ID mancante, deduplica del locator, protezione dal path traversal, invocazione read-only tramite registry e smoke CLI build/search. I gap del corpus restano parte del contratto e non vengono risolti con metadati sintetici.
+
+## Supported-question catalog
+
+Test mirato:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_supported_question_catalog
+```
+
+I test verificano copertura completa dei tool registrati, hash riproducibile, capability investimento dichiarata `planned` e non eseguibile, data gaps minimi, sovrapposizioni, intenti sconosciuti e richieste da rinviare a un professionista. Il catalogo non fa routing di linguaggio naturale e non invoca strumenti.
+
+## Investment Opportunity
+
+Test mirati e integrazione CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_investment_opportunity
+```
+
+Smoke CLI:
+
+```text
+fo planning investment-opportunity demo
+```
+
+Il contratto `investment-opportunity/v1` viene verificato con fixture sintetiche per immobile a reddito e asset mobile noleggiabile, cash flow zero e negativo, valore residuo, costo del tempo del proprietario, separazione del beneficio d'uso personale, gap delle assunzioni e hash riproducibile.
+
+## Work-transition readiness
+
+Test mirati e integrazione CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_work_transition_readiness tests.unit.test_work_transition_readiness_cli
+```
+
+Smoke CLI:
+
+```text
+fo planning work-transition readiness --demo
+```
+
+Output personale previsto:
+
+```text
+..\family-office-workspace\snapshots\work-transition-readiness.snapshot.json
+```
+
+Il contratto `work-transition-readiness/v1` verifica freshness, precedence, provenance, gross/net, periodi, bounds degli stream, liquidita' e doppio conteggio. Il comando produce sempre il report diagnostico; un blocker imposta `optimization_allowed=false` e impedisce ai successivi incrementi Work Transition di emettere date apparenti.
+
+## Work-transition scenario
+
+Test mirati e integrazione CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_work_transition_scenario tests.unit.test_work_transition_scenario_cli
+```
+
+Smoke CLI:
+
+```text
+fo planning work-transition scenario --demo
+```
+
+Output personale previsto:
+
+```text
+..\family-office-workspace\snapshots\work-transition-scenario.snapshot.json
+```
+
+Il contratto `work-transition-scenario/v1` costruisce timeline mensili FTE per adulto da una readiness non bloccata. I test coprono 100% -> 60% -> 0%, piu' livelli part-time, due adulti, readiness bloccata, sovrapposizioni, gap non dichiarati, durate invalide, granularita' non mensile e separazione tra uscita full-time, cessazione e date pensionistiche.

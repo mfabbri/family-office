@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Investment Opportunity Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_type", "opportunity_id", "label", "asset_type", "as_of_date", "base_currency", "horizon_years", "assumptions", "provenance", "scenarios"],
+  "properties": {
+    "schema_version": {"const": "investment-opportunity/v1"},
+    "record_type": {"const": "InvestmentOpportunityInput"},
+    "opportunity_id": {"type": "string", "minLength": 1},
+    "label": {"type": "string", "minLength": 1},
+    "asset_type": {"type": "string", "minLength": 1},
+    "as_of_date": {"type": "string", "format": "date"},
+    "base_currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "horizon_years": {"type": "integer", "minimum": 1},
+    "assumptions": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["assumption_id", "version", "source"]}},
+    "provenance": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "data_gaps": {"type": "array", "items": {"type": "object", "required": ["code"]}},
+    "scenarios": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/scenario"}}
+  },
+  "$defs": {
+    "amount": {"type": "object", "additionalProperties": false, "required": ["code", "amount"], "properties": {"code": {"type": "string", "minLength": 1}, "amount": {"type": ["number", "string"]}}},
+    "scenario": {"type": "object", "additionalProperties": false, "required": ["scenario_id", "label", "provenance"], "properties": {
+      "scenario_id": {"type": "string", "minLength": 1}, "label": {"type": "string", "minLength": 1}, "provenance": {"type": "array", "minItems": 1, "items": {"type": "object"}}, "financing_reference": {"type": ["string", "null"]},
+      "acquisition": {"$ref": "#/$defs/acquisition"}, "operations": {"$ref": "#/$defs/operations"}, "exit": {"$ref": "#/$defs/exit"},
+      "owner_time": {"type": "object", "additionalProperties": false, "properties": {"annual_hours": {"type": ["number", "string"]}, "hourly_value": {"type": ["number", "string"]}}},
+      "personal_use": {"type": "object", "additionalProperties": false, "properties": {"annual_economic_benefit": {"type": ["number", "string"]}}}
+    }},
+    "acquisition": {"type": "object", "additionalProperties": false, "properties": {"purchase_price": {"type": "array", "items": {"$ref": "#/$defs/amount"}}, "costs": {"type": "array", "items": {"$ref": "#/$defs/amount"}}, "initial_capex": {"type": "array", "items": {"$ref": "#/$defs/amount"}}}},
+    "operations": {"type": "object", "additionalProperties": false, "properties": {"revenue": {"type": "array", "items": {"$ref": "#/$defs/amount"}}, "costs": {"type": "array", "items": {"$ref": "#/$defs/amount"}}, "taxes_fees": {"type": "array", "items": {"$ref": "#/$defs/amount"}}}},
+    "exit": {"type": "object", "additionalProperties": false, "properties": {"residual_value": {"type": "array", "items": {"$ref": "#/$defs/amount"}}, "costs": {"type": "array", "items": {"$ref": "#/$defs/amount"}}}}
+  }
+}

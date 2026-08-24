@@ -6,16 +6,10 @@ Consentire domande in linguaggio naturale e risposte sofisticate usando retrieva
 
 ## Prerequisiti
 
-- Gate V4 completato; per V5.3+ deve essere completato anche il gate V4B Work Transition.
+- Gate V4 completato.
 - Tool deterministici con input/output versionati.
 - Knowledge con fonti e validità temporale.
 - Golden scenarios per le decisioni principali.
-
-## Sequencing note — V4B Work Transition
-
-V5.1 e V5.2 restano completati e i loro contratti/tool non vengono annullati. La prosecuzione da V5.3 e' intenzionalmente sospesa mentre `roadmap-v4b-work-transition.md` completa il golden use case full-time → part-time → ponte → pensioni. Alla chiusura del gate V4B → V5, il tool registry V5.1 deve includere i nuovi tool deterministici e V5 riprende dal primo incremento `planned`.
-
-Questa sospensione non autorizza l'LLM a stimare in proprio redditi netti, contributi, decorrenze, RITA, decumulo o date di uscita.
 
 ## Principio architetturale
 
@@ -61,16 +55,147 @@ Esito: completato con catalogo `knowledge-citation-catalog/v1`, servizio determi
 
 ### V5.3 — Supported-question taxonomy
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Definire famiglie di domande, tool richiesti, dati minimi, output attesi e casi da rifiutare o rinviare a un professionista.
 
-- Dipende da: V5.1, V5.2 e V4.20.
+- Dipende da: V5.1 e V5.2.
 - Repository: `bootstrap`, `engine`.
 - Output: catalogo versionato di intenti e capability matrix.
 - Test: copertura, intenti sovrapposti e domanda fuori perimetro.
 - Done quando: il sistema sa dichiarare cosa può e non può risolvere.
+
+Esito: completato con `supported-question-catalog/v1` e `question-capability-assessment/v1`. Il catalogo copre tutti i tool registrati con dati minimi, output, rischio ed escalation; non instrada testo libero e non invoca tool. Le domande su asset produttivi sono `planned` e non eseguibili fino al blocco V5.3a-V5.3h. Selezioni sovrapposte, sconosciute, incomplete o riservate a un professionista producono problemi espliciti. Verifiche: 4 test V5.3, 6 registry, 6 citation-index, regression unit engine 515 test e `roadmap_audit.py` OK.
+
+## Deterministic investment-opportunity enabling block
+
+Dopo V5.3 e prima dell'intent router V5.4, V5 introduce un blocco deterministico per asset produttivi. Questo preserva la regola di non anticipazione dell'AI: appartamenti a reddito, camper/veicoli noleggiabili e futuri asset analoghi devono essere valutabili da contratti, servizi e rule pack prima di diventare intenti eseguibili dal router conversazionale.
+
+La tassonomia V5.3 puo' gia' classificare queste domande come capability pianificata/non ancora eseguibile; gli incrementi seguenti rendono la capability realmente disponibile prima che V5.4 inizi a instradarla verso tool concreti.
+
+### V5.3a — Generic investment opportunity core
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Definire un contratto generico `investment-opportunity/v1` e un servizio deterministico per acquisition basis, operating cash flow, residual value, owner time, personal-use benefit separato, scenari e metriche comuni.
+
+- Dipende da: V4.2, V4.5, V4.10, V5.1 e V5.3.
+- Repository: `engine`, `bootstrap`.
+- Riusa: planning goals, liquidity plan, tax-aware portfolio, wealth strategy, provenance/data-gap conventions.
+- Output: `investment-opportunity/v1`.
+- Metriche candidate: NOI, free cash flow, cash-on-cash, payback, NPV, IRR, equity multiple; cap rate/DSCR solo quando semanticamente applicabili.
+- Vincoli: nessun rendimento di mercato, occupancy, tariffa, rivalutazione o residual value inventato; ogni assumption e' input/versionata.
+- Test: zero/negative cash flow, missing assumptions, residual value, owner-time cost, personal-use separation, deterministic hash/provenance.
+- Done quando: due adapter diversi possono usare lo stesso core senza duplicare formule o mescolare benefici personali con redditi imponibili.
+
+Esito: completato con contratto e servizio deterministico `investment-opportunity/v1`, schema input/output, fixture sintetiche per immobile a reddito e asset mobile noleggiabile e CLI `fo planning investment-opportunity build|demo`. Il core calcola soltanto importi espliciti: acquisition basis, ricavi/costi, NOI, free cash flow annuo, valore residuo/costi di uscita e costo del tempo del proprietario. Il beneficio economico dell'uso personale resta fuori da NOI e cash flow; fiscalita', classificazione dell'attivita', finanziamento, rendimenti, utilizzo e valori residui non dichiarati restano input o data gap. Verifiche: 8 test mirati OK, regression unit engine 516 test OK, smoke `fo planning investment-opportunity demo` OK e `roadmap_audit.py` OK.
+
+### V5.3b — Periodic code and contract audit
+
+**Stato:** `planned`
+**Tipo:** `audit`
+
+Eseguire l'audit immediatamente dopo V5.3a. V5.1 e V5.2 sono gia' completati; completando V5.3 e V5.3a si raggiunge la soglia di quattro incrementi funzionali dall'ultimo audit prevista da `roadmap_audit.py`.
+
+- Dipende da: V5.3 e V5.3a.
+- Repository: `bootstrap`, `knowledge`, `engine` e `rules` se toccati.
+- Checklist: `family-office-bootstrap/docs/code-audit-checklist.md`.
+- Focus: taxonomy/capability matrix, formule comuni, contratti, personal-use separation, provenance, data gaps e regression.
+- Done quando: non restano blocker impliciti prima degli adapter asset-specific.
+
+### V5.3c — Income-producing real estate adapter V2
+
+**Stato:** `planned`
+**Tipo:** `functional`
+
+Estendere la capability immobiliare da `hold/rent/sell` a un vero modello di investimento a reddito.
+
+- Dipende da: V5.3b.
+- Repository: `engine`, `knowledge`, `rules` solo se servono nuove regole fiscali.
+- Output: `real-estate-investment/v2`.
+- Modelli iniziali: long-term rental, short-term rental, mixed personal/rental use.
+- Driver: purchase/acquisition costs, capex, rent/nightly rate, occupancy/vacancy, agency/property-management fee, condominium, utilities, insurance, maintenance, taxes, financing link, exit costs/value.
+- Fiscalita': nessuna aliquota hard-coded; `knowledge -> rules -> tests -> engine`, oppure data gap esplicito.
+- Test: vacancy, management fee, maintenance shock, personal-use days, exit costs, missing tax classification.
+- Done quando: il sistema distingue NOI, cash flow, tax drag e valore residuo e puo' confrontare l'immobile con altre alternative sullo stesso capitale/orizzonte.
+
+### V5.3d — Rentable movable asset / camper adapter
+
+**Stato:** `planned`
+**Tipo:** `functional`
+
+Aggiungere un adapter per asset mobili ad uso misto, con il camper come primo caso reale.
+
+- Dipende da: V5.3c.
+- Repository: `engine`, `knowledge`, `rules` solo se necessari.
+- Output: `rentable-movable-asset/v1`.
+- Driver: available days, personal-use days, rental days, daily rate, platform/agency fee, insurance, storage, cleaning, delivery/collection, maintenance, tyres, mileage/wear, downtime, major repair, residual value.
+- Beneficio personale: `personal_use_economic_benefit` separato dal cash flow e mai trattato automaticamente come reddito o deduzione fiscale.
+- Activity classification: `personal | occasional_rental | habitual_rental | business` come input/regola validata; non dedurla dalla sola frequenza.
+- Test: utilization, downtime, major repair, mixed use, zero rental, residual-value shock, classification gap.
+- Done quando: il camper e' confrontabile economicamente senza confondere utilita' personale, cash flow da noleggio e trattamento fiscale.
+
+### V5.3e — Financing and leverage analyzer
+
+**Stato:** `planned`
+**Tipo:** `functional`
+
+Introdurre un contratto riusabile `financing-plan/v1` per asset acquistati con debito.
+
+- Dipende da: V5.3b.
+- Repository: `engine`.
+- Output: debt schedule con interest, principal, remaining balance, annual debt service, LTV e DSCR dove applicabile.
+- Input: down payment, loan amount, fixed/variable rate assumption, duration, fees, balloon/early repayment se dichiarati.
+- Vincolo: separare asset return da equity return; la leva non deve mascherare un asset economicamente debole.
+- Test: fixed/variable assumption, zero debt, high LTV, debt-service stress, early repayment fee.
+- Done quando: real estate e camper possono usare lo stesso financing contract senza formule duplicate.
+
+### V5.3f — Stress test and opportunity-cost comparator
+
+**Stato:** `planned`
+**Tipo:** `functional`
+
+Confrontare base/upside/adverse e l'uso alternativo dello stesso capitale sullo stesso orizzonte.
+
+- Dipende da: V5.3c, V5.3d e V5.3e.
+- Repository: `engine`.
+- Output: `investment-opportunity-comparison/v1`.
+- Stress real estate: occupancy/rent down, maintenance up, rate shock, exit-value shock.
+- Stress camper: rental days/daily rate down, maintenance/insurance up, downtime, major repair, residual-value shock.
+- Opportunity cost: benchmark esplicito da cash/tax-aware portfolio o altro scenario dichiarato; se manca, data gap.
+- Household checks: liquidity reserve, concentration, retirement/work-exit impact, reversibility.
+- Monte Carlo: fuori perimetro iniziale; prima base/upside/adverse deterministici.
+- Test: same-capital/same-horizon enforcement, missing benchmark, adverse negative cash flow, liquidity breach.
+- Done quando: il ranking mostra rendimento, rischio, liquidita' e management burden senza trasformare assumption in facts.
+
+### V5.3g — Investment opportunity code audit
+
+**Stato:** `planned`
+**Tipo:** `audit`
+
+Audit dopo quattro incrementi funzionali V5.3c-V5.3f.
+
+- Dipende da: V5.3f.
+- Repository: tutti quelli toccati dal blocco.
+- Focus: contract reuse, formula definitions, leverage separation, fiscal gaps, household constraints, CLI/docs, privacy, regression e roadmap cadence.
+- Done quando: il blocco deterministico e' stabile prima dell'integrazione strategica e del routing AI.
+
+### V5.3h — Wealth-strategy integration
+
+**Stato:** `planned`
+**Tipo:** `functional`
+
+Integrare le opportunita' nel compositore `wealth-strategy/v1` come alternative verificabili.
+
+- Dipende da: V5.3g.
+- Repository: `engine`.
+- Package examples: keep portfolio, buy income property, buy mixed-use camper, alternative financial allocation.
+- Ranking dimensions: expected net return dichiarato/derivato, cash yield, liquidity, capital at risk, tax drag, management burden, owner time, concentration, reversibility, personal utility, retirement cash-flow contribution, estate complexity.
+- Vincolo: `wealth-strategy` compone output esistenti; non ricalcola imposte, IRR o fiscalita'.
+- Test: missing adapter, blocked tax classification, liquidity breach, ranking tie, personal utility not treated as taxable cash flow.
+- Done quando: appartamento e camper possono comparire nello stesso business case insieme al portafoglio finanziario con lineage completo.
 
 ### V5.4 — Intent router
 
@@ -79,7 +204,7 @@ Definire famiglie di domande, tool richiesti, dati minimi, output attesi e casi 
 
 Classificare la domanda in uno o più intenti, estrarre entità e indicare dati mancanti senza eseguire calcoli.
 
-- Dipende da: V5.3.
+- Dipende da: V5.3 e V5.3h.
 - Repository: `engine`.
 - Output: `question-intent/v1`.
 - Test: dataset sintetico, ambiguità, prompt injection e richiesta non supportata.
@@ -92,11 +217,11 @@ Classificare la domanda in uno o più intenti, estrarre entità e indicare dati 
 
 Verificare il primo blocco funzionale V5 prima di introdurre il query planner.
 
-- Dipende da: V5.2, V5.3 e V5.4.
+- Dipende da: V5.2, V5.3, V5.3h e V5.4.
 - Repository: `bootstrap`, `knowledge`, `engine`.
 - Checklist: `family-office-bootstrap/docs/code-audit-checklist.md`.
 - Test: regression pertinente, privacy, allineamento contratti/CLI/docs e `roadmap_audit.py`.
-- Done quando: citation index, tassonomia e router risultano coerenti e non restano blocker impliciti per V5.5.
+- Done quando: citation index, tassonomia, investment-opportunity tools e router risultano coerenti e non restano blocker impliciti per V5.5.
 
 ### V5.5 — Query planner
 

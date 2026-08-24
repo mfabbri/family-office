@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Investment Opportunity Snapshot",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "record_type", "status", "opportunity_id", "asset_type", "base_currency", "scenarios", "data_gaps", "summary", "reproducibility"],
+  "properties": {
+    "schema_version": {"const": "investment-opportunity/v1"},
+    "record_type": {"const": "InvestmentOpportunitySnapshot"},
+    "status": {"enum": ["complete", "partial"]},
+    "opportunity_id": {"type": "string"},
+    "asset_type": {"type": "string"},
+    "base_currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "scenarios": {"type": "array"},
+    "data_gaps": {"type": "array"},
+    "summary": {"type": "object", "required": ["personal_use_benefit_is_not_cash_flow"]},
+    "reproducibility": {"type": "object", "required": ["hash_algorithm", "content_hash"], "properties": {"hash_algorithm": {"const": "sha256"}, "content_hash": {"type": "string", "minLength": 1}}}
+  }
+}

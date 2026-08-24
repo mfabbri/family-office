@@ -653,6 +653,27 @@ Fixture:
 
 - `examples/estate-plan-sample.json`
 
+## Investment Opportunity
+
+Modulo:
+
+```text
+family_office_engine.services.investment_opportunity
+```
+
+Funzione principale:
+
+- `build_investment_opportunity(input_path, output_path)`: trasforma scenari con sole assunzioni esplicite in `investment-opportunity/v1`.
+
+Il core calcola acquisition basis, ricavi e costi operativi annui, NOI, free cash flow annuo, valore residuo/costi di uscita e costo del tempo del proprietario. Il beneficio economico dell'uso personale resta una metrica separata: non entra in NOI o free cash flow e non riceve alcun trattamento fiscale implicito.
+
+Non inferisce rendimenti, tassi di occupazione/utilizzo, tariffe, fiscalita', classificazioni dell'attivita', finanziamento o valore residuo. Ognuno deve essere un input esplicito e versionato oppure un `data_gap`.
+
+Fixture:
+
+- `examples/investment-opportunity-income-property-sample.json`
+- `examples/investment-opportunity-rentable-movable-asset-sample.json`
+
 ## Wealth Strategy
 
 Modulo:

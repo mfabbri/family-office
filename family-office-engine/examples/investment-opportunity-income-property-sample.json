@@ -1,0 +1,5 @@
+{
+  "schema_version": "investment-opportunity/v1", "record_type": "InvestmentOpportunityInput", "opportunity_id": "synthetic-income-property", "label": "Synthetic income property", "asset_type": "income_property", "as_of_date": "2026-08-24", "base_currency": "EUR", "horizon_years": 10,
+  "assumptions": [{"assumption_id": "synthetic-income-property-base", "version": "v1", "source": "synthetic fixture"}], "provenance": [{"origin": "synthetic fixture"}],
+  "scenarios": [{"scenario_id": "base", "label": "Base", "provenance": [{"origin": "synthetic fixture"}], "acquisition": {"purchase_price": [{"code": "price", "amount": "200000"}], "costs": [{"code": "closing", "amount": "10000"}], "initial_capex": []}, "operations": {"revenue": [{"code": "rent", "amount": "18000"}], "costs": [{"code": "maintenance", "amount": "3000"}], "taxes_fees": [{"code": "declared_tax", "amount": "2500"}]}, "exit": {"residual_value": [{"code": "explicit_exit_value", "amount": "210000"}], "costs": [{"code": "selling_cost", "amount": "5000"}]}, "owner_time": {"annual_hours": "20", "hourly_value": "30"}, "personal_use": {"annual_economic_benefit": "0"}}]
+}

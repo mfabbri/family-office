@@ -11,11 +11,10 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 2 | `roadmap-v2.md` | Cashflow, fiscalità, RITA e successione V1 | `done` |
 | 3 | `roadmap-v3-decision-core.md` | Modello decisionale spiegabile | `done` |
 | 4 | `roadmap-v4-wealth-planning.md` | Pianificazione patrimoniale multi-obiettivo | `done` |
-| 5 | `roadmap-v4b-work-transition.md` | Full-time → part-time → cessazione → ponte → pensioni | `in_progress` |
-| 6 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `planned` |
-| 7 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `planned` |
+| 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `in_progress` |
+| 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `planned` |
 
-La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `done`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. La review della capability V4.8c ha pero' evidenziato che la domanda full-time -> part-time -> ponte -> pensione richiede ulteriori tool deterministici: per questo `roadmap-v4b-work-transition.md` e' la roadmap attiva. V5.1 e V5.2 restano `done` e i relativi artefatti sono preservati; V5.3+ riprenderanno solo dopo il gate V4B -> V5.
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `done`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. La roadmap V5 e' la roadmap attiva e richiede i tool deterministici V4 come base.
 
 Nota di governance: `roadmap_audit.py` richiede esattamente una roadmap con stato `in_progress`. Quando tutti gli incrementi della roadmap attiva sono `done`, mantenere quella roadmap `in_progress` fino a quando la transizione successiva non apre formalmente la nuova roadmap attiva nello stesso aggiornamento.
 
@@ -105,17 +104,6 @@ L'audit usa `family-office-bootstrap/docs/code-audit-checklist.md` e deve almeno
 - esiste una suite di casi sintetici e golden scenarios;
 - nessun calcolo fiscale o finanziario richiede un LLM.
 
-### Gate V4B → ripresa V5
-
-- il cashflow di lavoro e' modellato per fasi FTE e non come semplice interruttore lavoro/pensione;
-- data di uscita dal full-time, cessazione, maturazione del diritto e decorrenza delle pensioni sono campi distinti;
-- reddito netto, contributi INPS, TFR e previdenza complementare cambiano in funzione della fase lavorativa con rule pack versionati o gap espliciti;
-- INPS e Spagna/UE sono ricalcolati per scenario contributivo, mantenendo separate pensione teorica, pro-rata, benchmark documentali e decorrenze;
-- RITA, redditi del coniuge, affitti e prelievi patrimoniali sono stream con start/end e vincoli di liquidita';
-- esiste una simulazione mensile deterministica e uno stress stochastic separato per sequence-of-returns;
-- l'optimizer produce almeno `earliest_full_time_exit_date`, `recommended_full_time_exit_date` e `full_work_exit_date`, con motivi di scarto e confidence/gap;
-- `work-exit-feasibility/v1` e' mantenuto come legacy o migrato esplicitamente e il tool registry e' aggiornato prima di esporre la capability a V5.
-
 ### Gate V5 → V6
 
 - router, planner ed executor AI usano esclusivamente tool registrati;
@@ -139,5 +127,6 @@ Questi requisiti valgono in tutte le roadmap e possono generare incrementi abili
 
 ## Regola di non anticipazione dell'AI
 
+La roadmap V5 include inoltre, dopo V5.3 e prima di V5.4, il blocco deterministico V5.3a-V5.3h per `investment-opportunity/v1`, real estate a reddito, camper/rentable movable assets, financing/leverage, stress/opportunity cost e integrazione `wealth-strategy/v1`, con audit V5.3b e V5.3g per rispettare la cadenza di governance.
+
 La roadmap V5 non può essere usata per colmare capacità deterministiche mancanti. L'AI può classificare, pianificare, recuperare conoscenza e spiegare output, ma non deve inventare dati, aliquote, rendimenti, diritti pensionistici o risultati di scenario.
-Se durante V5 emerge un gap deterministico materiale per un golden use case, aprire una roadmap/incremento deterministico abilitante e sospendere la sola sequenza AI successiva; non simulare il gap nel prompt o nel response composer.
