@@ -25,6 +25,12 @@ Questo file deve restare breve. È una mappa, non un manuale completo.
    un errore blocca gli incrementi funzionali finche' la cadenza audit non e' ripristinata.
 6. Consultare decision log, long-term roadmap o altre roadmap solo in presenza di una dipendenza concreta.
 
+## Work Transition e pension bridge
+
+Per task su data di uscita dal full-time, part-time, cessazione, RITA, ponte patrimoniale o decorrenze pensionistiche leggere anche `family-office-bootstrap/docs/playbooks/11-work-transition-retirement-bridge.md`. Questi task sono almeno T4 e devono mantenere separate data di riduzione lavoro, cessazione, maturazione del diritto e decorrenza di ciascuna pensione.
+
+Quando `roadmap-v4b-work-transition.md` e' attiva, non proseguire con incrementi AI V5.3+ finche' il gate V4B -> V5 non e' completato. V5.1 e V5.2 restano validi e non vanno annullati.
+
 ## Playbook
 
 Indice: `family-office-bootstrap/docs/playbooks/README.md`.

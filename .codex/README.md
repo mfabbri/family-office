@@ -6,6 +6,7 @@ This project intentionally combines GPT-5.5 and GPT-5.6.
 - `fo_explorer`: `gpt-5.6-luna`, low reasoning.
 - `fo_reviewer`: `gpt-5.6-terra`, high reasoning.
 - `fo_normative_reviewer`: `gpt-5.6-sol`, extra-high reasoning.
+- `fo_retirement_transition_reviewer`: `gpt-5.6-sol`, extra-high reasoning, specialized on phased retirement/work-transition invariants.
 
 The generic alias `gpt-5.6` is deliberately forbidden because ChatGPT-authenticated Codex may reject it. Always use the complete IDs `gpt-5.6-sol`, `gpt-5.6-terra`, or `gpt-5.6-luna`.
 

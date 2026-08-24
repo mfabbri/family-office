@@ -8,7 +8,7 @@ Classificare il task prima di esplorare il repository.
 | T1 | Circoscritto a un modulo | bug semplice, test, parser locale | `05-bug-fix` | economy o standard/low-medium |
 | T2 | Nuova capacità delimitata | CLI, servizio, contratto singolo | `04-micro-increment` | standard/medium |
 | T3 | Cross-module o cross-repository | schema condiviso, ownership, integrazione | `06-cross-repository-change` | advanced/high |
-| T4 | Normativo o finanziario critico | fiscalità, pensione, RW, simulazione | `07-normative-change` | critical/high-xhigh |
+| T4 | Normativo o finanziario critico | fiscalità, pensione, RW, simulazione, uscita progressiva dal lavoro | `07-normative-change`; per work transition anche `11-work-transition-retirement-bridge` | critical/high-xhigh |
 | T5 | Architetturale o esplorativo | nuova roadmap, orchestrazione AI | piano dedicato | critical/high-xhigh |
 
 ## Procedura
@@ -33,3 +33,7 @@ Escalare quando emerge almeno uno dei seguenti elementi:
 - più di due ipotesi architetturali plausibili.
 
 Non escalare solo perché il repository è grande.
+
+## Routing speciale Work Transition
+
+Domande o incrementi che cercano la prima data per lasciare il full-time, introducono part-time, cessazione, RITA o un ponte fino alla pensione sono T4 anche se toccano un solo modulo. Se cambiano contratti condivisi o la sequenza delle roadmap diventano T5. Aprire `11-work-transition-retirement-bridge.md` oltre al playbook normativo e non usare V5/LLM per colmare calcoli deterministici mancanti.

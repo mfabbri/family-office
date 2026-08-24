@@ -23,6 +23,7 @@ Questi playbook riducono consumo di token e deriva operativa tramite caricamento
 - `08-testing-and-review.md` — verifica proporzionata al rischio.
 - `09-roadmap-maintenance.md` — aggiornamento minimo dello stato.
 - `10-code-audit.md` — audit periodico o richiesto.
+- `11-work-transition-retirement-bridge.md` — full-time → part-time → cessazione → RITA/patrimonio → pensioni.
 
 ## Principio fondamentale
 

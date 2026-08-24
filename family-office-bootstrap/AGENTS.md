@@ -13,4 +13,5 @@ Il bootstrap governa metodo, playbook e orchestrazione. Non contiene dati person
 - Usare il tier di modello indicato da `docs/playbooks/02-model-routing.md`.
 - Usare subagent solo secondo `docs/playbooks/03-subagent-policy.md`.
 - Per il prossimo incremento usare `docs/playbooks/04-micro-increment.md`.
+- Per transizioni full-time/part-time/cessazione/pensione usare anche `docs/playbooks/11-work-transition-retirement-bridge.md`.
 - Aggiornare un documento di governance solo se la modifica ne cambia davvero il contenuto operativo.

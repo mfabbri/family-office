@@ -20,6 +20,10 @@ config_file = "agents/fo-reviewer.toml"
 description = "Independent review for tax, pension, financial, and compliance-sensitive changes."
 config_file = "agents/fo-normative-reviewer.toml"
 
+[agents.fo_retirement_transition_reviewer]
+description = "Independent review for phased work-exit, pension entitlement, bridge-income, and decumulation changes."
+config_file = "agents/fo-retirement-transition-reviewer.toml"
+
 [profiles.standard]
 model = "gpt-5.5"
 model_reasoning_effort = "medium"

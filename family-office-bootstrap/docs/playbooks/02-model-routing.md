@@ -15,9 +15,10 @@ Use a hybrid strategy. The main agent remains on `gpt-5.5` for predictable every
 2. Keep T0-T2 work in the main agent unless a bounded read-only exploration is cheaper to delegate to Luna.
 3. Use Terra only for independent technical review of T3-T5 changes.
 4. Use Sol only for normative, financial, pension, schema, or architecture-critical review.
-5. Do not spawn more than one specialist unless their questions are independent.
-6. Do not use a specialist merely to restate work already completed by the main agent.
-7. Escalate reasoning before escalating model count.
+5. Per incrementi V4B Work Transition usare `fo_retirement_transition_reviewer` come review Sol read-only quando cambiano timeline, netto da lavoro, contribuzione, diritto/decorrenza, RITA o optimizer.
+6. Do not spawn more than one specialist unless their questions are independent.
+7. Do not use a specialist merely to restate work already completed by the main agent.
+8. Escalate reasoning before escalating model count.
 
 ## Compatibility
 
