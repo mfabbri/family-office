@@ -1,0 +1,66 @@
+{
+  "schema_version": "work-transition-scenario-input/v1",
+  "record_type": "WorkTransitionScenarioInput",
+  "household_id": "synthetic_work_transition_household",
+  "as_of_date": "2026-08-24",
+  "plan_start_date": "2026-09-01",
+  "plan_end_date": "2032-12-01",
+  "work_phases": [
+    {
+      "phase_id": "primary_full_time",
+      "member_id": "primary",
+      "start_date": "2026-09-01",
+      "end_date": "2029-12-01",
+      "status": "full_time",
+      "fte": 1.0,
+      "compensation_policy_ref": "employment-compensation-policy/synthetic-primary-v1",
+      "contribution_benefit_policy_ref": "employment-contribution-benefit-policy/synthetic-primary-v1",
+      "contractual_constraints": [
+        {
+          "constraint_id": "primary_part_time_requires_employer_approval",
+          "constraint_type": "employer_approval",
+          "description": "Synthetic constraint: part-time availability is declared, not guaranteed.",
+          "binding": "declared"
+        }
+      ],
+      "provenance": {"origin": "synthetic V4.12 scenario fixture"}
+    },
+    {
+      "phase_id": "primary_part_time_60",
+      "member_id": "primary",
+      "start_date": "2030-01-01",
+      "end_date": "2031-12-01",
+      "status": "part_time",
+      "fte": 0.6,
+      "compensation_policy_ref": "employment-compensation-policy/synthetic-primary-v1",
+      "contribution_benefit_policy_ref": "employment-contribution-benefit-policy/synthetic-primary-v1",
+      "contractual_constraints": [],
+      "provenance": {"origin": "synthetic V4.12 scenario fixture"}
+    },
+    {
+      "phase_id": "primary_not_working",
+      "member_id": "primary",
+      "start_date": "2032-01-01",
+      "end_date": "2032-12-01",
+      "status": "not_working",
+      "fte": 0.0,
+      "compensation_policy_ref": "employment-compensation-policy/no-employment-v1",
+      "contribution_benefit_policy_ref": "employment-contribution-benefit-policy/no-employment-v1",
+      "contractual_constraints": [],
+      "provenance": {"origin": "synthetic V4.12 scenario fixture"}
+    },
+    {
+      "phase_id": "spouse_full_time",
+      "member_id": "spouse",
+      "start_date": "2026-09-01",
+      "end_date": "2032-12-01",
+      "status": "full_time",
+      "fte": 1.0,
+      "compensation_policy_ref": "employment-compensation-policy/synthetic-spouse-v1",
+      "contribution_benefit_policy_ref": "employment-contribution-benefit-policy/synthetic-spouse-v1",
+      "contractual_constraints": [],
+      "provenance": {"origin": "synthetic V4.12 scenario fixture"}
+    }
+  ],
+  "declared_timeline_gaps": []
+}

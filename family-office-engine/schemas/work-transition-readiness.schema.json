@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Work Transition Readiness Snapshot",
+  "type": "object",
+  "required": ["schema_version", "record_type", "household_id", "as_of_date", "status", "optimization_allowed", "policy", "household_members", "input_selections", "sources", "data_gaps", "summary", "reproducibility"],
+  "properties": {
+    "schema_version": {"const": "work-transition-readiness/v1"},
+    "record_type": {"const": "WorkTransitionReadinessSnapshot"},
+    "household_id": {"type": "string"},
+    "as_of_date": {"type": "string", "format": "date"},
+    "status": {"enum": ["ready", "partial", "blocked"]},
+    "optimization_allowed": {"type": "boolean"},
+    "policy": {"type": "object"},
+    "household_members": {"type": "array", "items": {"type": "string"}},
+    "input_selections": {"type": "array", "items": {"type": "object"}},
+    "sources": {"type": "array", "items": {"type": "object"}},
+    "data_gaps": {"type": "array", "items": {"type": "object"}},
+    "summary": {"type": "object"},
+    "reproducibility": {"type": "object"},
+    "notes": {"type": "string"}
+  }
+}

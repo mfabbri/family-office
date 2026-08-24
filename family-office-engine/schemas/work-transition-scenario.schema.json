@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Work Transition Scenario Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_type", "household_id", "as_of_date", "status", "readiness_snapshot", "policy", "household_members", "plan_period", "derived_dates", "member_summaries", "work_phases", "monthly_timeline", "data_gaps", "summary", "reproducibility"],
+  "properties": {
+    "schema_version": {"const": "work-transition-scenario/v1"},
+    "record_type": {"const": "WorkTransitionScenarioSnapshot"},
+    "household_id": {"type": "string"},
+    "as_of_date": {"type": "string", "format": "date"},
+    "status": {"enum": ["ready", "blocked"]},
+    "readiness_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "schema_version", "status", "content_hash"],
+      "properties": {
+        "path": {"type": "string"},
+        "schema_version": {"const": "work-transition-readiness/v1"},
+        "status": {"enum": ["ready", "partial"]},
+        "content_hash": {"type": "string", "minLength": 1}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_version", "primary_granularity", "phase_period_inclusivity", "income_projection", "pension_dates"],
+      "properties": {
+        "policy_version": {"const": "work-transition-monthly-phases/v1"},
+        "primary_granularity": {"const": "monthly"},
+        "phase_period_inclusivity": {"const": "inclusive_start_month_inclusive_end_month"},
+        "income_projection": {"const": "not_calculated_in_v4_12"},
+        "pension_dates": {"const": "not_derived_in_v4_12"}
+      }
+    },
+    "household_members": {"type": "array", "items": {"type": "string"}},
+    "plan_period": {"$ref": "#/$defs/period"},
+    "derived_dates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["full_time_exit_date_by_member", "work_cessation_date_by_member", "pension_entitlement_date_by_member", "pension_payment_start_date_by_member"],
+      "properties": {
+        "full_time_exit_date_by_member": {"type": "object", "additionalProperties": {"type": ["string", "null"], "format": "date"}},
+        "work_cessation_date_by_member": {"type": "object", "additionalProperties": {"type": ["string", "null"], "format": "date"}},
+        "pension_entitlement_date_by_member": {"type": "object", "additionalProperties": {"type": "null"}},
+        "pension_payment_start_date_by_member": {"type": "object", "additionalProperties": {"type": "null"}}
+      }
+    },
+    "member_summaries": {"type": "array", "items": {"$ref": "#/$defs/member_summary"}},
+    "work_phases": {"type": "array", "items": {"$ref": "#/$defs/work_phase"}},
+    "monthly_timeline": {"type": "array", "items": {"$ref": "#/$defs/member_timeline"}},
+    "declared_timeline_gaps": {"type": "array", "items": {"$ref": "#/$defs/declared_gap"}},
+    "data_gaps": {"type": "array", "items": {"$ref": "#/$defs/data_gap"}},
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["member_count", "phase_count", "timeline_month_count", "blocking_gap_count", "warning_count"],
+      "properties": {
+        "member_count": {"type": "integer", "minimum": 1},
+        "phase_count": {"type": "integer", "minimum": 1},
+        "timeline_month_count": {"type": "integer", "minimum": 0},
+        "blocking_gap_count": {"type": "integer", "minimum": 0},
+        "warning_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hash_algorithm", "content_hash"],
+      "properties": {
+        "hash_algorithm": {"const": "sha256"},
+        "content_hash": {"type": "string", "minLength": 1}
+      }
+    },
+    "notes": {"type": "string"}
+  },
+  "$defs": {
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_date", "end_date"],
+      "properties": {"start_date": {"type": "string", "format": "date"}, "end_date": {"type": "string", "format": "date"}}
+    },
+    "work_phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase_id", "member_id", "start_date", "end_date", "status", "fte", "compensation_policy_ref", "contribution_benefit_policy_ref", "contractual_constraints", "provenance"],
+      "properties": {
+        "phase_id": {"type": "string", "minLength": 1},
+        "member_id": {"type": "string", "minLength": 1},
+        "start_date": {"type": "string", "format": "date"},
+        "end_date": {"type": "string", "format": "date"},
+        "status": {"enum": ["full_time", "part_time", "not_working"]},
+        "fte": {"type": "number", "minimum": 0, "maximum": 1},
+        "compensation_policy_ref": {"type": "string", "minLength": 1},
+        "contribution_benefit_policy_ref": {"type": "string", "minLength": 1},
+        "contractual_constraints": {"type": "array", "items": {"$ref": "#/$defs/contractual_constraint"}},
+        "provenance": {"$ref": "#/$defs/provenance"}
+      }
+    },
+    "month": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["month", "phase_id", "status", "fte", "compensation_policy_ref", "contribution_benefit_policy_ref"],
+      "properties": {
+        "month": {"type": "string", "format": "date"},
+        "phase_id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["full_time", "part_time", "not_working"]},
+        "fte": {"type": "number", "minimum": 0, "maximum": 1},
+        "compensation_policy_ref": {"type": "string", "minLength": 1},
+        "contribution_benefit_policy_ref": {"type": "string", "minLength": 1}
+      }
+    },
+    "member_timeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["member_id", "months"],
+      "properties": {"member_id": {"type": "string"}, "months": {"type": "array", "items": {"$ref": "#/$defs/month"}}}
+    },
+    "member_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["member_id", "first_month", "last_month", "full_time_exit_date", "work_cessation_date", "pension_entitlement_date", "pension_payment_start_date", "status_sequence"],
+      "properties": {
+        "member_id": {"type": "string"},
+        "first_month": {"type": ["string", "null"], "format": "date"},
+        "last_month": {"type": ["string", "null"], "format": "date"},
+        "full_time_exit_date": {"type": ["string", "null"], "format": "date"},
+        "work_cessation_date": {"type": ["string", "null"], "format": "date"},
+        "pension_entitlement_date": {"type": "null"},
+        "pension_payment_start_date": {"type": "null"},
+        "status_sequence": {"type": "array", "items": {"$ref": "#/$defs/phase_summary"}}
+      }
+    },
+    "phase_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase_id", "start_date", "end_date", "status", "fte"],
+      "properties": {
+        "phase_id": {"type": "string", "minLength": 1},
+        "start_date": {"type": "string", "format": "date"},
+        "end_date": {"type": "string", "format": "date"},
+        "status": {"enum": ["full_time", "part_time", "not_working"]},
+        "fte": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin"],
+      "properties": {"origin": {"type": "string", "minLength": 1}}
+    },
+    "contractual_constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["constraint_id", "constraint_type", "description", "binding"],
+      "properties": {
+        "constraint_id": {"type": "string", "minLength": 1},
+        "constraint_type": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1},
+        "binding": {"type": "string", "minLength": 1}
+      }
+    },
+    "declared_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["member_id", "start_date", "end_date", "reason"],
+      "properties": {"member_id": {"type": "string"}, "start_date": {"type": "string", "format": "date"}, "end_date": {"type": "string", "format": "date"}, "reason": {"type": "string"}}
+    },
+    "data_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "member_id", "start_date", "end_date", "blocking", "message"],
+      "properties": {
+        "code": {"enum": ["missing_member_timeline", "overlapping_phases", "declared_timeline_gap", "undeclared_timeline_gap"]},
+        "member_id": {"type": "string"},
+        "start_date": {"type": "string", "format": "date"},
+        "end_date": {"type": "string", "format": "date"},
+        "blocking": {"const": true},
+        "message": {"type": "string"}
+      }
+    }
+  }
+}

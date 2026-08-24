@@ -62,7 +62,7 @@ work-transition-plan/v1 + evidence
 
 ### V4.11 — Work-transition data readiness and lineage gate
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Riconciliare freshness, provenance e precedence degli snapshot necessari al golden use case prima di aggiungere nuovi calcoli.
@@ -75,7 +75,7 @@ Riconciliare freshness, provenance e precedence degli snapshot necessari al gold
 
 ### V4.12 — Monthly work-transition scenario contract
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Definire fasi lavorative mensili per ogni adulto: full-time, uno o piu' livelli part-time, cessazione e opzionale rientro.

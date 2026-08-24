@@ -1,0 +1,17 @@
+{
+  "schema_version": "work-transition-readiness-source-sample/v1",
+  "record_type": "SyntheticWorkTransitionSource",
+  "as_of_date": "2026-08-01",
+  "description": "Synthetic lineage-only source used by the V4.11 readiness demo.",
+  "bindings": {
+    "primary_employment": {"category": "employment_income", "member_id": "primary", "value_basis": "net"},
+    "spouse_employment": {"category": "spouse_income", "member_id": "spouse", "value_basis": "net"},
+    "household_expenses": {"category": "expenses", "member_id": null, "value_basis": "net"},
+    "household_net_worth": {"category": "net_worth", "member_id": null, "value_basis": "not_applicable"},
+    "bridge_liquidity": {"category": "liquidity", "member_id": null, "value_basis": "not_applicable"},
+    "rita": {"category": "rita_complementary_pension", "member_id": "primary", "value_basis": "gross"},
+    "inps": {"category": "inps_pension", "member_id": "primary", "value_basis": "gross"},
+    "spain_eu": {"category": "spain_eu_pension", "member_id": "primary", "value_basis": "gross"},
+    "other_income": {"category": "other_income", "member_id": null, "value_basis": "net"}
+  }
+}

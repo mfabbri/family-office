@@ -1,0 +1,33 @@
+{
+  "schema_version": "work-transition-readiness-input/v1",
+  "record_type": "WorkTransitionReadinessInput",
+  "household_id": "synthetic_work_transition_household",
+  "as_of_date": "2026-08-24",
+  "household_members": ["primary", "spouse"],
+  "freshness_policy": {
+    "default_max_age_days": 365,
+    "max_age_days_by_category": {"employment_income": 120, "liquidity": 90}
+  },
+  "required_inputs": [
+    {"input_id": "primary_employment", "category": "employment_income", "member_id": "primary", "accepted_value_basis": ["net"], "required_period": {"start_date": "2026-01-01", "end_date": "2026-07-31"}, "requires_stream_bounds": true},
+    {"input_id": "spouse_employment", "category": "spouse_income", "member_id": "spouse", "accepted_value_basis": ["net"], "requires_stream_bounds": true},
+    {"input_id": "household_expenses", "category": "expenses", "accepted_value_basis": ["net"]},
+    {"input_id": "household_net_worth", "category": "net_worth", "accepted_value_basis": ["not_applicable"]},
+    {"input_id": "bridge_liquidity", "category": "liquidity", "accepted_value_basis": ["not_applicable"], "requires_liquid_asset": true},
+    {"input_id": "rita", "category": "rita_complementary_pension", "member_id": "primary", "accepted_value_basis": ["gross"], "requires_stream_bounds": true},
+    {"input_id": "inps", "category": "inps_pension", "member_id": "primary", "accepted_value_basis": ["gross"], "requires_stream_bounds": true},
+    {"input_id": "spain_eu", "category": "spain_eu_pension", "member_id": "primary", "accepted_value_basis": ["gross"], "requires_stream_bounds": true},
+    {"input_id": "other_income", "category": "other_income", "accepted_value_basis": ["net"], "requires_stream_bounds": true}
+  ],
+  "sources": [
+    {"source_id": "payroll_primary", "input_id": "primary_employment", "category": "employment_income", "member_id": "primary", "source_kind": "documentary", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "net", "binding_pointer": "/bindings/primary_employment", "period": {"start_date": "2026-01-01", "end_date": "2026-07-31"}, "stream_start_date": "2026-01-01", "stream_end_date": "2026-12-31", "provenance": {"origin": "synthetic payroll fixture"}},
+    {"source_id": "payroll_spouse", "input_id": "spouse_employment", "category": "spouse_income", "member_id": "spouse", "source_kind": "documentary", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "net", "binding_pointer": "/bindings/spouse_employment", "stream_start_date": "2026-01-01", "stream_end_date": "2026-12-31", "provenance": {"origin": "synthetic spouse payroll fixture"}},
+    {"source_id": "expenses", "input_id": "household_expenses", "category": "expenses", "source_kind": "normalized", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "net", "binding_pointer": "/bindings/household_expenses", "provenance": {"origin": "synthetic lifecycle expenses fixture"}},
+    {"source_id": "net_worth", "input_id": "household_net_worth", "category": "net_worth", "source_kind": "normalized", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "not_applicable", "binding_pointer": "/bindings/household_net_worth", "provenance": {"origin": "synthetic net worth fixture"}},
+    {"source_id": "liquidity", "input_id": "bridge_liquidity", "category": "liquidity", "source_kind": "derived", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "not_applicable", "binding_pointer": "/bindings/bridge_liquidity", "liquidity_tier": "immediate", "coverage_keys": ["asset:synthetic_cash"], "provenance": {"origin": "synthetic liquidity fixture"}},
+    {"source_id": "rita", "input_id": "rita", "category": "rita_complementary_pension", "member_id": "primary", "source_kind": "derived", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "gross", "binding_pointer": "/bindings/rita", "stream_start_date": "2032-01-01", "stream_end_date": "2038-12-31", "provenance": {"origin": "synthetic RITA fixture"}},
+    {"source_id": "inps", "input_id": "inps", "category": "inps_pension", "member_id": "primary", "source_kind": "documentary", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "gross", "binding_pointer": "/bindings/inps", "stream_start_date": "2039-01-01", "stream_end_date": "2099-12-31", "provenance": {"origin": "synthetic INPS fixture"}},
+    {"source_id": "spain_eu", "input_id": "spain_eu", "category": "spain_eu_pension", "member_id": "primary", "source_kind": "derived", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "gross", "binding_pointer": "/bindings/spain_eu", "stream_start_date": "2038-06-01", "stream_end_date": "2099-12-31", "provenance": {"origin": "synthetic Spain EU fixture"}},
+    {"source_id": "rent", "input_id": "other_income", "category": "other_income", "source_kind": "normalized", "path": "work-transition-readiness-source-sample.json", "expected_schema_versions": ["work-transition-readiness-source-sample/v1"], "value_basis": "net", "binding_pointer": "/bindings/other_income", "stream_start_date": "2026-01-01", "stream_end_date": "2035-12-31", "provenance": {"origin": "synthetic rent fixture"}}
+  ]
+}
