@@ -29,8 +29,6 @@ Questo file deve restare breve. È una mappa, non un manuale completo.
 
 Indice: `family-office-bootstrap/docs/playbooks/README.md`.
 
-Per investimenti in asset produttivi (immobili a reddito, camper/veicoli noleggiabili, financing, leverage, cash flow, opportunity cost) usare `family-office-bootstrap/docs/playbooks/11-investment-opportunity.md` e trattare il task come T4 quando cambia semantica finanziaria o fiscale.
-
 ## Repository locali
 
 - `family-office-engine/AGENTS.md`

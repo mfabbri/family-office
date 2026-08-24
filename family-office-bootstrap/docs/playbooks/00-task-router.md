@@ -4,36 +4,43 @@ Classificare il task prima di esplorare il repository.
 
 | Classe | Caratteristiche | Esempi | Playbook | Tier iniziale |
 |---|---|---|---|---|
-| T0 | Meccanico, nessuna semantica | typo, rename, formatting | context + review | economy/low |
-| T1 | Circoscritto a un modulo | bug semplice, test, parser locale | `05-bug-fix` | economy o standard/low-medium |
-| T2 | Nuova capacità delimitata | CLI, servizio, contratto singolo | `04-micro-increment` | standard/medium |
-| T3 | Cross-module o cross-repository | schema condiviso, ownership, integrazione | `06-cross-repository-change` | advanced/high |
-| T4 | Normativo o finanziario critico | fiscalità, pensione, RW, simulazione, uscita progressiva dal lavoro | `07-normative-change`; per work transition anche `11-work-transition-retirement-bridge` | critical/high-xhigh |
-| T5 | Architetturale o esplorativo | nuova roadmap, orchestrazione AI | piano dedicato | critical/high-xhigh |
+| T0 | Meccanico, nessuna semantica | typo, rename, formatting | context + review | Luna/low |
+| T1 | Circoscritto a un modulo | bug semplice, test, parser locale | `05-bug-fix` | Terra/low-medium |
+| T2 | Nuova capacita' delimitata | CLI, servizio, contratto singolo | `04-micro-increment` | Terra/medium |
+| T3 | Cross-module o cross-repository | schema condiviso, ownership, integrazione | `06-cross-repository-change` | Terra/medium-high |
+| T4 | Normativo o finanziario critico | fiscalita', pensione, RW, investimenti, leverage, IRR/NPV | `07-normative-change` o `11-investment-opportunity` | Terra/medium + reviewer Sol/high |
+| T5 | Architetturale o esplorativo | nuova roadmap, orchestrazione AI | piano dedicato | Terra/high; Sol solo review critica |
 
 ## Procedura
 
-1. Identificare output richiesto e criteri di completamento.
-2. Assegnare una sola classe primaria; usare la più alta se il task attraversa più classi.
+1. Identificare goal, output, vincoli e done-when.
+2. Assegnare una sola classe primaria; usare la piu' alta se il task attraversa piu' classi.
 3. Applicare `01-context-budget.md`.
 4. Scegliere modello/effort con `02-model-routing.md`.
-5. Aprire il playbook specifico.
-6. Aumentare classe o contesto solo quando emerge un trigger documentato.
+5. Aprire un solo playbook specifico, piu' testing/review se necessario.
+6. Aumentare classe, contesto o reasoning solo quando emerge un trigger documentato.
+
+## Investment opportunity routing
+
+Usare `11-investment-opportunity.md` quando il task riguarda acquisto, gestione, finanziamento, noleggio, cash flow o confronto di asset produttivi, inclusi immobili, camper/veicoli, box, barche, fotovoltaico o piccole attivita'.
+
+- Analisi economica senza nuove regole fiscali: T4 finanziario.
+- Nuova classificazione fiscale/legale: T4 normativo + `07-normative-change`.
+- Solo integrazione UI/CLI di una capability esistente: T2/T3.
+- Nuova famiglia di asset ma contratto generico gia' stabile: T2/T3, non T5.
 
 ## Trigger di escalation
 
 Escalare quando emerge almeno uno dei seguenti elementi:
 
 - modifica di schema o contratto condiviso;
-- impatto su più repository;
+- impatto su piu' repository;
 - dati mancanti con conseguenze finanziarie;
-- interpretazione normativa o validità temporale;
+- interpretazione normativa o validita' temporale;
 - cambio di ownership, sicurezza o privacy;
 - test contraddittori o comportamento non riproducibile;
-- più di due ipotesi architetturali plausibili.
+- piu' di due ipotesi architetturali plausibili;
+- separazione non chiara tra rendimento finanziario e beneficio d'uso personale;
+- leva finanziaria o fiscalita' che cambia il ranking dell'investimento.
 
-Non escalare solo perché il repository è grande.
-
-## Routing speciale Work Transition
-
-Domande o incrementi che cercano la prima data per lasciare il full-time, introducono part-time, cessazione, RITA o un ponte fino alla pensione sono T4 anche se toccano un solo modulo. Se cambiano contratti condivisi o la sequenza delle roadmap diventano T5. Aprire `11-work-transition-retirement-bridge.md` oltre al playbook normativo e non usare V5/LLM per colmare calcoli deterministici mancanti.
+Non escalare solo perche' il repository e' grande.

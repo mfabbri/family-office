@@ -1,30 +1,29 @@
 # Agent Playbooks
 
-Questi playbook riducono consumo di token e deriva operativa tramite caricamento progressivo del contesto, routing per complessita' e uso selettivo dei subagent.
+Questi playbook riducono consumo di token e deriva operativa tramite caricamento progressivo del contesto, routing per complessità e uso selettivo dei subagent.
 
 ## Ordine d'uso
 
 1. `00-task-router.md`
 2. `01-context-budget.md`
 3. `02-model-routing.md`
-4. un solo playbook specifico del task
+4. playbook specifico del task
 5. `08-testing-and-review.md`
 
 ## Playbook disponibili
 
 - `00-task-router.md` — classificazione T0–T5 e selezione del flusso.
 - `01-context-budget.md` — limiti iniziali a listing, ricerche, letture e output.
-- `02-model-routing.md` — scelta fra GPT-5.6 Luna/Terra/Sol e fallback GPT-5.5.
+- `02-model-routing.md` — scelta di modello e reasoning effort.
 - `03-subagent-policy.md` — quando delegare e quando restare single-agent.
 - `04-micro-increment.md` — implementazione roadmap.
 - `05-bug-fix.md` — correzioni circoscritte.
-- `06-cross-repository-change.md` — modifiche con piu' repository o contratti.
+- `06-cross-repository-change.md` — modifiche con più repository o contratti.
 - `07-normative-change.md` — aggiornamenti fiscali, previdenziali o compliance.
 - `08-testing-and-review.md` — verifica proporzionata al rischio.
 - `09-roadmap-maintenance.md` — aggiornamento minimo dello stato.
 - `10-code-audit.md` — audit periodico o richiesto.
-- `11-investment-opportunity.md` — asset produttivi, immobili, camper/veicoli, leverage, cash flow e opportunity cost.
 
 ## Principio fondamentale
 
-Non leggere un documento perche' esiste. Leggerlo solo perche' il router o un'evidenza concreta lo rende necessario. Non aumentare reasoning o numero di agenti finche' non e' stato ridotto il contesto al minimo necessario.
+Non leggere un documento perché esiste. Leggerlo solo perché il router o un'evidenza concreta lo rende necessario.

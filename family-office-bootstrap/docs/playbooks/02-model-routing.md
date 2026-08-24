@@ -1,31 +1,52 @@
 # Model routing
 
-Use a hybrid strategy. The main agent remains on `gpt-5.5` for predictable everyday work, while specialist subagents use exact GPT-5.6 variants. Never configure the unsuffixed alias `gpt-5.6`.
+Obiettivo: usare il modello meno costoso che preserva il contratto del task, senza moltiplicare agenti o contesto.
 
-| Tier | Model | Reasoning | Typical use |
+## Default
+
+- Sessione principale: `gpt-5.6-terra`, reasoning `medium`, verbosity `low`.
+- Fallback compatibilita': `gpt-5.5`, reasoning `medium`.
+- Mai usare l'alias eseguibile non suffissato `gpt-5.6` nelle configurazioni del repository; usare gli ID esatti.
+
+| Tier | Modello | Reasoning | Uso tipico |
 |---|---|---:|---|
-| economy | `gpt-5.6-luna` | low | bounded discovery, inventory, repetitive checks |
-| standard | `gpt-5.5` | medium | ordinary implementation, bug fixes, documentation |
-| advanced | `gpt-5.6-terra` | high | cross-module review, difficult debugging, design validation |
-| critical | `gpt-5.6-sol` | high or xhigh | tax, pension, financial calculations, architecture, migrations |
+| economy | `gpt-5.6-luna` | low | inventario, search/read mirati, controlli ripetitivi, fixture/schema enumeration |
+| standard | `gpt-5.6-terra` | medium | implementazione ordinaria, planning delimitato, bug, documentazione |
+| advanced | `gpt-5.6-terra` | high | debug difficile, review cross-module, contract/design validation |
+| critical | `gpt-5.6-sol` | high | matematica finanziaria, architettura, migrazioni, review ad alto impatto |
+| exceptional | `gpt-5.6-sol` | xhigh | ambiguita' normativa/architetturale realmente difficile; non e' un default |
+| fallback | `gpt-5.5` | medium | client/account che non espone il profilo 5.6 richiesto o regressione verificata |
 
-## Routing rules
+## Routing per classe task
 
-1. Start the main session with `gpt-5.5`.
-2. Keep T0-T2 work in the main agent unless a bounded read-only exploration is cheaper to delegate to Luna.
-3. Use Terra only for independent technical review of T3-T5 changes.
-4. Use Sol only for normative, financial, pension, schema, or architecture-critical review.
-5. Per incrementi V4B Work Transition usare `fo_retirement_transition_reviewer` come review Sol read-only quando cambiano timeline, netto da lavoro, contribuzione, diritto/decorrenza, RITA o optimizer.
-6. Do not spawn more than one specialist unless their questions are independent.
-7. Do not use a specialist merely to restate work already completed by the main agent.
-8. Escalate reasoning before escalating model count.
+- T0: Luna/low; non spawnare agenti se il main puo' risolvere con una sola lettura.
+- T1: Terra/low-medium; Luna solo per discovery bounded.
+- T2: Terra/medium; planner Terra opzionale se attraversa piu' contratti.
+- T3: Terra/medium per implementazione, reviewer Terra/high al termine se il rischio lo giustifica.
+- T4: Terra/medium per editing deterministico; Sol/high per review finanziaria o normativa. `xhigh` solo con trigger esplicito.
+- T5: Terra/high per planning; Sol/high per una sola review indipendente delle decisioni irreversibili o ad alto impatto.
 
-## Compatibility
+## Regole di risparmio token
 
-Valid GPT-5.6 identifiers are:
+1. Ridurre prima contesto e reasoning, poi cambiare modello.
+2. Testare la stessa classe di task a un livello di reasoning inferiore prima di consolidare un setting piu' costoso.
+3. `model_verbosity = low` per output operativi; aumentare la verbosita' solo quando il deliverable lo richiede.
+4. Luna deve restituire sintesi, non dump di file o log.
+5. Un subagent deve sostituire una lettura/esplorazione costosa del main, non duplicarla.
+6. Massimo due subagent concorrenti e solo su workstream indipendenti.
+7. Preferire un singolo reviewer specializzato a piu' reviewer generici.
+8. Non usare Sol per typo, listing, boilerplate, test gia' localizzati o documentazione meccanica.
+9. Non aumentare reasoning per compensare requisiti ambigui: chiarire il contratto o leggere l'evidenza mancante.
+10. Se GPT-5.6 non e' disponibile nel client/account, usare `fallback55` senza cambiare i contratti del task.
 
-- `gpt-5.6-sol`
-- `gpt-5.6-terra`
-- `gpt-5.6-luna`
+## Trigger per Sol/xhigh
 
-The alias `gpt-5.6` must not appear in executable Codex configuration.
+Usare `critical` solo se almeno uno e' vero:
+
+- interpretazione normativa con piu' letture plausibili e impatto materiale;
+- formula finanziaria nuova o cambiamento di semantica di IRR/NPV/DSCR/tassazione;
+- migrazione di schema con compatibilita' retroattiva difficile;
+- decisione architetturale cross-repository irreversibile;
+- regressione non spiegata dopo evidenza e test mirati.
+
+Altrimenti fermarsi a Terra/high.

@@ -1,45 +1,35 @@
-# Subagent Policy
+# Subagent policy
 
-Il default è single-agent. Ogni subagent esegue chiamate e tool propri e quindi aumenta token, latenza e coordinamento.
+I subagent sono un acceleratore selettivo, non il default.
 
-## Consentito
+## Default
 
-Usare subagent quando il lavoro è:
+- Il main agent implementa e testa.
+- `fo_explorer` (Luna/low) solo per discovery bounded che evita letture estese del main.
+- `fo_planner` (Terra/medium) solo per cambi cross-module con output di piano compatto.
+- `fo_reviewer` (Terra/high) per review tecnica indipendente T3-T5.
+- `fo_financial_reviewer` (Sol/high) per formule, cash-flow, leverage, stress test e opportunity cost.
+- `fo_normative_reviewer` (Sol/high) per fiscalita', previdenza, compliance e validita' temporale.
 
-- indipendente e parallelizzabile;
-- prevalentemente read-only;
-- delimitato da input/output chiari;
-- sintetizzabile in un risultato breve;
-- utile a isolare log, scansioni o review dal contesto principale.
+## Vincoli
 
-Esempi: mappatura di un flusso, audit di test, verifica documentale, review indipendente di una patch T3–T5.
+- Massimo 2 subagent concorrenti.
+- Profondita' pratica: un solo livello di delega.
+- Nessun subagent se il task e' risolvibile con una singola lettura e un singolo test.
+- Non invocare reviewer finanziario e normativo sullo stesso cambiamento salvo che contenga entrambe le semantiche.
+- Non delegare la stessa domanda a due modelli per "votazione".
+- I subagent devono restituire sintesi e riferimenti, non raw logs.
+- Il main non deve rileggere integralmente i file gia' sintetizzati da un explorer affidabile salvo incongruenze.
 
-## Da evitare
+## Quando parallelizzare
 
-- un agente per ogni fase standard;
-- più agenti che modificano gli stessi file;
-- delegazione per task T0/T1;
-- catene ricorsive di agenti;
-- subagent che restituiscono log grezzi o copie di file.
+Solo se i workstream sono indipendenti, ad esempio:
 
-## Limiti del progetto
+- explorer: individua servizi/contratti riutilizzabili;
+- normative reviewer: verifica solo il perimetro fiscale di una nuova activity classification.
 
-- `agents.max_depth = 1`;
-- `agents.max_threads = 3`;
-- massimo 2 subagent per task, salvo richiesta esplicita;
-- preferire subagent read-only;
-- il main agent resta responsabile di decisione, integrazione e test finali.
+Non parallelizzare implementazione e review dello stesso file prima che l'implementazione sia stabile.
 
-## Reviewer specialistico Work Transition
+## Token hygiene
 
-Usare `fo_retirement_transition_reviewer` per una review indipendente read-only degli incrementi V4B che modificano almeno uno tra: FTE/reddito da lavoro, contribuzione futura, diritto o decorrenza pensionistica, coordinamento UE, RITA/bridge, decumulo, stochastic sustainability o optimizer. Il reviewer non produce numeri nuovi: verifica che numeri e date provengano da tool/rule pack deterministici e che gross/net, diritto/decorrenza e liquidita' non vengano confusi.
-
-## Contratto di ritorno
-
-Ogni subagent deve restituire:
-
-1. conclusione;
-2. evidenze con file/simboli;
-3. rischi o gap;
-4. massimo 5 azioni raccomandate;
-5. nessun log completo salvo richiesta.
+`interrupt_message = false` e' configurato per non aggiungere al contesto del modello messaggi di interruzione non necessari. Le risposte dei subagent devono essere brevi e strutturate per poter essere incorporate senza riaprire il corpus.

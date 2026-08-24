@@ -1,22 +1,34 @@
-# Codex model routing
+# Codex configuration - Family Office AI
 
-This project intentionally combines GPT-5.5 and GPT-5.6.
+Questa configurazione applica routing esplicito per ridurre token e context churn senza abbassare l'affidabilita' dei task finanziari/normativi.
 
-- Main session: `gpt-5.5`, medium reasoning.
-- `fo_explorer`: `gpt-5.6-luna`, low reasoning.
-- `fo_reviewer`: `gpt-5.6-terra`, high reasoning.
-- `fo_normative_reviewer`: `gpt-5.6-sol`, extra-high reasoning.
-- `fo_retirement_transition_reviewer`: `gpt-5.6-sol`, extra-high reasoning, specialized on phased retirement/work-transition invariants.
+## Default
 
-The generic alias `gpt-5.6` is deliberately forbidden because ChatGPT-authenticated Codex may reject it. Always use the complete IDs `gpt-5.6-sol`, `gpt-5.6-terra`, or `gpt-5.6-luna`.
+- main: `gpt-5.6-terra`, reasoning `medium`, verbosity `low`;
+- fallback manuale: profilo `fallback55` -> `gpt-5.5`, reasoning `medium`;
+- explorer: `gpt-5.6-luna`, low;
+- planner/reviewer tecnico: `gpt-5.6-terra`, medium/high;
+- reviewer finanziario/normativo: `gpt-5.6-sol`, high;
+- `xhigh` solo tramite profilo `critical` o escalation esplicita.
 
-Optional launch profiles are available:
+## Profili
 
-```powershell
+```text
 codex --profile standard
-codex --profile luna
-codex --profile terra
-codex --profile sol
+codex --profile economy
+codex --profile deep
+codex --profile critical
+codex --profile fallback55
 ```
 
-GPT-5.6 requires a current Codex client and account availability. The installer checks the local CLI version and rewrites only the exact obsolete alias `gpt-5.6` to `gpt-5.6-sol`; suffixed GPT-5.6 IDs are preserved.
+Il repository usa solo ID GPT-5.6 completi (`-luna`, `-terra`, `-sol`) per evitare incompatibilita' osservate con l'alias non suffissato in sessioni Codex autenticate via ChatGPT.
+
+## Multi-agent hygiene
+
+- massimo due subagent concorrenti;
+- `interrupt_message = false` per evitare messaggi di interruzione non necessari nel contesto;
+- default subagent Luna/low;
+- specialisti read-only e output concisi;
+- il main agent resta proprietario di implementazione e test.
+
+Vedi `family-office-bootstrap/docs/playbooks/02-model-routing.md` e `03-subagent-policy.md`.

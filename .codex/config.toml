@@ -1,41 +1,59 @@
-# Hybrid model routing for ChatGPT-authenticated Codex.
-# Keep the main session on GPT-5.5; use exact GPT-5.6 model IDs for profiles and specialist subagents.
-model = "gpt-5.5"
+# Family Office AI - token-aware Codex routing.
+# Exact GPT-5.6 model IDs are used because ChatGPT-authenticated Codex may reject the unsuffixed alias.
+# Default: Terra for balanced intelligence/cost. GPT-5.5 remains available as compatibility fallback.
+model = "gpt-5.6-terra"
 model_reasoning_effort = "medium"
+model_verbosity = "low"
 plan_mode_reasoning_effort = "high"
 
 [agents]
-max_threads = 3
-max_depth = 1
+enabled = true
+max_concurrent_threads_per_session = 2
+interrupt_message = false
+default_subagent_model = "gpt-5.6-luna"
+default_subagent_reasoning_effort = "low"
 
 [agents.fo_explorer]
-description = "Read-only repository exploration for narrow discovery tasks."
+description = "Read-only narrow repository exploration and inventory. Prefer for bounded scans and repetitive discovery."
 config_file = "agents/fo-explorer.toml"
 
+[agents.fo_planner]
+description = "Read-only architecture and implementation planner for cross-module changes; returns a compact execution plan."
+config_file = "agents/fo-planner.toml"
+
 [agents.fo_reviewer]
-description = "Independent technical review for complex or cross-module changes."
+description = "Independent technical reviewer for correctness, regressions, contracts, privacy, and missing tests."
 config_file = "agents/fo-reviewer.toml"
 
+[agents.fo_financial_reviewer]
+description = "Independent reviewer for investment mathematics, leverage, cash-flow, scenario assumptions, and opportunity-cost logic."
+config_file = "agents/fo-financial-reviewer.toml"
+
 [agents.fo_normative_reviewer]
-description = "Independent review for tax, pension, financial, and compliance-sensitive changes."
+description = "Independent reviewer for tax, pension, legal/compliance, temporal validity, and rule-pack traceability."
 config_file = "agents/fo-normative-reviewer.toml"
 
-[agents.fo_retirement_transition_reviewer]
-description = "Independent review for phased work-exit, pension entitlement, bridge-income, and decumulation changes."
-config_file = "agents/fo-retirement-transition-reviewer.toml"
-
 [profiles.standard]
-model = "gpt-5.5"
-model_reasoning_effort = "medium"
-
-[profiles.luna]
-model = "gpt-5.6-luna"
-model_reasoning_effort = "low"
-
-[profiles.terra]
 model = "gpt-5.6-terra"
 model_reasoning_effort = "medium"
+model_verbosity = "low"
 
-[profiles.sol]
+[profiles.economy]
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
+model_verbosity = "low"
+
+[profiles.deep]
 model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
+model_verbosity = "low"
+
+[profiles.critical]
+model = "gpt-5.6-sol"
+model_reasoning_effort = "xhigh"
+model_verbosity = "low"
+
+[profiles.fallback55]
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+model_verbosity = "low"
