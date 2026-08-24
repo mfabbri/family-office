@@ -779,3 +779,18 @@ Funzioni principali:
 Il servizio non scarica fonti, non interpreta norme e non crea metadati mancanti. Un documento senza citation ID strutturato resta nell'indice con `knowledge_document_citation_missing`. La ricerca `knowledge.citations.search` e' registrata nel tool registry come capability read-only.
 
 L'hash di `citation-index/v1` copre catalogo, hash dei documenti, data indice, gap e contratti input/output derivati dal tool registry. Di conseguenza l'aggiunta o la modifica di un tool cambia hash e conteggio dei contratti anche quando i file knowledge non cambiano; catalog hash e document hash permettono di distinguere le due cause.
+
+## Supported-question catalog
+
+Modulo:
+
+```text
+family_office_engine.services.supported_question_catalog
+```
+
+Funzioni principali:
+
+- `build_supported_question_catalog()`: costruisce `supported-question-catalog/v1` con famiglie di domande, tool registrati, dati minimi, output, rischio, limiti ed escalation.
+- `assess_question_capability(intent_ids, provided_data=None)`: valuta intenti gia' selezionati e restituisce `question-capability-assessment/v1`, senza classificare testo libero ne' invocare tool.
+
+Il catalogo copre ogni tool del registry una sola volta nella capability disponibile. Le domande su investimenti a reddito o asset mobili noleggiabili restano `planned` e non eseguibili fino al completamento di V5.3a-V5.3h. Il routing da linguaggio naturale resta fuori perimetro fino a `question-intent/v1` (V5.4); i dati minimi mancanti, gli intenti sovrapposti, sconosciuti o che richiedono consulenza professionale producono problemi espliciti.
