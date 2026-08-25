@@ -172,6 +172,10 @@ from family_office_engine.services.investment_opportunity import (
     InvestmentOpportunityError,
     build_investment_opportunity,
 )
+from family_office_engine.services.real_estate_investment import (
+    RealEstateInvestmentError,
+    build_real_estate_investment,
+)
 from family_office_engine.services.protection_gap import (
     ProtectionGapError,
     build_protection_gap,
@@ -380,6 +384,22 @@ def default_investment_opportunity_output() -> Path:
 
 def default_investment_opportunity_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-investment-opportunity.synthetic.snapshot.json"
+
+
+def default_real_estate_investment_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "real-estate-investment.json"
+
+
+def default_real_estate_investment_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "real-estate-investment-v2-sample.json"
+
+
+def default_real_estate_investment_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "real-estate-investment.snapshot.json"
+
+
+def default_real_estate_investment_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-real-estate-investment.synthetic.snapshot.json"
 
 
 def default_protection_gap_input() -> Path:
@@ -4389,6 +4409,21 @@ def build_parser() -> argparse.ArgumentParser:
     planning_investment_opportunity_demo_parser.add_argument(
         "--output", type=Path, default=default_investment_opportunity_demo_output(), help="Output synthetic investment opportunity snapshot JSON path"
     )
+    planning_real_estate_investment_parser = planning_subparsers.add_parser(
+        "real-estate-investment", help="Build income-producing real-estate investment scenarios"
+    )
+    planning_real_estate_investment_subparsers = planning_real_estate_investment_parser.add_subparsers(
+        dest="planning_real_estate_investment_command"
+    )
+    planning_real_estate_investment_build_parser = planning_real_estate_investment_subparsers.add_parser(
+        "build", help="Build real-estate-investment/v2 from declared rental drivers"
+    )
+    planning_real_estate_investment_build_parser.add_argument("--input", type=Path, default=default_real_estate_investment_input())
+    planning_real_estate_investment_build_parser.add_argument("--output", type=Path, default=default_real_estate_investment_output())
+    planning_real_estate_investment_demo_parser = planning_real_estate_investment_subparsers.add_parser(
+        "demo", help="Run the synthetic income-producing real-estate check"
+    )
+    planning_real_estate_investment_demo_parser.add_argument("--output", type=Path, default=default_real_estate_investment_demo_output())
     planning_protection_parser = planning_subparsers.add_parser(
         "protection",
         help="Compare explicit insurance policies and family protection needs",
@@ -5774,6 +5809,24 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(
             "planning investment-opportunity: "
+            f"{snapshot['status']} {snapshot['summary']['scenario_count']} scenarios, "
+            f"{snapshot['summary']['data_gap_count']} gaps ({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "real-estate-investment"
+        and args.planning_real_estate_investment_command in {"build", "demo"}
+    ):
+        try:
+            source = args.input if args.planning_real_estate_investment_command == "build" else default_real_estate_investment_sample_input()
+            snapshot = build_real_estate_investment(source, args.output)
+        except RealEstateInvestmentError as exc:
+            print(f"planning real-estate-investment: ERROR ({exc})")
+            return 1
+        print(
+            "planning real-estate-investment: "
             f"{snapshot['status']} {snapshot['summary']['scenario_count']} scenarios, "
             f"{snapshot['summary']['data_gap_count']} gaps ({args.output})"
         )

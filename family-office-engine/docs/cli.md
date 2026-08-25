@@ -758,6 +758,17 @@ fo planning investment-opportunity demo
 
 Il default legge `../family-office-workspace/planning/investment-opportunity.json`
 e scrive `../family-office-workspace/snapshots/investment-opportunity.snapshot.json`.
+
+## `fo planning real-estate-investment build`
+
+Costruisce `real-estate-investment/v2` per immobili a reddito con driver dichiarati:
+
+```text
+fo planning real-estate-investment build
+fo planning real-estate-investment demo
+```
+
+Il contratto separa ricavi locativi, NOI, cash flow, tax drag e valore di uscita. Le classificazioni fiscali prive di input/regola versionata restano `data_gaps`; il comando non deduce aliquote, occupazione o valore dell’immobile.
 Il core calcola solo acquisition basis, ricavi/costi operativi, NOI, free cash
 flow annuale, costo del tempo proprietario e valore residuo espliciti. Il
 beneficio di uso personale e' separato dal cash flow; fiscalita', classificazione

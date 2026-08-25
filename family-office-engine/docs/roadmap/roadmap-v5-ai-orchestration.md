@@ -94,7 +94,7 @@ Esito: completato con contratto e servizio deterministico `investment-opportunit
 
 ### V5.3b — Periodic code and contract audit
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `audit`
 
 Eseguire l'audit immediatamente dopo V5.3a. V5.1 e V5.2 sono gia' completati; completando V5.3 e V5.3a si raggiunge la soglia di quattro incrementi funzionali dall'ultimo audit prevista da `roadmap_audit.py`.
@@ -105,9 +105,11 @@ Eseguire l'audit immediatamente dopo V5.3a. V5.1 e V5.2 sono gia' completati; co
 - Focus: taxonomy/capability matrix, formule comuni, contratti, personal-use separation, provenance, data gaps e regression.
 - Done quando: non restano blocker impliciti prima degli adapter asset-specific.
 
+Esito: audit completato sui confini V5.1-V5.3a. Registry, citation index, taxonomy e core mantengono responsabilita' separate: il registry invoca soltanto tool espliciti, l'indice conserva fonti/gap senza interpretare norme, la taxonomy non instrada testo libero ne' espone capability pianificate, e il core calcola sola aritmetica da input dichiarati separando il beneficio d'uso personale dal cash flow. L'audit ha corretto un disallineamento schema-servizio di `investment-opportunity/v1`: campi sconosciuti, date non ISO e decimali non finiti sono ora rifiutati invece di essere ignorati o propagati. Nessuna dipendenza aggiuntiva, dato personale reale, duplicazione bloccante o debito tecnico che richieda decision log. Verifiche: 25 test mirati V5 OK, regression unit engine 517 test OK, smoke CLI `planning investment-opportunity demo` OK, `roadmap_audit.py` OK e controllo privacy sui file V5 senza dati personali reali (le sole occorrenze di identificativi fiscali sono fixture marcatamente sintetiche preesistenti).
+
 ### V5.3c — Income-producing real estate adapter V2
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Estendere la capability immobiliare da `hold/rent/sell` a un vero modello di investimento a reddito.
@@ -120,6 +122,8 @@ Estendere la capability immobiliare da `hold/rent/sell` a un vero modello di inv
 - Fiscalita': nessuna aliquota hard-coded; `knowledge -> rules -> tests -> engine`, oppure data gap esplicito.
 - Test: vacancy, management fee, maintenance shock, personal-use days, exit costs, missing tax classification.
 - Done quando: il sistema distingue NOI, cash flow, tax drag e valore residuo e puo' confrontare l'immobile con altre alternative sullo stesso capitale/orizzonte.
+
+Esito: completato con l'adapter deterministico `real-estate-investment/v2`, costruito sopra `investment-opportunity/v1` senza duplicarne formule comuni. Supporta flussi long-term, short-term e mixed-use con vacancy, disponibilita'/prenotazioni, commissione di gestione, costi operativi, tax drag dichiarato, giorni e beneficio di uso personale separati, acquisition basis, exit costs e valore residuo. La classificazione fiscale senza input o regola versionata produce `missing_tax_classification`; non sono state introdotte aliquote, classificazioni dedotte, rule pack o knowledge note. Scenari con acquisition basis diverse sono marcati non comparabili. Disponibili schema, fixture sintetica e CLI `fo planning real-estate-investment build|demo`. Verifiche: 20 test mirati/integrativi OK, regression unit engine 522 test OK, smoke CLI OK, privacy scan sui file V5.3c senza dati personali reali, `git diff --check` OK e `roadmap_audit.py` OK.
 
 ### V5.3d — Rentable movable asset / camper adapter
 

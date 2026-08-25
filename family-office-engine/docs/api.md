@@ -674,6 +674,24 @@ Fixture:
 - `examples/investment-opportunity-income-property-sample.json`
 - `examples/investment-opportunity-rentable-movable-asset-sample.json`
 
+## Real-estate Investment V2
+
+Modulo:
+
+```text
+family_office_engine.services.real_estate_investment
+```
+
+Funzione principale:
+
+- `build_real_estate_investment(input_path, output_path)`: adatta driver immobiliari dichiarati a `investment-opportunity/v1` e produce `real-estate-investment/v2`.
+
+Il servizio calcola solo ricavi da locazione lunga/breve dichiarati, vacancy, commissione di gestione, costi operativi, NOI, cash flow, tax drag dichiarato e valore netto di uscita. Giorni e beneficio di uso personale restano separati dal cash flow. In assenza di classificazione fiscale esplicita e versionata restituisce `missing_tax_classification`; non deduce aliquote o classificazioni.
+
+Fixture:
+
+- `examples/real-estate-investment-v2-sample.json`
+
 ## Wealth Strategy
 
 Modulo:

@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+from copy import deepcopy
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
@@ -109,6 +110,46 @@ class InvestmentOpportunityTest(unittest.TestCase):
             data["scenarios"][0]["operations"]["revenue"] = "18000"
             input_path.write_text(json.dumps(data), encoding="utf-8")
             with self.assertRaisesRegex(InvestmentOpportunityError, "operations.revenue must be a list"):
+                build_investment_opportunity(input_path, root / "snapshot.json")
+
+    def test_rejects_values_outside_the_strict_input_contract(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            base = json.loads(PROPERTY_FIXTURE.read_text(encoding="utf-8"))
+            invalid_cases = [
+                ("top level", lambda value: value.update({"unexpected": True})),
+                ("scenario", lambda value: value["scenarios"][0].update({"unexpected": True})),
+                ("operations", lambda value: value["scenarios"][0]["operations"].update({"unexpected": True})),
+                ("amount", lambda value: value["scenarios"][0]["operations"]["revenue"][0].update({"unexpected": True})),
+                ("owner_time", lambda value: value["scenarios"][0]["owner_time"].update({"unexpected": True})),
+                ("personal_use", lambda value: value["scenarios"][0]["personal_use"].update({"unexpected": True})),
+            ]
+            for label, mutate in invalid_cases:
+                with self.subTest(label=label):
+                    data = deepcopy(base)
+                    mutate(data)
+                    input_path = root / f"{label}.json"
+                    input_path.write_text(json.dumps(data), encoding="utf-8")
+                    with self.assertRaisesRegex(InvestmentOpportunityError, "unknown fields"):
+                        build_investment_opportunity(input_path, root / "snapshot.json")
+
+            data = deepcopy(base)
+            data["as_of_date"] = "not-a-date"
+            input_path = root / "invalid-date.json"
+            input_path.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaisesRegex(InvestmentOpportunityError, "as_of_date must be an ISO date"):
+                build_investment_opportunity(input_path, root / "snapshot.json")
+
+            data = deepcopy(base)
+            data["scenarios"][0]["operations"]["revenue"][0]["amount"] = "NaN"
+            input_path.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaisesRegex(InvestmentOpportunityError, "finite decimal"):
+                build_investment_opportunity(input_path, root / "snapshot.json")
+
+            data = deepcopy(base)
+            data["scenarios"][0]["personal_use"] = "3000"
+            input_path.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaisesRegex(InvestmentOpportunityError, "personal_use must be an object"):
                 build_investment_opportunity(input_path, root / "snapshot.json")
 
     def test_cli_build_and_demo_offer_short_paths(self):

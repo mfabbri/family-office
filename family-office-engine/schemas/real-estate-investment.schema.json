@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Real Estate Investment Snapshot V2",
+  "type": "object",
+  "required": ["schema_version", "record_type", "status", "scenarios", "data_gaps", "summary", "reproducibility"],
+  "properties": {
+    "schema_version": {"const": "real-estate-investment/v2"},
+    "record_type": {"const": "RealEstateInvestmentSnapshot"},
+    "status": {"enum": ["complete", "partial"]},
+    "scenarios": {"type": "array"},
+    "data_gaps": {"type": "array"},
+    "summary": {"type": "object"},
+    "reproducibility": {"type": "object", "required": ["hash_algorithm", "content_hash"]}
+  }
+}

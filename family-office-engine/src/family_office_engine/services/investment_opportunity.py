@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from datetime import date
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
@@ -19,11 +20,24 @@ class InvestmentOpportunityError(ValueError):
 def build_investment_opportunity(input_path: Path, output_path: Path) -> dict[str, Any]:
     """Build a reproducible snapshot from explicitly supplied scenario inputs."""
     data = _read_json(input_path)
+    snapshot = build_investment_opportunity_data(data, source_type="investment-opportunity-input-json", source_path=input_path)
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    except OSError as exc:
+        raise InvestmentOpportunityError(f"Cannot write investment opportunity snapshot: {output_path}") from exc
+    return snapshot
+
+
+def build_investment_opportunity_data(
+    data: dict[str, Any], *, source_type: str, source_path: Path | None = None
+) -> dict[str, Any]:
+    """Build the generic contract from validated adapter data without duplicating its arithmetic."""
     _validate_top_level(data)
     gaps = _declared_gaps(data.get("data_gaps", []))
     scenarios = [_build_scenario(item, index, gaps) for index, item in enumerate(data["scenarios"])]
     core = {
-        "source": {"type": "investment-opportunity-input-json", "path": str(input_path)},
+        "source": {"type": source_type, "path": str(source_path) if source_path else None},
         "opportunity_id": data["opportunity_id"],
         "label": data["label"],
         "asset_type": data["asset_type"],
@@ -54,21 +68,25 @@ def build_investment_opportunity(input_path: Path, output_path: Path) -> dict[st
             "from operating and fiscal cash flow."
         ),
     }
-    try:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    except OSError as exc:
-        raise InvestmentOpportunityError(f"Cannot write investment opportunity snapshot: {output_path}") from exc
     return snapshot
 
 
 def _validate_top_level(data: dict[str, Any]) -> None:
+    _reject_unknown_fields(
+        data,
+        {
+            "schema_version", "record_type", "opportunity_id", "label", "asset_type", "as_of_date",
+            "base_currency", "horizon_years", "assumptions", "provenance", "data_gaps", "scenarios",
+        },
+        "investment opportunity input",
+    )
     if data.get("schema_version") != SCHEMA_VERSION:
         raise InvestmentOpportunityError(f"Unsupported investment opportunity schema: {data.get('schema_version')}")
     if data.get("record_type") != INPUT_RECORD_TYPE:
         raise InvestmentOpportunityError(f"Unsupported investment opportunity record type: {data.get('record_type')}")
     for field in ("opportunity_id", "label", "asset_type", "as_of_date", "base_currency"):
         _required_text(data.get(field), field)
+    _iso_date(data["as_of_date"], "as_of_date")
     if len(data["base_currency"]) != 3 or data["base_currency"] != data["base_currency"].upper():
         raise InvestmentOpportunityError("base_currency must be an ISO-4217 uppercase code")
     if not isinstance(data.get("horizon_years"), int) or data["horizon_years"] < 1:
@@ -89,6 +107,11 @@ def _validate_top_level(data: dict[str, Any]) -> None:
 def _build_scenario(raw: Any, index: int, gaps: list[dict[str, Any]]) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise InvestmentOpportunityError(f"scenarios[{index}] must be an object")
+    _reject_unknown_fields(
+        raw,
+        {"scenario_id", "label", "provenance", "financing_reference", "acquisition", "operations", "exit", "owner_time", "personal_use"},
+        f"scenarios[{index}]",
+    )
     scenario_id = _required_text(raw.get("scenario_id"), f"scenarios[{index}].scenario_id")
     label = _required_text(raw.get("label"), f"scenarios[{index}].label")
     if not isinstance(raw.get("provenance"), list) or not raw["provenance"]:
@@ -140,6 +163,7 @@ def _component(raw: Any, scenario_id: str, name: str, gaps: list[dict[str, Any]]
     if not isinstance(raw, dict):
         raise InvestmentOpportunityError(f"{name} must be an object")
     fields = ("purchase_price", "costs", "initial_capex") if name == "acquisition" else (("revenue", "costs", "taxes_fees") if name == "operations" else ("residual_value", "costs"))
+    _reject_unknown_fields(raw, set(fields), name)
     result = {}
     for field in fields:
         value = raw.get(field)
@@ -157,6 +181,7 @@ def _owner_time_cost(raw: Any, scenario_id: str, gaps: list[dict[str, Any]]) -> 
         return Decimal("0")
     if not isinstance(raw, dict):
         raise InvestmentOpportunityError("owner_time must be an object")
+    _reject_unknown_fields(raw, {"annual_hours", "hourly_value"}, "owner_time")
     hours, value = raw.get("annual_hours"), raw.get("hourly_value")
     if hours is None or value is None:
         _gap(gaps, scenario_id, "missing_owner_time_input", "annual_hours and hourly_value must both be explicit.")
@@ -168,7 +193,13 @@ def _owner_time_cost(raw: Any, scenario_id: str, gaps: list[dict[str, Any]]) -> 
 
 
 def _personal_use_benefit(raw: Any, scenario_id: str, gaps: list[dict[str, Any]]) -> Decimal:
-    if raw is None or not isinstance(raw, dict) or raw.get("annual_economic_benefit") is None:
+    if raw is None:
+        _gap(gaps, scenario_id, "missing_personal_use_benefit", "Personal-use economic benefit must be explicit, including zero when absent.")
+        return Decimal("0")
+    if not isinstance(raw, dict):
+        raise InvestmentOpportunityError("personal_use must be an object")
+    _reject_unknown_fields(raw, {"annual_economic_benefit"}, "personal_use")
+    if raw.get("annual_economic_benefit") is None:
         _gap(gaps, scenario_id, "missing_personal_use_benefit", "Personal-use economic benefit must be explicit, including zero when absent.")
         return Decimal("0")
     return _decimal(raw["annual_economic_benefit"], "personal_use.annual_economic_benefit")
@@ -181,6 +212,7 @@ def _money_items(value: Any, label: str) -> list[dict[str, str]]:
     for index, item in enumerate(value):
         if not isinstance(item, dict):
             raise InvestmentOpportunityError(f"{label}[{index}] must be an object")
+        _reject_unknown_fields(item, {"code", "amount"}, f"{label}[{index}]")
         result.append({"code": _required_text(item.get("code"), f"{label}[{index}].code"), "amount": _money_text(_decimal(item.get("amount"), f"{label}[{index}].amount"))})
     return result
 
@@ -228,9 +260,28 @@ def _optional_text(value: Any, label: str) -> str | None:
 
 def _decimal(value: Any, label: str) -> Decimal:
     try:
-        return Decimal(str(value))
+        decimal = Decimal(str(value))
     except (InvalidOperation, TypeError) as exc:
         raise InvestmentOpportunityError(f"{label} must be a decimal") from exc
+    if not decimal.is_finite():
+        raise InvestmentOpportunityError(f"{label} must be a finite decimal")
+    return decimal
+
+
+def _iso_date(value: Any, label: str) -> str:
+    if not isinstance(value, str):
+        raise InvestmentOpportunityError(f"{label} must be an ISO date")
+    try:
+        date.fromisoformat(value)
+    except ValueError as exc:
+        raise InvestmentOpportunityError(f"{label} must be an ISO date") from exc
+    return value
+
+
+def _reject_unknown_fields(data: dict[str, Any], allowed: set[str], label: str) -> None:
+    unknown = sorted(set(data) - allowed)
+    if unknown:
+        raise InvestmentOpportunityError(f"{label} has unknown fields: {', '.join(unknown)}")
 
 
 def _money_text(value: Decimal) -> str:

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Real Estate Investment Input V2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_type", "opportunity_id", "label", "as_of_date", "base_currency", "horizon_years", "assumptions", "provenance", "scenarios"],
+  "properties": {
+    "schema_version": {"const": "real-estate-investment/v2"},
+    "record_type": {"const": "RealEstateInvestmentInput"},
+    "opportunity_id": {"type": "string", "minLength": 1},
+    "label": {"type": "string", "minLength": 1},
+    "as_of_date": {"type": "string", "format": "date"},
+    "base_currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "horizon_years": {"type": "integer", "minimum": 1},
+    "assumptions": {"type": "array", "minItems": 1},
+    "provenance": {"type": "array", "minItems": 1},
+    "data_gaps": {"type": "array"},
+    "scenarios": {"type": "array", "minItems": 1}
+  }
+}

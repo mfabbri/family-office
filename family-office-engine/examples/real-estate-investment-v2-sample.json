@@ -1,0 +1,32 @@
+{
+  "schema_version": "real-estate-investment/v2",
+  "record_type": "RealEstateInvestmentInput",
+  "opportunity_id": "synthetic-mixed-income-property",
+  "label": "Synthetic mixed-use income property",
+  "as_of_date": "2026-08-25",
+  "base_currency": "EUR",
+  "horizon_years": 10,
+  "assumptions": [{"assumption_id": "synthetic-property-v2", "version": "v1", "source": "synthetic fixture"}],
+  "provenance": [{"origin": "synthetic fixture"}],
+  "scenarios": [
+    {
+      "scenario_id": "base",
+      "label": "Base mixed use",
+      "provenance": [{"origin": "synthetic fixture"}],
+      "rental_model": "mixed_use",
+      "rental_streams": [
+        {"stream_id": "annual_lease", "stream_type": "long_term", "monthly_rent": "1500", "vacancy_months": 1},
+        {"stream_id": "short_stays", "stream_type": "short_term", "nightly_rate": "120", "booked_nights": 30, "available_nights": 40}
+      ],
+      "personal_use_days": 20,
+      "management_fee_rate": "0.10",
+      "operating_costs": [{"code": "condominium", "amount": "1200"}, {"code": "insurance", "amount": "400"}, {"code": "maintenance", "amount": "2000"}],
+      "taxes_fees": [{"code": "declared_tax_drag", "amount": "2500"}],
+      "tax_classification": {"classification": "declared_pending_professional_review", "source": "synthetic fixture"},
+      "acquisition": {"purchase_price": [{"code": "price", "amount": "200000"}], "costs": [{"code": "closing", "amount": "10000"}], "initial_capex": [{"code": "renovation", "amount": "5000"}]},
+      "exit": {"residual_value": [{"code": "declared_exit_value", "amount": "225000"}], "costs": [{"code": "selling_cost", "amount": "8000"}]},
+      "owner_time": {"annual_hours": "30", "hourly_value": "30"},
+      "personal_use": {"annual_economic_benefit": "2000"}
+    }
+  ]
+}

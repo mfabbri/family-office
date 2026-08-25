@@ -1125,6 +1125,17 @@ fo planning investment-opportunity demo
 
 Il contratto `investment-opportunity/v1` viene verificato con fixture sintetiche per immobile a reddito e asset mobile noleggiabile, cash flow zero e negativo, valore residuo, costo del tempo del proprietario, separazione del beneficio d'uso personale, gap delle assunzioni e hash riproducibile.
 
+## Real-estate investment V2
+
+Test mirati e smoke CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_real_estate_investment
+fo planning real-estate-investment demo
+```
+
+I test verificano modelli long-term, short-term e mixed-use, vacancy, commissione di gestione, maintenance shock, giorni di uso personale, costi/valore di uscita e il gap della classificazione fiscale. Il calcolo riusa `investment-opportunity/v1`; la fiscalità non viene dedotta.
+
 ## Work-transition readiness
 
 Test mirati e integrazione CLI:
