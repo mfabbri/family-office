@@ -1,0 +1,25 @@
+{
+  "schema_version": "rentable-movable-asset/v1",
+  "record_type": "RentableMovableAssetInput",
+  "opportunity_id": "synthetic-mixed-use-camper",
+  "label": "Synthetic mixed-use camper",
+  "asset_kind": "camper",
+  "as_of_date": "2026-08-25",
+  "base_currency": "EUR",
+  "horizon_years": 8,
+  "assumptions": [{"assumption_id": "synthetic-camper-v1", "version": "v1", "source": "synthetic fixture"}],
+  "provenance": [{"origin": "synthetic fixture"}],
+  "scenarios": [{
+    "scenario_id": "base", "label": "Base mixed use", "provenance": [{"origin": "synthetic fixture"}],
+    "availability": {"available_days": 300, "personal_use_days": 30, "rental_days": 80, "downtime_days": 20},
+    "daily_rate": "150", "platform_agency_fee_rate": "0.15",
+    "insurance": [{"code": "annual_insurance", "amount": "1200"}], "storage": [{"code": "storage", "amount": "900"}],
+    "cleaning": [{"code": "turnover_cleaning", "amount": "800"}], "delivery_collection": [{"code": "delivery", "amount": "500"}],
+    "maintenance": [{"code": "routine", "amount": "1300"}], "tyres": [{"code": "tyres", "amount": "400"}],
+    "mileage_wear": [{"code": "wear", "amount": "600"}], "major_repair": [], "taxes_fees": [{"code": "declared_tax_drag", "amount": "600"}],
+    "activity_classification": {"classification": "occasional_rental", "source": "synthetic fixture"},
+    "acquisition": {"purchase_price": [{"code": "price", "amount": "60000"}], "costs": [{"code": "registration", "amount": "2000"}], "initial_capex": [{"code": "equipment", "amount": "3000"}]},
+    "exit": {"residual_value": [{"code": "declared_residual", "amount": "30000"}], "costs": [{"code": "sale_cost", "amount": "1000"}]},
+    "owner_time": {"annual_hours": "25", "hourly_value": "30"}, "personal_use": {"annual_economic_benefit": "2500"}
+  }]
+}

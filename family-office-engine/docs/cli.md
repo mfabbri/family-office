@@ -775,6 +775,28 @@ beneficio di uso personale e' separato dal cash flow; fiscalita', classificazion
 dell'attivita', financing, utilizzo e valori non dichiarati sono data gap o
 competenza degli adapter/rule pack successivi.
 
+## `fo planning rentable-movable-asset build`
+
+Costruisce `rentable-movable-asset/v1` (incluso il caso camper) da driver di disponibilita', noleggio e costi dichiarati:
+
+```text
+fo planning rentable-movable-asset build
+fo planning rentable-movable-asset demo
+```
+
+Il default legge `../family-office-workspace/planning/rentable-movable-asset.json` e scrive `../family-office-workspace/snapshots/rentable-movable-asset.snapshot.json`. Uso personale, ricavi da noleggio e trattamento fiscale restano distinti; una classificazione `personal`, `occasional_rental`, `habitual_rental` o `business` richiede input con fonte o resta un data gap.
+
+## `fo planning financing-plan build`
+
+Costruisce `financing-plan/v1` riusabile per immobili e asset mobili:
+
+```text
+fo planning financing-plan build
+fo planning financing-plan demo
+```
+
+Il default legge `../family-office-workspace/planning/financing-plan.json` e scrive `../family-office-workspace/snapshots/financing-plan.snapshot.json`. Il comando calcola solo il piano del debito da tassi, fee e rimborsi dichiarati; mantiene separati cash flow dell'asset, cash flow dell'equity, interessi e capitale. LTV richiede un valore di garanzia esplicito, DSCR richiede NOI esplicito e un piano senza debito lo segnala come non applicabile.
+
 ## `fo planning pension-contributions build`
 
 Confronta opzioni esplicite di contribuzione a previdenza complementare:

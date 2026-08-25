@@ -176,6 +176,14 @@ from family_office_engine.services.real_estate_investment import (
     RealEstateInvestmentError,
     build_real_estate_investment,
 )
+from family_office_engine.services.rentable_movable_asset import (
+    RentableMovableAssetError,
+    build_rentable_movable_asset,
+)
+from family_office_engine.services.financing_plan import (
+    FinancingPlanError,
+    build_financing_plan,
+)
 from family_office_engine.services.protection_gap import (
     ProtectionGapError,
     build_protection_gap,
@@ -400,6 +408,38 @@ def default_real_estate_investment_output() -> Path:
 
 def default_real_estate_investment_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-real-estate-investment.synthetic.snapshot.json"
+
+
+def default_rentable_movable_asset_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "rentable-movable-asset.json"
+
+
+def default_rentable_movable_asset_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "rentable-movable-asset-v1-sample.json"
+
+
+def default_rentable_movable_asset_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "rentable-movable-asset.snapshot.json"
+
+
+def default_rentable_movable_asset_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-rentable-movable-asset.synthetic.snapshot.json"
+
+
+def default_financing_plan_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "financing-plan.json"
+
+
+def default_financing_plan_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "financing-plan-v1-sample.json"
+
+
+def default_financing_plan_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "financing-plan.snapshot.json"
+
+
+def default_financing_plan_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-financing-plan.synthetic.snapshot.json"
 
 
 def default_protection_gap_input() -> Path:
@@ -4424,6 +4464,36 @@ def build_parser() -> argparse.ArgumentParser:
         "demo", help="Run the synthetic income-producing real-estate check"
     )
     planning_real_estate_investment_demo_parser.add_argument("--output", type=Path, default=default_real_estate_investment_demo_output())
+    planning_rentable_movable_asset_parser = planning_subparsers.add_parser(
+        "rentable-movable-asset", help="Build rentable movable asset investment scenarios"
+    )
+    planning_rentable_movable_asset_subparsers = planning_rentable_movable_asset_parser.add_subparsers(
+        dest="planning_rentable_movable_asset_command"
+    )
+    planning_rentable_movable_asset_build_parser = planning_rentable_movable_asset_subparsers.add_parser(
+        "build", help="Build rentable-movable-asset/v1 from declared rental drivers"
+    )
+    planning_rentable_movable_asset_build_parser.add_argument("--input", type=Path, default=default_rentable_movable_asset_input())
+    planning_rentable_movable_asset_build_parser.add_argument("--output", type=Path, default=default_rentable_movable_asset_output())
+    planning_rentable_movable_asset_demo_parser = planning_rentable_movable_asset_subparsers.add_parser(
+        "demo", help="Run the synthetic rentable movable asset check"
+    )
+    planning_rentable_movable_asset_demo_parser.add_argument("--output", type=Path, default=default_rentable_movable_asset_demo_output())
+    planning_financing_plan_parser = planning_subparsers.add_parser(
+        "financing-plan", help="Build deterministic debt and leverage schedules"
+    )
+    planning_financing_plan_subparsers = planning_financing_plan_parser.add_subparsers(
+        dest="planning_financing_plan_command"
+    )
+    planning_financing_plan_build_parser = planning_financing_plan_subparsers.add_parser(
+        "build", help="Build financing-plan/v1 from declared loan terms and asset cash flow"
+    )
+    planning_financing_plan_build_parser.add_argument("--input", type=Path, default=default_financing_plan_input())
+    planning_financing_plan_build_parser.add_argument("--output", type=Path, default=default_financing_plan_output())
+    planning_financing_plan_demo_parser = planning_financing_plan_subparsers.add_parser(
+        "demo", help="Run the synthetic financing and leverage check"
+    )
+    planning_financing_plan_demo_parser.add_argument("--output", type=Path, default=default_financing_plan_demo_output())
     planning_protection_parser = planning_subparsers.add_parser(
         "protection",
         help="Compare explicit insurance policies and family protection needs",
@@ -5828,6 +5898,42 @@ def main(argv: list[str] | None = None) -> int:
         print(
             "planning real-estate-investment: "
             f"{snapshot['status']} {snapshot['summary']['scenario_count']} scenarios, "
+            f"{snapshot['summary']['data_gap_count']} gaps ({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "rentable-movable-asset"
+        and args.planning_rentable_movable_asset_command in {"build", "demo"}
+    ):
+        try:
+            source = args.input if args.planning_rentable_movable_asset_command == "build" else default_rentable_movable_asset_sample_input()
+            snapshot = build_rentable_movable_asset(source, args.output)
+        except RentableMovableAssetError as exc:
+            print(f"planning rentable-movable-asset: ERROR ({exc})")
+            return 1
+        print(
+            "planning rentable-movable-asset: "
+            f"{snapshot['status']} {snapshot['summary']['scenario_count']} scenarios, "
+            f"{snapshot['summary']['data_gap_count']} gaps ({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "financing-plan"
+        and args.planning_financing_plan_command in {"build", "demo"}
+    ):
+        try:
+            source = args.input if args.planning_financing_plan_command == "build" else default_financing_plan_sample_input()
+            snapshot = build_financing_plan(source, args.output)
+        except FinancingPlanError as exc:
+            print(f"planning financing-plan: ERROR ({exc})")
+            return 1
+        print(
+            "planning financing-plan: "
+            f"{snapshot['status']} {snapshot['summary']['schedule_years']} schedule years, "
             f"{snapshot['summary']['data_gap_count']} gaps ({args.output})"
         )
         return 0

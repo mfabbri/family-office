@@ -1136,6 +1136,28 @@ fo planning real-estate-investment demo
 
 I test verificano modelli long-term, short-term e mixed-use, vacancy, commissione di gestione, maintenance shock, giorni di uso personale, costi/valore di uscita e il gap della classificazione fiscale. Il calcolo riusa `investment-opportunity/v1`; la fiscalità non viene dedotta.
 
+## Rentable movable asset V1
+
+Test mirati e smoke CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_rentable_movable_asset
+fo planning rentable-movable-asset demo
+```
+
+I test coprono utilizzo, downtime, major repair, uso misto, zero rental, residual-value shock e classificazione dell'attivita' mancante. Il calcolo riusa `investment-opportunity/v1`; non deduce fiscalita' o classificazione dal numero di giorni.
+
+## Financing plan V1
+
+Test mirati e smoke CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_financing_plan
+fo planning financing-plan demo
+```
+
+I test coprono piano a tasso fisso e variabile, LTV elevato, assenza di debito, stress di debt service, DSCR con NOI mancante e fee/rimborso anticipato. Nessun tasso, fee, valore di garanzia, rendimento o trattamento fiscale viene dedotto.
+
 ## Work-transition readiness
 
 Test mirati e integrazione CLI:

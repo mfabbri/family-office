@@ -692,6 +692,42 @@ Fixture:
 
 - `examples/real-estate-investment-v2-sample.json`
 
+## Rentable Movable Asset V1
+
+Modulo:
+
+```text
+family_office_engine.services.rentable_movable_asset
+```
+
+Funzione principale:
+
+- `build_rentable_movable_asset(input_path, output_path)`: adatta driver dichiarati di un asset mobile noleggiabile a `investment-opportunity/v1` e produce `rentable-movable-asset/v1`.
+
+Il servizio conserva separati giorni disponibili, uso personale, noleggio e downtime; calcola ricavo da tariffa/giorni, fee piattaforma dichiarata, costi, NOI, cash flow e valore netto di uscita. Il beneficio d'uso personale non e' reddito o cash flow fiscale. La classificazione dell'attivita' non e' dedotta dalla frequenza: senza input validato produce `missing_activity_classification`.
+
+Fixture:
+
+- `examples/rentable-movable-asset-v1-sample.json`
+
+## Financing Plan V1
+
+Modulo:
+
+```text
+family_office_engine.services.financing_plan
+```
+
+Funzione principale:
+
+- `build_financing_plan(input_path, output_path)`: costruisce il debt schedule annuale `financing-plan/v1` da termini, tassi, rimborsi e cash flow dell'asset dichiarati.
+
+Il contratto espone separatamente interessi, capitale, rimborso anticipato, fee, debito residuo, LTV, debt service e DSCR quando il NOI e' dichiarato. Il cash flow dell'asset prima del finanziamento non viene mai confuso con il cash flow dell'equity dopo debt service. Tassi fissi/variabili, fee e rimborsi sono input espliciti; non inferisce fiscalita', performance dell'asset, valori delle garanzie o percorsi dei tassi.
+
+Fixture:
+
+- `examples/financing-plan-v1-sample.json`
+
 ## Wealth Strategy
 
 Modulo:

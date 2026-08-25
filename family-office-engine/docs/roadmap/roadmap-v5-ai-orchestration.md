@@ -127,7 +127,7 @@ Esito: completato con l'adapter deterministico `real-estate-investment/v2`, cost
 
 ### V5.3d — Rentable movable asset / camper adapter
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Aggiungere un adapter per asset mobili ad uso misto, con il camper come primo caso reale.
@@ -141,9 +141,11 @@ Aggiungere un adapter per asset mobili ad uso misto, con il camper come primo ca
 - Test: utilization, downtime, major repair, mixed use, zero rental, residual-value shock, classification gap.
 - Done quando: il camper e' confrontabile economicamente senza confondere utilita' personale, cash flow da noleggio e trattamento fiscale.
 
+Esito: completato con `rentable-movable-asset/v1`, adapter deterministico sopra `investment-opportunity/v1`, fixture sintetica e CLI `fo planning rentable-movable-asset build|demo`. Il contratto conserva disponibilita', uso personale, noleggio e downtime separati; calcola ricavi da tariffa/giorni, fee piattaforma, costi operativi inclusi major repair, NOI, cash flow, utilizzo e valore netto di uscita. La classificazione dell'attivita' e' solo input validato (`personal`, `occasional_rental`, `habitual_rental`, `business`): se manca produce `missing_activity_classification`, senza deduzioni fiscali o basate sulla frequenza. Il beneficio d'uso personale resta economico e fuori dal cash flow imponibile. Verifiche: 5 test mirati, 19 test core/adapter, smoke CLI, regression unit engine 527 test, `git diff --check` e `roadmap_audit.py` OK.
+
 ### V5.3e — Financing and leverage analyzer
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Introdurre un contratto riusabile `financing-plan/v1` per asset acquistati con debito.
@@ -155,6 +157,8 @@ Introdurre un contratto riusabile `financing-plan/v1` per asset acquistati con d
 - Vincolo: separare asset return da equity return; la leva non deve mascherare un asset economicamente debole.
 - Test: fixed/variable assumption, zero debt, high LTV, debt-service stress, early repayment fee.
 - Done quando: real estate e camper possono usare lo stesso financing contract senza formule duplicate.
+
+Esito: completato con contratto e servizio deterministico `financing-plan/v1`, fixture sintetica e CLI `fo planning financing-plan build|demo`. Il piano annuale riusa lo stesso contratto per qualunque asset tramite un `asset_reference` e cash flow dichiarato; espone interessi, capitale, rimborso anticipato, fee, debt service, debito residuo, LTV e DSCR. Il cash flow dell'asset prima del finanziamento resta separato dal cash flow dell'equity dopo debt service. Tassi fissi/variabili, fee e rimborsi sono input obbligatori o gap; non vengono dedotti fiscalita', rendimenti, valori di garanzia o percorsi dei tassi. Verifiche: 6 test mirati, 25 test core/adapter integrati, smoke CLI, regression unit engine 533 test, `git diff --check` e `roadmap_audit.py` OK.
 
 ### V5.3f — Stress test and opportunity-cost comparator
 

@@ -13,7 +13,7 @@ Non leggere automaticamente long-term roadmap e decision log.
 
 1. Confermare ID, capacità osservabile e dipendenze.
 2. Definire input, output, errori, data gaps e test.
-3. Aggiornare `current-next-increment.md` solo se il piano cambia o inizia l'implementazione.
+3. Aggiornare `current-next-increment.md` solo se il piano cambia o inizia l'implementazione. Quando l'implementazione inizia, aggiornare nello stesso cambiamento anche lo stato del medesimo incremento nella roadmap attiva a `in_progress`: i due documenti devono restare allineati per l'audit.
 4. Implementare il minimo necessario.
 5. Eseguire test mirati.
 6. Eseguire regression appropriata al gate.

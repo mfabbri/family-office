@@ -28,6 +28,10 @@ Quando cambia un comando CLI o un wizard, verificare almeno:
 - salvataggio progressivo e ripresa con `--overwrite`;
 - valori incerti registrati come `data_gaps`.
 
+## Smoke CLI riproducibile
+
+Verificare il comando utente `fo ...` oltre al fallback tecnico `python -m family_office_engine.cli.main ...`. Su Windows, se `fo` non e' nel `PATH` della shell, invocare esplicitamente l'eseguibile del virtual environment del repository, ad esempio `./.venv/Scripts/fo.exe ...`; non considerare il fallback tecnico un sostituto dello smoke del comando utente.
+
 ## Completion report
 
 Riportare soltanto:

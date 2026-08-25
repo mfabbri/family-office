@@ -7,6 +7,8 @@ Aggiornare solo i documenti che cambiano semanticamente.
 - `current-next-increment.md`
 - roadmap attiva
 
+Quando un incremento passa a `in_progress` o `done`, aggiornare nello stesso cambiamento entrambi i documenti. Lo stato e l'ID dell'incremento corrente devono coincidere: `roadmap_audit.py` considera la divergenza un errore di governance.
+
 ## Solo se necessario
 
 - `decision-log.md`: decisione architetturale, governance o debito deliberato;

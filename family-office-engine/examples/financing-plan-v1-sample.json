@@ -1,0 +1,15 @@
+{
+  "schema_version": "financing-plan/v1",
+  "record_type": "FinancingPlanInput",
+  "plan_id": "synthetic-income-property-loan",
+  "label": "Synthetic income property financing",
+  "as_of_date": "2026-08-25",
+  "base_currency": "EUR",
+  "asset_reference": "synthetic-income-property",
+  "collateral_value": "200000.00",
+  "equity_contribution": "50000.00",
+  "asset_cash_flow": {"annual_free_cash_flow": "12000.00", "annual_net_operating_income": "15000.00"},
+  "terms": {"loan_amount": "150000.00", "term_years": 3, "repayment_method": "amortizing", "rate_type": "fixed", "fixed_annual_rate": "0.04", "origination_fee": "1000.00", "early_repayments": [{"year": 2, "principal_amount": "10000.00", "fee_amount": "150.00"}]},
+  "assumptions": [{"assumption_id": "loan-terms", "version": "v1", "source": "synthetic fixture"}],
+  "provenance": [{"origin": "synthetic fixture"}]
+}
