@@ -162,7 +162,7 @@ Esito: completato con contratto e servizio deterministico `financing-plan/v1`, f
 
 ### V5.3f — Stress test and opportunity-cost comparator
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Confrontare base/upside/adverse e l'uso alternativo dello stesso capitale sullo stesso orizzonte.
@@ -178,9 +178,11 @@ Confrontare base/upside/adverse e l'uso alternativo dello stesso capitale sullo 
 - Test: same-capital/same-horizon enforcement, missing benchmark, adverse negative cash flow, liquidity breach.
 - Done quando: il ranking mostra rendimento, rischio, liquidita' e management burden senza trasformare assumption in facts.
 
+Esito: completato con il contratto e servizio deterministico `investment-opportunity-comparison/v1`, schema, fixture sintetica e CLI `fo planning investment-opportunity-comparison build|demo`. Il comparatore richiede nella capability primaria esattamente base/upside/adverse, riusa soltanto metriche e stress dichiarati da adapter/financing, impone capitale e orizzonte uguali tramite gap espliciti e non inventa benchmark. Il benchmark mancante o uno scenario benchmark non allineato restano data gap; cash flow negativo, liquidity/concentration breach e management burden sono osservabili separatamente. Non produce un ranking automatico e non sottrae due volte il costo del tempo del proprietario quando gia' incluso nei flussi dell'adapter. Verifiche: 5 test mirati, 30 test del blocco investment-opportunity, smoke `fo` nel venv locale, regression unit engine 538 test OK, `git diff --check`, privacy scan dei nuovi file e `roadmap_audit.py` OK.
+
 ### V5.3g — Investment opportunity code audit
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `audit`
 
 Audit dopo quattro incrementi funzionali V5.3c-V5.3f.
@@ -190,9 +192,11 @@ Audit dopo quattro incrementi funzionali V5.3c-V5.3f.
 - Focus: contract reuse, formula definitions, leverage separation, fiscal gaps, household constraints, CLI/docs, privacy, regression e roadmap cadence.
 - Done quando: il blocco deterministico e' stabile prima dell'integrazione strategica e del routing AI.
 
+Esito: audit completato sui confini V5.3c-V5.3f. Il core resta l'unico punto per le metriche comuni; gli adapter riusano il core, il financing plan mantiene separati cash flow dell'asset e dell'equity, e il comparatore riceve solo flussi, valori di uscita, stress e vincoli household dichiarati senza ranking o doppio conteggio del costo del tempo. Classificazione fiscale/attivita', benchmark, soglie di liquidita' e concentrazione restano regole/input o data gap espliciti. L'audit ha corretto il drift locale dello schema input `investment-opportunity-comparison/v1`, documentando i campi annidati gia' richiesti dal servizio e proteggendoli con test. Nessuna dipendenza aggiuntiva, dato personale reale, formula duplicata o debito bloccante; non serve una decisione architetturale aggiuntiva. Verifiche: 31 test mirati/integrativi del blocco OK, smoke `fo` nel venv locale OK, JSON schema parse OK, regression unit engine e `roadmap_audit.py` OK, `git diff --check` OK e privacy scan del perimetro V5.3c-V5.3g senza dati personali reali.
+
 ### V5.3h — Wealth-strategy integration
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Integrare le opportunita' nel compositore `wealth-strategy/v1` come alternative verificabili.
@@ -205,9 +209,11 @@ Integrare le opportunita' nel compositore `wealth-strategy/v1` come alternative 
 - Test: missing adapter, blocked tax classification, liquidity breach, ranking tie, personal utility not treated as taxable cash flow.
 - Done quando: appartamento e camper possono comparire nello stesso business case insieme al portafoglio finanziario con lineage completo.
 
+Esito: completato estendendo `wealth-strategy/v1` con piu' sorgenti `investment-opportunity-comparison/v1`, selezionate per `comparison_id` e scenario. Il business case sintetico include portafoglio, immobile a reddito e camper nello stesso snapshot, con hash sorgente, scenario avverso e breach di liquidita' visibili. L'utilita' personale e' una dichiarazione economica separata `not_taxable_cash_flow`; tax/activity gap, benchmark e vincoli household restano gap della fonte. Una parita' assegna lo stesso rank e, insieme ai gap critici, disabilita `automatic_ranking_produced` e fa stampare `top=review_required`. Nessuna formula di imposte, IRR, rendimento, cash flow o classificazione viene duplicata o ricalcolata. Verifiche: test unitari/integrativi V5.3h, smoke `fo planning wealth-strategy demo`, regression engine, `roadmap_audit.py`, controllo JSON, `git diff --check` e privacy scan OK.
+
 ### V5.4 — Intent router
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Classificare la domanda in uno o più intenti, estrarre entità e indicare dati mancanti senza eseguire calcoli.
@@ -218,9 +224,11 @@ Classificare la domanda in uno o più intenti, estrarre entità e indicare dati 
 - Test: dataset sintetico, ambiguità, prompt injection e richiesta non supportata.
 - Done quando: il routing ha confidence e fallback deterministici.
 
+Esito: completato con `question-intent/v1`, router lessicale deterministico che riusa `supported-question-catalog/v1`, restituisce confidence, intenti candidati, entita' proposte e dati minimi mancanti senza invocare tool, calcolare valori o scrivere facts. L'output conserva solo fingerprint della domanda. Prompt injection/istruzioni di tool, richieste fuori perimetro e collisioni di intenti restano `needs_clarification`. Il comparatore di opportunita' e' registrato come tool deterministico e la capability d'investimento richiede confronti e gap dichiarati; il router non lo invoca. Verifiche: test mirati catalog/router/registry, smoke `fo orchestration question-intent demo`, regression engine, `roadmap_audit.py`, `git diff --check` e privacy scan OK.
+
 ### V5.4a — Periodic code and contract audit
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `audit`
 
 Verificare il primo blocco funzionale V5 prima di introdurre il query planner.
@@ -231,9 +239,11 @@ Verificare il primo blocco funzionale V5 prima di introdurre il query planner.
 - Test: regression pertinente, privacy, allineamento contratti/CLI/docs e `roadmap_audit.py`.
 - Done quando: citation index, tassonomia, investment-opportunity tools e router risultano coerenti e non restano blocker impliciti per V5.5.
 
+Esito: audit completato su V5.2-V5.4. Citation index mantiene i contratti derivati dal registry (29 dopo il tool di confronto), il catalogo copre ogni tool disponibile una sola volta e dichiara il router `question-intent/v1` come sola classificazione senza invocazioni. Il comparatore di investimenti, il compositore wealth strategy e il registry condividono correttamente snapshot paths singolari/plurali; l'audit ha corretto la normalizzazione di `investment_opportunity_comparison_snapshot_paths` e il policy marker V5.3 che era rimasto obsoleto dopo V5.4. Schema, fixture, CLI, API docs, data gaps, privacy e confini restano coerenti; nessun dato personale reale, dipendenza non dichiarata, formula duplicata o follow-up residuo. Verifiche: 22 test mirati, smoke `fo` registry/question-intent/citations, regression engine 548 test OK, `roadmap_audit.py` OK, `git diff --check` e privacy scan OK.
+
 ### V5.5 — Query planner
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Trasformare gli intenti in un DAG di tool con dipendenze, input, controlli e criteri di arresto.
@@ -244,9 +254,11 @@ Trasformare gli intenti in un DAG di tool con dipendenze, input, controlli e cri
 - Test: piano valido, ciclo, tool mancante, dato sensibile non autorizzato.
 - Done quando: il piano è ispezionabile prima dell'esecuzione.
 
+Esito: completato con il servizio deterministico `execution-plan/v1`, che valida un `question-intent/v1` gia' routed con lineage del catalogo corrente e costruisce un DAG topologicamente ordinato di soli tool registrati e consentiti dagli intenti selezionati. I binding dichiarano esclusivamente sorgente/riferimento/sensibilita'/autorizzazione: nessun valore personale o numerico entra nel piano; un binding sensibile richiede consenso esplicito. Tool non registrati o fuori catalogo, parametri obbligatori mancanti, dipendenze mancanti, cicli e lineage obsoleta sono rifiutati esplicitamente. Ogni nodo mostra controlli e stop criteria ma resta `not_executed`; il planner non importa l'adapter d'invocazione, non esegue tool e non calcola imposte, pensioni o valori finanziari. Disponibili `fo orchestration execution-plan build|demo`, guida JSON, API/CLI docs e decision log. Verifiche: 19 test mirati planner/router/registry OK, smoke `fo` demo OK, regression unit engine 555 test OK, `git diff --check`, privacy scan e controllo del confine non-esecutore OK; `roadmap_audit.py` era verde prima della chiusura.
+
 ### V5.6 — Natural-language scenario builder
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Convertire richieste come “pensione a 62 anni con università dei figli” in draft di scenario strutturato, mai direttamente in risultato.
@@ -257,9 +269,11 @@ Convertire richieste come “pensione a 62 anni con università dei figli” in 
 - Test: date, importi, conflitti, omissioni e valori non supportati.
 - Done quando: nessuna assunzione implicita viene eseguita senza essere resa visibile.
 
+Esito: completato con `scenario-draft/v1`, builder deterministico da domanda a preview non eseguibile. Il draft conserva solo fingerprint della domanda e `question-intent/v1`; promuove età pensionabile, date ISO, budget EUR e obiettivo università dei figli esclusivamente se espliciti, sempre come proposte `confirmation_required`. Età confliggenti, valori fuori range, budget non positivi, omissioni e istruzioni di tool restano conflitti, rifiuti o data gaps, senza diventare facts o assunzioni del contratto `decision-scenario/v2`. Disponibili `fo orchestration scenario-draft build|demo`, guida JSON aggiornata, API/CLI docs e decision log. Il builder non compone/esegue scenari né calcola imposte, pensioni, rendimenti o saldi. Verifiche: 15 test mirati draft/router/scenario V2 OK, smoke `fo` demo e build OK, regression unit engine 560 test OK, controllo del confine non-esecutore, privacy scan e `git diff --check` OK; `roadmap_audit.py` era verde prima della chiusura.
+
 ### V5.7 — Deterministic executor and evidence bundle
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Eseguire il piano, raccogliere output, log, hash, fonti, errori e data gaps in un bundle unico.
@@ -269,6 +283,8 @@ Eseguire il piano, raccogliere output, log, hash, fonti, errori e data gaps in u
 - Output: `evidence-bundle/v1`.
 - Test: esecuzione parziale, retry sicuro, timeout, versioni e riproducibilità.
 - Done quando: la risposta può essere rigenerata dagli stessi input.
+
+Esito: completato con `execution-request/v1` ed executor deterministico che accetta solo piani `execution-plan/v1` pronti con lineage corrente e invoca esclusivamente `invoke_registered_tool`. `evidence-bundle/v1` conserva output, stati, errori, data gaps, fonti/riferimenti e hash dei valori privati senza copiarli; grant, contratti output e policy devono coincidere con il registry. Retry fino a tre tentativi e' consentito solo ai tool read-only; timeout, fallimenti, skip per dipendenza o autorizzazione e risultati parziali restano espliciti. Disponibile `fo orchestration execute`. Verifiche: 18 test mirati executor/planner/registry OK, smoke CLI, regression unit engine 564 test OK, `git diff --check` e `roadmap_audit.py` OK.
 
 ### V5.8 — Response composer with citations
 

@@ -1070,6 +1070,17 @@ Output personale previsto:
 
 Il contratto `tool-registry/v1` registra i tool deterministici invocabili da V5 con schema input/output, prerequisiti, rischio e policy. I test coprono snapshot registry, scrittura, tool inesistente, versione incompatibile, parametri mancanti e invocazione controllata di un tool registrato.
 
+## Execution executor
+
+Test mirati e smoke CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_execution_executor tests.unit.test_execution_plan tests.unit.test_tool_registry
+fo orchestration execute --input ../family-office-workspace/planning/execution-request.json
+```
+
+I test coprono invocazione solo via registry, evidenze senza valori grezzi, autorizzazione mancante, lineage/versione obsoleta, retry esclusivamente read-only, fallimento parziale e scrittura del bundle. Il comando usa un request privato; non usare il piano demo come request eseguibile.
+
 ## Citation index
 
 Test mirati:

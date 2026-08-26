@@ -28,7 +28,7 @@ def build_supported_question_catalog() -> dict[str, Any]:
         "tool_registry_schema_version": "tool-registry/v1",
         "intents": intents,
         "policy": {
-            "natural_language_routing": "not_available_until_question-intent/v1",
+            "natural_language_routing": "question-intent/v1 (classification only; tool invocation remains disabled)",
             "llm_must_not_calculate_tax_pension_financial_values": True,
             "missing_data_must_be_explicit": True,
             "professional_review_is_not_a_tool_invocation": True,
@@ -121,7 +121,7 @@ def _intents() -> list[dict[str, Any]]:
         _intent("portfolio_and_contributions", "Portfolio and pension-contribution options", "available", ["planning.tax_aware_portfolio.build", "planning.pension_contribution_options.build"], ["declared options", "versioned rule pack"], ["tax-aware-portfolio/v1", "pension-contribution-options/v1"], "high", "Declared alternatives only; professional review is required."),
         _intent("wealth_protection_and_estate", "Wealth strategy, protection and estate planning", "available", ["planning.wealth_strategy.build", "planning.protection_gap.build", "planning.estate_plan.build"], ["wealth-strategy-input/v1", "protection-gap-input/v1", "estate-plan-input/v2"], ["wealth-strategy/v1", "protection-gap/v1", "estate-plan/v2"], "high", "Does not create legal instruments; professional review is required."),
         _intent("real_estate_hold_rent_sell", "Real-estate hold, rent or sell comparison", "available", ["planning.real_estate_plan.build"], ["real-estate-plan/v1"], ["real-estate-plan/v1"], "medium", "Uses declared costs and tax inputs/gaps; not an income-property investment analysis."),
-        _intent("investment_opportunity", "Income-producing property or rentable movable asset", "planned", [], ["investment-opportunity/v1", "declared assumptions", "tax classification or explicit gap"], ["investment-opportunity/v1", "investment-opportunity-comparison/v1"], "high", "Unavailable until V5.3a-V5.3h; do not infer returns, taxes, occupancy or activity classification."),
+        _intent("investment_opportunity", "Income-producing property or rentable movable asset", "available", ["planning.investment_opportunity_comparison.build"], ["investment-opportunity-comparison/v1", "tax classification or explicit gap", "household constraints or explicit gap"], ["investment-opportunity-comparison/v1", "wealth-strategy/v1"], "high", "Requires declared deterministic comparison evidence; do not infer returns, taxes, occupancy or activity classification."),
         _intent("professional_advice_or_out_of_scope", "Binding professional advice or unsupported request", "unavailable", [], [], [], "high", "Refer to the appropriate professional; no deterministic result is claimed."),
     ]
 

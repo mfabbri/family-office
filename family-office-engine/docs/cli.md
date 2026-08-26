@@ -797,6 +797,41 @@ fo planning financing-plan demo
 
 Il default legge `../family-office-workspace/planning/financing-plan.json` e scrive `../family-office-workspace/snapshots/financing-plan.snapshot.json`. Il comando calcola solo il piano del debito da tassi, fee e rimborsi dichiarati; mantiene separati cash flow dell'asset, cash flow dell'equity, interessi e capitale. LTV richiede un valore di garanzia esplicito, DSCR richiede NOI esplicito e un piano senza debito lo segnala come non applicabile.
 
+## `fo planning investment-opportunity-comparison build`
+
+Confronta un'opportunita' di investimento con un'alternativa dichiarata sullo stesso capitale e orizzonte. Serve per rendere visibili gli scenari `base`, `upside` e `adverse`, non per produrre una raccomandazione automatica.
+
+Primo controllo, interamente sintetico:
+
+```powershell
+fo planning investment-opportunity-comparison demo
+```
+
+Per un caso nel workspace, dalla cartella `family-office-engine`, copia e modifica la fixture sintetica senza inserire dati personali nel repository:
+
+```powershell
+Copy-Item .\examples\investment-opportunity-comparison-v1-sample.json `
+  ..\family-office-workspace\planning\investment-opportunity-comparison.json
+fo planning investment-opportunity-comparison build
+```
+
+Default:
+
+- input: `../family-office-workspace/planning/investment-opportunity-comparison.json`;
+- output: `../family-office-workspace/snapshots/investment-opportunity-comparison.snapshot.json`;
+- demo: `examples/investment-opportunity-comparison-v1-sample.json`.
+
+### Come compilare e leggere il risultato
+
+1. Inserisci nella sezione `primary` i tre scenari obbligatori `base`, `upside` e `adverse` dell'immobile o del camper, usando solo cash flow, valore di uscita e stress gia' dichiarati dagli adapter e dall'eventuale `financing-plan/v1`.
+2. Inserisci un `benchmark` solo se hai un'alternativa concreta e dichiarata (per esempio liquidita' o portafoglio gia' modellato). Capitale e orizzonte devono coincidere con `primary`.
+3. Per ogni scenario dichiara vincolo di riserva liquida, liquidita' residua, limite/concentrazione prevista, impatto sul cash flow di uscita dal lavoro e reversibilita'. Se un dato non e' noto, lascialo come gap: non usare valori inventati.
+4. Leggi `comparisons[].opportunity_cost`: un valore positivo indica che il benchmark dichiarato ha un valore sullo stesso orizzonte superiore all'opportunita'; un valore negativo indica il contrario. Non e' un ranking ne' una previsione di mercato.
+
+Lo snapshot mantiene quattro dimensioni separate: `return`, `risk`, `liquidity` e `management_burden`. `negative_annual_equity_cash_flow`, `liquidity_breach` e `concentration_breach` restano visibili anche quando un valore di uscita rende positivo il totale a orizzonte.
+
+Se manca il benchmark, l'output e' `partial` con `missing_benchmark`; se capitale o orizzonte non coincidono, compaiono `incomparable_capital` o `incomparable_horizon`. Il comando non deduce rendimenti di mercato, fiscalita', occupazione/utilizzo, tassi, valori di uscita, soglie household o classificazioni legali. Non somma il beneficio d'uso personale al cash flow e non produce un ranking automatico: il risultato va revisionato da una persona, e da un professionista per aspetti fiscali, legali o di investimento.
+
 ## `fo planning pension-contributions build`
 
 Confronta opzioni esplicite di contribuzione a previdenza complementare:
@@ -1392,9 +1427,9 @@ Default principali:
 - output: `../family-office-workspace/snapshots/wealth-strategy.snapshot.json`
 - input sintetico: `examples/wealth-strategy-input-sample.json`
 - output sintetico: `../family-office-workspace/snapshots/cli-check-wealth-strategy.synthetic.snapshot.json`
-- sorgenti default: liquidity, tax-aware portfolio, cross-border IT-ES, real estate, protection, estate plan e work-exit nel workspace snapshots
+- sorgenti default: liquidity, tax-aware portfolio, cross-border IT-ES, real estate, protection, estate plan e work-exit nel workspace snapshots; `--investment-opportunity-comparison` puo' essere ripetuto per ciascun confronto `investment-opportunity-comparison/v1` (immobile, camper o altra alternativa gia' valutata)
 
-Il comando produce `wealth-strategy/v1` con 2-4 pacchetti, componenti collegati agli snapshot sorgente, ranking ponderato, checklist 90/180 giorni, costi, dipendenze, reversibilita', controlli, rischi, scenari avversi e gap. Non calcola nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni.
+I pacchetti d'investimento selezionano `comparison_id` e scenario `base|upside|adverse`, conservano hash e gap della fonte, e dichiarano separatamente `personal_utility.annual_economic_benefit`: non e' mai cash flow imponibile. Se mancano classificazione fiscale/attivita', benchmark, vincoli household o utilita' personale, oppure se i punteggi sono a pari merito, il riepilogo stampa `top=review_required`; l'ordinamento resta soltanto un supporto ispezionabile alla revisione umana. Il comando non calcola nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni.
 
 ## `fo orchestration tool-registry build`
 
@@ -1417,6 +1452,60 @@ Default principali:
 - output: `../family-office-workspace/snapshots/tool-registry.snapshot.json`
 
 Il comando produce `tool-registry/v1` con tool id, schema input/output, prerequisiti, rischio, policy di autorizzazione e note di perimetro. Non esegue tool di pianificazione e non abilita calcoli LLM.
+
+## `fo orchestration question-intent route`
+
+Classifica una domanda in intenti supportati senza invocare tool, scrivere facts o calcolare valori.
+
+```text
+fo orchestration question-intent route --question "Pensione a 62 anni tra Italia e Spagna"
+fo orchestration question-intent demo
+```
+
+L'output `question-intent/v1` conserva soltanto fingerprint della domanda, intenti candidati, entita' proposte, dati minimi mancanti e problemi: il testo non viene persistito. Istruzioni di invocazione, prompt injection, richieste non supportate e combinazioni ambigue restano `needs_clarification` con zero tool invocati. Anche un intento riconosciuto non autorizza esecuzioni: il planner V5.5 resta il solo componente destinato a produrre piani ispezionabili.
+
+## `fo orchestration scenario-draft build`
+
+Estrae un draft verificabile da una domanda, senza comporre o eseguire uno scenario.
+
+```text
+fo orchestration scenario-draft build --question "Pensione a 62 anni con università dei figli e budget di € 20000"
+fo orchestration scenario-draft demo
+```
+
+Default principali:
+
+- output: `../family-office-workspace/snapshots/scenario-draft.snapshot.json`
+- output demo: `../family-office-workspace/snapshots/cli-check-scenario-draft.synthetic.snapshot.json`
+
+Il comando non richiede JSON manuale e non conserva il testo della domanda. Rende visibili facts, assunzioni e obiettivi solo se espliciti, tutti da confermare; omissioni diventano richieste di conferma/data gaps, mentre date non valide, importi non positivi, età incoerenti o istruzioni di tool sono rifiutati. L'output non è un `decision-scenario/v2` e non può essere eseguito: serve prima una revisione esplicita e la composizione deterministica successiva.
+
+## `fo orchestration execution-plan build`
+
+Valida un DAG dichiarato di soli tool registrati e produce un piano ispezionabile, senza eseguire alcun nodo.
+
+```text
+fo orchestration execution-plan demo
+fo orchestration execution-plan build --input ../family-office-workspace/planning/execution-plan.json
+```
+
+Default principali:
+
+- input: `../family-office-workspace/planning/execution-plan.json`
+- output: `../family-office-workspace/snapshots/execution-plan.snapshot.json`
+- output demo: `../family-office-workspace/snapshots/cli-check-execution-plan.synthetic.snapshot.json`
+
+L'input include lo snapshot `question-intent/v1` gia' `routed` e nodi con `tool_id`, `depends_on` e `input_bindings`; i binding dichiarano solo sorgente, riferimento, sensibilita' e, quando serve, autorizzazione. Il planner rifiuta tool non registrati o fuori catalogo, parametri obbligatori assenti, riferimenti a nodi mancanti, cicli, lineage router/catalogo obsoleto e input sensibili privi di `explicit_user_consent`. L'output `execution-plan/v1` mostra ordine, controlli e stop criteria, ma ogni nodo resta `not_executed`: l'esecuzione deterministica sara' introdotta separatamente.
+
+## `fo orchestration execute`
+
+Esegue un `execution-plan/v1` pronto esclusivamente mediante il tool registry e scrive `evidence-bundle/v1`.
+
+```text
+fo orchestration execute --input ../family-office-workspace/planning/execution-request.json
+```
+
+Default: input `../family-office-workspace/planning/execution-request.json`; output `../family-office-workspace/snapshots/evidence-bundle.snapshot.json`. Il request contiene grant espliciti e valori privati dei binding; il bundle non li copia, ma ne registra hash e riferimenti con output, fonti, errori, stati e data gaps. Il lineage corrente del registry, la versione output e le policy di autorizzazione devono coincidere con il piano. I retry sono possibili soltanto per tool read-only; timeout e fallimenti parziali restano osservabili.
 
 ## `fo orchestration citations build`
 

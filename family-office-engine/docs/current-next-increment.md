@@ -2,7 +2,7 @@
 
 ## ID e titolo
 
-V5.3f - Stress test and opportunity-cost comparator.
+V5.8 - Response composer with citations.
 
 ## Stato
 
@@ -14,9 +14,9 @@ V5.3f - Stress test and opportunity-cost comparator.
 
 ## Motivazione e dipendenze
 
-V5.3e e' completato senza blocker impliciti. V5.3f e' il primo incremento funzionale pianificato con dipendenze soddisfatte.
+V5.7 e' completato. V5.8 e' il primo incremento funzionale pianificato con dipendenze soddisfatte.
 
-Dipendenze: V5.3c, V5.3d e V5.3e sono `done`. Prima dell'avvio applicare `11-investment-opportunity.md` come T4 finanziario. Il confronto deve usare lo stesso capitale e orizzonte dichiarati, senza introdurre benchmark, fiscalita' o rendimenti impliciti.
+Dipendenze: V5.2 e V5.7 sono `done`. V5.8 deve comporre risposte esclusivamente da `evidence-bundle/v1` e citazioni indicizzate.
 
 Prima dell'implementazione eseguire sempre:
 
@@ -24,20 +24,18 @@ Prima dell'implementazione eseguire sempre:
 python family-office-engine/src/family_office_engine/governance/roadmap_audit.py
 ```
 
-## Piano operativo V5.3f
+## Piano operativo V5.8
 
-1. Definire `investment-opportunity-comparison/v1` per scenari base/upside/adverse e opportunity cost sullo stesso capitale/orizzonte.
-2. Riutilizzare output dichiarati degli adapter e del financing plan; rendere benchmark, liquidita', concentrazione e vincoli household input o data gap.
-3. Modellare solo stress espliciti: ricavi/utilizzo/rate/value down e costi/debt service/downtime up secondo l'asset.
-4. Aggiungere fixture sintetiche, test unitari/integrativi e smoke CLI; eseguire regression e `roadmap_audit.py` prima della chiusura.
+1. Definire un compositore che accetti esclusivamente evidenze e citazioni indicizzate.
+2. Rendere espliciti facts, assunzioni, limiti, fonti, conflitti e richieste di revisione professionale.
+3. Aggiungere fixture sintetiche, test e smoke CLI; eseguire regression e `roadmap_audit.py` prima della chiusura.
 
-## Criteri di completamento V5.3f
+## Criteri di completamento V5.8
 
-- confronto impone stesso capitale e orizzonte, con benchmark mancante esplicitato come gap;
-- scenari avversi, cash flow negativo e liquidity breach restano osservabili senza assunzioni implicite;
-- rendimento, rischio, liquidita' e management burden restano dimensioni separate dal ranking;
-- provenance, privacy, data gaps, regression e audit verdi.
+- ogni affermazione deriva da evidence bundle e citazione identificabile oppure resta un limite o assunzione;
+- numeri, conflitti, errori e data gaps non vengono nascosti nella composizione;
+- il compositore non ricalcola imposte, pensioni o valori finanziari.
 
 ## Cadenza audit
 
-Il contatore e' `functional_since_audit=3` dopo V5.3c-V5.3e. Il prossimo audit obbligatorio e' V5.3g, dopo quattro incrementi funzionali V5.3c-V5.3f.
+V5.4a e' l'ultimo audit completato. V5.5, V5.6 e V5.7 sono i primi tre incrementi funzionali successivi; V5.8 sarebbe il quarto e non richiede ancora un audit. Il successivo incremento funzionale richiedera' un audit prima dell'avvio.

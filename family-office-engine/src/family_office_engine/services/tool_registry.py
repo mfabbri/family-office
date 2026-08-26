@@ -21,6 +21,7 @@ from family_office_engine.services.spanish_eu_theoretical_pension import build_s
 from family_office_engine.services.spanish_pension_net_it_resident import build_spanish_pension_net_it_resident
 from family_office_engine.services.tax_aware_portfolio import build_tax_aware_portfolio
 from family_office_engine.services.wealth_strategy import build_wealth_strategy
+from family_office_engine.services.investment_opportunity_comparison import build_investment_opportunity_comparison
 from family_office_engine.services.work_exit_feasibility import build_work_exit_feasibility
 
 SCHEMA_VERSION = "tool-registry/v1"
@@ -253,6 +254,19 @@ TOOL_REGISTRY: tuple[RegisteredTool, ...] = (
         notes="Finds feasible exit dates from deterministic pension and spending evidence; no LLM calculations.",
     ),
     RegisteredTool(
+        tool_id="planning.investment_opportunity_comparison.build",
+        title="Build investment-opportunity-comparison/v1",
+        callable_ref=build_investment_opportunity_comparison,
+        input_schema_version="investment-opportunity-comparison/v1",
+        output_schema_version="investment-opportunity-comparison/v1",
+        required_parameters=("input_path", "output_path"),
+        optional_parameters=(),
+        prerequisites=("investment-opportunity/v1",),
+        risk_level="high",
+        authorization_policy=("workspace_write", "professional_review_required"),
+        notes="Compares only declared investment scenarios and benchmarks; does not infer returns, tax treatment or recommendations.",
+    ),
+    RegisteredTool(
         tool_id="planning.wealth_strategy.build",
         title="Build wealth-strategy/v1",
         callable_ref=build_wealth_strategy,
@@ -270,6 +284,7 @@ TOOL_REGISTRY: tuple[RegisteredTool, ...] = (
             "protection_gap_snapshot_path",
             "estate_plan_snapshot_path",
             "work_exit_snapshot_path",
+            "investment_opportunity_comparison_snapshot_paths",
         ),
         prerequisites=("liquidity-plan/v1", "tax-aware-portfolio/v1", "estate-plan/v2"),
         risk_level="high",
@@ -393,6 +408,10 @@ def _validate_registry_records(tools: list[dict[str, Any]]) -> None:
 
 
 def _coerce_path(value: Any, name: str) -> Any:
+    if name.endswith("_paths"):
+        if not isinstance(value, list) or not all(isinstance(item, (str, Path)) for item in value):
+            raise ToolRegistryError(f"{name} must be a list of path strings")
+        return [Path(item) for item in value]
     if name.endswith("_path") or name in {"input_path", "output_path", "rule_pack_path"}:
         if not isinstance(value, (str, Path)):
             raise ToolRegistryError(f"{name} must be a path string")

@@ -2,12 +2,19 @@ import copy
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 
+from family_office_engine.cli.main import main
+from family_office_engine.services.investment_opportunity_comparison import build_investment_opportunity_comparison
 from family_office_engine.services.wealth_strategy import WealthStrategyError, build_wealth_strategy
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 SAMPLE_INPUT = REPOSITORY_ROOT / "family-office-engine" / "examples" / "wealth-strategy-input-sample.json"
+INVESTMENT_INPUT = REPOSITORY_ROOT / "family-office-engine" / "examples" / "wealth-strategy-investment-opportunity-input-sample.json"
+PROPERTY_COMPARISON_INPUT = REPOSITORY_ROOT / "family-office-engine" / "examples" / "investment-opportunity-comparison-income-property-v1-sample.json"
+CAMPER_COMPARISON_INPUT = REPOSITORY_ROOT / "family-office-engine" / "examples" / "investment-opportunity-comparison-camper-v1-sample.json"
 
 
 class WealthStrategyTest(unittest.TestCase):
@@ -65,6 +72,57 @@ class WealthStrategyTest(unittest.TestCase):
             with self.assertRaisesRegex(WealthStrategyError, "2 to 4"):
                 build_wealth_strategy(_write_json(root / "input.json", data), root / "out.json", **_source_paths(root))
 
+    def test_investment_packages_preserve_lineage_gaps_personal_utility_and_ties(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            property_comparison = _comparison_snapshot(root, PROPERTY_COMPARISON_INPUT, "missing_tax_classification")
+            camper_comparison = _comparison_snapshot(root, CAMPER_COMPARISON_INPUT)
+            result = build_wealth_strategy(
+                INVESTMENT_INPUT,
+                root / "wealth-strategy.json",
+                **_source_paths(root),
+                investment_opportunity_comparison_snapshot_paths=[property_comparison, camper_comparison],
+            )
+
+            property_package = next(item for item in result["packages"] if item["package_id"] == "buy_income_property")
+            camper_package = next(item for item in result["packages"] if item["package_id"] == "buy_mixed_use_camper")
+            self.assertEqual(property_package["components"][0]["source_hash"], property_package["components"][1]["source_hash"])
+            self.assertTrue(property_package["components"][1]["evidence"]["liquidity"]["liquidity_breach"])
+            self.assertIn("source.missing_tax_classification", {gap["code"] for gap in property_package["data_gaps"]})
+            self.assertEqual(camper_package["personal_utility"]["annual_economic_benefit"], "2400.00")
+            self.assertEqual(camper_package["personal_utility"]["tax_treatment"], "not_taxable_cash_flow")
+            self.assertFalse(result["summary"]["automatic_ranking_produced"])
+            tied = [item for item in result["ranking"] if item["package_id"] in {"buy_income_property", "buy_mixed_use_camper"}]
+            self.assertEqual({item["rank"] for item in tied}, {2})
+            self.assertTrue(all(item["tied_with_package_ids"] for item in tied))
+
+    def test_investment_package_requires_explicit_personal_utility(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            data = json.loads(INVESTMENT_INPUT.read_text(encoding="utf-8"))
+            data["packages"][1].pop("personal_utility")
+            property_comparison = _comparison_snapshot(root, PROPERTY_COMPARISON_INPUT)
+            camper_comparison = _comparison_snapshot(root, CAMPER_COMPARISON_INPUT)
+            result = build_wealth_strategy(
+                _write_json(root / "input.json", data), root / "wealth-strategy.json", **_source_paths(root),
+                investment_opportunity_comparison_snapshot_paths=[property_comparison, camper_comparison],
+            )
+            package = next(item for item in result["packages"] if item["package_id"] == "buy_income_property")
+            self.assertIn("missing_personal_utility", {gap["code"] for gap in package["data_gaps"]})
+            self.assertFalse(result["summary"]["automatic_ranking_produced"])
+
+    def test_cli_demo_includes_investment_comparison_packages(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            output = Path(tmp_dir) / "wealth-strategy.json"
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["planning", "wealth-strategy", "demo", "--output", str(output)])
+            self.assertEqual(exit_code, 0)
+            snapshot = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual({item["package_id"] for item in snapshot["packages"]}, {"keep_portfolio", "buy_income_property", "buy_mixed_use_camper"})
+            self.assertIn("planning wealth-strategy demo: partial", stdout.getvalue())
+            self.assertIn("top=review_required", stdout.getvalue())
+
 
 def _source_paths(root: Path) -> dict:
     return {
@@ -103,6 +161,16 @@ def _source_paths(root: Path) -> dict:
         ),
         "work_exit_snapshot_path": _write_json(root / "work-exit.json", _snapshot("work-exit-feasibility/v1", first_sustainable_exit_date="2039-01-01")),
     }
+
+
+def _comparison_snapshot(root: Path, source: Path, gap_code: str | None = None) -> Path:
+    data = json.loads(source.read_text(encoding="utf-8"))
+    if gap_code is not None:
+        data["data_gaps"] = [{"code": gap_code, "message": "Synthetic declared gap."}]
+    input_path = _write_json(root / f"{data['comparison_id']}.input.json", data)
+    output_path = root / f"{data['comparison_id']}.snapshot.json"
+    build_investment_opportunity_comparison(input_path, output_path)
+    return output_path
 
 
 def _snapshot(schema_version: str, **extra: object) -> dict:

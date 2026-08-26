@@ -1,0 +1,30 @@
+{
+  "schema_version": "investment-opportunity-comparison/v1",
+  "record_type": "InvestmentOpportunityComparisonInput",
+  "comparison_id": "synthetic-income-property-versus-cash",
+  "label": "Synthetic income property versus declared cash alternative",
+  "as_of_date": "2026-08-25",
+  "base_currency": "EUR",
+  "capital_amount": "50000.00",
+  "horizon_years": 3,
+  "assumptions": [{"assumption_id": "adapter-and-financing-outputs", "version": "v1", "source": "synthetic fixture"}],
+  "provenance": [{"origin": "synthetic fixture only; no market benchmark inferred"}],
+  "primary": {
+    "alternative_id": "income-property-equity", "label": "Income property equity", "capital_amount": "50000.00", "horizon_years": 3,
+    "provenance": [{"origin": "real-estate-investment/v2 and financing-plan/v1 synthetic outputs"}],
+    "scenarios": [
+      {"scenario_type": "base", "label": "Base", "provenance": [{"origin": "declared output"}], "stress_factors": [], "annual_equity_cash_flow": "3000.00", "net_exit_value": "55000.00", "annual_owner_hours": "30", "annual_owner_time_cost": "900.00", "household_constraints": {"liquidity_reserve_required": "20000", "liquid_assets_after_commitment": "25000", "concentration_limit": "0.50", "concentration_after_commitment": "0.35", "retirement_work_exit_cash_flow_impact": "3000", "reversibility": "medium"}},
+      {"scenario_type": "upside", "label": "Upside", "provenance": [{"origin": "declared output"}], "stress_factors": [{"factor": "rent", "direction": "up", "value": "0.10", "unit": "rate"}], "annual_equity_cash_flow": "5000.00", "net_exit_value": "60000.00", "annual_owner_hours": "30", "annual_owner_time_cost": "900.00", "household_constraints": {"liquidity_reserve_required": "20000", "liquid_assets_after_commitment": "27000", "concentration_limit": "0.50", "concentration_after_commitment": "0.35", "retirement_work_exit_cash_flow_impact": "5000", "reversibility": "medium"}},
+      {"scenario_type": "adverse", "label": "Adverse", "provenance": [{"origin": "declared output"}], "stress_factors": [{"factor": "occupancy", "direction": "down", "value": "0.20", "unit": "rate"}, {"factor": "maintenance", "direction": "up", "value": "3000", "unit": "EUR/year"}, {"factor": "rate", "direction": "up", "value": "0.02", "unit": "rate"}, {"factor": "exit_value", "direction": "down", "value": "0.10", "unit": "rate"}], "annual_equity_cash_flow": "-2000.00", "net_exit_value": "40000.00", "annual_owner_hours": "45", "annual_owner_time_cost": "1350.00", "household_constraints": {"liquidity_reserve_required": "20000", "liquid_assets_after_commitment": "15000", "concentration_limit": "0.50", "concentration_after_commitment": "0.60", "retirement_work_exit_cash_flow_impact": "-2000", "reversibility": "low"}}
+    ]
+  },
+  "benchmark": {
+    "alternative_id": "declared-cash-alternative", "label": "Declared cash alternative", "capital_amount": "50000.00", "horizon_years": 3,
+    "provenance": [{"origin": "explicit synthetic alternative, not market data"}],
+    "scenarios": [
+      {"scenario_type": "base", "label": "Base", "provenance": [{"origin": "declared output"}], "stress_factors": [], "annual_equity_cash_flow": "1000.00", "net_exit_value": "50000.00", "annual_owner_hours": "0", "annual_owner_time_cost": "0", "household_constraints": {"liquidity_reserve_required": "20000", "liquid_assets_after_commitment": "50000", "concentration_limit": "0.50", "concentration_after_commitment": "0.10", "retirement_work_exit_cash_flow_impact": "1000", "reversibility": "high"}},
+      {"scenario_type": "upside", "label": "Upside", "provenance": [{"origin": "declared output"}], "stress_factors": [{"factor": "declared_yield", "direction": "up", "value": "0.01", "unit": "rate"}], "annual_equity_cash_flow": "1500.00", "net_exit_value": "50000.00", "annual_owner_hours": "0", "annual_owner_time_cost": "0", "household_constraints": {"liquidity_reserve_required": "20000", "liquid_assets_after_commitment": "50000", "concentration_limit": "0.50", "concentration_after_commitment": "0.10", "retirement_work_exit_cash_flow_impact": "1500", "reversibility": "high"}},
+      {"scenario_type": "adverse", "label": "Adverse", "provenance": [{"origin": "declared output"}], "stress_factors": [{"factor": "declared_yield", "direction": "down", "value": "0.01", "unit": "rate"}], "annual_equity_cash_flow": "500.00", "net_exit_value": "50000.00", "annual_owner_hours": "0", "annual_owner_time_cost": "0", "household_constraints": {"liquidity_reserve_required": "20000", "liquid_assets_after_commitment": "50000", "concentration_limit": "0.50", "concentration_after_commitment": "0.10", "retirement_work_exit_cash_flow_impact": "500", "reversibility": "high"}}
+    ]
+  }
+}

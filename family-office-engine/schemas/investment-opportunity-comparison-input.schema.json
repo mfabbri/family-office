@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Investment Opportunity Comparison Input V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_type", "comparison_id", "label", "as_of_date", "base_currency", "capital_amount", "horizon_years", "assumptions", "provenance", "primary"],
+  "properties": {
+    "schema_version": {"const": "investment-opportunity-comparison/v1"},
+    "record_type": {"const": "InvestmentOpportunityComparisonInput"},
+    "comparison_id": {"type": "string", "minLength": 1},
+    "label": {"type": "string", "minLength": 1},
+    "as_of_date": {"type": "string", "format": "date"},
+    "base_currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "capital_amount": {"type": ["number", "string"]},
+    "horizon_years": {"type": "integer", "minimum": 1},
+    "assumptions": {"type": "array", "minItems": 1},
+    "provenance": {"type": "array", "minItems": 1},
+    "primary": {"$ref": "#/$defs/alternative"},
+    "benchmark": {"$ref": "#/$defs/alternative"},
+    "data_gaps": {"type": "array"}
+  },
+  "$defs": {
+    "alternative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alternative_id", "label", "capital_amount", "horizon_years", "provenance", "scenarios"],
+      "properties": {
+        "alternative_id": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "capital_amount": {"type": ["number", "string"]},
+        "horizon_years": {"type": "integer", "minimum": 1},
+        "provenance": {"type": "array", "minItems": 1},
+        "scenarios": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/scenario"}}
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenario_type", "label", "provenance", "annual_equity_cash_flow", "net_exit_value", "annual_owner_hours", "annual_owner_time_cost"],
+      "properties": {
+        "scenario_type": {"enum": ["base", "upside", "adverse"]},
+        "label": {"type": "string", "minLength": 1},
+        "provenance": {"type": "array", "minItems": 1},
+        "stress_factors": {"type": "array", "items": {"$ref": "#/$defs/stress_factor"}},
+        "annual_equity_cash_flow": {"type": ["number", "string"]},
+        "net_exit_value": {"type": ["number", "string"]},
+        "annual_owner_hours": {"type": ["number", "string"]},
+        "annual_owner_time_cost": {"type": ["number", "string"]},
+        "household_constraints": {"$ref": "#/$defs/household_constraints"}
+      }
+    },
+    "stress_factor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factor", "direction", "value", "unit"],
+      "properties": {
+        "factor": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["up", "down"]},
+        "value": {"type": ["number", "string"]},
+        "unit": {"type": "string", "minLength": 1}
+      }
+    },
+    "household_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "liquidity_reserve_required": {"type": ["number", "string", "null"]},
+        "liquid_assets_after_commitment": {"type": ["number", "string", "null"]},
+        "concentration_limit": {"type": ["number", "string", "null"]},
+        "concentration_after_commitment": {"type": ["number", "string", "null"]},
+        "retirement_work_exit_cash_flow_impact": {"type": ["number", "string", "null"]},
+        "reversibility": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

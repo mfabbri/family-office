@@ -11,6 +11,28 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Non inserire calcoli fiscali, pensionistici o finanziari stimati a mano se il campo richiede un fatto osservato.
 - Preferisci i wizard disponibili prima di modificare JSON a mano; usano i dati gia' salvati come contesto e salvano progressivamente le risposte.
 
+## `scenario-draft/v1`
+
+- Comandi: `orchestration scenario-draft build --question "..."`, `orchestration scenario-draft demo`.
+- Nessun JSON di input da compilare: passa una domanda in linguaggio naturale; il testo non viene conservato nello snapshot.
+- Il draft mostra solo proposte esplicite da confermare e non è compatibile direttamente con `decision-scenario/v2`. Età pensionabile, date ISO, budget EUR e università dei figli sono riconosciuti soltanto quando espressi chiaramente.
+- Completa prima le `confirmation_requests`, risolvi `conflicts` e `rejected_values`, poi costruisci un input `decision-scenario/v2` privato con fonti e assunzioni confermate. Non usare il draft come scenario eseguibile.
+
+## `execution-plan-input/v1`
+
+- Default: `../family-office-workspace/planning/execution-plan.json`.
+- Comandi: `orchestration question-intent route`, `orchestration execution-plan build`, `orchestration execution-plan demo`.
+- Prima instrada la domanda con i dati minimi dichiarati e copia lo snapshot `question-intent/v1` ottenuto nel campo `question_intent` del piano. Non inserire il testo della domanda.
+- Ogni nodo dichiara `node_id`, `tool_id`, `depends_on` e `input_bindings`. Ogni binding contiene solo `source` (`workspace_path`, `rule_pack`, `prior_node_output` o `citation_index`), `reference`, `sensitivity` e, per output di un nodo, `node_id`.
+- I valori personali o finanziari non devono essere inseriti nel piano: restano nei file privati del workspace richiamati dal binding. Un binding `sensitive` richiede `authorization: explicit_user_consent`.
+- Il file descrive una preview: non invoca tool e non produce calcoli. Usa `demo` per vedere un DAG sintetico valido prima di predisporre un input privato.
+
+## `execution-request/v1`
+
+- Default: `../family-office-workspace/planning/execution-request.json`.
+- Comando: `orchestration execute --input ../family-office-workspace/planning/execution-request.json`.
+- Contiene un `execution-plan/v1` gia' `ready`, grant di autorizzazione per nodo e valori privati dei binding associati esattamente ai riferimenti del piano. Il bundle conserva riferimenti e hash dei valori, non i valori grezzi; conserva output, stati, errori e data gaps. I retry sono limitati ai tool `read_only`.
+
 ## `base-assumptions.json`
 
 - Default: `../family-office-workspace/assumptions/base-assumptions.json`.
@@ -170,6 +192,17 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - `rent_assumption` richiede `monthly_gross_rent` e `vacancy_months` per confrontare la locazione.
 - `sale_assumption` richiede `estimated_sale_price`, `months_to_liquidity` e costi di vendita espliciti per confrontare la vendita.
 - Nota: imposte, costi, canoni, vacancy e prezzo di vendita sono input espliciti. Il motore non calcola fiscalita' immobiliare normativa, successione, perizie, finanziamenti, FX o raccomandazioni.
+
+## `investment-opportunity-comparison/v1`
+
+- Default: `../family-office-workspace/planning/investment-opportunity-comparison.json`.
+- Esempio: `examples/investment-opportunity-comparison-v1-sample.json`.
+- Comandi: `planning investment-opportunity-comparison build`, `planning investment-opportunity-comparison demo`.
+- Campi principali: `capital_amount`, `horizon_years`, `primary`, `benchmark`, `assumptions`, `provenance`, `data_gaps`.
+- `primary` richiede esattamente gli scenari `base`, `upside` e `adverse`; ogni scenario dichiara `annual_equity_cash_flow`, `net_exit_value`, stress espliciti, ore/costo del proprietario e `household_constraints`.
+- `benchmark` e' opzionale: se manca, il build resta utile ma produce `missing_benchmark` e non calcola `opportunity_cost`. Se e' presente, usa lo stesso capitale e orizzonte di `primary`.
+- `household_constraints` include riserva liquida, liquidita' dopo l'impegno, limite e concentrazione prevista, impatto sul cash flow di work-exit e reversibilita'. I valori ignoti devono restare gap espliciti.
+- Nota: il file confronta soltanto dati gia' dichiarati da adapter e financing; non inserire rendimenti di mercato, imposte, tassi, valori di uscita o soglie household non supportati. L'output non e' un ranking o una raccomandazione.
 
 ## `protection-gap/v1`
 

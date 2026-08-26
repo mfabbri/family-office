@@ -32,13 +32,13 @@ class SupportedQuestionCatalogTest(unittest.TestCase):
         ]
         self.assertEqual(len(available_tool_records), len(set(available_tool_records)))
 
-    def test_investment_opportunity_is_declared_planned_not_executable(self):
+    def test_investment_opportunity_requires_comparison_and_declared_gaps(self):
         result = assess_question_capability(["investment_opportunity"])
 
         self.assertEqual(ASSESSMENT_SCHEMA_VERSION, result["schema_version"])
         self.assertFalse(result["executable"])
-        self.assertIn("capability_planned_not_executable", {problem["code"] for problem in result["problems"]})
-        self.assertEqual([], result["intent_results"][0]["required_tools"])
+        self.assertIn("minimum_data_missing", {problem["code"] for problem in result["problems"]})
+        self.assertEqual(["planning.investment_opportunity_comparison.build"], result["intent_results"][0]["required_tools"])
 
     def test_missing_data_is_explicit_for_available_capability(self):
         result = assess_question_capability(["liquidity_and_cashflow"], ["planning-goals/v1"])

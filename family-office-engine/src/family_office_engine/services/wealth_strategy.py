@@ -22,6 +22,7 @@ SOURCE_SCHEMAS = {
     "protection_gap": "protection-gap/v1",
     "estate_plan": "estate-plan/v2",
     "work_exit": "work-exit-feasibility/v1",
+    "investment_opportunity_comparison": "investment-opportunity-comparison/v1",
 }
 SCORE_KEYS = ("liquidity", "retirement", "tax_efficiency", "protection", "succession", "cross_border", "reversibility")
 REVERSIBILITY_SCORE = {"low": 1, "medium": 3, "high": 5}
@@ -45,6 +46,7 @@ def build_wealth_strategy(
     protection_gap_snapshot_path: Path | None = None,
     estate_plan_snapshot_path: Path | None = None,
     work_exit_snapshot_path: Path | None = None,
+    investment_opportunity_comparison_snapshot_paths: list[Path] | None = None,
 ) -> dict[str, Any]:
     data = _read_json(input_path, "wealth strategy input")
     sources = {
@@ -60,6 +62,9 @@ def build_wealth_strategy(
         "protection_gap": _optional_snapshot(protection_gap_snapshot_path, SOURCE_SCHEMAS["protection_gap"]),
         "estate_plan": _optional_snapshot(estate_plan_snapshot_path, SOURCE_SCHEMAS["estate_plan"]),
         "work_exit": _optional_snapshot(work_exit_snapshot_path, SOURCE_SCHEMAS["work_exit"]),
+        "investment_opportunity_comparison": _optional_investment_comparison_snapshots(
+            investment_opportunity_comparison_snapshot_paths or []
+        ),
     }
     errors: list[str] = []
     data_gaps: list[dict[str, Any]] = []
@@ -73,6 +78,7 @@ def build_wealth_strategy(
         for index, item in enumerate(data["packages"])
     ]
     ranking = _ranking(packages)
+    automatic_ranking_produced = _automatic_ranking_allowed(packages, ranking)
     status = _status(packages, sources, data_gaps)
     core = {
         "source": {"type": "wealth-strategy-input-json", "path": str(input_path), "snapshots": _source_summary(sources)},
@@ -86,6 +92,7 @@ def build_wealth_strategy(
             "comparable_package_count": sum(1 for item in packages if item["status"] in {"complete", "partial"}),
             "blocked_package_count": sum(1 for item in packages if item["status"].startswith("blocked")),
             "data_gap_count": len(data_gaps),
+            "automatic_ranking_produced": automatic_ranking_produced,
             "review_required": True,
         },
         "data_gaps": data_gaps,
@@ -101,7 +108,8 @@ def build_wealth_strategy(
         },
         "notes": (
             "Wealth strategy V1 composes deterministic V4 snapshots into comparable declared packages. "
-            "It does not calculate new tax, pension, investment returns, legal effects or recommendations."
+            "It does not calculate new tax, pension, investment returns, legal effects or recommendations. "
+            "Investment personal utility is an explicit non-taxable annotation, never a cash-flow input."
         ),
     }
     try:
@@ -154,6 +162,10 @@ def _package(
     components = _components(item.get("components", []), package_id, sources)
     package_gaps = [gap for component in components for gap in component["data_gaps"]]
     package_gaps.extend(_incompatibility_gaps(package_id, components, incompatibilities))
+    personal_utility, personal_utility_gaps = _personal_utility(
+        item.get("personal_utility"), any(component["source_key"] == "investment_opportunity_comparison" for component in components)
+    )
+    package_gaps.extend(personal_utility_gaps)
     global_gaps.extend({"package_id": package_id, **gap} for gap in package_gaps)
     declared_scores = _declared_scores(item.get("declared_scores", {}), prefix, item.get("reversibility"))
     weighted_score = _weighted_score(declared_scores, weights, package_gaps)
@@ -171,6 +183,7 @@ def _package(
         "costs": _costs(item.get("costs", []), package_id),
         "dependencies": _string_list(item.get("dependencies", []), f"{prefix}.dependencies"),
         "reversibility": item.get("reversibility") or "unknown",
+        "personal_utility": personal_utility,
         "controls": _non_empty_string_list(item.get("controls"), f"{prefix}.controls"),
         "risks": _non_empty_string_list(item.get("risks"), f"{prefix}.risks"),
         "adverse_scenarios": _non_empty_string_list(item.get("adverse_scenarios"), f"{prefix}.adverse_scenarios"),
@@ -189,8 +202,12 @@ def _components(raw_components: Any, package_id: str, sources: dict[str, dict[st
         source_key = _required_item_text(item, "source_key", f"{package_id}.components[{index}]")
         if source_key not in SOURCE_SCHEMAS:
             raise WealthStrategyError(f"{component_id}.source_key must be one of {sorted(SOURCE_SCHEMAS)}")
-        source = sources[source_key]
-        evidence, gaps = _component_evidence(component_id, source_key, item.get("selector", {}), source)
+        selector = item.get("selector", {})
+        if source_key == "investment_opportunity_comparison":
+            source, selector = _investment_comparison_source(sources[source_key], selector)
+        else:
+            source = sources[source_key]
+        evidence, gaps = _component_evidence(component_id, source_key, selector, source)
         result.append(
             {
                 "component_id": component_id,
@@ -234,6 +251,29 @@ def _component_evidence(component_id: str, source_key: str, selector: Any, sourc
     raise WealthStrategyError(f"{component_id}.selector must use collection or path")
 
 
+def _investment_comparison_source(source: dict[str, Any], selector: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    if not isinstance(selector, dict):
+        raise WealthStrategyError("investment opportunity comparison selector must be an object")
+    comparison_id = selector.get("comparison_id")
+    if not isinstance(comparison_id, str) or not comparison_id.strip():
+        raise WealthStrategyError("investment opportunity comparison selector.comparison_id is required")
+    snapshot = source.get("snapshots", {}).get(comparison_id)
+    if snapshot is None:
+        return {"path": None, "snapshot": None}, {}
+    scenario_type = selector.get("scenario_type")
+    if scenario_type is None:
+        return {"path": source["paths"].get(comparison_id), "snapshot": snapshot}, {}
+    if scenario_type not in {"base", "upside", "adverse"}:
+        raise WealthStrategyError("investment opportunity comparison selector.scenario_type must be base, upside or adverse")
+    view = dict(snapshot)
+    primary = snapshot.get("primary")
+    view["scenarios"] = primary.get("scenarios", []) if isinstance(primary, dict) else []
+    return (
+        {"path": source["paths"].get(comparison_id), "snapshot": view},
+        {"collection": "scenarios", "id_field": "scenario_type", "id": scenario_type},
+    )
+
+
 def _select_collection_item(snapshot: dict[str, Any], selector: dict[str, Any]) -> dict[str, Any] | None:
     collection = snapshot.get(selector.get("collection"))
     if not isinstance(collection, list):
@@ -261,6 +301,10 @@ def _evidence_summary(value: dict[str, Any]) -> dict[str, Any]:
         "failure_reasons",
         "reserve_conflicts",
         "operational_flags",
+        "return",
+        "risk",
+        "liquidity",
+        "management_burden",
     )
     return {key: value.get(key) for key in summary_keys if key in value}
 
@@ -324,7 +368,7 @@ def _package_status(components: list[dict[str, Any]], gaps: list[dict[str, Any]]
 
 
 def _status(packages: list[dict[str, Any]], sources: dict[str, dict[str, Any]], data_gaps: list[dict[str, Any]]) -> str:
-    if not any(item["snapshot"] is not None for item in sources.values()):
+    if not any(_source_available(item) for item in sources.values()):
         return "blocked_missing_sources"
     if sum(1 for package in packages if package["status"] in {"complete", "partial"}) < 2:
         return "blocked_insufficient_comparable_packages"
@@ -335,18 +379,71 @@ def _status(packages: list[dict[str, Any]], sources: dict[str, dict[str, Any]], 
     return "complete"
 
 
+def _source_available(source: dict[str, Any]) -> bool:
+    if "snapshots" in source:
+        return bool(source["snapshots"])
+    return source["snapshot"] is not None
+
+
 def _ranking(packages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ranked = sorted(packages, key=lambda item: (-_decimal(item["weighted_score"], "weighted_score"), item["package_id"]))
-    return [
-        {
-            "rank": index + 1,
+    result = []
+    previous_score: Decimal | None = None
+    rank = 0
+    for index, item in enumerate(ranked):
+        score = _decimal(item["weighted_score"], "weighted_score")
+        if score != previous_score:
+            rank = index + 1
+            previous_score = score
+        tied_with = [candidate["package_id"] for candidate in ranked if candidate["package_id"] != item["package_id"] and candidate["weighted_score"] == item["weighted_score"]]
+        result.append(
+            {
+            "rank": rank,
             "package_id": item["package_id"],
             "status": item["status"],
             "weighted_score": item["weighted_score"],
+            "tied_with_package_ids": tied_with,
             "review_required": True,
-        }
-        for index, item in enumerate(ranked)
-    ]
+            }
+        )
+    return result
+
+
+def _automatic_ranking_allowed(packages: list[dict[str, Any]], ranking: list[dict[str, Any]]) -> bool:
+    critical_codes = {
+        "source.missing_tax_classification",
+        "source.missing_activity_classification",
+        "source.missing_benchmark",
+        "source.missing_household_constraints",
+        "source.incomplete_household_constraints",
+        "missing_personal_utility",
+    }
+    return not any(
+        set(gap.get("code", "") for gap in package["data_gaps"]) & critical_codes
+        for package in packages
+    ) and not any(item["tied_with_package_ids"] for item in ranking)
+
+
+def _personal_utility(value: Any, required: bool) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
+    if value is None:
+        if required:
+            return None, [{"code": "missing_personal_utility", "message": "Investment packages must declare personal utility or an explicit zero value."}]
+        return None, []
+    if not isinstance(value, dict):
+        raise WealthStrategyError("personal_utility must be an object")
+    allowed = {"annual_economic_benefit", "source"}
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise WealthStrategyError(f"personal_utility has unknown fields: {', '.join(unknown)}")
+    benefit = _decimal(value.get("annual_economic_benefit"), "personal_utility.annual_economic_benefit")
+    if benefit < 0:
+        raise WealthStrategyError("personal_utility.annual_economic_benefit must be greater than or equal to 0")
+    source = _required_item_text(value, "source", "personal_utility")
+    return {
+        "annual_economic_benefit": _format_money(benefit),
+        "source": source,
+        "tax_treatment": "not_taxable_cash_flow",
+    }, []
 
 
 def _costs(value: Any, package_id: str) -> list[dict[str, Any]]:
@@ -373,15 +470,27 @@ def _costs(value: Any, package_id: str) -> list[dict[str, Any]]:
 
 
 def _source_summary(sources: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    return {
-        key: {
+    result = {}
+    for key, item in sources.items():
+        if "snapshots" in item:
+            result[key] = [
+                {
+                    "comparison_id": comparison_id,
+                    "path": str(item["paths"][comparison_id]),
+                    "schema_version": snapshot.get("schema_version"),
+                    "status": snapshot.get("status"),
+                    "content_hash": _snapshot_hash(snapshot),
+                }
+                for comparison_id, snapshot in item["snapshots"].items()
+            ]
+            continue
+        result[key] = {
             "path": None if item["path"] is None else str(item["path"]),
             "schema_version": None if item["snapshot"] is None else item["snapshot"].get("schema_version"),
             "status": None if item["snapshot"] is None else item["snapshot"].get("status"),
             "content_hash": _snapshot_hash(item["snapshot"]) if item["snapshot"] is not None else None,
         }
-        for key, item in sources.items()
-    }
+    return result
 
 
 def _optional_snapshot(path: Path | None, expected_schema: str) -> dict[str, Any]:
@@ -398,6 +507,24 @@ def _optional_snapshot(path: Path | None, expected_schema: str) -> dict[str, Any
     if data.get("schema_version") != expected_schema:
         raise WealthStrategyError(f"Unsupported source schema in {path}: {data.get('schema_version')}; expected {expected_schema}")
     return {"path": path, "snapshot": data}
+
+
+def _optional_investment_comparison_snapshots(paths: list[Path]) -> dict[str, Any]:
+    snapshots: dict[str, dict[str, Any]] = {}
+    source_paths: dict[str, Path] = {}
+    for path in paths:
+        source = _optional_snapshot(path, SOURCE_SCHEMAS["investment_opportunity_comparison"])
+        snapshot = source["snapshot"]
+        if snapshot is None:
+            continue
+        comparison_id = snapshot.get("comparison_id")
+        if not isinstance(comparison_id, str) or not comparison_id.strip():
+            raise WealthStrategyError(f"Investment comparison snapshot needs comparison_id: {path}")
+        if comparison_id in snapshots:
+            raise WealthStrategyError(f"Duplicate investment comparison_id: {comparison_id}")
+        snapshots[comparison_id] = snapshot
+        source_paths[comparison_id] = path
+    return {"paths": source_paths, "snapshots": snapshots}
 
 
 def _collect_nested_gaps(value: Any) -> list[dict[str, Any]]:
@@ -495,6 +622,10 @@ def _semantic_core(core: dict[str, Any]) -> dict[str, Any]:
         snapshots = source.get("snapshots")
         if isinstance(snapshots, dict):
             for item in snapshots.values():
+                if isinstance(item, dict):
+                    item.pop("path", None)
+        elif isinstance(snapshots, list):
+            for item in snapshots:
                 if isinstance(item, dict):
                     item.pop("path", None)
     return semantic

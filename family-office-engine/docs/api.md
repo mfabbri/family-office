@@ -738,9 +738,9 @@ family_office_engine.services.wealth_strategy
 
 Funzione principale:
 
-- `build_wealth_strategy(input_path, output_path, ...)`: compone pacchetti strategici dichiarati e snapshot V4 esistenti in `wealth-strategy/v1`.
+- `build_wealth_strategy(input_path, output_path, ..., investment_opportunity_comparison_snapshot_paths=...)`: compone pacchetti strategici dichiarati, snapshot V4 e confronti `investment-opportunity-comparison/v1` in `wealth-strategy/v1`.
 
-`wealth-strategy/v1` verifica sorgenti, schema, status, hash e selettori dei componenti; produce 2-4 pacchetti comparabili con punteggi ponderati dichiarati, ranking, piano 90/180 giorni, costi, dipendenze, reversibilita', controlli, rischi, scenari avversi e data gaps.
+`wealth-strategy/v1` verifica sorgenti, schema, status, hash e selettori dei componenti; i confronti d'investimento sono selezionati per `comparison_id` e scenario e possono essere multipli. Produce 2-4 pacchetti comparabili con punteggi ponderati dichiarati, parita' esplicite, piano 90/180 giorni, costi, dipendenze, reversibilita', controlli, rischi, scenari avversi e data gaps. Utilita' personale dichiarata resta un'annotazione economica `not_taxable_cash_flow`; gap fiscali/household/benchmark o una parita' disabilitano `automatic_ranking_produced`.
 
 Il servizio non calcola nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni. I punteggi e i pacchetti sono input espliciti; gli snapshot sorgente restano l'evidenza deterministica.
 
@@ -868,4 +868,47 @@ Funzioni principali:
 - `build_supported_question_catalog()`: costruisce `supported-question-catalog/v1` con famiglie di domande, tool registrati, dati minimi, output, rischio, limiti ed escalation.
 - `assess_question_capability(intent_ids, provided_data=None)`: valuta intenti gia' selezionati e restituisce `question-capability-assessment/v1`, senza classificare testo libero ne' invocare tool.
 
-Il catalogo copre ogni tool del registry una sola volta nella capability disponibile. Le domande su investimenti a reddito o asset mobili noleggiabili restano `planned` e non eseguibili fino al completamento di V5.3a-V5.3h. Il routing da linguaggio naturale resta fuori perimetro fino a `question-intent/v1` (V5.4); i dati minimi mancanti, gli intenti sovrapposti, sconosciuti o che richiedono consulenza professionale producono problemi espliciti.
+Il catalogo copre ogni tool del registry una sola volta nella capability disponibile. Le domande su investimenti a reddito o asset mobili noleggiabili richiedono ora un confronto deterministico e gap dichiarati; il routing da linguaggio naturale e' fornito da `question-intent/v1` (V5.4), ma non invoca tool. Dati minimi mancanti, intenti sovrapposti, sconosciuti o che richiedono consulenza professionale producono problemi espliciti.
+
+## Question intent
+
+Modulo:
+
+```text
+family_office_engine.services.question_intent
+```
+
+- `route_question_intent(question, provided_data=None)`: restituisce `question-intent/v1` da regole lessicali versionate, senza tool invocation, calcoli o scritture di facts.
+- `build_question_intent(question, output_path, provided_data=None)`: scrive lo stesso snapshot nel workspace; conserva un fingerprint, non il testo della domanda.
+
+Il router riusa `supported-question-catalog/v1`, propone soltanto entita' riconosciute e rende espliciti intenti ambigui, dati minimi mancanti, prompt injection e richieste fuori perimetro. Gli investimenti produttivi sono ora disponibili solo tramite il tool registrato `planning.investment_opportunity_comparison.build`, con confronti e gap dichiarati; il router non lo invoca.
+
+## Scenario draft
+
+Modulo:
+
+```text
+family_office_engine.services.scenario_draft
+```
+
+- `draft_scenario(question)`: restituisce `scenario-draft/v1` con sole proposte esplicite e richieste di conferma.
+- `build_scenario_draft(question, output_path)`: scrive lo stesso draft senza persistere il testo della domanda.
+
+Il builder usa il router solo per fingerprint e perimetro, poi estrae in modo deterministico età pensionabile, date ISO, budget EUR e obiettivi università dei figli quando sono espliciti. Ogni valore resta `confirmation_required`; età incoerenti, importi non positivi, date non valide, istruzioni di tool e omissioni producono conflitti, valori rifiutati o data gaps. `scenario-draft/v1` non è un `decision-scenario/v2`, non è eseguibile e non calcola imposte, pensioni, rendimenti o saldi.
+
+## Execution executor and evidence bundle
+
+Modulo `family_office_engine.services.execution_executor`: `execute_plan(request)` esegue soltanto un `execution-plan/v1` pronto con lineage corrente attraverso `invoke_registered_tool`; `build_evidence_bundle(input_path, output_path)` persiste `evidence-bundle/v1`. Il request privato fornisce valori ai binding ma il bundle conserva soltanto hash e riferimenti dei valori, oltre a output, fonti, stati, errori e data gaps. Le autorizzazioni devono soddisfare la policy del registry, i retry sono limitati a tool read-only e timeout/fallimenti/dependency skip restano riproducibili. L'executor non introduce calcoli LLM fiscali, previdenziali o finanziari.
+
+## Execution plan
+
+Modulo:
+
+```text
+family_office_engine.services.execution_plan
+```
+
+- `plan_execution(data)`: valida `execution-plan-input/v1` e restituisce un `execution-plan/v1` ispezionabile, senza invocare tool.
+- `build_execution_plan(input_path, output_path)`: legge lo stesso input JSON e scrive il piano nel workspace.
+
+Il planner accetta soltanto un `question-intent/v1` con stato `routed`, lineage del catalogo corrente e binding di input come metadati: non accetta valori grezzi. Ogni nodo deve usare un tool presente nel registry e autorizzato dagli intenti selezionati; i parametri obbligatori devono essere dichiarati, le dipendenze devono formare un DAG e un input sensibile richiede `explicit_user_consent`. L'output conserva ordine topologico, controlli, stop criteria, policy e hash; tutti i nodi restano `not_executed`. L'esecuzione appartiene a V5.7 e il servizio non calcola importi fiscali, previdenziali o finanziari.

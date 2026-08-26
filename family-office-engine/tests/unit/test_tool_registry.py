@@ -7,6 +7,7 @@ from family_office_engine.services.tool_registry import (
     ToolRegistryError,
     build_tool_registry,
     invoke_registered_tool,
+    _coerce_path,
 )
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
@@ -68,6 +69,13 @@ class ToolRegistryTest(unittest.TestCase):
     def test_missing_required_parameter_is_rejected(self):
         with self.assertRaisesRegex(ToolRegistryError, "Missing required parameters"):
             invoke_registered_tool("planning.protection_gap.build", "protection-gap/v1", {"input_path": PROTECTION_SAMPLE})
+
+    def test_repeated_snapshot_paths_are_normalized_for_wealth_strategy(self):
+        values = _coerce_path(["one.json", Path("two.json")], "investment_opportunity_comparison_snapshot_paths")
+
+        self.assertEqual([Path("one.json"), Path("two.json")], values)
+        with self.assertRaisesRegex(ToolRegistryError, "list of path strings"):
+            _coerce_path("one.json", "investment_opportunity_comparison_snapshot_paths")
 
 
 if __name__ == "__main__":

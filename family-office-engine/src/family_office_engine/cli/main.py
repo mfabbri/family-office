@@ -184,6 +184,10 @@ from family_office_engine.services.financing_plan import (
     FinancingPlanError,
     build_financing_plan,
 )
+from family_office_engine.services.investment_opportunity_comparison import (
+    InvestmentOpportunityComparisonError,
+    build_investment_opportunity_comparison,
+)
 from family_office_engine.services.protection_gap import (
     ProtectionGapError,
     build_protection_gap,
@@ -210,6 +214,15 @@ from family_office_engine.services.citation_index import (
     build_citation_index,
     search_citation_index,
 )
+from family_office_engine.services.question_intent import QuestionIntentError, build_question_intent
+from family_office_engine.services.scenario_draft import ScenarioDraftError, build_scenario_draft
+from family_office_engine.services.execution_plan import (
+    ExecutionPlanError,
+    build_execution_plan,
+    demo_execution_plan_input,
+    plan_execution,
+)
+from family_office_engine.services.execution_executor import ExecutionExecutorError, build_evidence_bundle
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -440,6 +453,22 @@ def default_financing_plan_output() -> Path:
 
 def default_financing_plan_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-financing-plan.synthetic.snapshot.json"
+
+
+def default_investment_opportunity_comparison_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "investment-opportunity-comparison.json"
+
+
+def default_investment_opportunity_comparison_sample_input() -> Path:
+    return resolve_repo("engine") / "examples" / "investment-opportunity-comparison-v1-sample.json"
+
+
+def default_investment_opportunity_comparison_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "investment-opportunity-comparison.snapshot.json"
+
+
+def default_investment_opportunity_comparison_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-investment-opportunity-comparison.synthetic.snapshot.json"
 
 
 def default_protection_gap_input() -> Path:
@@ -762,6 +791,42 @@ def default_wealth_strategy_demo_output() -> Path:
 
 def default_tool_registry_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "tool-registry.snapshot.json"
+
+
+def default_question_intent_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "question-intent.snapshot.json"
+
+
+def default_question_intent_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-question-intent.synthetic.snapshot.json"
+
+
+def default_execution_plan_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "execution-plan.json"
+
+
+def default_execution_plan_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "execution-plan.snapshot.json"
+
+
+def default_execution_plan_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-execution-plan.synthetic.snapshot.json"
+
+
+def default_execution_request_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "execution-request.json"
+
+
+def default_evidence_bundle_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "evidence-bundle.snapshot.json"
+
+
+def default_scenario_draft_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "scenario-draft.snapshot.json"
+
+
+def default_scenario_draft_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "cli-check-scenario-draft.synthetic.snapshot.json"
 
 
 def default_citation_catalog() -> Path:
@@ -4494,6 +4559,21 @@ def build_parser() -> argparse.ArgumentParser:
         "demo", help="Run the synthetic financing and leverage check"
     )
     planning_financing_plan_demo_parser.add_argument("--output", type=Path, default=default_financing_plan_demo_output())
+    planning_comparison_parser = planning_subparsers.add_parser(
+        "investment-opportunity-comparison", help="Compare declared investment stress scenarios and opportunity cost"
+    )
+    planning_comparison_subparsers = planning_comparison_parser.add_subparsers(
+        dest="planning_investment_opportunity_comparison_command"
+    )
+    planning_comparison_build_parser = planning_comparison_subparsers.add_parser(
+        "build", help="Build investment-opportunity-comparison/v1 from declared adapter and financing outputs"
+    )
+    planning_comparison_build_parser.add_argument("--input", type=Path, default=default_investment_opportunity_comparison_input())
+    planning_comparison_build_parser.add_argument("--output", type=Path, default=default_investment_opportunity_comparison_output())
+    planning_comparison_demo_parser = planning_comparison_subparsers.add_parser(
+        "demo", help="Run the synthetic stress and opportunity-cost comparison check"
+    )
+    planning_comparison_demo_parser.add_argument("--output", type=Path, default=default_investment_opportunity_comparison_demo_output())
     planning_protection_parser = planning_subparsers.add_parser(
         "protection",
         help="Compare explicit insurance policies and family protection needs",
@@ -4626,6 +4706,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Input work-exit-feasibility/v1 snapshot path",
     )
     planning_wealth_strategy_build_parser.add_argument(
+        "--investment-opportunity-comparison",
+        type=Path,
+        action="append",
+        default=[],
+        help="Input investment-opportunity-comparison/v1 snapshot path; repeat for each alternative",
+    )
+    planning_wealth_strategy_build_parser.add_argument(
         "--output",
         type=Path,
         default=default_wealth_strategy_output(),
@@ -4722,6 +4809,71 @@ def build_parser() -> argparse.ArgumentParser:
         "--include-inactive",
         action="store_true",
         help="Include expired, abrogated or withdrawn citations",
+    )
+    orchestration_question_parser = orchestration_subparsers.add_parser(
+        "question-intent", help="Route a question deterministically without invoking tools"
+    )
+    orchestration_question_subparsers = orchestration_question_parser.add_subparsers(
+        dest="orchestration_question_intent_command"
+    )
+    orchestration_question_route_parser = orchestration_question_subparsers.add_parser(
+        "route", help="Classify a question into supported intents and explicit missing data"
+    )
+    orchestration_question_route_parser.add_argument("--question", required=True, help="Question to classify; it is not persisted verbatim")
+    orchestration_question_route_parser.add_argument("--provided-data", action="append", default=[], help="Declared available data item; repeat as needed")
+    orchestration_question_route_parser.add_argument("--output", type=Path, default=default_question_intent_output())
+    orchestration_question_demo_parser = orchestration_question_subparsers.add_parser(
+        "demo", help="Run a synthetic question-intent routing check"
+    )
+    orchestration_question_demo_parser.add_argument("--output", type=Path, default=default_question_intent_demo_output())
+    orchestration_scenario_draft_parser = orchestration_subparsers.add_parser(
+        "scenario-draft", help="Extract a reviewable scenario draft without executing it"
+    )
+    orchestration_scenario_draft_subparsers = orchestration_scenario_draft_parser.add_subparsers(
+        dest="orchestration_scenario_draft_command"
+    )
+    orchestration_scenario_draft_build_parser = orchestration_scenario_draft_subparsers.add_parser(
+        "build", help="Build scenario-draft/v1 from a question without persisting its text"
+    )
+    orchestration_scenario_draft_build_parser.add_argument("--question", required=True, help="Question to draft; it is not persisted verbatim")
+    orchestration_scenario_draft_build_parser.add_argument(
+        "--output", type=Path, default=default_scenario_draft_output(), help="Output scenario-draft/v1 JSON path"
+    )
+    orchestration_scenario_draft_demo_parser = orchestration_scenario_draft_subparsers.add_parser(
+        "demo", help="Build a synthetic scenario draft without execution"
+    )
+    orchestration_scenario_draft_demo_parser.add_argument(
+        "--output", type=Path, default=default_scenario_draft_demo_output(), help="Output synthetic scenario-draft/v1 JSON path"
+    )
+    orchestration_execution_plan_parser = orchestration_subparsers.add_parser(
+        "execution-plan", help="Build an inspectable registered-tool DAG without executing it"
+    )
+    orchestration_execution_plan_subparsers = orchestration_execution_plan_parser.add_subparsers(
+        dest="orchestration_execution_plan_command"
+    )
+    orchestration_execution_plan_build_parser = orchestration_execution_plan_subparsers.add_parser(
+        "build", help="Validate execution-plan-input/v1 and write execution-plan/v1"
+    )
+    orchestration_execution_plan_build_parser.add_argument(
+        "--input", type=Path, default=default_execution_plan_input(), help="Input execution-plan-input/v1 JSON path"
+    )
+    orchestration_execution_plan_build_parser.add_argument(
+        "--output", type=Path, default=default_execution_plan_output(), help="Output execution-plan/v1 JSON path"
+    )
+    orchestration_execution_plan_demo_parser = orchestration_execution_plan_subparsers.add_parser(
+        "demo", help="Build a synthetic inspectable retirement DAG without execution"
+    )
+    orchestration_execution_plan_demo_parser.add_argument(
+        "--output", type=Path, default=default_execution_plan_demo_output(), help="Output synthetic execution-plan/v1 JSON path"
+    )
+    orchestration_execute_parser = orchestration_subparsers.add_parser(
+        "execute", help="Execute a ready registered-tool plan and write evidence-bundle/v1"
+    )
+    orchestration_execute_parser.add_argument(
+        "--input", type=Path, default=default_execution_request_input(), help="Private execution-request/v1 JSON path"
+    )
+    orchestration_execute_parser.add_argument(
+        "--output", type=Path, default=default_evidence_bundle_output(), help="Output evidence-bundle/v1 JSON path"
     )
     planning_it_es_eu_pension_parser = planning_subparsers.add_parser(
         "it-es-eu-pension",
@@ -5940,6 +6092,24 @@ def main(argv: list[str] | None = None) -> int:
 
     if (
         args.command == "planning"
+        and args.planning_command == "investment-opportunity-comparison"
+        and args.planning_investment_opportunity_comparison_command in {"build", "demo"}
+    ):
+        try:
+            source = args.input if args.planning_investment_opportunity_comparison_command == "build" else default_investment_opportunity_comparison_sample_input()
+            snapshot = build_investment_opportunity_comparison(source, args.output)
+        except InvestmentOpportunityComparisonError as exc:
+            print(f"planning investment-opportunity-comparison: ERROR ({exc})")
+            return 1
+        print(
+            "planning investment-opportunity-comparison: "
+            f"{snapshot['status']} {snapshot['summary']['scenario_count']} scenarios, "
+            f"{snapshot['summary']['data_gap_count']} gaps ({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
         and args.planning_command == "investment-opportunity"
         and args.planning_investment_opportunity_command == "demo"
     ):
@@ -6723,6 +6893,7 @@ def main(argv: list[str] | None = None) -> int:
                 protection_gap_snapshot_path=args.protection_gap,
                 estate_plan_snapshot_path=args.estate_plan,
                 work_exit_snapshot_path=args.work_exit,
+                investment_opportunity_comparison_snapshot_paths=args.investment_opportunity_comparison,
             )
         except WealthStrategyError as exc:
             print(f"planning wealth-strategy: ERROR ({exc})")
@@ -6732,7 +6903,7 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['status']} "
             f"{snapshot['summary']['package_count']} packages, "
             f"{snapshot['summary']['comparable_package_count']} comparable, "
-            f"top={snapshot['ranking'][0]['package_id'] if snapshot['ranking'] else 'none'}, "
+            f"top={snapshot['ranking'][0]['package_id'] if snapshot['summary']['automatic_ranking_produced'] and snapshot['ranking'] else 'review_required'}, "
             f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )
@@ -6751,6 +6922,8 @@ def main(argv: list[str] | None = None) -> int:
             estate_output = default_estate_plan_demo_output()
             work_exit_output = default_work_exit_demo_output()
             cross_border_output = default_cross_border_it_es_demo_output()
+            property_comparison_output = resolve_repo("workspace") / "snapshots" / "cli-check-income-property-comparison.synthetic.snapshot.json"
+            camper_comparison_output = resolve_repo("workspace") / "snapshots" / "cli-check-camper-comparison.synthetic.snapshot.json"
             asset_availability_output = resolve_repo("workspace") / "snapshots" / "cli-check-asset-availability.synthetic.snapshot.json"
             import_asset_availability(default_asset_availability_sample_input(), asset_availability_output)
             build_liquidity_plan(
@@ -6779,8 +6952,16 @@ def main(argv: list[str] | None = None) -> int:
                 eu_pension_pro_rata_snapshot_path=default_cross_border_it_es_sample_pro_rata(),
                 foreign_assets_snapshot_path=default_cross_border_it_es_sample_foreign_assets(),
             )
+            build_investment_opportunity_comparison(
+                resolve_repo("engine") / "examples" / "investment-opportunity-comparison-income-property-v1-sample.json",
+                property_comparison_output,
+            )
+            build_investment_opportunity_comparison(
+                resolve_repo("engine") / "examples" / "investment-opportunity-comparison-camper-v1-sample.json",
+                camper_comparison_output,
+            )
             snapshot = build_wealth_strategy(
-                default_wealth_strategy_sample_input(),
+                resolve_repo("engine") / "examples" / "wealth-strategy-investment-opportunity-input-sample.json",
                 args.output,
                 liquidity_plan_snapshot_path=liquidity_output,
                 tax_aware_portfolio_snapshot_path=tax_output,
@@ -6789,6 +6970,7 @@ def main(argv: list[str] | None = None) -> int:
                 protection_gap_snapshot_path=protection_output,
                 estate_plan_snapshot_path=estate_output,
                 work_exit_snapshot_path=work_exit_output,
+                investment_opportunity_comparison_snapshot_paths=[property_comparison_output, camper_comparison_output],
             )
         except (
             LiquidityPlanError,
@@ -6808,9 +6990,86 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['status']} "
             f"{snapshot['summary']['package_count']} packages, "
             f"{snapshot['summary']['comparable_package_count']} comparable, "
-            f"top={snapshot['ranking'][0]['package_id'] if snapshot['ranking'] else 'none'}, "
+            f"top={snapshot['ranking'][0]['package_id'] if snapshot['summary']['automatic_ranking_produced'] and snapshot['ranking'] else 'review_required'}, "
             f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "question-intent"
+        and args.orchestration_question_intent_command in {"route", "demo"}
+    ):
+        try:
+            question = args.question if args.orchestration_question_intent_command == "route" else "Can I retire at 62 in Italy and Spain?"
+            provided_data = args.provided_data if args.orchestration_question_intent_command == "route" else []
+            snapshot = build_question_intent(question, args.output, provided_data=provided_data)
+        except QuestionIntentError as exc:
+            print(f"orchestration question-intent: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration question-intent: "
+            f"{snapshot['status']} {len(snapshot['selected_intent_ids'])} intents, "
+            f"{len(snapshot['missing_data'])} missing data, "
+            f"{len(snapshot['tool_invocations'])} tool invocations ({args.output})"
+        )
+        return 0
+
+    if args.command == "orchestration" and args.orchestration_command == "execute":
+        try:
+            snapshot = build_evidence_bundle(args.input, args.output)
+        except ExecutionExecutorError as exc:
+            print(f"orchestration execute: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration execute: "
+            f"{snapshot['status']} {len(snapshot['nodes'])} nodes, "
+            f"{len(snapshot['errors'])} errors ({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "scenario-draft"
+        and args.orchestration_scenario_draft_command in {"build", "demo"}
+    ):
+        try:
+            question = (
+                args.question
+                if args.orchestration_scenario_draft_command == "build"
+                else "Pensione a 62 anni con università dei figli e budget di € 20000"
+            )
+            snapshot = build_scenario_draft(question, args.output)
+        except ScenarioDraftError as exc:
+            print(f"orchestration scenario-draft: ERROR ({exc}); provide a question or run `fo orchestration scenario-draft demo`")
+            return 1
+        print(
+            "orchestration scenario-draft: "
+            f"{snapshot['status']} {len(snapshot['proposed_scenario']['facts'])} facts, "
+            f"{len(snapshot['confirmation_requests'])} confirmation requests, no scenario execution ({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "execution-plan"
+        and args.orchestration_execution_plan_command in {"build", "demo"}
+    ):
+        try:
+            if args.orchestration_execution_plan_command == "demo":
+                snapshot = plan_execution(demo_execution_plan_input())
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                args.output.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            else:
+                snapshot = build_execution_plan(args.input, args.output)
+        except ExecutionPlanError as exc:
+            print(f"orchestration execution-plan: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration execution-plan: "
+            f"{snapshot['status']} {len(snapshot['nodes'])} nodes, "
+            f"{len(snapshot['execution_order'])} ordered, no tool invocations ({args.output})"
         )
         return 0
 
