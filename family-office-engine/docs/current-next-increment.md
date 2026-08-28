@@ -2,11 +2,11 @@
 
 ## ID e titolo
 
-V5.8 - Response composer with citations.
+V5.12a - Orchestration and local API code audit.
 
 ## Stato
 
-`planned`
+`done`
 
 ## Roadmap
 
@@ -14,28 +14,25 @@ V5.8 - Response composer with citations.
 
 ## Motivazione e dipendenze
 
-V5.7 e' completato. V5.8 e' il primo incremento funzionale pianificato con dipendenze soddisfatte.
+V5.9-V5.12 sono quattro incrementi funzionali conclusi dopo V5.8a. `roadmap_audit.py` riporta `audit_due=true`, quindi V5.12a e' l'unico incremento selezionabile prima di un successivo lavoro funzionale.
 
-Dipendenze: V5.2 e V5.7 sono `done`. V5.8 deve comporre risposte esclusivamente da `evidence-bundle/v1` e citazioni indicizzate.
+Dipendenze: V5.9, V5.10, V5.11 e V5.12 sono `done`.
 
-Prima dell'implementazione eseguire sempre:
+## Piano operativo V5.12a
 
-```text
-python family-office-engine/src/family_office_engine/governance/roadmap_audit.py
-```
+1. Verificare confini e contratti di guardrail, decision memory, evaluation suite e API locale: nessun percorso deve eludere router, planner, executor, composer o guardrail.
+2. Controllare coerenza tra servizi, CLI, documentazione, fixture e test; verificare error handling, dipendenze e compatibilita' dei path.
+3. Eseguire test mirati, smoke CLI, suite completa, audit roadmap, compilazione, `git diff --check` e privacy scan; registrare follow-up espliciti o correggere solo difetti piccoli e verificabili.
 
-## Piano operativo V5.8
+## Criteri di completamento V5.12a
 
-1. Definire un compositore che accetti esclusivamente evidenze e citazioni indicizzate.
-2. Rendere espliciti facts, assunzioni, limiti, fonti, conflitti e richieste di revisione professionale.
-3. Aggiungere fixture sintetiche, test e smoke CLI; eseguire regression e `roadmap_audit.py` prima della chiusura.
+- confini dei moduli, contratti e test V5.9-V5.12 risultano coerenti;
+- nessun dato personale reale, dipendenza non dichiarata o bypass architetturale;
+- regression e controllo cadenza audit sono riproducibili e verdi;
+- ogni debito residuo e' esplicitamente registrato.
 
-## Criteri di completamento V5.8
+## Esito e verifiche
 
-- ogni affermazione deriva da evidence bundle e citazione identificabile oppure resta un limite o assunzione;
-- numeri, conflitti, errori e data gaps non vengono nascosti nella composizione;
-- il compositore non ricalcola imposte, pensioni o valori finanziari.
+Audit completato. Corretto il solo drift rilevato: documentazione CLI/testing dell'API locale e sezione API di `decision-memory/v1`. I confini restano separati, senza dipendenze nuove, dati personali reali o bypass; nessun follow-up tecnico implicito.
 
-## Cadenza audit
-
-V5.4a e' l'ultimo audit completato. V5.5, V5.6 e V5.7 sono i primi tre incrementi funzionali successivi; V5.8 sarebbe il quarto e non richiede ancora un audit. Il successivo incremento funzionale richiedera' un audit prima dell'avvio.
+Verifiche riproducibili: 16 test mirati V5.9-V5.12 OK; smoke `fo orchestration local-api serve --help` OK; suite engine 582 test OK; compilazione, architecture check planner-only, privacy scan e `git diff --check` OK. La chiusura dell'audit deve azzerare il contatore di cadenza.

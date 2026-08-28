@@ -33,7 +33,7 @@ class CitationIndexTest(unittest.TestCase):
         self.assertEqual(first["schema_version"], "citation-index/v1")
         self.assertEqual(first["status"], "complete_with_gaps")
         self.assertGreaterEqual(first["summary"]["citation_count"], 10)
-        self.assertEqual(first["summary"]["knowledge_document_count"], 13)
+        self.assertEqual(first["summary"]["knowledge_document_count"], 14)
         self.assertGreaterEqual(first["summary"]["contract_count"], 15)
         self.assertEqual(
             first["reproducibility"]["content_hash"],
@@ -42,6 +42,7 @@ class CitationIndexTest(unittest.TestCase):
         gap_codes = {gap["code"] for gap in first["data_gaps"]}
         self.assertIn("knowledge_document_citation_missing", gap_codes)
         self.assertNotIn("unindexed_knowledge_document", gap_codes)
+        self.assertIn("eu.aml.regulation.2024-1624", {item["citation_id"] for item in first["citations"]})
 
     def test_temporal_search_excludes_abrogated_source_but_supports_historical_query(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

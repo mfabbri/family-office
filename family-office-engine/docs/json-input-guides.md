@@ -33,6 +33,27 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Comando: `orchestration execute --input ../family-office-workspace/planning/execution-request.json`.
 - Contiene un `execution-plan/v1` gia' `ready`, grant di autorizzazione per nodo e valori privati dei binding associati esattamente ai riferimenti del piano. Il bundle conserva riferimenti e hash dei valori, non i valori grezzi; conserva output, stati, errori e data gaps. I retry sono limitati ai tool `read_only`.
 
+## `response-composition-input/v1`
+
+- Default: `../family-office-workspace/planning/response-composition.json`.
+- Comando: `orchestration response build --input ../family-office-workspace/planning/response-composition.json`.
+- Include un `evidence-bundle/v1`, un risultato `citation-search/v1` e gli elementi della risposta. Ogni elemento indica `node_id`, JSON Pointer, label, sezione e citation ID: il valore viene risolto dall'evidenza, non scritto nel composer. Il label e' un descrittore non probatorio, non una conclusione.
+- Le sezioni diverse da `assumption` richiedono almeno una citazione attiva restituita dalla ricerca. Errori e data gaps del bundle, oltre ai gap delle citazioni, sono riportati come limiti; valori diversi con la stessa label diventano conflitti espliciti.
+
+## `guardrail-assessment-input/v1`
+
+- Default: `../family-office-workspace/planning/guardrail-assessment.json`.
+- Comando: `orchestration guardrails evaluate`.
+- Include il testo privato della richiesta, il tipo richiesto (`informational`, `simulation` o `recommendation`) e un `advisory-response/v1`. L'output conserva solo il fingerprint del testo e applica il rule pack `compliance/guardrail-policy-v1.json`.
+- Il guardrail rifiuta richieste di aggiramento AML/CRS o anonimato assoluto, escalando gap critici; non determina obblighi legali, fiscali o di reporting.
+
+## `orchestration-evaluation/v1`
+
+- Comando: `orchestration evaluate --candidate-id release-candidate`.
+- Non richiede JSON privato: il dataset versionato `evaluations/v5.11-orchestration-evaluation.json` è sintetico e viene usato come default.
+- `candidate_id` è soltanto un identificatore di release; non inserire prompt, conversazioni, facts o dati personali. Usa `--baseline` soltanto con un report creato dallo stesso dataset.
+- Il report contiene metriche, soglie, fallimenti e hash riproducibili; un gate non passato blocca il rilascio del candidato.
+
 ## `base-assumptions.json`
 
 - Default: `../family-office-workspace/assumptions/base-assumptions.json`.

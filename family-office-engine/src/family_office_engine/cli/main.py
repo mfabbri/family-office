@@ -223,6 +223,16 @@ from family_office_engine.services.execution_plan import (
     plan_execution,
 )
 from family_office_engine.services.execution_executor import ExecutionExecutorError, build_evidence_bundle
+from family_office_engine.services.advisory_response import AdvisoryResponseError, build_advisory_response
+from family_office_engine.services.guardrails import GuardrailError, build_guardrail_assessment
+from family_office_engine.services.orchestration_evaluation import (
+    OrchestrationEvaluationError,
+    build_orchestration_evaluation,
+)
+from family_office_engine.services.local_conversation_api import (
+    LocalConversationApiError,
+    serve_local_conversation_api,
+)
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -819,6 +829,34 @@ def default_execution_request_input() -> Path:
 
 def default_evidence_bundle_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "evidence-bundle.snapshot.json"
+
+
+def default_response_composition_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "response-composition.json"
+
+
+def default_advisory_response_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "advisory-response.snapshot.json"
+
+
+def default_guardrail_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "guardrail-assessment.json"
+
+
+def default_guardrail_policy() -> Path:
+    return resolve_repo("rules") / "compliance" / "guardrail-policy-v1.json"
+
+
+def default_guardrail_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "answer-confidence.snapshot.json"
+
+
+def default_orchestration_evaluation_dataset() -> Path:
+    return ENGINE_ROOT / "evaluations" / "v5.11-orchestration-evaluation.json"
+
+
+def default_orchestration_evaluation_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "orchestration-evaluation-report.snapshot.json"
 
 
 def default_scenario_draft_output() -> Path:
@@ -4866,6 +4904,18 @@ def build_parser() -> argparse.ArgumentParser:
     orchestration_execution_plan_demo_parser.add_argument(
         "--output", type=Path, default=default_execution_plan_demo_output(), help="Output synthetic execution-plan/v1 JSON path"
     )
+    orchestration_local_api_parser = orchestration_subparsers.add_parser(
+        "local-api", help="Serve the loopback-only local conversation API"
+    )
+    orchestration_local_api_subparsers = orchestration_local_api_parser.add_subparsers(
+        dest="orchestration_local_api_command"
+    )
+    orchestration_local_api_serve_parser = orchestration_local_api_subparsers.add_parser(
+        "serve", help="Serve local-conversation-session/v1 on loopback"
+    )
+    orchestration_local_api_serve_parser.add_argument("--token", required=True, help="Bearer token (at least 16 characters; never persisted)")
+    orchestration_local_api_serve_parser.add_argument("--host", default="127.0.0.1", help="Loopback host (default: 127.0.0.1)")
+    orchestration_local_api_serve_parser.add_argument("--port", type=int, default=8765, help="Loopback TCP port (default: 8765)")
     orchestration_execute_parser = orchestration_subparsers.add_parser(
         "execute", help="Execute a ready registered-tool plan and write evidence-bundle/v1"
     )
@@ -4875,6 +4925,41 @@ def build_parser() -> argparse.ArgumentParser:
     orchestration_execute_parser.add_argument(
         "--output", type=Path, default=default_evidence_bundle_output(), help="Output evidence-bundle/v1 JSON path"
     )
+    orchestration_response_parser = orchestration_subparsers.add_parser(
+        "response", help="Compose an evidence-backed advisory-response/v1"
+    )
+    orchestration_response_subparsers = orchestration_response_parser.add_subparsers(
+        dest="orchestration_response_command"
+    )
+    orchestration_response_build_parser = orchestration_response_subparsers.add_parser(
+        "build", help="Compose only from evidence-bundle/v1 and citation-search/v1"
+    )
+    orchestration_response_build_parser.add_argument(
+        "--input", type=Path, default=default_response_composition_input(), help="Private response-composition-input/v1 JSON path"
+    )
+    orchestration_response_build_parser.add_argument(
+        "--output", type=Path, default=default_advisory_response_output(), help="Output advisory-response/v1 JSON path"
+    )
+    orchestration_guardrails_parser = orchestration_subparsers.add_parser(
+        "guardrails", help="Evaluate versioned compliance and evidence guardrails"
+    )
+    orchestration_guardrails_subparsers = orchestration_guardrails_parser.add_subparsers(
+        dest="orchestration_guardrails_command"
+    )
+    orchestration_guardrails_evaluate_parser = orchestration_guardrails_subparsers.add_parser(
+        "evaluate", help="Build answer-confidence/v1 without a legal determination"
+    )
+    orchestration_guardrails_evaluate_parser.add_argument("--input", type=Path, default=default_guardrail_input())
+    orchestration_guardrails_evaluate_parser.add_argument("--policy", type=Path, default=default_guardrail_policy())
+    orchestration_guardrails_evaluate_parser.add_argument("--output", type=Path, default=default_guardrail_output())
+    orchestration_evaluation_parser = orchestration_subparsers.add_parser(
+        "evaluate", help="Run the synthetic deterministic orchestration release gate"
+    )
+    orchestration_evaluation_parser.add_argument("--dataset", type=Path, default=default_orchestration_evaluation_dataset())
+    orchestration_evaluation_parser.add_argument("--policy", type=Path, default=default_guardrail_policy())
+    orchestration_evaluation_parser.add_argument("--candidate-id", required=True, help="Model/prompt release candidate identifier; no prompt text")
+    orchestration_evaluation_parser.add_argument("--baseline", type=Path, help="Prior report for the identical dataset")
+    orchestration_evaluation_parser.add_argument("--output", type=Path, default=default_orchestration_evaluation_output())
     planning_it_es_eu_pension_parser = planning_subparsers.add_parser(
         "it-es-eu-pension",
         help="Estimate Spain EU entitlement and pro-rata pension share",
@@ -7016,6 +7101,38 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
 
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "guardrails"
+        and args.orchestration_guardrails_command == "evaluate"
+    ):
+        try:
+            snapshot = build_guardrail_assessment(args.input, args.policy, args.output)
+        except GuardrailError as exc:
+            print(f"orchestration guardrails: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration guardrails: "
+            f"{snapshot['status']} confidence={snapshot['confidence']['level']} "
+            f"review={snapshot['review']['required']} ({args.output})"
+        )
+        return 0
+
+    if args.command == "orchestration" and args.orchestration_command == "evaluate":
+        try:
+            snapshot = build_orchestration_evaluation(
+                args.dataset, args.policy, args.output, candidate_id=args.candidate_id, baseline_path=args.baseline
+            )
+        except OrchestrationEvaluationError as exc:
+            print(f"orchestration evaluate: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration evaluate: "
+            f"release_gate={'passed' if snapshot['release_gate']['passed'] else 'failed'} "
+            f"{len(snapshot['cases'])} cases ({args.output})"
+        )
+        return 0
+
     if args.command == "orchestration" and args.orchestration_command == "execute":
         try:
             snapshot = build_evidence_bundle(args.input, args.output)
@@ -7026,6 +7143,23 @@ def main(argv: list[str] | None = None) -> int:
             "orchestration execute: "
             f"{snapshot['status']} {len(snapshot['nodes'])} nodes, "
             f"{len(snapshot['errors'])} errors ({args.output})"
+        )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "response"
+        and args.orchestration_response_command == "build"
+    ):
+        try:
+            snapshot = build_advisory_response(args.input, args.output)
+        except AdvisoryResponseError as exc:
+            print(f"orchestration response: ERROR ({exc})")
+            return 1
+        print(
+            "orchestration response: "
+            f"{snapshot['status']} {len(snapshot['items'])} evidence-backed items, "
+            f"{len(snapshot['limitations'])} limitations ({args.output})"
         )
         return 0
 
@@ -7071,6 +7205,22 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['status']} {len(snapshot['nodes'])} nodes, "
             f"{len(snapshot['execution_order'])} ordered, no tool invocations ({args.output})"
         )
+        return 0
+
+    if (
+        args.command == "orchestration"
+        and args.orchestration_command == "local-api"
+        and args.orchestration_local_api_command == "serve"
+    ):
+        try:
+            print(f"orchestration local-api: serving loopback API at http://{args.host}:{args.port}/")
+            serve_local_conversation_api(args.token, args.host, args.port)
+        except LocalConversationApiError as exc:
+            print(f"orchestration local-api: ERROR ({exc})")
+            return 1
+        except OSError as exc:
+            print(f"orchestration local-api: ERROR (cannot bind loopback API: {exc})")
+            return 1
         return 0
 
     if (

@@ -29,6 +29,7 @@ class ToolRegistryTest(unittest.TestCase):
         self.assertIn("planning.wealth_strategy.build", tool_ids)
         self.assertIn("planning.work_exit_feasibility.build", tool_ids)
         self.assertIn("knowledge.citations.search", tool_ids)
+        self.assertIn("orchestration.guardrails.evaluate", tool_ids)
 
     def test_writes_registry_snapshot(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

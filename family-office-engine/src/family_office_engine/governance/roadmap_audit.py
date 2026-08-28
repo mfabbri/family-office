@@ -140,7 +140,9 @@ def validate_audit_cadence(
         for increment in relevant
     )
     audit_due = functional_since_last_audit >= audit_interval
-    if audit_due and roadmap_current.kind != "audit":
+    if audit_due and not _audit_requirement_allows_current(
+        roadmap_current, increments, last_audit_index
+    ):
         last_audit_id = (
             increments[last_audit_index].increment_id
             if last_audit_index is not None
@@ -163,6 +165,30 @@ def validate_audit_cadence(
             else None
         ),
     )
+
+
+def _audit_requirement_allows_current(
+    current: RoadmapIncrement,
+    increments: list[RoadmapIncrement],
+    last_audit_index: int | None,
+) -> bool:
+    """Allow the just-completed fourth functional increment to await its audit.
+
+    The audit remains due and a later planned/in-progress functional increment is
+    rejected. Without this narrow transition state, marking the fourth item done
+    would itself make the validator fail before an audit could be selected.
+    """
+    if current.kind in {"audit", "governance", "docs"}:
+        return True
+    if current.kind != "functional" or current.status != "done":
+        return False
+    current_index = increments.index(current)
+    relevant = increments[last_audit_index + 1 :] if last_audit_index is not None else increments
+    latest_completed_functional = max(
+        (increment for increment in relevant if increment.kind == "functional" and increment.status == "done"),
+        key=increments.index,
+    )
+    return latest_completed_functional.increment_id == current.increment_id and current_index == len(increments) - 1
 
 
 def default_paths() -> tuple[Path, Path]:

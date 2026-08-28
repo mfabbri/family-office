@@ -5,6 +5,7 @@
     "taxation",
     "pensions",
     "international",
+    "compliance",
     "succession"
   ],
   "excluded_paths": [
@@ -167,9 +168,40 @@
       "valid_to": "2026-12-31",
       "verified_at": "2026-07-29",
       "source_status": "active"
+    },
+    {
+      "citation_id": "eu.aml.regulation.2024-1624",
+      "title": "Regulation (EU) 2024/1624 on prevention of use of the financial system for money laundering or terrorist financing",
+      "issuer": "European Union",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://eur-lex.europa.eu/eli/reg/2024/1624/oj",
+      "official_reference": null,
+      "jurisdictions": ["EU", "IT", "ES"],
+      "topics": ["compliance", "aml", "guardrails"],
+      "valid_from": "2024-07-09",
+      "valid_to": null,
+      "verified_at": "2026-08-26",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "oecd.crs.2025",
+      "title": "Consolidated text of the Common Reporting Standard (2025)",
+      "issuer": "OECD",
+      "source_type": "institutional_guidance",
+      "authority_level": "institutional_guidance",
+      "url": "https://www.oecd.org/en/publications/consolidated-text-of-the-common-reporting-standard-2025_055664b1-en.html",
+      "official_reference": null,
+      "jurisdictions": ["OECD_CRS"],
+      "topics": ["compliance", "crs", "tax_transparency", "guardrails"],
+      "valid_from": "2025-06-02",
+      "valid_to": null,
+      "verified_at": "2026-08-26",
+      "source_status": "active"
     }
   ],
   "documents": [
+    {"document_id": "knowledge.compliance.aml-crs-guardrails", "path": "compliance/aml-crs-guardrails.md", "topics": ["compliance", "aml", "crs", "guardrails"], "jurisdictions": ["EU", "IT", "ES", "OECD_CRS"], "citation_ids": ["eu.aml.regulation.2024-1624", "oecd.crs.2025"]},
     {"document_id": "knowledge.taxation.irpef", "path": "taxation/irpef.md", "topics": ["taxation", "irpef"], "jurisdictions": ["IT"], "citation_ids": ["it.law.207-2024.irpef"]},
     {"document_id": "knowledge.taxation.impatriati", "path": "taxation/impatriati.md", "topics": ["taxation", "impatriati"], "jurisdictions": ["IT"], "citation_ids": []},
     {"document_id": "knowledge.taxation.investment-regimes", "path": "taxation/investment-tax-regimes-it.md", "topics": ["taxation", "investments"], "jurisdictions": ["IT"], "citation_ids": ["it.ade.plusvalenze.2026"]},

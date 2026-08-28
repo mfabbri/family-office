@@ -1,0 +1,12 @@
+{
+  "schema_version": "orchestration-guardrail-policy/v1",
+  "record_type": "OrchestrationGuardrailPolicy",
+  "policy_id": "orchestration.compliance-safety.v1",
+  "jurisdictions": ["EU", "IT", "ES", "OECD_CRS"],
+  "valid_from": "2026-08-26",
+  "verified_at": "2026-08-26",
+  "source_refs": ["eu.aml.regulation.2024-1624", "oecd.crs.2025"],
+  "blocked_request_terms": ["evadere", "nascondere", "non dichiarare", "aggirare aml", "bypass aml", "bypass crs", "anonimato assoluto", "false identity", "evade", "conceal", "bypass aml", "bypass crs", "absolute anonymity"],
+  "critical_gap_codes": ["missing_tax_classification", "missing_activity_classification", "missing_benchmark", "missing_input", "knowledge_document_citation_missing"],
+  "limitations": ["This policy refuses circumvention assistance; it does not determine legal obligations or reportability.", "A recommendation requires human professional review even when evidence is complete."]
+}

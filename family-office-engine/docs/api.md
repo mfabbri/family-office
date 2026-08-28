@@ -900,6 +900,22 @@ Il builder usa il router solo per fingerprint e perimetro, poi estrae in modo de
 
 Modulo `family_office_engine.services.execution_executor`: `execute_plan(request)` esegue soltanto un `execution-plan/v1` pronto con lineage corrente attraverso `invoke_registered_tool`; `build_evidence_bundle(input_path, output_path)` persiste `evidence-bundle/v1`. Il request privato fornisce valori ai binding ma il bundle conserva soltanto hash e riferimenti dei valori, oltre a output, fonti, stati, errori e data gaps. Le autorizzazioni devono soddisfare la policy del registry, i retry sono limitati a tool read-only e timeout/fallimenti/dependency skip restano riproducibili. L'executor non introduce calcoli LLM fiscali, previdenziali o finanziari.
 
+## Advisory response
+
+Modulo `family_office_engine.services.advisory_response`: `compose_advisory_response(data)` valida `response-composition-input/v1` e restituisce `advisory-response/v1`; `build_advisory_response(input_path, output_path)` lo persiste nel workspace. Ogni item risolve il proprio valore da un JSON Pointer nell'output di un nodo riuscito dell'`evidence-bundle/v1` e, salvo una `assumption` esplicitamente marcata, richiede una citazione attiva di `citation-search/v1`. Il label dell'input e' emesso come descrittore non probatorio, cosi' non diventa una conclusione non supportata; il composer propaga errori e data gaps come limiti e rileva valori confliggenti con lo stesso descrittore. Non scarica fonti, non interpreta norme e non ricalcola importi fiscali, previdenziali o finanziari.
+
+## Guardrails and confidence
+
+Modulo `family_office_engine.services.guardrails`: `assess_guardrails(data, policy)` applica `orchestration-guardrail-policy/v1` a un `advisory-response/v1`; `build_guardrail_assessment(input_path, policy_path, output_path)` scrive `answer-confidence/v1`. Il testo privato viene trasformato in fingerprint, non persistito. La policy rifiuta assistenza per aggirare AML/CRS o anonimato assoluto, scala gap critici e richiede review professionale per una raccomandazione. Il servizio non determina obblighi AML/CRS, status fiscale, reportabilità o responsabilità legali.
+
+## Orchestration evaluation release gate
+
+Modulo `family_office_engine.services.orchestration_evaluation`: `evaluate_orchestration(dataset, policy, candidate_id, baseline)` esegue `orchestration-evaluation/v1` sui contratti deterministici router, planner, composer e guardrail e restituisce `orchestration-evaluation-report/v1`. Il dataset versionato contiene solo casi sintetici e soglie per routing, planning, tool use, citazioni, hallucination, privacy, fiscal safety e limiti della spiegazione. Il gate passa soltanto senza casi/soglie/regressioni falliti; un baseline è ammesso solo per lo stesso hash di dataset. Non invoca LLM, non registra prompt o conversazioni e non delega calcoli fiscali, previdenziali o finanziari.
+
+## Decision memory
+
+Modulo `family_office_engine.services.decision_memory`: `apply_decision_memory(data, existing=None)` aggiorna un `decision-memory/v1` append-only; `update_decision_memory(input_path, memory_path)` lo persiste esclusivamente nel workspace privato. Ogni record richiede lineage hash/versionato di scenario, evidence bundle, advisory response e answer confidence; una nuova versione supersede quella attiva, mentre revoche e conflitti restano espliciti. Testo conversazionale, facts grezzi e request non entrano nel contratto.
+
 ## Execution plan
 
 Modulo:
@@ -912,3 +928,11 @@ family_office_engine.services.execution_plan
 - `build_execution_plan(input_path, output_path)`: legge lo stesso input JSON e scrive il piano nel workspace.
 
 Il planner accetta soltanto un `question-intent/v1` con stato `routed`, lineage del catalogo corrente e binding di input come metadati: non accetta valori grezzi. Ogni nodo deve usare un tool presente nel registry e autorizzato dagli intenti selezionati; i parametri obbligatori devono essere dichiarati, le dipendenze devono formare un DAG e un input sensibile richiede `explicit_user_consent`. L'output conserva ordine topologico, controlli, stop criteria, policy e hash; tutti i nodi restano `not_executed`. L'esecuzione appartiene a V5.7 e il servizio non calcola importi fiscali, previdenziali o finanziari.
+
+## Local conversation API
+
+Modulo `family_office_engine.services.local_conversation_api`. Avvio locale: `fo orchestration local-api serve --token <token-di-almeno-16-caratteri>`.
+
+Il server accetta solo `127.0.0.1`, `::1` o `localhost` e usa un bearer token non persistito. Espone `local-conversation-session/v1` in memoria: `POST /v1/local-conversation-sessions` crea una sessione con il solo `question_fingerprint` SHA-256; `POST /{session_id}/plan-preview` riceve un `execution-plan-input/v1` e invoca esclusivamente `plan_execution`; `POST /approve`, `POST /cancel`, `GET /{session_id}` e `GET /{session_id}/audit` gestiscono stato e audit append-only. Il client HTML minimale e' servito da `/`; calcola il fingerprint nel browser e conserva il token solo nella scheda.
+
+La preview richiede un `question-intent/v1` gia' instradato e tutti i nodi restano `not_executed`. L'approvazione e' `approved_preview_only`: non esiste un endpoint API per executor, composer o guardrail, quindi la superficie locale non puo' eseguire tool o aggirare i rispettivi confini.

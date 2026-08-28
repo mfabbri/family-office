@@ -18,7 +18,7 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
 
         self.assertTrue(report.current_increment_id.startswith("V"))
         if report.audit_due:
-            self.assertEqual(report.current_increment_kind, "audit")
+            self.assertIn(report.current_increment_kind, {"audit", "functional"})
         else:
             self.assertLess(report.functional_since_last_audit, 4)
 
@@ -66,6 +66,20 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
         with self.assertRaisesRegex(RoadmapAuditCadenceError, "Audit due after 4"):
             self._validate(entries, "V4.6", "planned")
 
+    def test_fourth_completed_functional_increment_can_wait_for_its_required_audit(self) -> None:
+        entries = [
+            ("V4.1", "audit", "done"),
+            ("V4.2", "functional", "done"),
+            ("V4.3", "functional", "done"),
+            ("V4.4", "functional", "done"),
+            ("V4.5", "functional", "done"),
+        ]
+
+        report = self._validate(entries, "V4.5", "done")
+
+        self.assertTrue(report.audit_due)
+        self.assertEqual("functional", report.current_increment_kind)
+
     def test_due_audit_is_allowed_as_current_increment(self) -> None:
         entries = [
             ("V4.1", "audit", "done"),
@@ -80,6 +94,21 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
 
         self.assertTrue(report.audit_due)
         self.assertEqual(report.current_increment_kind, "audit")
+
+    def test_due_audit_does_not_block_a_docs_increment(self) -> None:
+        entries = [
+            ("V4.1", "audit", "done"),
+            ("V4.2", "functional", "done"),
+            ("V4.3", "functional", "done"),
+            ("V4.4", "functional", "done"),
+            ("V4.5", "functional", "done"),
+            ("V4.5a", "docs", "planned"),
+        ]
+
+        report = self._validate(entries, "V4.5a", "planned")
+
+        self.assertTrue(report.audit_due)
+        self.assertEqual("docs", report.current_increment_kind)
 
     def test_completed_audit_resets_the_counter(self) -> None:
         entries = [

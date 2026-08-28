@@ -24,7 +24,7 @@ L'output dell'LLM non diventa automaticamente un fatto del workspace.
 
 ### V5.1 — Tool registry and invocation contract
 
-**Stato:** `done`
+**Stato:** `in_progress`
 **Tipo:** `functional`
 
 Registrare tool disponibili, schema input/output, prerequisiti, livello di rischio e policy di autorizzazione.
@@ -288,7 +288,7 @@ Esito: completato con `execution-request/v1` ed executor deterministico che acce
 
 ### V5.8 — Response composer with citations
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Comporre executive summary, alternative, motivazioni, numeri, fonti, assunzioni, rischi e azioni usando solo l'evidence bundle.
@@ -300,9 +300,26 @@ Comporre executive summary, alternative, motivazioni, numeri, fonti, assunzioni,
 - Vincolo evidenze: una citazione collegata al documento knowledge non supporta automaticamente ogni frase; il composer deve collegare ciascuna affermazione alla specifica evidenza pertinente oppure dichiararla non supportata.
 - Done quando: ogni numero e conclusione è collegato a un elemento del bundle.
 
+Esito: completato con `response-composition-input/v1` e `advisory-response/v1`. Il composer risolve ogni item da un JSON Pointer dell'output di un nodo `succeeded` in `evidence-bundle/v1`; le sezioni non marcate `assumption` richiedono citazioni attive di `citation-search/v1`. Errori e data gaps del bundle o dell'indice restano limiti e valori diversi con lo stesso descrittore diventano conflitti espliciti. Il composer non scarica fonti, non interpreta il descrittore come conclusione e non ricalcola importi. Disponibile `fo orchestration response build`. Verifiche: 14 test mirati composer/executor/citation OK, smoke CLI, regression unit engine 568 test OK, `git diff --check` e `roadmap_audit.py` OK.
+
+### V5.8a — Orchestration code and contract audit
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Eseguire l'audit obbligatorio dopo i quattro incrementi funzionali V5.5-V5.8 e prima di V5.9.
+
+- Dipende da: V5.8.
+- Repository: `engine`, `knowledge` se il confine citations richiede una verifica incrociata.
+- Checklist: `family-office-bootstrap/docs/code-audit-checklist.md`.
+- Focus: registry/planner/executor/composer, lineage, schema e CLI, citazioni specifiche, gap/errori/conflitti, privacy e regressione.
+- Done quando: non restano blocker impliciti prima dei guardrail V5.9 e ogni follow-up e' esplicito.
+
+Esito: audit completato sui confini V5.5-V5.8. Registry, planner, executor e composer mantengono ownership separate; la CLI passa attraverso i rispettivi builder e le guide/test descrivono contratti e versioni coerenti. Gli input non validi usano eccezioni tipizzate, gli errori/gap/conflitti restano espliciti, le citazioni sono specifiche e attive e non emergono dipendenze esterne o dati personali reali. L'audit ha corretto un rischio di conclusione non supportata: il label libero del composer e' ora un `unverified_descriptor`, mentre valori e conclusioni restano evidenza puntata. I piccoli helper hash locali sono semanticamente allineati e non richiedono un refactor nel perimetro. Verifiche: 25 test mirati, help CLI, compilazione dei servizi V5.5-V5.8, regression engine 568 test, `git diff --check` e `roadmap_audit.py` OK.
+
 ### V5.9 — Guardrails, confidence and escalation
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Bloccare richieste di evasione/opacità, risultati con dati insufficienti, azioni ad alto rischio o conclusioni normative non aggiornate.
@@ -313,9 +330,11 @@ Bloccare richieste di evasione/opacità, risultati con dati insufficienti, azion
 - Test: AML/CRS bypass, anonimato assoluto, tax rule scaduta, gap critico.
 - Done quando: il sistema distingue risposta informativa, simulazione e raccomandazione da validare.
 
+Esito: completato con nota knowledge compliance, fonti pubbliche EUR-Lex/OECD nel citation catalog, rule pack `orchestration-guardrail-policy/v1`, servizio registrato e `answer-confidence/v1`. Il guardrail conserva solo fingerprint della richiesta, rifiuta bypass AML/CRS e anonimato assoluto, blocca citazioni scadute, escala gap critici e distingue informazione, simulazione e raccomandazione con review professionale. Non determina obblighi AML/CRS, fiscali o legali. Disponibile `fo orchestration guardrails evaluate`. Verifiche: 21 test mirati cross-repository OK, regression engine 571 test OK, JSON parse catalog/rule pack, compilazione, privacy scan, `git diff --check` e `roadmap_audit.py` OK.
+
 ### V5.10 — Decision memory and comparison history
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Memorizzare decisioni, scenari confrontati, assunzioni approvate e motivi, senza trasformare conversazioni non validate in facts.
@@ -326,9 +345,11 @@ Memorizzare decisioni, scenari confrontati, assunzioni approvate e motivi, senza
 - Test: aggiornamento, revoca, conflitto e separazione dati personali.
 - Done quando: una decisione futura può mostrare cosa è cambiato rispetto alla precedente.
 
+Esito: completato con `decision-memory/v1` append-only e lineage validato per scenario, evidence bundle, advisory response e answer confidence. Gli aggiornamenti supersedono esplicitamente la versione attiva; revoche e conflitti di versione restano osservabili. Testo conversazionale e facts grezzi sono rifiutati e non entrano nello snapshot. Verifiche: test mirati update/revoca/conflitto/privacy OK, regression engine 574 test OK, compilazione, privacy scan, `git diff --check` e `roadmap_audit.py` OK.
+
 ### V5.11 — AI evaluation suite
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Creare benchmark per routing, planning, tool use, citazioni, hallucination, privacy, fiscal safety e qualità delle spiegazioni.
@@ -339,9 +360,11 @@ Creare benchmark per routing, planning, tool use, citazioni, hallucination, priv
 - Test: esecuzione locale ripetibile e report regressioni.
 - Done quando: un cambio di modello o prompt non può essere rilasciato senza misure comparative.
 
+Esito: completato con dataset sintetico versionato `orchestration-evaluation/v1`, runner e report `orchestration-evaluation-report/v1`, CLI `fo orchestration evaluate` e baseline comparabile solo con lo stesso hash del dataset. Gli otto casi coprono routing, preview del planner e tool use, citazioni/evidenza non risolta, privacy, sicurezza fiscale con fonte scaduta e limiti espliciti della spiegazione; il gate fallisce per caso, soglia o regressione. Il runner esercita solo componenti deterministici, non conserva prompt/conversazioni né delega calcoli fiscali, previdenziali o finanziari a LLM. Verifiche: 29 test mirati/integrativi OK, regression engine 577 test OK, smoke CLI con baseline OK, compilazione, JSON parse, privacy scan, `git diff --check` e `roadmap_audit.py` OK.
+
 ### V5.12 — Local API and conversational interface
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Esporre il flusso come API locale e interfaccia conversazionale con sessione, preview del piano e approvazioni.
@@ -351,6 +374,23 @@ Esporre il flusso come API locale e interfaccia conversazionale con sessione, pr
 - Output: API versionata e client minimo.
 - Test: autenticazione locale, autorizzazioni, concorrenza, cancel e audit.
 - Done quando: l'interfaccia non bypassa planner, executor o guardrail.
+
+Esito: completato con `local-conversation-session/v1`, server HTTP della sola libreria standard vincolato a loopback e CLI `fo orchestration local-api serve --token ...`. Ogni sessione in memoria conserva soltanto fingerprint SHA-256 della domanda, route, preview, stato di approvazione/annullamento e audit append-only; il token non e' persistito. La preview riceve solo `execution-plan-input/v1` e passa esclusivamente da `plan_execution`; tutti i nodi restano `not_executed`. L'approvazione e' esplicitamente `approved_preview_only`: non esistono endpoint per executor, composer o guardrail, quindi non e' disponibile alcun bypass per eseguire tool o produrre risposte. Verifiche: test HTTP/unitari per token errato, loopback, concorrenza/isolation, preview non eseguita, approvazione, cancel e audit; test planner; smoke help CLI, regression engine, audit roadmap, compilazione, `git diff --check` e privacy scan OK.
+
+### V5.12a - Orchestration and local API code audit
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Eseguire l'audit obbligatorio dopo i quattro incrementi funzionali V5.9-V5.12.
+
+- Dipende da: V5.12.
+- Repository: `engine`, `rules` e `knowledge` per i confini V5.9, `bootstrap` per la checklist.
+- Checklist: `family-office-bootstrap/docs/code-audit-checklist.md`.
+- Focus: guardrail/rule-pack e citation boundary, decision memory privacy, evaluation release gate, API loopback/sessioni, contratti, CLI, error handling, dipendenze, privacy e cadenza.
+- Done quando: i confini V5.9-V5.12 sono verificati, regression e audit sono verdi e ogni follow-up e' esplicito.
+
+Esito: audit completato sui confini V5.9-V5.12. Guardrail, decision memory, evaluation suite e API locale mantengono responsabilita' separate: il guardrail resta un consumatore di risposta/evidenza con rule pack versionato, la memoria accetta solo lineage validato, il release gate usa esclusivamente casi sintetici e l'API locale importa solo il planner senza esporre executor, composer o guardrail. Nessuna dipendenza aggiuntiva o dato personale reale; path e CLI restano compatibili. L'audit ha corretto il drift documentale: aggiunte guida CLI/testing per `fo orchestration local-api serve` e sezione API per `decision-memory/v1`. Nessun follow-up tecnico bloccante o decisione architetturale ulteriore. Verifiche: 16 test mirati V5.9-V5.12 OK, smoke `fo orchestration local-api serve --help` OK, regression engine 582 test OK, compilazione, controllo planner-only, privacy scan e `git diff --check` OK; `roadmap_audit.py` ripristina la cadenza dopo questa chiusura.
 
 ## Exit criteria V5
 

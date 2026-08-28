@@ -23,6 +23,7 @@ from family_office_engine.services.tax_aware_portfolio import build_tax_aware_po
 from family_office_engine.services.wealth_strategy import build_wealth_strategy
 from family_office_engine.services.investment_opportunity_comparison import build_investment_opportunity_comparison
 from family_office_engine.services.work_exit_feasibility import build_work_exit_feasibility
+from family_office_engine.services.guardrails import build_guardrail_assessment
 
 SCHEMA_VERSION = "tool-registry/v1"
 SNAPSHOT_RECORD_TYPE = "ToolRegistrySnapshot"
@@ -63,6 +64,19 @@ TOOL_REGISTRY: tuple[RegisteredTool, ...] = (
         risk_level="low",
         authorization_policy=("read_only",),
         notes="Returns only catalogued citations with temporal status and explicit corpus gaps.",
+    ),
+    RegisteredTool(
+        tool_id="orchestration.guardrails.evaluate",
+        title="Evaluate answer-confidence/v1 guardrails",
+        callable_ref=build_guardrail_assessment,
+        input_schema_version="guardrail-assessment-input/v1",
+        output_schema_version="answer-confidence/v1",
+        required_parameters=("input_path", "policy_path", "output_path"),
+        optional_parameters=(),
+        prerequisites=("orchestration-guardrail-policy/v1", "advisory-response/v1"),
+        risk_level="high",
+        authorization_policy=("workspace_write", "rule_pack_required", "professional_review_required"),
+        notes="Refuses compliance circumvention and escalates evidence gaps; it makes no legal determination.",
     ),
     RegisteredTool(
         tool_id="planning.liquidity_plan.build",

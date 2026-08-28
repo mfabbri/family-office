@@ -15,6 +15,7 @@ RECORD_TYPE = "QuestionIntent"
 
 KEYWORDS = {
     "knowledge_and_sources": ("fonte", "fonti", "norma", "normative", "citazione", "citation"),
+    "compliance_and_guardrails": ("aml", "crs", "antiriciclaggio", "compliance", "anonimato"),
     "liquidity_and_cashflow": ("liquidita", "liquidità", "cash flow", "riserva", "emergenza"),
     "retirement_and_work_exit": ("pensione", "pension", "ritiro", "smettere di lavorare", "part-time"),
     "cross_border_tax_and_reporting": ("spagna", "spain", "rw", "ivafe", "ivie", "residenza fiscale"),

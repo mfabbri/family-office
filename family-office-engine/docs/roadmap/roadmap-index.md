@@ -44,7 +44,7 @@ Ogni incremento deve inoltre dichiarare `**Tipo:**` con uno dei valori:
 3. Se contiene uno stato `planned` o `in_progress`, continuare quell'incremento.
 4. Se lo stato è `blocked`, creare come incremento corrente il più piccolo lavoro necessario a rimuovere il blocco. Non saltare a una roadmap successiva.
 5. Se l'incremento corrente è `done`, aprire la prima roadmap non completata nell'ordine della tabella.
-6. Prima di selezionare il prossimo incremento funzionale, verificare la cadenza di code audit: dopo 4 incrementi funzionali completati senza audit, selezionare il micro-incremento di audit nella roadmap attiva. Se manca, crearlo con suffisso alfabetico senza rinumerare gli incrementi già tracciati.
+6. Prima di selezionare il prossimo incremento funzionale, verificare la cadenza di code audit: dopo 4 incrementi funzionali completati senza audit, selezionare il micro-incremento di audit nella roadmap attiva. Il quarto incremento può essere marcato `done` e il validator deve riportare `audit_due=true`; da quel momento rifiuta un incremento funzionale successivo finché l'audit non è `done`, ma non blocca lavoro `docs` o `governance`. Se manca, crearlo con suffisso alfabetico senza rinumerare gli incrementi già tracciati.
 7. Selezionare il primo incremento con stato `planned` le cui dipendenze risultano `done` o `deferred` con motivazione compatibile.
 8. Salvare il piano concreto in `current-next-increment.md` prima di modificare codice, regole, knowledge o workspace.
 9. Al completamento, aggiornare nello stesso cambiamento:

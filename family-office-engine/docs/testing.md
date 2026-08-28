@@ -1081,6 +1081,48 @@ fo orchestration execute --input ../family-office-workspace/planning/execution-r
 
 I test coprono invocazione solo via registry, evidenze senza valori grezzi, autorizzazione mancante, lineage/versione obsoleta, retry esclusivamente read-only, fallimento parziale e scrittura del bundle. Il comando usa un request privato; non usare il piano demo come request eseguibile.
 
+## Advisory response
+
+Test mirati e smoke CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_advisory_response tests.unit.test_execution_executor tests.unit.test_citation_index
+fo orchestration response build --input ../family-office-workspace/planning/response-composition.json
+```
+
+I test coprono citazioni specifiche e attive obbligatorie, puntatori evidenza non risolti, valori numerici non supportati, conflitti, limiti propagati e persistenza CLI. Il composer riceve solo snapshot deterministici; non accetta testo libero o fonti non indicizzate.
+
+## Guardrails and confidence
+
+Test mirati e smoke CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_guardrails tests.unit.test_tool_registry tests.unit.test_supported_question_catalog tests.unit.test_citation_index
+fo orchestration guardrails evaluate --input ../family-office-workspace/planning/guardrail-assessment.json
+```
+
+I test coprono bypass AML/CRS, anonimato, gap critici, citazioni/non-conclusioni e review obbligatoria per raccomandazioni. Le fixture sono sintetiche e il testo della richiesta non appare nello snapshot.
+
+## Orchestration evaluation release gate
+
+```powershell
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_orchestration_evaluation tests.unit.test_question_intent tests.unit.test_execution_plan tests.unit.test_advisory_response tests.unit.test_guardrails
+fo orchestration evaluate --candidate-id synthetic-release-candidate
+```
+
+Il test usa solo il dataset sintetico V5.11 e verifica soglie, rifiuto di dataset non sintetico, compatibilità del baseline e smoke CLI. Il report deve avere `release_gate.passed=true`; non è un benchmark di qualità generativa né autorizza LLM a calcolare valori critici.
+
+## Local conversation API
+
+Test mirati e smoke CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_local_conversation_api tests.unit.test_execution_plan
+fo orchestration local-api serve --help
+```
+
+I test coprono bearer token, vincolo loopback, isolamento concorrente delle sessioni, preview non eseguita, approvazione non esecutiva, annullamento, audit append-only e assenza del token nel client HTML. Il server non deve essere avviato su un host non loopback.
+
 ## Citation index
 
 Test mirati:

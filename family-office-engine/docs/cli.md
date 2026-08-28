@@ -1507,6 +1507,44 @@ fo orchestration execute --input ../family-office-workspace/planning/execution-r
 
 Default: input `../family-office-workspace/planning/execution-request.json`; output `../family-office-workspace/snapshots/evidence-bundle.snapshot.json`. Il request contiene grant espliciti e valori privati dei binding; il bundle non li copia, ma ne registra hash e riferimenti con output, fonti, errori, stati e data gaps. Il lineage corrente del registry, la versione output e le policy di autorizzazione devono coincidere con il piano. I retry sono possibili soltanto per tool read-only; timeout e fallimenti parziali restano osservabili.
 
+## `fo orchestration response build`
+
+Compone `advisory-response/v1` soltanto da un evidence bundle e da un risultato di ricerca citazioni gia' indicizzato.
+
+```text
+fo orchestration response build --input ../family-office-workspace/planning/response-composition.json
+```
+
+Default: input `../family-office-workspace/planning/response-composition.json`; output `../family-office-workspace/snapshots/advisory-response.snapshot.json`. Ogni item specifica un nodo eseguito, un JSON Pointer e una citazione attiva: il valore dell'item e' risolto dall'evidenza e non e' ricalcolato. Il label e' emesso come descrittore non probatorio; errori, data gaps e conflitti tra valori con lo stesso descrittore restano nel risultato come limiti. Il comando non accetta fonti non indicizzate e non calcola imposte, pensioni o valori finanziari.
+
+## `fo orchestration guardrails evaluate`
+
+Valuta una risposta con il rule pack versionato di compliance e produce `answer-confidence/v1`.
+
+```text
+fo orchestration guardrails evaluate --input ../family-office-workspace/planning/guardrail-assessment.json
+```
+
+Default: policy `../family-office-rules/compliance/guardrail-policy-v1.json`; output `../family-office-workspace/snapshots/answer-confidence.snapshot.json`. Il testo della richiesta resta nell'input privato e l'output conserva soltanto un fingerprint. Il comando rifiuta richieste di aggiramento AML/CRS o anonimato assoluto, escala gap critici e richiede revisione professionale per raccomandazioni; non effettua determinazioni legali, fiscali o di reporting.
+
+## `fo orchestration evaluate`
+
+```text
+fo orchestration evaluate --candidate-id release-2026-08-28
+```
+
+Esegue il dataset sintetico versionato `evaluations/v5.11-orchestration-evaluation.json` e scrive `orchestration-evaluation-report/v1`. `--candidate-id` identifica il candidato modello/prompt senza includerne il testo; `--baseline` accetta esclusivamente un report generato dallo stesso dataset. Il release gate fallisce se un caso critico, una soglia o il confronto col baseline regredisce. Il comando non invoca LLM e non usa dati personali o calcoli finanziari/fiscali.
+
+## `fo orchestration local-api serve`
+
+Avvia l'interfaccia conversazionale solo su loopback.
+
+```text
+fo orchestration local-api serve --token <token-di-almeno-16-caratteri>
+```
+
+Host e porta predefiniti sono `127.0.0.1:8765`; sono ammessi solo `127.0.0.1`, `::1` o `localhost`. Il token bearer non viene scritto dal server. L'API crea sessioni transitorie con fingerprint della domanda, preview del solo `execution-plan-input/v1`, approvazione non esecutiva, annullamento e audit locale. Non espone executor, composer o guardrail.
+
 ## `fo orchestration citations build`
 
 Costruisce l'indice locale delle fonti pubbliche, dei documenti knowledge e dei contratti registrati.
