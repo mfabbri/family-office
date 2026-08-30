@@ -81,6 +81,16 @@ fo compliance setup
 
 `setup` registra progressivamente una scadenza locale (review, rinnovo o documento) senza modificare JSON. Una fonte omessa resta un `data_gap` esplicito e richiede verifica o revisione professionale. Il calendario resta in `../family-office-workspace/snapshots/compliance-calendar.snapshot.json`; il rule pack iniziale è `../family-office-rules/compliance/calendar-policy-2026.json`.
 
+## `fo security check`
+
+Esegue il controllo locale di segreti accidentali, file sensibili non cifrati, secret store e policy dei log senza stampare contenuti o credenziali:
+
+```text
+fo security check
+```
+
+Il comando crea, se manca, il secret store locale `.security/workspace.key` nel workspace e lo usa soltanto per operazioni esplicite di cifratura applicativa. I file non vengono migrati o cifrati automaticamente. `security-check/v1` conserva solo codici di finding, path relativi e permessi; su Windows la verifica dei bit POSIX e' dichiarata `acl-managed` e richiede controllo ACL del sistema operativo per una garanzia completa.
+
 ## `fo payroll import`
 
 Importa buste paga PDF dal workspace privato e scrive:
@@ -1633,3 +1643,25 @@ Default principali:
 - output: `../family-office-workspace/snapshots/citation-index.snapshot.json`
 
 `build` produce `citation-index/v1` con riepilogo di citazioni, documenti, contratti e gap. `search` esclude per default fonti future, scadute, abrogate o ritirate; `--include-inactive` le mostra con stato temporale esplicito. Se l'indice manca o non e' valido, l'errore indica di eseguire prima `fo orchestration citations build`.
+
+## Wizard per input di pianificazione
+
+I percorsi guidati personali evitano la modifica manuale dei JSON e usano il workspace locale:
+
+```text
+fo planning wealth-strategy wizard
+fo planning protection wizard
+fo planning estate wizard
+```
+
+Ogni wizard mostra il contesto raccolto, salva un input privato in `../family-office-workspace/planning/`, conserva la provenienza come dichiarazione dell'utente e rende espliciti i valori incerti in `data_gaps`. Se esiste gia' un input, il comando non lo sovrascrive: usare `--overwrite` per rivederlo. Il riepilogo finale indica il prossimo `build` da eseguire. I wizard non importano documenti, non usano rete e non calcolano imposte, pensioni, rendimenti, coperture consigliate o effetti legali.
+
+## `fo compliance regulatory`
+
+Prepara una proposta normativa versionata senza modificare automaticamente knowledge o rule pack:
+
+```text
+fo compliance regulatory prepare --change-id it.demo.2026.v2 --summary "..." --source-url https://example.gov/change --authority official --jurisdiction IT --valid-from 2026-09-01 --affected-rule-pack it.demo.2026.v1 --required-test test_demo --rollback-strategy "restore previous version"
+```
+
+La proposta `regulatory-change/v1` espone fonte, autorita', validita', retroattivita', impatto, data gaps, test richiesti e checklist. Una fonte non autorevole o una validita' retroattiva resta in revisione. Dopo evidenza indipendente si puo' usare `approve --input <path> --approver <name> --tests-passed`; `rollback --input <path> --reason <reason>` registra il ripristino. I file sono accettati solo dentro il workspace.

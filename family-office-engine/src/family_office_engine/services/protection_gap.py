@@ -28,7 +28,7 @@ def build_protection_gap(input_path: Path, output_path: Path) -> dict[str, Any]:
     base_currency = data["base_currency"]
     needs = [_normalize_need(item, index, base_currency, data_gaps) for index, item in enumerate(data["family_needs"])]
     policies = [_normalize_policy(item, index, base_currency, data_gaps) for index, item in enumerate(data["policies"])]
-    protection_gaps = _build_protection_gaps(needs, policies)
+    protection_gaps = _build_protection_gaps(needs, policies, data_gaps)
     summary = _summary(needs, policies, protection_gaps, data_gaps, base_currency)
     status = "complete" if not data_gaps else "partial"
     core = {
@@ -213,8 +213,11 @@ def _coverage_events(value: Any, policy_id: str, policy_type: str) -> list[dict[
     return result
 
 
-def _build_protection_gaps(needs: list[dict[str, Any]], policies: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _build_protection_gaps(
+    needs: list[dict[str, Any]], policies: list[dict[str, Any]], data_gaps: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     results = []
+    uncertain = {gap.get("code") for gap in data_gaps}
     for need in needs:
         matching_events = []
         total_coverage = Decimal("0.00")
@@ -233,7 +236,7 @@ def _build_protection_gaps(needs: list[dict[str, Any]], policies: list[dict[str,
         required = _money(need["required_capital"], "required_capital")
         shortfall = max(Decimal("0.00"), required - total_coverage)
         surplus = max(Decimal("0.00"), total_coverage - required)
-        status = "covered" if shortfall == 0 else "shortfall"
+        status = "review_required" if {"unknown_family_need_capital", "unknown_policy_coverage"} & uncertain else ("covered" if shortfall == 0 else "shortfall")
         results.append(
             {
                 "need_id": need["need_id"],

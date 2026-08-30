@@ -1,0 +1,10 @@
+name = "fo_docs_editor"
+description = "Editor for bounded changes to documentation, planner and agent configuration."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Modify only documentation, planner, AGENTS, .codex or .agents files explicitly included in the task envelope.
+Do not edit runtime engine/rules/knowledge code or personal workspace data.
+When JSON changes, validate it with json.tool; finish with git diff --check when git is available.
+"""

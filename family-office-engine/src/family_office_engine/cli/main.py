@@ -252,6 +252,14 @@ from family_office_engine.services.compliance_calendar import (
     build_compliance_calendar,
     setup_workspace_compliance_event,
 )
+from family_office_engine.services.regulatory_change import (
+    RegulatoryChangeError,
+    approve_regulatory_change,
+    build_regulatory_change,
+    rollback_regulatory_change,
+    write_regulatory_change,
+)
+from family_office_engine.services.security import SecurityError, build_security_check
 from family_office_engine.services.operator_analysis import (
     OperatorAnalysisError,
     analyze_operator_question,
@@ -2046,6 +2054,100 @@ def run_pension_contribution_wizard(input_path: Path, overwrite: bool = False) -
     return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(gaps)}
 
 
+def _wizard_provenance() -> list[dict[str, str]]:
+    return [{"source_id": "planning-wizard", "type": "user_declared_input"}]
+
+
+def _save_v66a_progress(path: Path, data: dict[str, Any], error_type: type[ValueError], last_answered: str) -> None:
+    progress = dict(data)
+    progress["data_gaps"] = list(progress.get("data_gaps", [])) + [{
+        "code": "wizard_incomplete", "message": "Wizard interrupted before final review.", "last_answered": last_answered,
+    }]
+    _write_wizard_json(path, progress, True, error_type, "planning wizard input")
+
+
+def _validate_v66a_input_path(path: Path, error_type: type[ValueError]) -> Path:
+    workspace = resolve_repo("workspace").resolve()
+    candidate = path.expanduser().resolve()
+    try:
+        candidate.relative_to(workspace)
+    except ValueError as exc:
+        raise error_type(f"planning wizard input must be inside workspace: {workspace}") from exc
+    return candidate
+
+
+def run_protection_wizard(input_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    input_path = _validate_v66a_input_path(input_path, ProtectionGapError)
+    existing = _read_optional_wizard_json(input_path, ProtectionGapError, "protection gap input")
+    if existing is not None and not overwrite:
+        return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
+    defaults = existing or {}
+    print("planning protection wizard: raccoglie solo fabbisogno e copertura dichiarati; premi invio per segnare un valore come incerto.")
+    print(f"contesto disponibile: nucleo={defaults.get('household_id') or 'household_private'}, valuta=EUR, input={input_path}")
+    household_id = _prompt_text("Nome tecnico del nucleo/caso", str(defaults.get("household_id") or "household_private"))
+    _save_v66a_progress(input_path, {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id}, ProtectionGapError, "household_id")
+    as_of_date = _prompt_date("Data di riferimento (YYYY-MM-DD)", str(defaults.get("as_of_date") or "2026-01-01"))
+    _save_v66a_progress(input_path, {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id, "as_of_date": as_of_date}, ProtectionGapError, "as_of_date")
+    need_capital = _prompt_decimal_text("Capitale necessario per la famiglia in caso di decesso; 0.00 se ignoto", str(defaults.get("need_capital") or "0.00"))
+    _save_v66a_progress(input_path, {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id, "as_of_date": as_of_date, "need_capital": need_capital}, ProtectionGapError, "need_capital")
+    policy_capital = _prompt_decimal_text("Capitale assicurato dichiarato per decesso; 0.00 se ignoto", str(defaults.get("policy_capital") or "0.00"))
+    _save_v66a_progress(input_path, {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id, "as_of_date": as_of_date, "need_capital": need_capital, "policy_capital": policy_capital}, ProtectionGapError, "policy_capital")
+    beneficiary = _prompt_text("Identificativo tecnico del beneficiario", "beneficiary_review")
+    gaps = _wizard_gaps([(need_capital == "0.00", "unknown_family_need_capital", "Family protection need must be documented."), (policy_capital == "0.00", "unknown_policy_coverage", "Policy coverage must be documented.")])
+    data = {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id, "as_of_date": as_of_date, "base_currency": "EUR", "family_needs": [{"need_id": "death_protection_review", "label": "Declared death protection need", "event_type": "death", "required_capital": need_capital, "covered_person_ids": [], "provenance": _wizard_provenance()}], "policies": [{"policy_id": "policy_review", "label": "Declared policy under review", "policy_type": "risk_life", "currency": "EUR", "annual_premium": None, "surrender_value": None, "beneficiaries": [{"beneficiary_person_id": beneficiary, "relationship": "unknown", "share": "1.00", "provenance": "user_declared_input"}], "coverage_events": [{"event_type": "death", "insured_capital": policy_capital, "provenance": "user_declared_input"}], "provenance": _wizard_provenance()}], "data_gaps": gaps}
+    _write_wizard_json(input_path, data, True, ProtectionGapError, "protection gap input")
+    return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(gaps)}
+
+
+def run_estate_wizard(input_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    input_path = _validate_v66a_input_path(input_path, EstatePlanError)
+    existing = _read_optional_wizard_json(input_path, EstatePlanError, "estate plan input")
+    if existing is not None and not overwrite:
+        return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
+    defaults = existing or {}
+    print("planning estate wizard: raccoglie fatti dichiarati; non determina quote, imposte o effetti legali.")
+    print(f"contesto disponibile: nucleo={defaults.get('household_id') or 'household_private'}, rule-pack={default_estate_plan_rule_pack()}")
+    household_id = _prompt_text("Nome tecnico del nucleo/caso", str(defaults.get("household_id") or "household_private"))
+    _save_v66a_progress(input_path, {"schema_version": "estate-plan/v2", "record_type": "EstatePlanInput", "household_id": household_id}, EstatePlanError, "household_id")
+    as_of_date = _prompt_date("Data di riferimento (YYYY-MM-DD)", str(defaults.get("as_of_date") or "2026-01-01"))
+    _save_v66a_progress(input_path, {"schema_version": "estate-plan/v2", "record_type": "EstatePlanInput", "household_id": household_id, "as_of_date": as_of_date}, EstatePlanError, "as_of_date")
+    decedent = _prompt_text("Identificativo tecnico della persona titolare", str(defaults.get("decedent_person_id") or "person_review"))
+    _save_v66a_progress(input_path, {"schema_version": "estate-plan/v2", "record_type": "EstatePlanInput", "household_id": household_id, "as_of_date": as_of_date, "decedent_person_id": decedent}, EstatePlanError, "decedent_person_id")
+    asset_id = _prompt_text("Identificativo tecnico di un asset da riesaminare", str(defaults.get("asset_id") or "asset_review"))
+    asset_value = _prompt_decimal_text("Valore lordo dichiarato dell'asset; 0.00 se ignoto", str(defaults.get("asset_value") or "0.00"))
+    data = {"schema_version": "estate-plan/v2", "record_type": "EstatePlanInput", "household_id": household_id, "as_of_date": as_of_date, "base_currency": "EUR", "decedent_person_id": decedent, "family": {"has_spouse": False, "children": []}, "assets": [{"asset_id": asset_id, "label": "Asset declared for review", "asset_class": "other", "jurisdiction": "IT", "currency": "EUR", "gross_value": asset_value, "ownership_share": "1.00", "provenance": _wizard_provenance()}], "insurance_policies": [], "prior_donations": [], "scenarios": [], "data_gaps": _wizard_gaps([(asset_value == "0.00", "unknown_estate_asset_value", "Estate asset value must be documented."), (True, "family_and_allocation_review_required", "Family composition, allocations, donations and tax liquidity require explicit review.")])}
+    _write_wizard_json(input_path, data, True, EstatePlanError, "estate plan input")
+    return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(data["data_gaps"])}
+
+
+def run_wealth_strategy_wizard(input_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    input_path = _validate_v66a_input_path(input_path, WealthStrategyError)
+    existing = _read_optional_wizard_json(input_path, WealthStrategyError, "wealth strategy input")
+    if existing is not None and not overwrite:
+        return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
+    defaults = existing or {}
+    print("planning wealth-strategy wizard: prepara due pacchetti dichiarati, senza ranking o calcoli nuovi.")
+    print(
+        "fatti disponibili: "
+        f"goals={'yes' if default_planning_goals_output().exists() else 'no'}, "
+        f"protection={'yes' if default_protection_gap_output().exists() else 'no'}, "
+        f"estate={'yes' if default_estate_plan_output().exists() else 'no'}"
+    )
+    household_id = _prompt_text("Nome tecnico del nucleo/caso", str(defaults.get("household_id") or "household_private"))
+    _save_v66a_progress(input_path, {"schema_version": "wealth-strategy-input/v1", "record_type": "WealthStrategyInput", "household_id": household_id}, WealthStrategyError, "household_id")
+    as_of_date = _prompt_date("Data di riferimento (YYYY-MM-DD)", str(defaults.get("as_of_date") or "2026-01-01"))
+    _save_v66a_progress(input_path, {"schema_version": "wealth-strategy-input/v1", "record_type": "WealthStrategyInput", "household_id": household_id, "as_of_date": as_of_date}, WealthStrategyError, "as_of_date")
+    first_label = _prompt_text("Nome del primo pacchetto da confrontare", str(defaults.get("first_label") or "package_review_a"))
+    _save_v66a_progress(input_path, {"schema_version": "wealth-strategy-input/v1", "record_type": "WealthStrategyInput", "household_id": household_id, "as_of_date": as_of_date, "first_label": first_label}, WealthStrategyError, "first_package")
+    second_label = _prompt_text("Nome del secondo pacchetto da confrontare", str(defaults.get("second_label") or "package_review_b"))
+    weights = {key: "1.00" for key in ("liquidity", "retirement", "tax_efficiency", "protection", "succession", "cross_border", "reversibility")}
+    def package(identifier: str, label: str) -> dict[str, Any]:
+        return {"package_id": identifier, "label": label, "components": [{"component_id": f"{identifier}_goals", "source_key": "planning_goals", "selector": {"path": "status", "exists": True}}], "declared_scores": {key: "0.00" for key in weights}, "implementation": {"actions_90_days": ["Document declared actions before comparison."], "actions_180_days": ["Review the package with the relevant professional."]}, "costs": [], "dependencies": ["Source snapshots and declared scores"], "reversibility": "unknown", "controls": ["Human review required"], "risks": ["Package is incomplete until sources are available"], "adverse_scenarios": ["Missing or partial source snapshot"]}
+    data = {"schema_version": "wealth-strategy-input/v1", "record_type": "WealthStrategyInput", "household_id": household_id, "as_of_date": as_of_date, "base_currency": "EUR", "comparison_weights": weights, "packages": [package("package_review_a", first_label), package("package_review_b", second_label)], "incompatibilities": [], "data_gaps": [{"code": "wizard_requires_source_review", "message": "Source snapshots, scores and package details must be explicitly reviewed before comparison."}]}
+    _write_wizard_json(input_path, data, True, WealthStrategyError, "wealth strategy input")
+    return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(data["data_gaps"])}
+
+
 def _write_wizard_json(
     path: Path,
     data: dict[str, Any],
@@ -3363,6 +3465,37 @@ def build_parser() -> argparse.ArgumentParser:
     compliance_calendar_parser.add_argument("--output", type=Path, help="Workspace-local compliance calendar output")
     compliance_setup_parser = compliance_subparsers.add_parser("setup", help="Add one workspace-local review, renewal, or document deadline")
     compliance_setup_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace root")
+    regulatory = compliance_subparsers.add_parser("regulatory", help="Prepare and govern a versioned regulatory change")
+    regulatory_subparsers = regulatory.add_subparsers(dest="regulatory_command")
+    regulatory_prepare = regulatory_subparsers.add_parser("prepare", help="Prepare a source-backed change proposal")
+    regulatory_prepare.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    regulatory_prepare.add_argument("--output", type=Path, help="Workspace-local proposal output")
+    regulatory_prepare.add_argument("--change-id", required=True)
+    regulatory_prepare.add_argument("--summary", required=True)
+    regulatory_prepare.add_argument("--source-url", required=True)
+    regulatory_prepare.add_argument("--authority", choices=["official", "institutional", "professional", "user_declared", "unknown"], required=True)
+    regulatory_prepare.add_argument("--jurisdiction", required=True)
+    regulatory_prepare.add_argument("--valid-from", required=True)
+    regulatory_prepare.add_argument("--valid-to")
+    regulatory_prepare.add_argument("--affected-rule-pack", action="append", default=[])
+    regulatory_prepare.add_argument("--required-test", action="append", default=[])
+    regulatory_prepare.add_argument("--rollback-strategy", required=True)
+    regulatory_prepare.add_argument("--as-of-date", default=date.today().isoformat())
+    regulatory_approve = regulatory_subparsers.add_parser("approve", help="Approve a proposal after independent tests")
+    regulatory_approve.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    regulatory_approve.add_argument("--input", type=Path, required=True)
+    regulatory_approve.add_argument("--approver", required=True)
+    regulatory_approve.add_argument("--tests-passed", action="store_true")
+    regulatory_rollback = regulatory_subparsers.add_parser("rollback", help="Record rollback of an approved proposal")
+    regulatory_rollback.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    regulatory_rollback.add_argument("--input", type=Path, required=True)
+    regulatory_rollback.add_argument("--reason", required=True)
+    security = subparsers.add_parser("security", help="Check local workspace protection without exposing secrets")
+    security_subparsers = security.add_subparsers(dest="security_command")
+    security_check_parser = security_subparsers.add_parser("check", help="Check secrets, encryption, permissions and log safety")
+    security_check_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace root")
+    security_check_parser.add_argument("--repository", type=Path, default=resolve_repo("engine"), help="Repository to scan for accidental secrets")
+    security_check_parser.add_argument("--key-path", type=Path, help="Optional workspace-relative secret store path")
     pension = subparsers.add_parser("pension", help="Import pension sources")
     pension_subparsers = pension.add_subparsers(dest="pension_command")
     inps_parser = pension_subparsers.add_parser(
@@ -4739,6 +4872,9 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_protection_gap_demo_output(),
         help="Output synthetic protection gap snapshot JSON path",
     )
+    planning_protection_wizard_parser = planning_protection_subparsers.add_parser("wizard", help="Collect private protection inputs with explicit gaps")
+    planning_protection_wizard_parser.add_argument("--input", type=Path, default=default_protection_gap_input())
+    planning_protection_wizard_parser.add_argument("--overwrite", action="store_true", help="Resume or revise an existing private draft")
     planning_estate_parser = planning_subparsers.add_parser(
         "estate",
         help="Compare declared estate allocations, donations and beneficiary gaps",
@@ -4778,6 +4914,9 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_estate_plan_demo_output(),
         help="Output synthetic estate plan snapshot JSON path",
     )
+    planning_estate_wizard_parser = planning_estate_subparsers.add_parser("wizard", help="Collect private estate inputs with explicit gaps")
+    planning_estate_wizard_parser.add_argument("--input", type=Path, default=default_estate_plan_input())
+    planning_estate_wizard_parser.add_argument("--overwrite", action="store_true", help="Resume or revise an existing private draft")
     planning_wealth_strategy_parser = planning_subparsers.add_parser(
         "wealth-strategy",
         help="Compose V4 planning snapshots into comparable strategy packages",
@@ -4860,6 +4999,9 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_wealth_strategy_demo_output(),
         help="Output synthetic wealth strategy snapshot JSON path",
     )
+    planning_wealth_strategy_wizard_parser = planning_wealth_strategy_subparsers.add_parser("wizard", help="Collect private wealth strategy packages with explicit gaps")
+    planning_wealth_strategy_wizard_parser.add_argument("--input", type=Path, default=default_wealth_strategy_input())
+    planning_wealth_strategy_wizard_parser.add_argument("--overwrite", action="store_true", help="Resume or revise an existing private draft")
     orchestration = subparsers.add_parser("orchestration", help="Inspect deterministic orchestration contracts")
     orchestration_subparsers = orchestration.add_subparsers(dest="orchestration_command")
     ask_parser = subparsers.add_parser(
@@ -5859,11 +6001,52 @@ def main(argv: list[str] | None = None) -> int:
                     print("Next: add an authoritative source in 'fo compliance setup' or obtain professional review.")
                 print(f"Calendar: {output}")
                 return 0 if report["status"] == "ready" else 2
+            if args.compliance_command == "regulatory":
+                if args.regulatory_command == "prepare":
+                    output = args.output or args.workspace / "snapshots" / f"regulatory-change-{args.change_id}.json"
+                    proposal = build_regulatory_change({
+                        "change_id": args.change_id,
+                        "summary": args.summary,
+                        "source": {"url": args.source_url, "authority": args.authority},
+                        "jurisdiction": args.jurisdiction,
+                        "valid_from": args.valid_from,
+                        "valid_to": args.valid_to,
+                        "affected_rule_packs": args.affected_rule_pack,
+                        "required_tests": args.required_test,
+                        "rollback_strategy": args.rollback_strategy,
+                    }, as_of_date=args.as_of_date)
+                    write_regulatory_change(proposal, output, args.workspace)
+                    print(f"regulatory prepare: {proposal['status']} findings={len(proposal['impact_assessment']['findings'])} ({output})")
+                    print("Next: obtain independent test evidence and run 'fo compliance regulatory approve'.")
+                    return 0 if not proposal["impact_assessment"]["findings"] else 2
+                if args.regulatory_command == "approve":
+                    proposal = approve_regulatory_change(args.input, args.workspace, args.approver, tests_passed=args.tests_passed)
+                    print(f"regulatory approve: {proposal['status']} ({args.input})")
+                    return 0
+                if args.regulatory_command == "rollback":
+                    proposal = rollback_regulatory_change(args.input, args.workspace, args.reason)
+                    print(f"regulatory rollback: {proposal['status']} ({args.input})")
+                    return 0
+                print("compliance regulatory: ERROR (choose prepare, approve or rollback)")
+                return 2
             print("compliance: ERROR (choose calendar or setup)")
             return 2
-        except ComplianceCalendarError as exc:
+        except (ComplianceCalendarError, RegulatoryChangeError, OSError, json.JSONDecodeError) as exc:
             print(f"compliance: ERROR ({exc})")
             return 1
+
+    if args.command == "security" and args.security_command == "check":
+        try:
+            report = build_security_check(args.workspace, args.repository, args.key_path)
+        except (SecurityError, OSError):
+            print("security check: ERROR (workspace security check could not be completed)")
+            return 1
+        print(f"security check: {report['status']} findings={len(report['findings'])}")
+        for finding in report["findings"]:
+            print(f"- {finding['code']}: {finding['path']}")
+        print(f"secret store: {report['secret_store']['path']} permissions={report['secret_store']['permissions']}")
+        print("log policy: relative paths and finding codes only; secrets and file contents are never emitted")
+        return 0 if report["status"] == "ready" else 2
 
     if args.command == "pension" and args.pension_command == "import-inps":
         try:
@@ -7068,6 +7251,25 @@ def main(argv: list[str] | None = None) -> int:
     if (
         args.command == "planning"
         and args.planning_command == "protection"
+        and args.planning_protection_command == "wizard"
+    ):
+        try:
+            result = run_protection_wizard(args.input, args.overwrite)
+        except (EOFError, KeyboardInterrupt):
+            print("planning protection wizard: interrupted; rerun with `--overwrite` to resume/revise.")
+            return 1
+        except ProtectionGapError as exc:
+            print(f"planning protection wizard: ERROR ({exc})")
+            return 1
+        if result["status"] == "existing":
+            print(f"planning protection wizard: existing input found ({result['input_path']}; rerun with `--overwrite` to revise it)")
+        else:
+            print(f"planning protection wizard: prepared {result['data_gap_count']} gaps ({result['input_path']}; next: `fo planning protection build`)")
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "protection"
         and args.planning_protection_command == "build"
     ):
         try:
@@ -7112,6 +7314,25 @@ def main(argv: list[str] | None = None) -> int:
     if (
         args.command == "planning"
         and args.planning_command == "estate"
+        and args.planning_estate_command == "wizard"
+    ):
+        try:
+            result = run_estate_wizard(args.input, args.overwrite)
+        except (EOFError, KeyboardInterrupt):
+            print("planning estate wizard: interrupted; rerun with `--overwrite` to resume/revise.")
+            return 1
+        except EstatePlanError as exc:
+            print(f"planning estate wizard: ERROR ({exc})")
+            return 1
+        if result["status"] == "existing":
+            print(f"planning estate wizard: existing input found ({result['input_path']}; rerun with `--overwrite` to revise it)")
+        else:
+            print(f"planning estate wizard: prepared {result['data_gap_count']} gaps ({result['input_path']}; next: `fo planning estate build`)")
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "estate"
         and args.planning_estate_command == "build"
     ):
         try:
@@ -7147,6 +7368,25 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "wealth-strategy"
+        and args.planning_wealth_strategy_command == "wizard"
+    ):
+        try:
+            result = run_wealth_strategy_wizard(args.input, args.overwrite)
+        except (EOFError, KeyboardInterrupt):
+            print("planning wealth-strategy wizard: interrupted; rerun with `--overwrite` to resume/revise.")
+            return 1
+        except WealthStrategyError as exc:
+            print(f"planning wealth-strategy wizard: ERROR ({exc})")
+            return 1
+        if result["status"] == "existing":
+            print(f"planning wealth-strategy wizard: existing input found ({result['input_path']}; rerun with `--overwrite` to revise it)")
+        else:
+            print(f"planning wealth-strategy wizard: prepared {result['data_gap_count']} gaps ({result['input_path']}; next: `fo planning wealth-strategy build`)")
         return 0
 
     if (

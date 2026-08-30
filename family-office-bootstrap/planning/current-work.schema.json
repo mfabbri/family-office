@@ -1,0 +1,437 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://family-office.local/schemas/current-work.schema.json",
+  "title": "Family Office AI current work state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "selected_at",
+    "roadmap_basis",
+    "increment",
+    "verification",
+    "next_action"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "status": {
+      "enum": [
+        "uninitialized",
+        "selected",
+        "in_progress",
+        "blocked",
+        "completed",
+        "superseded"
+      ]
+    },
+    "selected_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "roadmap_basis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "section"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "section": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "increment": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "objective",
+        "scope",
+        "out_of_scope",
+        "candidate_files",
+        "stop_condition"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "out_of_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "candidate_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stop_condition": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tests",
+        "documentation_touchpoints",
+        "result"
+      ],
+      "properties": {
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "documentation_touchpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "result": {
+          "enum": [
+            "pending",
+            "not_run",
+            "passed",
+            "failed",
+            "partial",
+            "not_applicable"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "task_envelope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "risk_domain",
+            "repositories",
+            "read_set",
+            "write_set",
+            "test_command",
+            "stop_conditions"
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "discovery-lite",
+                "docs-edit",
+                "scoped-fix",
+                "feature-slice",
+                "quality-slice",
+                "normative-change",
+                "architecture-review"
+              ]
+            },
+            "risk_domain": {
+              "enum": [
+                "general",
+                "privacy",
+                "tax",
+                "pension",
+                "financial",
+                "compliance"
+              ]
+            },
+            "repositories": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "read_set": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "write_set": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "test_command": {
+              "type": "string"
+            },
+            "stop_conditions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "session_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "description"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "resume",
+            "recalculate",
+            "review",
+            "none"
+          ]
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_version",
+        "tier",
+        "task_class",
+        "agent",
+        "model",
+        "reasoning_effort",
+        "rationale",
+        "trace"
+      ],
+      "properties": {
+        "policy_version": {
+          "const": "3.1"
+        },
+        "tier": {
+          "enum": [
+            "low",
+            "medium",
+            "review",
+            "high",
+            "critical"
+          ]
+        },
+        "task_class": {
+          "enum": [
+            "discovery",
+            "documentation",
+            "implementation",
+            "quality",
+            "architecture",
+            "migration",
+            "normative",
+            "planning",
+            "financial"
+          ]
+        },
+        "agent": {
+          "enum": [
+            "fo_explorer",
+            "fo_docs_reviewer",
+            "fo_docs_editor",
+            "fo_implementer",
+            "fo_reviewer",
+            "fo_architect",
+            "fo_normative_reviewer",
+            "fo_planner",
+            "fo_financial_reviewer"
+          ]
+        },
+        "model": {
+          "enum": [
+            "gpt-5.6-luna",
+            "gpt-5.6-terra",
+            "gpt-5.6-sol"
+          ]
+        },
+        "reasoning_effort": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "xhigh"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "event",
+              "tier",
+              "agent",
+              "model",
+              "reasoning_effort",
+              "reason"
+            ],
+            "properties": {
+              "at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "event": {
+                "enum": [
+                  "selected",
+                  "delegated",
+                  "escalated",
+                  "fallback"
+                ]
+              },
+              "tier": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "review",
+                  "high",
+                  "critical"
+                ]
+              },
+              "agent": {
+                "enum": [
+                  "fo_explorer",
+                  "fo_docs_reviewer",
+                  "fo_docs_editor",
+                  "fo_implementer",
+                  "fo_reviewer",
+                  "fo_architect",
+                  "fo_normative_reviewer",
+                  "fo_planner",
+                  "fo_financial_reviewer"
+                ]
+              },
+              "model": {
+                "enum": [
+                  "gpt-5.6-luna",
+                  "gpt-5.6-terra",
+                  "gpt-5.6-sol"
+                ]
+              },
+              "reasoning_effort": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "from_tier": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "low",
+                  "medium",
+                  "review",
+                  "high",
+                  "critical",
+                  null
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "selected",
+              "in_progress",
+              "blocked"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "routing"
+        ]
+      }
+    }
+  ]
+}

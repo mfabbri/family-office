@@ -117,6 +117,14 @@ def _next_action(status: str, data_gaps: list[dict[str, str]]) -> str:
         return "No separate analysis-plan command is available in this CLI yet; no calculation has been run."
     if status == "not_supported":
         return "Ask a supported family-office question or request qualified professional review."
+    wizard_by_source = {
+        "wealth-strategy-input/v1": "fo planning wealth-strategy wizard --overwrite",
+        "protection-gap/v1": "fo planning protection wizard --overwrite",
+        "estate-plan/v2": "fo planning estate wizard --overwrite",
+    }
+    wizard_actions = [wizard_by_source[gap["source"]] for gap in data_gaps if gap.get("source") in wizard_by_source]
+    if wizard_actions:
+        return "Resolve the missing planning inputs with " + ", ".join(wizard_actions) + ", then rerun 'fo ask'."
     missing = ", ".join(_fact_label(gap["source"]) for gap in data_gaps)
     return f"Add or import the missing sources ({missing}), then rerun 'fo ask'."
 

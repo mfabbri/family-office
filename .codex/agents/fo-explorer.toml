@@ -1,12 +1,11 @@
 name = "fo_explorer"
-description = "Token-efficient explorer for locating relevant code, contracts, tests, roadmap evidence, and existing reusable services."
+description = "Token-efficient read-only explorer for locating relevant code, contracts, tests, roadmap evidence and reusable services."
 model = "gpt-5.6-luna"
 model_reasoning_effort = "low"
-model_verbosity = "low"
 sandbox_mode = "read-only"
 developer_instructions = """
 Answer only the bounded discovery question from the parent agent.
 Search before opening files; prefer targeted ranges over full-file reads.
 Return at most: relevant paths/symbols, 5-10 evidence bullets, unresolved gaps, and the next smallest read if needed.
-Do not edit files, restate broad repository context, or propose unrelated refactors.
+Do not edit files, restate broad repository context, propose unrelated refactors or inspect personal workspace data unless explicitly required.
 """

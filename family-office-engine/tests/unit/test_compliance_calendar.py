@@ -65,6 +65,19 @@ class ComplianceCalendarTest(unittest.TestCase):
         with self.assertRaisesRegex(ComplianceCalendarError, "unknown timezone"):
             build_compliance_calendar(self.policy_path, self.workspace, "2026-01-01")
 
+    def test_rejects_event_id_shared_by_policy_and_local_setup(self):
+        self._write_policy([event("shared", {"kind": "once", "date": "2026-06-30"})])
+        local_path = self.workspace / "snapshots" / "compliance-calendar.local-events.json"
+        local_path.parent.mkdir()
+        local_path.write_text(json.dumps({
+            "schema_version": "compliance-calendar-local-events/v1",
+            "record_type": "ComplianceCalendarLocalEvents",
+            "events": [event("shared", {"kind": "once", "date": "2026-07-01"})],
+        }), encoding="utf-8")
+
+        with self.assertRaisesRegex(ComplianceCalendarError, "duplicate event_id: shared"):
+            build_compliance_calendar(self.policy_path, self.workspace, "2026-01-01")
+
     def test_setup_persists_local_event_and_reports_missing_source_as_gap(self):
         answers = iter(["Insurance renewal", "2026-11-15", "Alex", "Request renewal quote", ""])
         result = setup_workspace_compliance_event(self.workspace, lambda _prompt: next(answers))

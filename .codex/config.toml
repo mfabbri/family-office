@@ -1,59 +1,53 @@
-# Family Office AI - token-aware Codex routing.
-# Exact GPT-5.6 model IDs are used because ChatGPT-authenticated Codex may reject the unsuffixed alias.
-# Default: Terra for balanced intelligence/cost. GPT-5.5 remains available as compatibility fallback.
-model = "gpt-5.6-terra"
+# Family Office AI Codex model routing v3.1.
+# Project-local [profiles.*] are intentionally absent.
+# The parent is a low-cost router/controller; specialist agents perform substantive work.
+
+model = "gpt-5.6-luna"
 model_reasoning_effort = "medium"
-model_verbosity = "low"
-plan_mode_reasoning_effort = "high"
+plan_mode_reasoning_effort = "medium"
+
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
 
 [agents]
 enabled = true
-max_concurrent_threads_per_session = 2
-interrupt_message = false
-default_subagent_model = "gpt-5.6-luna"
-default_subagent_reasoning_effort = "low"
+max_concurrent_threads_per_session = 3
+default_subagent_model = "gpt-5.6-terra"
+default_subagent_reasoning_effort = "medium"
+interrupt_message = true
 
 [agents.fo_explorer]
-description = "Read-only narrow repository exploration and inventory. Prefer for bounded scans and repetitive discovery."
+description = "Discovery read-only e ricognizione meccanica del repository."
 config_file = "agents/fo-explorer.toml"
 
+[agents.fo_docs_reviewer]
+description = "Review read-only di documentazione, contratti e guardrail."
+config_file = "agents/fo-docs-reviewer.toml"
+
+[agents.fo_docs_editor]
+description = "Modifiche semplici e circoscritte a docs, planner e configurazione agent."
+config_file = "agents/fo-docs-editor.toml"
+
 [agents.fo_planner]
-description = "Read-only architecture and implementation planner for cross-module changes; returns a compact execution plan."
+description = "Planning read-only per cambi cross-module entro architettura e contratti già decisi."
 config_file = "agents/fo-planner.toml"
 
+[agents.fo_implementer]
+description = "Fix e micro-feature runtime entro contratti e rule pack già definiti."
+config_file = "agents/fo-implementer.toml"
+
 [agents.fo_reviewer]
-description = "Independent technical reviewer for correctness, regressions, contracts, privacy, and missing tests."
+description = "Review tecnica indipendente, regressioni, edge case, privacy e quality gate."
 config_file = "agents/fo-reviewer.toml"
 
+[agents.fo_architect]
+description = "Architettura, migrazioni e trade-off cross-module/cross-repository."
+config_file = "agents/fo-architect.toml"
+
 [agents.fo_financial_reviewer]
-description = "Independent reviewer for investment mathematics, leverage, cash-flow, scenario assumptions, and opportunity-cost logic."
+description = "Review indipendente di matematica finanziaria, cash-flow, leverage e opportunity cost."
 config_file = "agents/fo-financial-reviewer.toml"
 
 [agents.fo_normative_reviewer]
-description = "Independent reviewer for tax, pension, legal/compliance, temporal validity, and rule-pack traceability."
+description = "Review critica per fiscalità, pensioni, compliance e regole legali sensibili."
 config_file = "agents/fo-normative-reviewer.toml"
-
-[profiles.standard]
-model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
-model_verbosity = "low"
-
-[profiles.economy]
-model = "gpt-5.6-luna"
-model_reasoning_effort = "low"
-model_verbosity = "low"
-
-[profiles.deep]
-model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
-model_verbosity = "low"
-
-[profiles.critical]
-model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
-model_verbosity = "low"
-
-[profiles.fallback55]
-model = "gpt-5.5"
-model_reasoning_effort = "medium"
-model_verbosity = "low"

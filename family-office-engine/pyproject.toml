@@ -4,7 +4,9 @@ version="0.1.0"
 description="Personal family office engine"
 requires-python=">=3.11"
 dependencies=[
-  "PyPDF2>=3"
+  "PyPDF2>=3",
+  "tzdata>=2025.2",
+  "cryptography>=42"
 ]
 
 [project.scripts]

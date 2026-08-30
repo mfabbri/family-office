@@ -1,52 +1,63 @@
 # Model routing
 
-Obiettivo: usare il modello meno costoso che preserva il contratto del task, senza moltiplicare agenti o contesto.
+Obiettivo: usare il modello meno costoso compatibile con rischio, fase e contratto del task, senza sacrificare i reviewer specialistici del Family Office AI.
 
-## Default
+Il routing usa custom agent, non `[profiles.*]` project-local. Il parent `gpt-5.6-luna` / `medium` classifica, delega e sintetizza; non assorbe silenziosamente lavoro medium/review/high/critical.
 
-- Sessione principale: `gpt-5.6-terra`, reasoning `medium`, verbosity `low`.
-- Fallback compatibilita': `gpt-5.5`, reasoning `medium`.
-- Mai usare l'alias eseguibile non suffissato `gpt-5.6` nelle configurazioni del repository; usare gli ID esatti.
+| Tier | Agent | Model | Reasoning | Uso tipico |
+|---|---|---|---:|---|
+| low | `fo_explorer` | `gpt-5.6-luna` | low | discovery bounded/read-only |
+| low | `fo_docs_reviewer` | `gpt-5.6-luna` | medium | review documentale/contratti |
+| low | `fo_docs_editor` | `gpt-5.6-luna` | medium | docs/planner/config agent |
+| medium | `fo_planner` | `gpt-5.6-terra` | medium | planning cross-module con architettura già decisa |
+| medium | `fo_implementer` | `gpt-5.6-terra` | medium | implementazione T1–T3 entro contratti definiti |
+| review | `fo_reviewer` | `gpt-5.6-terra` | high | quality gate, regressioni, privacy/provenance |
+| high | `fo_architect` | `gpt-5.6-sol` | high | architettura, migrazioni, trade-off |
+| high | `fo_financial_reviewer` | `gpt-5.6-sol` | high | IRR/NPV/DSCR, leverage, cash-flow, scenario assumptions, opportunity cost |
+| critical | `fo_normative_reviewer` | `gpt-5.6-sol` | xhigh | fiscalità, pensioni, RW/IVAFE/IVIE, successione, AML/CRS/DAC, compliance |
 
-| Tier | Modello | Reasoning | Uso tipico |
-|---|---|---:|---|
-| economy | `gpt-5.6-luna` | low | inventario, search/read mirati, controlli ripetitivi, fixture/schema enumeration |
-| standard | `gpt-5.6-terra` | medium | implementazione ordinaria, planning delimitato, bug, documentazione |
-| advanced | `gpt-5.6-terra` | high | debug difficile, review cross-module, contract/design validation |
-| critical | `gpt-5.6-sol` | high | matematica finanziaria, architettura, migrazioni, review ad alto impatto |
-| exceptional | `gpt-5.6-sol` | xhigh | ambiguita' normativa/architetturale realmente difficile; non e' un default |
-| fallback | `gpt-5.5` | medium | client/account che non espone il profilo 5.6 richiesto o regressione verificata |
+## Routing rules
 
-## Routing per classe task
-
-- T0: Luna/low; non spawnare agenti se il main puo' risolvere con una sola lettura.
-- T1: Terra/low-medium; Luna solo per discovery bounded.
-- T2: Terra/medium; planner Terra opzionale se attraversa piu' contratti.
-- T3: Terra/medium per implementazione, reviewer Terra/high al termine se il rischio lo giustifica.
-- T4: Terra/medium per editing deterministico; Sol/high per review finanziaria o normativa. `xhigh` solo con trigger esplicito.
-- T5: Terra/high per planning; Sol/high per una sola review indipendente delle decisioni irreversibili o ad alto impatto.
+1. Creare il task envelope e registrarlo in `planning/current-work.json`.
+2. Se la fase richiede interpretazione/verifica normativa T4, usare Sol/xhigh prima di implementare.
+3. Se la fase è finanziaria ma non introduce una nuova interpretazione normativa, usare `fo_financial_reviewer` Sol/high per formule, scenari e ranking.
+4. Se serve planning cross-module ma architettura e regole sono già decise, usare `fo_planner` Terra/medium.
+5. Implementare codice deterministico con `fo_implementer` Terra/medium quando regole e contratti sono definiti.
+6. Usare `fo_reviewer` Terra/high per review indipendente T3 o quality/audit.
+7. Usare `fo_architect` Sol/high per architettura/migrazione, non per semplici modifiche di codice.
+8. Per T4, dopo implementazione Terra, tornare al reviewer specialistico appropriato quando il playbook richiede un gate indipendente.
+9. Registrare `delegated`, `escalated` o `fallback` nella trace prima di cambiare route.
+10. Non sostituire silenziosamente un modello non disponibile.
 
 ## Regole di risparmio token
 
 1. Ridurre prima contesto e reasoning, poi cambiare modello.
-2. Testare la stessa classe di task a un livello di reasoning inferiore prima di consolidare un setting piu' costoso.
-3. `model_verbosity = low` per output operativi; aumentare la verbosita' solo quando il deliverable lo richiede.
-4. Luna deve restituire sintesi, non dump di file o log.
-5. Un subagent deve sostituire una lettura/esplorazione costosa del main, non duplicarla.
-6. Massimo due subagent concorrenti e solo su workstream indipendenti.
-7. Preferire un singolo reviewer specializzato a piu' reviewer generici.
-8. Non usare Sol per typo, listing, boilerplate, test gia' localizzati o documentazione meccanica.
-9. Non aumentare reasoning per compensare requisiti ambigui: chiarire il contratto o leggere l'evidenza mancante.
-10. Se GPT-5.6 non e' disponibile nel client/account, usare `fallback55` senza cambiare i contratti del task.
+2. Luna deve restituire sintesi, non dump di file o log.
+3. Un subagent deve sostituire una lettura/esplorazione costosa del parent, non duplicarla.
+4. Preferire un singolo reviewer specializzato a più reviewer generici.
+5. Non usare Sol per typo, listing, boilerplate, test già localizzati o documentazione meccanica.
+6. Non aumentare reasoning per compensare requisiti ambigui: chiarire il contratto o leggere l'evidenza mancante.
+7. `xhigh` è riservato al reviewer normativo critico; la matematica finanziaria ordinaria resta Sol/high e deterministica nei servizi/test.
 
 ## Trigger per Sol/xhigh
 
-Usare `critical` solo se almeno uno e' vero:
+Usare `fo_normative_reviewer` / xhigh solo se almeno uno è vero:
 
-- interpretazione normativa con piu' letture plausibili e impatto materiale;
-- formula finanziaria nuova o cambiamento di semantica di IRR/NPV/DSCR/tassazione;
-- migrazione di schema con compatibilita' retroattiva difficile;
-- decisione architetturale cross-repository irreversibile;
-- regressione non spiegata dopo evidenza e test mirati.
+- interpretazione normativa con più letture plausibili e impatto materiale;
+- validità temporale/transitoria della norma non ovvia;
+- fiscalità, pensioni, monitoraggio fiscale o successione cambiano materialmente il risultato;
+- obblighi AML/CRS/DAC o altre regole di compliance richiedono una decisione interpretativa.
 
-Altrimenti fermarsi a Terra/high.
+Per nuove formule finanziarie o cambi di semantica IRR/NPV/DSCR usare prima `fo_financial_reviewer` Sol/high; escalare al reviewer normativo solo se il problema è anche legale/fiscale.
+
+## Compatibility e fallback
+
+Usare solo identificatori completi:
+
+- `gpt-5.6-luna`
+- `gpt-5.6-terra`
+- `gpt-5.6-sol`
+
+L'alias non suffissato `gpt-5.6` non deve apparire come valore `model` nella configurazione eseguibile.
+
+Se il client/account non espone il modello richiesto, registrare un evento `fallback` nel planner e usare un modello disponibile senza cambiare i contratti del task. Il fallback non deve essere silenzioso.

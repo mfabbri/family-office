@@ -10,8 +10,13 @@ __pycache__/
 
 # Local/editor history
 .history/
-.agents/
+.agents/*
+!.agents/skills/
+!.agents/skills/**
 .migration-backups/
+
+# Workspace-local security material and generated keys
+family-office-workspace/.security/
 
 # OS/editor noise
 .DS_Store

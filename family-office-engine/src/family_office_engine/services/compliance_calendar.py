@@ -27,6 +27,7 @@ def build_compliance_calendar(
     _within(workspace, output, "output")
     local = _read_local_events(workspace)
     events = list(policy["events"]) + local["events"]
+    _validate_unique_event_ids(events)
     entries, gaps = [], []
     for event in events:
         entry, event_gaps = _entry(event, current)
@@ -130,11 +131,9 @@ def _validate_policy(policy: dict[str, Any]) -> None:
     for field in ("policy_id", "valid_from", "verified_at"):
         if not isinstance(policy.get(field), str) or not policy[field]: raise ComplianceCalendarError(f"policy {field} is required")
     if not isinstance(policy.get("jurisdictions"), list) or not isinstance(policy.get("source_refs"), list) or not isinstance(policy.get("events"), list): raise ComplianceCalendarError("policy requires jurisdictions, source_refs and events lists")
-    ids = set()
     for event in policy["events"]:
         _validate_event(event)
-        if event["event_id"] in ids: raise ComplianceCalendarError(f"duplicate event_id: {event['event_id']}")
-        ids.add(event["event_id"])
+    _validate_unique_event_ids(policy["events"])
 
 
 def _validate_event(event: Any) -> None:
@@ -147,12 +146,22 @@ def _validate_event(event: Any) -> None:
     _zone(event["timezone"])
 
 
+def _validate_unique_event_ids(events: list[dict[str, Any]]) -> None:
+    ids: set[str] = set()
+    for event in events:
+        event_id = event["event_id"]
+        if event_id in ids:
+            raise ComplianceCalendarError(f"duplicate event_id: {event_id}")
+        ids.add(event_id)
+
+
 def _read_local_events(workspace: Path) -> dict[str, Any]:
     path = _local_path(workspace)
     if not path.exists(): return {"schema_version": LOCAL_SCHEMA_VERSION, "record_type": "ComplianceCalendarLocalEvents", "events": []}
     data = _read_json(path, "local compliance events")
     if data.get("schema_version") != LOCAL_SCHEMA_VERSION or not isinstance(data.get("events"), list): raise ComplianceCalendarError(f"local events must be {LOCAL_SCHEMA_VERSION}")
     for event in data["events"]: _validate_event(event)
+    _validate_unique_event_ids(data["events"])
     return data
 
 

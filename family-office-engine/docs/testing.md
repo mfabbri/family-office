@@ -1,5 +1,7 @@
 # Testing
 
+`test_security.py` copre `security-check/v1`: round-trip di cifratura autenticata, chiave errata, confinamento dei path, segreto nel repository, file sensibile non cifrato, permessi POSIX e output CLI/log senza contenuti sensibili. Il test dei permessi POSIX e' saltato su Windows perche' i bit `chmod` non rappresentano gli ACL NTFS.
+
 ## Unit Test
 
 Dal repository `family-office-engine`:
@@ -1295,3 +1297,17 @@ Output personale previsto:
 ```
 
 Il contratto `work-transition-scenario/v1` costruisce timeline mensili FTE per adulto da una readiness non bloccata. I test coprono 100% -> 60% -> 0%, piu' livelli part-time, due adulti, readiness bloccata, sovrapposizioni, gap non dichiarati, durate invalide, granularita' non mensile e separazione tra uscita full-time, cessazione e date pensionistiche.
+
+## Regulatory change
+
+## Wizard input V6.6a
+
+Test mirati dei tre wizard CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_planning_wizards_v66a
+```
+
+I test usano esclusivamente risposte sintetiche e verificano draft workspace-local, `--overwrite`, provenance, `data_gaps` espliciti e prossima azione leggibile.
+
+`test_regulatory_change.py` copre `regulatory-change/v1`: fonte autorevole, fonte non autorevole, validita' retroattiva, approvazione dopo test indipendenti, rollback e confinamento workspace. La CLI viene esercitata nello stesso test con `prepare` e `approve`.

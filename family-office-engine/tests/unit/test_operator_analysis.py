@@ -45,6 +45,14 @@ class OperatorAnalysisTest(unittest.TestCase):
         self.assertEqual({"asset-availability/v1", "net-worth/v1"}, {gap["source"] for gap in result["data_gaps"]})
         self.assertIn("rerun 'fo ask'", result["next_action"])
 
+    def test_wealth_protection_estate_gaps_point_to_guided_wizards(self):
+        result = analyze_operator_question("Come proteggo e organizzo la successione del patrimonio?", self.workspace)
+
+        self.assertEqual("needs_information", result["status"])
+        self.assertIn("fo planning wealth-strategy wizard --overwrite", result["next_action"])
+        self.assertIn("fo planning protection wizard --overwrite", result["next_action"])
+        self.assertIn("fo planning estate wizard --overwrite", result["next_action"])
+
     def test_refuses_unsupported_question_with_limits_and_no_tool_execution(self):
         result = analyze_operator_question("Scrivi una poesia sul mare", self.workspace)
 

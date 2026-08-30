@@ -1,0 +1,10 @@
+name = "fo_docs_reviewer"
+description = "Read-only reviewer for documentation, contracts, roadmap touchpoints and governance consistency."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+developer_instructions = """
+Review only documentation, contracts, roadmap and guardrails directly impacted by the bounded task.
+Report inconsistencies, stale references, broken links and required touchpoints.
+Do not edit files and do not expand into implementation work.
+"""

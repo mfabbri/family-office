@@ -151,9 +151,25 @@ Esito: completato con `compliance-calendar/v1`, policy `it.compliance-calendar.2
 
 Verifiche: 5 test V6.4 (ricorrenza, mobile, timezone, deduplicazione, errori, source gap e CLI) e regression engine 619 test OK; smoke `fo compliance calendar --help`, compilazione, JSON validation knowledge/rules, `git diff --check`, privacy/confine (sola libreria standard, workspace-local) e audit roadmap OK. Il quarto incremento funzionale dopo V6.3b rende dovuto l'audit prima del prossimo incremento funzionale.
 
+### V6.4a - Operations compliance code audit
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Eseguire il code audit obbligatorio dopo V6.3c, V6.3d, V6.3e e V6.4 con la checklist del bootstrap. Il perimetro e' `operator_analysis`, `local_intent_assist`, `compliance_calendar`, CLI e relativi contratti, test e documentazione. Correggere solo difetti piccoli e verificabili; registrare come follow-up ogni debito non risolto nello stesso audit.
+
+- Dipende da: V6.3c, V6.3d, V6.3e e V6.4.
+- Repository: `engine`, `rules`, `knowledge`, `workspace`.
+- Test: test mirati del perimetro, smoke CLI, regression engine e audit roadmap.
+- Done quando: il contatore audit e' azzerato con evidenze riproducibili e ogni debito residuo e' esplicito.
+
+Esito: audit completato. Nel perimetro V6.3c-V6.4, journey operatore, assistente locale e calendario restano confinati a dati workspace-local/sintetici, routing deterministico, data gaps espliciti e path compatibili; nessun dato personale reale, dipendenza non dichiarata o disallineamento sostanziale fra CLI, servizi, contratti, test e documentazione e' stato rilevato. Corrette due lacune piccole: il calendario rifiuta ID evento duplicati anche tra rule pack e scadenze locali, e `tzdata>=2025.2` e' dichiarato/installato per supportare IANA timezone su Windows. Nessun follow-up o decision log necessario.
+
+Verifiche: `pip check`, 33 test mirati e regression engine 620 test OK; compilazione, validazione JSON rule pack, smoke `fo ask --help` e `fo compliance calendar --help`, `git diff --check` e audit roadmap OK.
+
 ### V6.5 — Regulatory update workflow
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Rilevare e valutare cambi normativi seguendo Knowledge → Rules → Tests → Engine, con validità temporale e approvazione.
@@ -163,9 +179,11 @@ Rilevare e valutare cambi normativi seguendo Knowledge → Rules → Tests → E
 - Test: nuova aliquota, norma retroattiva, fonte non autorevole e rollback.
 - Done quando: una regola non può cambiare senza fonte, test e periodo di validità.
 
+Esito: completato con contratto `regulatory-change/v1`, servizio locale deterministico e CLI `fo compliance regulatory prepare|approve|rollback`. La proposta registra fonte, autorita', giurisdizione, periodo di validita', retroattivita', rule pack impattati, test richiesti, data gaps, checklist, approvazione e strategia di rollback. Fonti non autorevoli e cambi retroattivi restano in revisione; il servizio non usa rete, non modifica knowledge/rules e non interpreta aliquote o risultati fiscali. Verifiche: 6 test mirati con integrazione CLI, compilazione, smoke help e controlli finali di regression, privacy/architettura, `git diff --check` e `roadmap_audit.py` OK.
+
 ### V6.6 — Secrets, encryption and access control
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Proteggere workspace, token, backup e dati identificativi con cifratura, secret store e least privilege.
@@ -174,6 +192,42 @@ Proteggere workspace, token, backup e dati identificativi con cifratura, secret 
 - Output: threat model, configurazione locale e security checks.
 - Test: segreto nel repository, permessi eccessivi, file non cifrato e log sensibile.
 - Done quando: nessun segreto o documento personale entra in pacchetti software o log diagnostici.
+
+Piano V6.6: il contratto `security-check/v1` e' locale e deterministico; il comando `fo security check` esegue la diagnostica con default workspace, mentre cifratura e decifratura autenticata restano operazioni esplicite e confinabili. Il secret store e' creato con chiave casuale e permessi del proprietario su POSIX; su Windows il report non simula una verifica ACL che Python non puo' attestare. Lo scanner non legge o stampa contenuti nei finding, non usa rete e non modifica snapshot esistenti.
+
+Esito: completato con `security-check/v1`, servizio `security`, secret store locale e CLI `fo security check`. Verifiche: test mirati 17 OK con 1 skip Windows motivato, regression engine 631 OK con 1 skip, `pip check`, compilazione, smoke CLI, validazione planner stdlib, audit roadmap, scansione privacy/confini e `git diff --check` OK.
+
+### V6.6a — Guided planning input wizards
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Rendere inseribili dalla CLI gli input mancanti che `fo ask` identifica per patrimonio, protezione e successione, senza richiedere la modifica manuale di JSON.
+
+- Dipende da: V6.6.
+- Repository: `engine`, `workspace`.
+- Output: `fo planning wealth-strategy wizard`, `fo planning protection wizard` e `fo planning estate wizard`, con draft privati, salvataggio progressivo e validazione locale.
+- UX: partire dalla decisione familiare, mostrare fatti già disponibili, chiedere solo dati mancanti, dichiarare assunzioni, `data_gaps`, limiti, provenance e prossima azione.
+- Test: ripresa con `--overwrite`, input incompleti, valori incerti come gap, path confinati al workspace, privacy, fixture sintetiche e coerenza con `fo ask`.
+- Out of scope: calcoli fiscali, previdenziali o finanziari nuovi; consulenza legale; import automatico da fonti non dichiarate; esecuzione automatica dei piani.
+- Done quando: ogni input richiesto dalle tre capability ha un percorso CLI guidato documentato e testato, e `fo ask` indica un prossimo comando realmente disponibile.
+
+Esito: completato con i tre wizard workspace-local `fo planning wealth-strategy wizard`, `fo planning protection wizard` e `fo planning estate wizard`. I draft usano salvataggio progressivo, `--overwrite`, provenance dichiarata e `data_gaps`; i path esterni sono rifiutati. `fo ask` propone i wizard quando mancano gli input corrispondenti. Valori di protezione incerti non vengono presentati come coperti: il builder restituisce `review_required`. Verifiche: 21 test mirati, regression engine 637 test OK con 1 skip Windows, compilazione, `pip check`, smoke help, audit roadmap, validazione routing strutturale, privacy/path boundary e `git diff --check` OK. Nessun dato personale reale, rete, import o nuovo calcolo introdotto.
+
+### V6.6b — Plain-language questions and contextual explanations
+
+**Stato:** `planned`
+**Tipo:** `functional`
+
+Sostituire nei wizard le richieste tecniche e criptiche con domande semplici orientate alla decisione familiare e aggiungere spiegazioni contestuali prima di ogni risposta.
+
+- Dipende da: V6.6a.
+- Repository: `engine`, `workspace`.
+- Output: testi question-first per i wizard wealth-strategy, protection ed estate; spiegazioni di data, pacchetto strategico, fatti disponibili, valori incerti e prossima azione.
+- UX: distinguere chiaramente dati già disponibili, dati richiesti, esempi e valori ancora da verificare; non chiedere identificativi tecnici senza spiegarne lo scopo.
+- Test: prompt comprensibili, default spiegati, input vuoti trasformati in `data_gaps`, ripresa con `--overwrite`, output senza gergo non spiegato e coerenza con `fo ask`.
+- Out of scope: nuovi calcoli, raccomandazioni automatiche, consulenza fiscale/legale/finanziaria e modifica dei contratti deterministici.
+- Done quando: un operatore non tecnico può completare o riprendere ciascun wizard comprendendo cosa sta inserendo, perché viene richiesto e quale sarà il passo successivo.
 
 ### V6.7 — Sanitized export and packaging
 
