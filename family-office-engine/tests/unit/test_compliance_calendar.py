@@ -78,6 +78,17 @@ class ComplianceCalendarTest(unittest.TestCase):
         with self.assertRaisesRegex(ComplianceCalendarError, "duplicate event_id: shared"):
             build_compliance_calendar(self.policy_path, self.workspace, "2026-01-01")
 
+    def test_policy_validity_is_checked_against_observation_date(self):
+        self._write_policy([])
+        result = build_compliance_calendar(self.policy_path, self.workspace, "2027-01-01")
+        self.assertEqual("needs_review", result["status"])
+        self.assertEqual("policy_outside_validity", result["data_gaps"][0]["code"])
+        invalid = policy([])
+        invalid["valid_to"] = "2025-12-31"
+        self.policy_path.write_text(json.dumps(invalid), encoding="utf-8")
+        with self.assertRaisesRegex(ComplianceCalendarError, "must not precede"):
+            build_compliance_calendar(self.policy_path, self.workspace, "2026-01-01")
+
     def test_setup_persists_local_event_and_reports_missing_source_as_gap(self):
         answers = iter(["Insurance renewal", "2026-11-15", "Alex", "Request renewal quote", ""])
         result = setup_workspace_compliance_event(self.workspace, lambda _prompt: next(answers))
@@ -86,6 +97,15 @@ class ComplianceCalendarTest(unittest.TestCase):
         report = build_compliance_calendar(self.policy_path, self.workspace, "2026-09-01")
         self.assertEqual("needs_review", report["status"])
         self.assertEqual("source_not_verified", report["data_gaps"][0]["code"])
+
+    def test_setup_chooses_first_free_local_event_id(self):
+        local_path = self.workspace / "snapshots" / "compliance-calendar.local-events.json"
+        local_path.parent.mkdir()
+        local_path.write_text(json.dumps({"schema_version": "compliance-calendar-local-events/v1", "record_type": "ComplianceCalendarLocalEvents", "events": [event("local-001", {"kind": "once", "date": "2026-10-01"}), event("local-003", {"kind": "once", "date": "2026-10-03"})]}), encoding="utf-8")
+        answers = iter(["New review", "2026-11-15", "household", "Review evidence", "source"])
+        setup_workspace_compliance_event(self.workspace, lambda _prompt: next(answers))
+        saved = json.loads(local_path.read_text())
+        self.assertEqual("local-002", saved["events"][-1]["event_id"])
 
     def test_cli_calendar_is_readable_and_setup_needs_no_json(self):
         self._write_policy([event("cli", {"kind": "once", "date": "2026-06-30"})])

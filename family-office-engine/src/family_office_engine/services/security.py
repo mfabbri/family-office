@@ -125,8 +125,8 @@ def _scan_for_secrets(root: Path) -> list[dict[str, str]]:
         except (UnicodeDecodeError, OSError):
             continue
         for line_number, line in enumerate(text.splitlines(), 1):
-            lowered = line.lower()
-            if any(marker in lowered for marker in ("synthetic", "fixture", "example")):
+            relative_parts = path.resolve().relative_to(root.resolve()).parts
+            if "tests" in relative_parts or "fixtures" in relative_parts:
                 continue
             if any(pattern.search(line) for pattern in _SECRET_PATTERNS):
                 findings.append({"code": "secret_detected", "path": _relative(root, path), "line": str(line_number)})

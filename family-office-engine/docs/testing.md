@@ -1300,7 +1300,7 @@ Il contratto `work-transition-scenario/v1` costruisce timeline mensili FTE per a
 
 ## Regulatory change
 
-## Wizard input V6.6a
+## Wizard input V6.6a/V6.6b
 
 Test mirati dei tre wizard CLI:
 
@@ -1308,6 +1308,6 @@ Test mirati dei tre wizard CLI:
 $env:PYTHONPATH='src'; python -m unittest tests.unit.test_planning_wizards_v66a
 ```
 
-I test usano esclusivamente risposte sintetiche e verificano draft workspace-local, `--overwrite`, provenance, `data_gaps` espliciti e prossima azione leggibile.
+I test usano esclusivamente risposte sintetiche e verificano draft workspace-local, `--overwrite`, provenance, `data_gaps` espliciti e prossima azione leggibile. Verificano anche i testi question-first: etichetta tecnica locale del nucleo, data a cui si riferiscono i dati, default `0.00` che diventa `data_gap` se il valore non è noto e spiegazione dei pacchetti wealth-strategy come alternative da confrontare.
 
-`test_regulatory_change.py` copre `regulatory-change/v1`: fonte autorevole, fonte non autorevole, validita' retroattiva, approvazione dopo test indipendenti, rollback e confinamento workspace. La CLI viene esercitata nello stesso test con `prepare` e `approve`.
+`test_regulatory_change.py` copre `regulatory-change/v1`: fonte autorevole, fonte non autorevole, validita' retroattiva, gate Knowledge/Rules/test evidence, rollback e confinamento workspace. `test_compliance_calendar.py` verifica anche validita' temporale della policy e ID locali non contigui; `test_security.py` verifica che un marker `fixture` in un commento non sopprima la rilevazione. La CLI viene esercitata nello stesso test con `prepare` e `approve`.

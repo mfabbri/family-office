@@ -14,7 +14,13 @@ class PlanningWizardsV66aTests(unittest.TestCase):
     def _run(self, command, answers, output):
         stdout = io.StringIO()
         workspace = output.parent.parent
-        with patch.dict(os.environ, {"FO_WORKSPACE_PATH": str(workspace)}), patch("builtins.input", side_effect=answers), redirect_stdout(stdout):
+        answer_iterator = iter(answers)
+
+        def answer(prompt):
+            print(prompt)
+            return next(answer_iterator)
+
+        with patch.dict(os.environ, {"FO_WORKSPACE_PATH": str(workspace)}), patch("builtins.input", side_effect=answer), redirect_stdout(stdout):
             exit_code = main(command + ["--input", str(output)])
         self.assertEqual(0, exit_code, stdout.getvalue())
         return json.loads(output.read_text(encoding="utf-8")), stdout.getvalue()
@@ -29,7 +35,11 @@ class PlanningWizardsV66aTests(unittest.TestCase):
             self.assertEqual("ProtectionGapInput", data["record_type"])
             self.assertEqual("user_declared_input", data["family_needs"][0]["provenance"][0]["type"])
             self.assertIn("unknown_policy_coverage", {gap["code"] for gap in data["data_gaps"]})
-            self.assertIn("next: `fo planning protection build`", text)
+            self.assertIn("solo un'etichetta tecnica locale", text)
+            self.assertIn("A quale data si riferiscono questi dati?", text)
+            self.assertIn("diventa un `data_gap`", text)
+            self.assertIn("resta `0.00` nella bozza", text)
+            self.assertIn("Ora esegui `fo planning protection build`", text)
             snapshot_path = output.with_suffix(".snapshot.json")
             self.assertEqual(0, main(["planning", "protection", "build", "--input", str(output), "--output", str(snapshot_path)]))
             snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
@@ -45,7 +55,11 @@ class PlanningWizardsV66aTests(unittest.TestCase):
             self.assertEqual("EstatePlanInput", data["record_type"])
             self.assertEqual("user_declared_input", data["assets"][0]["provenance"][0]["type"])
             self.assertIn("family_and_allocation_review_required", {gap["code"] for gap in data["data_gaps"]})
-            self.assertIn("next: `fo planning estate build`", text)
+            self.assertIn("solo un'etichetta tecnica locale", text)
+            self.assertIn("A quale data si riferiscono questi dati?", text)
+            self.assertIn("diventa un `data_gap`", text)
+            self.assertIn("resta `0.00` nella bozza", text)
+            self.assertIn("Ora esegui `fo planning estate build`", text)
             self.assertEqual(0, main(["planning", "estate", "build", "--input", str(output), "--output", str(output.with_suffix(".snapshot.json"))]))
 
     def test_wealth_strategy_wizard_requires_two_declared_packages_and_overwrite(self):
@@ -58,12 +72,15 @@ class PlanningWizardsV66aTests(unittest.TestCase):
             self.assertEqual("WealthStrategyInput", data["record_type"])
             self.assertEqual(2, len(data["packages"]))
             self.assertIn("wizard_requires_source_review", {gap["code"] for gap in data["data_gaps"]})
-            self.assertIn("next: `fo planning wealth-strategy build`", text)
+            self.assertIn("solo un'etichetta tecnica locale", text)
+            self.assertIn("A quale data si riferiscono questi dati?", text)
+            self.assertIn("Un pacchetto è un possibile modo di organizzare le scelte familiari da confrontare", text)
+            self.assertIn("Ora esegui `fo planning wealth-strategy build`", text)
             self.assertEqual(0, main(["planning", "wealth-strategy", "build", "--input", str(output), "--output", str(output.with_suffix(".snapshot.json"))]))
             stdout = io.StringIO()
             with patch.dict(os.environ, {"FO_WORKSPACE_PATH": str(output.parent.parent)}), redirect_stdout(stdout):
                 self.assertEqual(0, main(["planning", "wealth-strategy", "wizard", "--input", str(output)]))
-            self.assertIn("existing input found", stdout.getvalue())
+            self.assertIn("bozza", stdout.getvalue())
 
     def test_protection_wizard_saves_private_progress_on_interrupt(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

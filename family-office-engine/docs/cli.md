@@ -1654,7 +1654,9 @@ fo planning protection wizard
 fo planning estate wizard
 ```
 
-Ogni wizard mostra il contesto raccolto, salva un input privato in `../family-office-workspace/planning/`, conserva la provenienza come dichiarazione dell'utente e rende espliciti i valori incerti in `data_gaps`. Se esiste gia' un input, il comando non lo sovrascrive: usare `--overwrite` per rivederlo. Il riepilogo finale indica il prossimo `build` da eseguire. I wizard non importano documenti, non usano rete e non calcolano imposte, pensioni, rendimenti, coperture consigliate o effetti legali.
+Ogni wizard parte dalla decisione familiare e spiega le risposte prima di chiederle: il nome del nucleo è solo un'etichetta tecnica locale, la data di riferimento è la data a cui si riferiscono i dati e un valore non noto diventa un `data_gap` da verificare. Nel wizard wealth-strategy, un pacchetto è un possibile modo di organizzare le scelte familiari da confrontare, non una raccomandazione. Per esempio, si possono chiamare i due pacchetti `liquidita_prima` e `protezione_prima`.
+
+Il wizard salva un input privato in `../family-office-workspace/planning/`, conserva la provenienza come dichiarazione dell'utente e spiega nel messaggio finale cosa farà il comando `build` successivo. Se esiste già un input, il comando non lo sovrascrive: usare `--overwrite` per rivederlo. I wizard non importano documenti, non usano rete e non calcolano imposte, pensioni, rendimenti, coperture consigliate o effetti legali.
 
 ## `fo compliance regulatory`
 
@@ -1664,4 +1666,4 @@ Prepara una proposta normativa versionata senza modificare automaticamente knowl
 fo compliance regulatory prepare --change-id it.demo.2026.v2 --summary "..." --source-url https://example.gov/change --authority official --jurisdiction IT --valid-from 2026-09-01 --affected-rule-pack it.demo.2026.v1 --required-test test_demo --rollback-strategy "restore previous version"
 ```
 
-La proposta `regulatory-change/v1` espone fonte, autorita', validita', retroattivita', impatto, data gaps, test richiesti e checklist. Una fonte non autorevole o una validita' retroattiva resta in revisione. Dopo evidenza indipendente si puo' usare `approve --input <path> --approver <name> --tests-passed`; `rollback --input <path> --reason <reason>` registra il ripristino. I file sono accettati solo dentro il workspace.
+La proposta `regulatory-change/v1` espone fonte, autorita', validita', retroattivita', impatto, data gaps, test richiesti e checklist. Una fonte non autorevole o una validita' retroattiva resta in revisione. L'approvazione richiede evidenza nominativa dei test e la conferma esplicita dei passaggi Knowledge e Rules: `approve --input <path> --approver <name> --tests-passed --knowledge-updated --rule-pack-versioned --test-evidence <test-name>`. `rollback --input <path> --reason <reason>` registra il ripristino. I file sono accettati solo dentro il workspace.

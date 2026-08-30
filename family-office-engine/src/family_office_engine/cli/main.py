@@ -2082,17 +2082,17 @@ def run_protection_wizard(input_path: Path, overwrite: bool = False) -> dict[str
     if existing is not None and not overwrite:
         return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
     defaults = existing or {}
-    print("planning protection wizard: raccoglie solo fabbisogno e copertura dichiarati; premi invio per segnare un valore come incerto.")
-    print(f"contesto disponibile: nucleo={defaults.get('household_id') or 'household_private'}, valuta=EUR, input={input_path}")
-    household_id = _prompt_text("Nome tecnico del nucleo/caso", str(defaults.get("household_id") or "household_private"))
+    print("Prepariamo una bozza per capire quali informazioni servono sulla protezione della famiglia. Non calcoliamo consigli o coperture.")
+    print(f"Contesto disponibile: nucleo={defaults.get('household_id') or 'household_private'}, valuta=EUR.")
+    household_id = _prompt_text("Come vuoi chiamare questo nucleo? È solo un'etichetta tecnica locale per ritrovare la bozza, per esempio `famiglia_casa`; non è una valutazione.", str(defaults.get("household_id") or "household_private"))
     _save_v66a_progress(input_path, {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id}, ProtectionGapError, "household_id")
-    as_of_date = _prompt_date("Data di riferimento (YYYY-MM-DD)", str(defaults.get("as_of_date") or "2026-01-01"))
+    as_of_date = _prompt_date("A quale data si riferiscono questi dati? Non è la data in cui compili la bozza. Se si riferiscono a oggi, premi Invio; altrimenti inserisci YYYY-MM-DD.", str(defaults.get("as_of_date") or date.today().isoformat()))
     _save_v66a_progress(input_path, {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id, "as_of_date": as_of_date}, ProtectionGapError, "as_of_date")
-    need_capital = _prompt_decimal_text("Capitale necessario per la famiglia in caso di decesso; 0.00 se ignoto", str(defaults.get("need_capital") or "0.00"))
+    need_capital = _prompt_decimal_text("Quale capitale ritieni necessario alla famiglia in caso di decesso? Se non conosci il dato, premi Invio: resta `0.00` nella bozza e diventa un `data_gap`, cioè un dato da verificare. Esempio: `250000.00`.", str(defaults.get("need_capital") or "0.00"))
     _save_v66a_progress(input_path, {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id, "as_of_date": as_of_date, "need_capital": need_capital}, ProtectionGapError, "need_capital")
-    policy_capital = _prompt_decimal_text("Capitale assicurato dichiarato per decesso; 0.00 se ignoto", str(defaults.get("policy_capital") or "0.00"))
+    policy_capital = _prompt_decimal_text("Quale capitale per decesso risulta dalla polizza? Se non conosci il dato, premi Invio: resta `0.00` nella bozza e diventa un `data_gap`, cioè un dato da verificare. Esempio: `150000.00`.", str(defaults.get("policy_capital") or "0.00"))
     _save_v66a_progress(input_path, {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id, "as_of_date": as_of_date, "need_capital": need_capital, "policy_capital": policy_capital}, ProtectionGapError, "policy_capital")
-    beneficiary = _prompt_text("Identificativo tecnico del beneficiario", "beneficiary_review")
+    beneficiary = _prompt_text("Chi deve essere indicato come beneficiario nella bozza? Usa un'etichetta locale, per esempio `coniuge` o `beneficiario_da_verificare`.", "beneficiary_review")
     gaps = _wizard_gaps([(need_capital == "0.00", "unknown_family_need_capital", "Family protection need must be documented."), (policy_capital == "0.00", "unknown_policy_coverage", "Policy coverage must be documented.")])
     data = {"schema_version": "protection-gap/v1", "record_type": "ProtectionGapInput", "household_id": household_id, "as_of_date": as_of_date, "base_currency": "EUR", "family_needs": [{"need_id": "death_protection_review", "label": "Declared death protection need", "event_type": "death", "required_capital": need_capital, "covered_person_ids": [], "provenance": _wizard_provenance()}], "policies": [{"policy_id": "policy_review", "label": "Declared policy under review", "policy_type": "risk_life", "currency": "EUR", "annual_premium": None, "surrender_value": None, "beneficiaries": [{"beneficiary_person_id": beneficiary, "relationship": "unknown", "share": "1.00", "provenance": "user_declared_input"}], "coverage_events": [{"event_type": "death", "insured_capital": policy_capital, "provenance": "user_declared_input"}], "provenance": _wizard_provenance()}], "data_gaps": gaps}
     _write_wizard_json(input_path, data, True, ProtectionGapError, "protection gap input")
@@ -2105,16 +2105,16 @@ def run_estate_wizard(input_path: Path, overwrite: bool = False) -> dict[str, An
     if existing is not None and not overwrite:
         return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
     defaults = existing or {}
-    print("planning estate wizard: raccoglie fatti dichiarati; non determina quote, imposte o effetti legali.")
-    print(f"contesto disponibile: nucleo={defaults.get('household_id') or 'household_private'}, rule-pack={default_estate_plan_rule_pack()}")
-    household_id = _prompt_text("Nome tecnico del nucleo/caso", str(defaults.get("household_id") or "household_private"))
+    print("Prepariamo una bozza dei fatti da rivedere per la successione. Non determina quote, imposte o effetti legali.")
+    print(f"Contesto disponibile: nucleo={defaults.get('household_id') or 'household_private'}.")
+    household_id = _prompt_text("Come vuoi chiamare questo nucleo? È solo un'etichetta tecnica locale per ritrovare la bozza, per esempio `famiglia_casa`; non è una valutazione.", str(defaults.get("household_id") or "household_private"))
     _save_v66a_progress(input_path, {"schema_version": "estate-plan/v2", "record_type": "EstatePlanInput", "household_id": household_id}, EstatePlanError, "household_id")
-    as_of_date = _prompt_date("Data di riferimento (YYYY-MM-DD)", str(defaults.get("as_of_date") or "2026-01-01"))
+    as_of_date = _prompt_date("A quale data si riferiscono questi dati? Non è la data in cui compili la bozza. Se si riferiscono a oggi, premi Invio; altrimenti inserisci YYYY-MM-DD.", str(defaults.get("as_of_date") or date.today().isoformat()))
     _save_v66a_progress(input_path, {"schema_version": "estate-plan/v2", "record_type": "EstatePlanInput", "household_id": household_id, "as_of_date": as_of_date}, EstatePlanError, "as_of_date")
-    decedent = _prompt_text("Identificativo tecnico della persona titolare", str(defaults.get("decedent_person_id") or "person_review"))
+    decedent = _prompt_text("Chi è la persona titolare da considerare? Usa un'etichetta locale, per esempio `persona_1`.", str(defaults.get("decedent_person_id") or "person_review"))
     _save_v66a_progress(input_path, {"schema_version": "estate-plan/v2", "record_type": "EstatePlanInput", "household_id": household_id, "as_of_date": as_of_date, "decedent_person_id": decedent}, EstatePlanError, "decedent_person_id")
-    asset_id = _prompt_text("Identificativo tecnico di un asset da riesaminare", str(defaults.get("asset_id") or "asset_review"))
-    asset_value = _prompt_decimal_text("Valore lordo dichiarato dell'asset; 0.00 se ignoto", str(defaults.get("asset_value") or "0.00"))
+    asset_id = _prompt_text("Quale bene vuoi inserire per la revisione? Usa un'etichetta locale, per esempio `casa_principale`.", str(defaults.get("asset_id") or "asset_review"))
+    asset_value = _prompt_decimal_text("Qual è il valore lordo dichiarato del bene? Se non conosci il dato, premi Invio: resta `0.00` nella bozza e diventa un `data_gap`, cioè un dato da verificare. Esempio: `300000.00`.", str(defaults.get("asset_value") or "0.00"))
     data = {"schema_version": "estate-plan/v2", "record_type": "EstatePlanInput", "household_id": household_id, "as_of_date": as_of_date, "base_currency": "EUR", "decedent_person_id": decedent, "family": {"has_spouse": False, "children": []}, "assets": [{"asset_id": asset_id, "label": "Asset declared for review", "asset_class": "other", "jurisdiction": "IT", "currency": "EUR", "gross_value": asset_value, "ownership_share": "1.00", "provenance": _wizard_provenance()}], "insurance_policies": [], "prior_donations": [], "scenarios": [], "data_gaps": _wizard_gaps([(asset_value == "0.00", "unknown_estate_asset_value", "Estate asset value must be documented."), (True, "family_and_allocation_review_required", "Family composition, allocations, donations and tax liquidity require explicit review.")])}
     _write_wizard_json(input_path, data, True, EstatePlanError, "estate plan input")
     return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(data["data_gaps"])}
@@ -2126,20 +2126,20 @@ def run_wealth_strategy_wizard(input_path: Path, overwrite: bool = False) -> dic
     if existing is not None and not overwrite:
         return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
     defaults = existing or {}
-    print("planning wealth-strategy wizard: prepara due pacchetti dichiarati, senza ranking o calcoli nuovi.")
+    print("Prepariamo due possibili modi di organizzare le scelte familiari da confrontare. Non calcoliamo ranking o raccomandazioni.")
     print(
-        "fatti disponibili: "
-        f"goals={'yes' if default_planning_goals_output().exists() else 'no'}, "
-        f"protection={'yes' if default_protection_gap_output().exists() else 'no'}, "
-        f"estate={'yes' if default_estate_plan_output().exists() else 'no'}"
+        "Fatti già disponibili: "
+        f"obiettivi familiari={'sì' if default_planning_goals_output().exists() else 'no'}, "
+        f"protezione economica={'sì' if default_protection_gap_output().exists() else 'no'}, "
+        f"successione={'sì' if default_estate_plan_output().exists() else 'no'}."
     )
-    household_id = _prompt_text("Nome tecnico del nucleo/caso", str(defaults.get("household_id") or "household_private"))
+    household_id = _prompt_text("Come vuoi chiamare questo nucleo? È solo un'etichetta tecnica locale per ritrovare la bozza, per esempio `famiglia_casa`; non è una valutazione.", str(defaults.get("household_id") or "household_private"))
     _save_v66a_progress(input_path, {"schema_version": "wealth-strategy-input/v1", "record_type": "WealthStrategyInput", "household_id": household_id}, WealthStrategyError, "household_id")
-    as_of_date = _prompt_date("Data di riferimento (YYYY-MM-DD)", str(defaults.get("as_of_date") or "2026-01-01"))
+    as_of_date = _prompt_date("A quale data si riferiscono questi dati? Non è la data in cui compili la bozza. Se si riferiscono a oggi, premi Invio; altrimenti inserisci YYYY-MM-DD.", str(defaults.get("as_of_date") or date.today().isoformat()))
     _save_v66a_progress(input_path, {"schema_version": "wealth-strategy-input/v1", "record_type": "WealthStrategyInput", "household_id": household_id, "as_of_date": as_of_date}, WealthStrategyError, "as_of_date")
-    first_label = _prompt_text("Nome del primo pacchetto da confrontare", str(defaults.get("first_label") or "package_review_a"))
+    first_label = _prompt_text("Un pacchetto è un possibile modo di organizzare le scelte familiari da confrontare, non una raccomandazione. Come chiami il primo? Esempio: `liquidita_prima`.", str(defaults.get("first_label") or "package_review_a"))
     _save_v66a_progress(input_path, {"schema_version": "wealth-strategy-input/v1", "record_type": "WealthStrategyInput", "household_id": household_id, "as_of_date": as_of_date, "first_label": first_label}, WealthStrategyError, "first_package")
-    second_label = _prompt_text("Nome del secondo pacchetto da confrontare", str(defaults.get("second_label") or "package_review_b"))
+    second_label = _prompt_text("Qual è il secondo possibile modo di organizzare le scelte familiari da confrontare? Esempio: `protezione_prima`.", str(defaults.get("second_label") or "package_review_b"))
     weights = {key: "1.00" for key in ("liquidity", "retirement", "tax_efficiency", "protection", "succession", "cross_border", "reversibility")}
     def package(identifier: str, label: str) -> dict[str, Any]:
         return {"package_id": identifier, "label": label, "components": [{"component_id": f"{identifier}_goals", "source_key": "planning_goals", "selector": {"path": "status", "exists": True}}], "declared_scores": {key: "0.00" for key in weights}, "implementation": {"actions_90_days": ["Document declared actions before comparison."], "actions_180_days": ["Review the package with the relevant professional."]}, "costs": [], "dependencies": ["Source snapshots and declared scores"], "reversibility": "unknown", "controls": ["Human review required"], "risks": ["Package is incomplete until sources are available"], "adverse_scenarios": ["Missing or partial source snapshot"]}
@@ -3486,6 +3486,9 @@ def build_parser() -> argparse.ArgumentParser:
     regulatory_approve.add_argument("--input", type=Path, required=True)
     regulatory_approve.add_argument("--approver", required=True)
     regulatory_approve.add_argument("--tests-passed", action="store_true")
+    regulatory_approve.add_argument("--knowledge-updated", action="store_true")
+    regulatory_approve.add_argument("--rule-pack-versioned", action="store_true")
+    regulatory_approve.add_argument("--test-evidence", required=True)
     regulatory_rollback = regulatory_subparsers.add_parser("rollback", help="Record rollback of an approved proposal")
     regulatory_rollback.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
     regulatory_rollback.add_argument("--input", type=Path, required=True)
@@ -6020,7 +6023,7 @@ def main(argv: list[str] | None = None) -> int:
                     print("Next: obtain independent test evidence and run 'fo compliance regulatory approve'.")
                     return 0 if not proposal["impact_assessment"]["findings"] else 2
                 if args.regulatory_command == "approve":
-                    proposal = approve_regulatory_change(args.input, args.workspace, args.approver, tests_passed=args.tests_passed)
+                    proposal = approve_regulatory_change(args.input, args.workspace, args.approver, tests_passed=args.tests_passed, knowledge_updated=args.knowledge_updated, rule_pack_versioned=args.rule_pack_versioned, test_evidence=args.test_evidence)
                     print(f"regulatory approve: {proposal['status']} ({args.input})")
                     return 0
                 if args.regulatory_command == "rollback":
@@ -7262,9 +7265,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"planning protection wizard: ERROR ({exc})")
             return 1
         if result["status"] == "existing":
-            print(f"planning protection wizard: existing input found ({result['input_path']}; rerun with `--overwrite` to revise it)")
+            print(f"planning protection wizard: bozza già presente ({result['input_path']}). Per rivedere le risposte, esegui di nuovo con `--overwrite`; poi `fo planning protection build` crea il riepilogo dai dati dichiarati.")
         else:
-            print(f"planning protection wizard: prepared {result['data_gap_count']} gaps ({result['input_path']}; next: `fo planning protection build`)")
+            print(f"planning protection wizard: bozza salvata con {result['data_gap_count']} dati da verificare ({result['input_path']}). Ora esegui `fo planning protection build`: usa i dati dichiarati e mostra gli eventuali gap, senza consigliare una polizza.")
         return 0
 
     if (
@@ -7325,9 +7328,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"planning estate wizard: ERROR ({exc})")
             return 1
         if result["status"] == "existing":
-            print(f"planning estate wizard: existing input found ({result['input_path']}; rerun with `--overwrite` to revise it)")
+            print(f"planning estate wizard: bozza già presente ({result['input_path']}). Per rivedere le risposte, esegui di nuovo con `--overwrite`; poi `fo planning estate build` prepara il riepilogo dei fatti da rivedere.")
         else:
-            print(f"planning estate wizard: prepared {result['data_gap_count']} gaps ({result['input_path']}; next: `fo planning estate build`)")
+            print(f"planning estate wizard: bozza salvata con {result['data_gap_count']} dati da verificare ({result['input_path']}). Ora esegui `fo planning estate build`: organizza i fatti dichiarati, ma non decide quote, imposte o effetti legali.")
         return 0
 
     if (
@@ -7384,9 +7387,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"planning wealth-strategy wizard: ERROR ({exc})")
             return 1
         if result["status"] == "existing":
-            print(f"planning wealth-strategy wizard: existing input found ({result['input_path']}; rerun with `--overwrite` to revise it)")
+            print(f"planning wealth-strategy wizard: bozza già presente ({result['input_path']}). Per rivedere le risposte, esegui di nuovo con `--overwrite`; poi `fo planning wealth-strategy build` confronta soltanto i pacchetti dichiarati e le fonti disponibili.")
         else:
-            print(f"planning wealth-strategy wizard: prepared {result['data_gap_count']} gaps ({result['input_path']}; next: `fo planning wealth-strategy build`)")
+            print(f"planning wealth-strategy wizard: bozza salvata con {result['data_gap_count']} dati da verificare ({result['input_path']}). Ora esegui `fo planning wealth-strategy build`: confronta, per esempio, `liquidita_prima` e `protezione_prima` usando solo fonti dichiarate; non crea nuovi calcoli o raccomandazioni.")
         return 0
 
     if (

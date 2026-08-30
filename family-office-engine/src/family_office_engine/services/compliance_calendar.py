@@ -28,7 +28,7 @@ def build_compliance_calendar(
     local = _read_local_events(workspace)
     events = list(policy["events"]) + local["events"]
     _validate_unique_event_ids(events)
-    entries, gaps = [], []
+    entries, gaps = [], _policy_validity_gaps(policy, current)
     for event in events:
         entry, event_gaps = _entry(event, current)
         entries.append(entry)
@@ -64,7 +64,11 @@ def setup_workspace_compliance_event(workspace_root: Path, ask: Any) -> dict[str
     if not action:
         raise ComplianceCalendarError("required action cannot be empty")
     source = ask("Source or issuer (leave blank when not verified): ").strip() or None
-    event_id = f"local-{len(local['events']) + 1:03d}"
+    used_ids = {event.get("event_id") for event in local["events"]}
+    sequence = 1
+    while f"local-{sequence:03d}" in used_ids:
+        sequence += 1
+    event_id = f"local-{sequence:03d}"
     event = {
         "event_id": event_id, "title": title, "category": "workspace", "schedule": {"kind": "once", "date": due_date},
         "timezone": "Europe/Rome", "owner": owner, "required_action": action, "source_refs": [] if source is None else [source],
@@ -131,9 +135,21 @@ def _validate_policy(policy: dict[str, Any]) -> None:
     for field in ("policy_id", "valid_from", "verified_at"):
         if not isinstance(policy.get(field), str) or not policy[field]: raise ComplianceCalendarError(f"policy {field} is required")
     if not isinstance(policy.get("jurisdictions"), list) or not isinstance(policy.get("source_refs"), list) or not isinstance(policy.get("events"), list): raise ComplianceCalendarError("policy requires jurisdictions, source_refs and events lists")
+    valid_from = _date(policy["valid_from"], "policy valid_from")
+    valid_to = _date(policy["valid_to"], "policy valid_to") if policy.get("valid_to") else None
+    _date(policy["verified_at"], "policy verified_at")
+    if valid_to and valid_to < valid_from: raise ComplianceCalendarError("policy valid_to must not precede valid_from")
     for event in policy["events"]:
         _validate_event(event)
     _validate_unique_event_ids(policy["events"])
+
+
+def _policy_validity_gaps(policy: dict[str, Any], current: date) -> list[dict[str, Any]]:
+    valid_from = _date(policy["valid_from"], "policy valid_from")
+    valid_to = _date(policy["valid_to"], "policy valid_to") if policy.get("valid_to") else None
+    if current < valid_from or (valid_to and current > valid_to):
+        return [{"code": "policy_outside_validity", "event_id": "__policy__", "action": "Use a policy whose validity covers the calendar observation date."}]
+    return []
 
 
 def _validate_event(event: Any) -> None:

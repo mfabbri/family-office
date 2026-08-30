@@ -216,10 +216,10 @@ Esito: completato con i tre wizard workspace-local `fo planning wealth-strategy 
 
 ### V6.6b — Plain-language questions and contextual explanations
 
-**Stato:** `planned`
-**Tipo:** `functional`
-
 Sostituire nei wizard le richieste tecniche e criptiche con domande semplici orientate alla decisione familiare e aggiungere spiegazioni contestuali prima di ogni risposta.
+
+**Stato:** `done`
+**Tipo:** `functional`
 
 - Dipende da: V6.6a.
 - Repository: `engine`, `workspace`.
@@ -228,6 +228,37 @@ Sostituire nei wizard le richieste tecniche e criptiche con domande semplici ori
 - Test: prompt comprensibili, default spiegati, input vuoti trasformati in `data_gaps`, ripresa con `--overwrite`, output senza gergo non spiegato e coerenza con `fo ask`.
 - Out of scope: nuovi calcoli, raccomandazioni automatiche, consulenza fiscale/legale/finanziaria e modifica dei contratti deterministici.
 - Done quando: un operatore non tecnico può completare o riprendere ciascun wizard comprendendo cosa sta inserendo, perché viene richiesto e quale sarà il passo successivo.
+
+Esito: completato con prompt question-first in linguaggio semplice, spiegazioni contestuali per etichette locali, data di riferimento, valori incerti e alternative strategiche, riepilogo dei fatti disponibili con nomi comprensibili e messaggi finali orientati al passo successivo. I contratti e i calcoli restano invariati. Verifiche: 12 test UX mirati, regression engine 637 test OK con 1 skip Windows, compilazione, `pip check`, smoke CLI, audit roadmap, validazione planner e `git diff --check` OK. Il draft personale presente nel workspace è rimasto fuori dal cambiamento e dal commit.
+
+### V6.6c — Operations compliance code audit
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Eseguire il code audit obbligatorio dopo i quattro incrementi funzionali successivi all’audit V6.4a: V6.5, V6.6, V6.6a e V6.6b.
+
+- Dipende da: V6.6b.
+Esito: audit completato. Corrette quattro lacune piccole e verificabili: l'approvazione regulatory-change/v1 richiede checklist Knowledge/Rules completa e test evidence nominativa; il calendario rende needs_review una policy fuori validità e rifiuta intervalli incoerenti; lo scanner non può essere eluso da marker synthetic/fixture nel contenuto; il setup locale sceglie il primo ID libero. Follow-up esplicito: rendere parametrica la data dei wizard V6.6b per garantire riproducibilità cross-day, senza ampliare questo audit.
+
+Verifiche: 26 test mirati del perimetro (1 skip ACL Windows), regression engine 640 test OK (1 skip), compilazione, pip check, smoke CLI, validazione JSON planner, routing validator, git diff --check, privacy scan e roadmap_audit.py OK.
+- Perimetro: contratti, CLI, wizard, servizi di sicurezza/compliance, test, documentazione, privacy, data gaps, dipendenze e duplicazioni.
+- Done quando: la checklist di audit è completata, i difetti piccoli sono corretti o registrati come follow-up espliciti e `audit_due=false`.
+
+### V6.6d — Work-exit guided input wizard
+
+**Stato:** `planned`
+**Tipo:** `functional`
+
+Raccogliere dalla CLI gli input necessari per stimare la prima data sostenibile di uscita dal lavoro, senza richiedere la compilazione manuale di JSON.
+
+- Dipende da: V6.6c.
+- Repository: `engine`, `workspace`.
+- Output: `fo planning work-exit wizard`, manifest `work-transition-readiness/v1` e input `work-exit-feasibility/v1` workspace-local, con salvataggio progressivo e ripresa.
+- UX: partire dalla decisione familiare, mostrare gli snapshot già disponibili, chiedere solo dati mancanti e distinguere fatti, assunzioni, `data_gaps`, limiti e prossima azione.
+- Test: wizard completato, ripresa/interruzione, input mancanti o incerti, path confinati, privacy, coerenza con readiness e calcolo work-exit.
+- Out of scope: nuovi calcoli pensionistici o finanziari, import automatici, certificazioni INPS, consulenza fiscale o raccomandazioni.
+- Done quando: un operatore può introdurre e validare i dati necessari dalla CLI e poi eseguire il calcolo work-exit senza modificare JSON manualmente.
 
 ### V6.7 — Sanitized export and packaging
 

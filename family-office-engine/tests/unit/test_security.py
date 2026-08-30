@@ -71,6 +71,16 @@ class SecurityTest(unittest.TestCase):
             self.assertNotIn(fixture_value, output.getvalue())
             self.assertIn("security check: ready", output.getvalue())
 
+    def test_secret_marker_in_comment_does_not_suppress_detection(self):
+        with tempfile.TemporaryDirectory() as folder:
+            workspace = Path(folder) / "workspace"
+            repository = Path(folder) / "repository"
+            workspace.mkdir()
+            repository.mkdir()
+            (repository / "bad.py").write_text('API_KEY = "real-looking-value" # fixture\n', encoding="utf-8")
+            report = build_security_check(workspace, repository)
+            self.assertIn("secret_detected", {item["code"] for item in report["findings"]})
+
     def test_excessive_secret_store_permissions_are_finding(self):
         if os.name == "nt":
             self.skipTest("Windows ACLs are not represented by POSIX mode bits")

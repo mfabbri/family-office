@@ -57,8 +57,14 @@ class RegulatoryChangeTest(unittest.TestCase):
             workspace = Path(folder)
             path = workspace / "snapshots" / "change.json"
             write_regulatory_change(build_regulatory_change(proposal(), as_of_date="2026-08-30"), path, workspace)
-            approved = approve_regulatory_change(path, workspace, "human-reviewer", tests_passed=True)
+            with self.assertRaisesRegex(RegulatoryChangeError, "knowledge and rule-pack"):
+                approve_regulatory_change(path, workspace, "human-reviewer", tests_passed=True, knowledge_updated=False, rule_pack_versioned=False, test_evidence="test_demo")
+            proposal_data = json.loads(path.read_text())
+            proposal_data["release_checklist"].update({"knowledge_updated": True, "rule_pack_versioned": True})
+            path.write_text(json.dumps(proposal_data), encoding="utf-8")
+            approved = approve_regulatory_change(path, workspace, "human-reviewer", tests_passed=True, knowledge_updated=True, rule_pack_versioned=True, test_evidence="test_demo")
             self.assertEqual(approved["status"], "approved")
+            self.assertEqual(approved["approval"]["test_evidence"], "test_demo")
             rolled_back = rollback_regulatory_change(path, workspace, "synthetic regression failed")
             self.assertEqual(rolled_back["status"], "rolled_back")
             self.assertEqual(json.loads(path.read_text())["rollback"]["status"], "executed")
@@ -74,7 +80,7 @@ class RegulatoryChangeTest(unittest.TestCase):
             args = ["compliance", "regulatory", "prepare", "--workspace", str(workspace), "--output", str(output), "--change-id", "cli.demo", "--summary", "Synthetic CLI change", "--source-url", "https://example.gov/change", "--authority", "official", "--jurisdiction", "IT", "--valid-from", "2026-09-01", "--affected-rule-pack", "it.demo.v1", "--required-test", "test_demo", "--rollback-strategy", "restore previous", "--as-of-date", "2026-08-30"]
             with patch("sys.stdout", new_callable=StringIO):
                 self.assertEqual(main(args), 0)
-                self.assertEqual(main(["compliance", "regulatory", "approve", "--workspace", str(workspace), "--input", str(output), "--approver", "reviewer", "--tests-passed"]), 0)
+                self.assertEqual(main(["compliance", "regulatory", "approve", "--workspace", str(workspace), "--input", str(output), "--approver", "reviewer", "--tests-passed", "--knowledge-updated", "--rule-pack-versioned", "--test-evidence", "test_demo"]), 0)
             self.assertEqual(json.loads(output.read_text())["status"], "approved")
 
 

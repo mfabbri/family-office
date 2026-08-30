@@ -112,7 +112,7 @@ def write_regulatory_change(proposal: Mapping[str, Any], output: Path, workspace
     return dict(proposal, path=str(destination))
 
 
-def approve_regulatory_change(path: Path, workspace: Path, approver: str, *, tests_passed: bool) -> dict[str, Any]:
+def approve_regulatory_change(path: Path, workspace: Path, approver: str, *, tests_passed: bool, knowledge_updated: bool = False, rule_pack_versioned: bool = False, test_evidence: str = "") -> dict[str, Any]:
     destination = _workspace_path(path, workspace)
     proposal = json.loads(destination.read_text(encoding="utf-8"))
     if proposal.get("schema_version") != SCHEMA_VERSION:
@@ -123,9 +123,14 @@ def approve_regulatory_change(path: Path, workspace: Path, approver: str, *, tes
         raise RegulatoryChangeError("proposal has unresolved source or impact findings")
     if not tests_passed:
         raise RegulatoryChangeError("approval requires passing required tests")
+    if not knowledge_updated or not rule_pack_versioned:
+        raise RegulatoryChangeError("approval requires completed knowledge and rule-pack checklist")
+    if not isinstance(test_evidence, str) or not test_evidence.strip():
+        raise RegulatoryChangeError("approval requires named test evidence")
     proposal["status"] = "approved"
     proposal["approval"] = {"approver": approver, "approved_on": date.today().isoformat()}
-    proposal["release_checklist"].update({"tests_passed": True, "human_approved": True})
+    proposal["approval"]["test_evidence"] = test_evidence.strip()
+    proposal["release_checklist"].update({"knowledge_updated": True, "rule_pack_versioned": True, "tests_passed": True, "human_approved": True})
     return write_regulatory_change(proposal, destination, workspace)
 
 
