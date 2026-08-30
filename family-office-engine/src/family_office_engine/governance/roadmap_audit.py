@@ -182,13 +182,12 @@ def _audit_requirement_allows_current(
         return True
     if current.kind != "functional" or current.status != "done":
         return False
-    current_index = increments.index(current)
     relevant = increments[last_audit_index + 1 :] if last_audit_index is not None else increments
     latest_completed_functional = max(
         (increment for increment in relevant if increment.kind == "functional" and increment.status == "done"),
         key=increments.index,
     )
-    return latest_completed_functional.increment_id == current.increment_id and current_index == len(increments) - 1
+    return latest_completed_functional.increment_id == current.increment_id
 
 
 def default_paths() -> tuple[Path, Path]:

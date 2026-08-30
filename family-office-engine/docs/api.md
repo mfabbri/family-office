@@ -870,6 +870,10 @@ Funzioni principali:
 
 Il catalogo copre ogni tool del registry una sola volta nella capability disponibile. Le domande su investimenti a reddito o asset mobili noleggiabili richiedono ora un confronto deterministico e gap dichiarati; il routing da linguaggio naturale e' fornito da `question-intent/v1` (V5.4), ma non invoca tool. Dati minimi mancanti, intenti sovrapposti, sconosciuti o che richiedono consulenza professionale producono problemi espliciti.
 
+## Operator analysis
+
+Modulo `family_office_engine.services.operator_analysis`: `analyze_operator_question(question, workspace_root, local_intent_assist=None)` restituisce `operator-analysis/v1` per il journey `fo ask`. Usa il router e il catalogo V5, ma ispeziona nel workspace soltanto i metadati degli snapshot; non persiste il testo della domanda, non invoca tool e non calcola valori fiscali, previdenziali o finanziari. Il campo `presentation` espone decisione, soli fatti rilevanti con label leggibili, stato di diagnosi, assenza di analisi eseguita, limiti, provenienza e prossima azione; i dettagli tecnici restano nel contratto. Se configurato, `local_intent_assist` chiama soltanto un endpoint HTTP loopback e pubblica una proposta effimera in `intent_assist`; la proposta e la sua validazione contro il catalogo restano separate, e il router lessicale conserva sempre l'autorita' e il fallback.
+
 ## Question intent
 
 Modulo:
@@ -936,3 +940,28 @@ Modulo `family_office_engine.services.local_conversation_api`. Avvio locale: `fo
 Il server accetta solo `127.0.0.1`, `::1` o `localhost` e usa un bearer token non persistito. Espone `local-conversation-session/v1` in memoria: `POST /v1/local-conversation-sessions` crea una sessione con il solo `question_fingerprint` SHA-256; `POST /{session_id}/plan-preview` riceve un `execution-plan-input/v1` e invoca esclusivamente `plan_execution`; `POST /approve`, `POST /cancel`, `GET /{session_id}` e `GET /{session_id}/audit` gestiscono stato e audit append-only. Il client HTML minimale e' servito da `/`; calcola il fingerprint nel browser e conserva il token solo nella scheda.
 
 La preview richiede un `question-intent/v1` gia' instradato e tutti i nodi restano `not_executed`. L'approvazione e' `approved_preview_only`: non esiste un endpoint API per executor, composer o guardrail, quindi la superficie locale non puo' eseguire tool o aggirare i rispettivi confini.
+# API
+
+## `pipeline-run/v1`
+
+`family_office_engine.services.pipeline_refresh.refresh_pipeline(workspace_root, manifest_path=None, dry_run=False)` orchestra il DAG locale iniziale senza eseguire shell o calcoli fiscali, previdenziali o finanziari. Restituisce un `pipeline-run/v1` con `pipeline_id`, step, input hash, output relativi al workspace e riepilogo degli stati.
+
+Il manifest viene sostituito atomicamente soltanto dopo un run completo; `PipelineRefreshError.run` espone gli step gia' esaminati e quello `failed`, mantenendo il precedente baseline leggibile. Il DAG V1 contiene `document_inventory` e il suo dipendente `snapshot_catalog`.
+
+## `artifact-lineage/v1`
+
+`family_office_engine.services.artifact_lineage.build_artifact_lineage(input_path, output_path, workspace_root)` costruisce un sidecar deterministico per un artefatto privato. Conserva SHA-256 dell'artefatto e delle fonti, path relativi normalizzati, versioni dichiarate del producer e delle fonti `input`/`rule_pack`, data di osservazione e policy di freshness. La scrittura e' atomica e tutti i path restano nel workspace.
+
+`check_artifact_freshness(lineage_path, workspace_root, as_of_date)` restituisce `artifact-freshness-report/v1`, con gli issue espliciti `artifact_missing`, `artifact_changed`, `source_missing`, `source_changed`, `rule_pack_changed` e `artifact_stale`. La data di controllo e' un input obbligatorio per ripetere lo stesso esito; path assoluti o che escono dal workspace sono rifiutati.
+
+## `data-quality-report/v1`
+
+`family_office_engine.services.document_data_quality.build_document_data_quality(input_path, output_path, workspace_root)` legge una dichiarazione `data-quality-input/v1` e un inventario `document-inventory/v1` privati. La dichiarazione esplicita periodi mensili e totali documentali attesi; il report registra finding e remediation per duplicati SHA-256, documenti `uncategorized`, mesi mancanti e totali incoerenti. Non legge né conserva il contenuto dei documenti, scrive atomicamente nel workspace e rifiuta path assoluti, Windows assoluti o esterni.
+
+`build_workspace_document_data_quality(workspace_root, output_path=None, as_of_date=None)` è il percorso operativo predefinito: legge l'inventario e l'eventuale `data-quality-policy/v1` workspace-local, quindi registra una categoria mensile non configurata come `data_gap` anziché dedurne l'aspettativa. `setup_workspace_document_data_quality(workspace_root, as_of_date, ask)` raccoglie solo queste scelte non deducibili e salva progressivamente la policy; non modifica totali o regole di qualità.
+
+## `compliance-calendar/v1`
+
+`build_compliance_calendar(policy_path, workspace_root, as_of_date, output_path=None)` legge un rule pack `compliance-calendar-policy/v1` e produce il calendario locale con scadenza timezone-aware, fonte, responsabile, azione richiesta e alert deduplicati. Supporta ricorrenze annuali, date una tantum e ultimo giorno lavorativo del mese; la data di controllo è sempre esplicita. `setup_workspace_compliance_event(workspace_root, ask)` salva progressivamente una scadenza workspace-local senza richiedere JSON manuale.
+
+Il servizio non contiene date normative hard-coded, non determina obblighi individuali e non calcola importi. Fonti mancanti nelle scadenze locali diventano `source_not_verified`; output e configurazione locale restano confinati al workspace.

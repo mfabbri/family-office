@@ -80,6 +80,21 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
         self.assertTrue(report.audit_due)
         self.assertEqual("functional", report.current_increment_kind)
 
+    def test_fourth_completed_functional_increment_can_wait_when_later_work_is_planned(self) -> None:
+        entries = [
+            ("V4.1", "audit", "done"),
+            ("V4.2", "functional", "done"),
+            ("V4.3", "functional", "done"),
+            ("V4.4", "functional", "done"),
+            ("V4.5", "functional", "done"),
+            ("V4.6", "functional", "planned"),
+        ]
+
+        report = self._validate(entries, "V4.5", "done")
+
+        self.assertTrue(report.audit_due)
+        self.assertEqual("functional", report.current_increment_kind)
+
     def test_due_audit_is_allowed_as_current_increment(self) -> None:
         entries = [
             ("V4.1", "audit", "done"),
@@ -94,6 +109,17 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
 
         self.assertTrue(report.audit_due)
         self.assertEqual(report.current_increment_kind, "audit")
+
+    def test_suffixed_increment_header_is_parsed_as_a_separate_section(self) -> None:
+        entries = [
+            ("V4.3", "functional", "done"),
+            ("V4.3a", "functional", "in_progress"),
+        ]
+
+        report = self._validate(entries, "V4.3a", "in_progress")
+
+        self.assertEqual("V4.3a", report.current_increment_id)
+        self.assertEqual("functional", report.current_increment_kind)
 
     def test_due_audit_does_not_block_a_docs_increment(self) -> None:
         entries = [

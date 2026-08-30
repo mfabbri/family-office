@@ -1,8 +1,8 @@
-# V6 Roadmap — Operations, Security and Compliance
+# V6 Roadmap — Operations, Security, Compliance and Operator Experience
 
 ## Obiettivo
 
-Rendere il family office un sistema mantenibile nel tempo: aggiornamenti documentali, monitoraggio, sicurezza, audit, normativa, backup, release e revisione periodica.
+Rendere il family office un sistema mantenibile nel tempo e utilizzabile per decisioni familiari: aggiornamenti documentali, monitoraggio, sicurezza, audit, normativa, backup, release, revisione periodica e journey operatore question-first sopra capability deterministiche.
 
 ## Prerequisiti
 
@@ -13,7 +13,8 @@ Rendere il family office un sistema mantenibile nel tempo: aggiornamenti documen
 
 ### V6.1 — Pipeline refresh orchestrator
 
-**Stato:** `planned`
+**Stato:** `done`
+**Tipo:** `functional`
 
 Creare un comando unico che rilevi input cambiati, esegua solo gli step necessari e produca un run manifest.
 
@@ -22,9 +23,12 @@ Creare un comando unico che rilevi input cambiati, esegua solo gli step necessar
 - Test: run completo, incrementale, errore parziale, idempotenza.
 - Done quando: gli snapshot non devono essere rigenerati manualmente in ordine.
 
+Esito: completato con `pipeline-run/v1`, il servizio deterministico `pipeline_refresh` e CLI `fo pipeline refresh [--dry-run]`. Il DAG iniziale e' statico e locale: aggiorna `document_inventory` e il dipendente `snapshot_catalog` soltanto quando hash di input, output o dipendenze lo richiedono. Il manifest usa solo path relativi al workspace, stati espliciti e scrittura atomica dopo successo; un fallimento conserva il baseline precedente. Non esegue shell o comandi arbitrari, non interpreta documenti e non effettua calcoli fiscali, previdenziali o finanziari. Verifiche: 4 test V6.1 (completo, incrementale, modifica input, errore, idempotenza, dry-run e confinamento) OK; 11 test document inventory, 11 test audit roadmap e regression engine 586 test OK; smoke help CLI, compilazione, `git diff --check`, architecture/privacy scan e `roadmap_audit.py` OK.
+
 ### V6.2 — Lineage, hashes and freshness
 
-**Stato:** `planned`
+**Stato:** `done`
+**Tipo:** `functional`
 
 Aggiungere hash input, versione parser/regola, timestamp, path relativi e policy di scadenza a snapshot e report.
 
@@ -34,9 +38,12 @@ Aggiungere hash input, versione parser/regola, timestamp, path relativi e policy
 - Test: documento cambiato, rule pack aggiornato, snapshot obsoleto, path multipiattaforma.
 - Done quando: ogni risultato dichiara se è aggiornato e da quali input deriva.
 
+Esito: completato con sidecar generico `artifact-lineage/v1`, builder/checker deterministici e CLI `fo pipeline lineage build|check`. Il sidecar registra artefatto, fonti `input` e `rule_pack`, SHA-256, versioni dichiarate, data di osservazione, path relativi normalizzati e policy di freshness; la scrittura e' atomica. Il checker, con data esplicita, rende visibili fonti/rule pack modificati o mancanti, artefatto modificato o assente e scadenza; nessun path assoluto o esterno al workspace e' accettato. Verifiche: 4 test V6.2 (hash/versioni, sorgenti/rule/scadenza, path e CLI), 21 test mirati V6.1-V6.2/document inventory/CLI wrapper e regression engine 590 test OK; smoke help CLI, compilazione, `git diff --check`, privacy scan del perimetro e `roadmap_audit.py` OK.
+
 ### V6.3 — Document intake and data-quality monitoring
 
-**Stato:** `planned`
+**Stato:** `done`
+**Tipo:** `functional`
 
 Controllare nuovi documenti, duplicati, periodi mancanti, variazioni anomale e riconciliazione degli asset.
 
@@ -46,9 +53,91 @@ Controllare nuovi documenti, duplicati, periodi mancanti, variazioni anomale e r
 - Test: duplicati, gap mensili, totale incoerente e documento non classificato.
 - Done quando: una decisione non usa silenziosamente dati vecchi o incompleti.
 
+Esito: completato con `data-quality-report/v1`, generato localmente da un inventario `document-inventory/v1` e da una dichiarazione `data-quality-input/v1`. I periodi mensili e i totali documentali attesi restano input espliciti; il report mette in coda remediation per duplicati SHA-256, documenti non classificati, mesi mancanti e totali incoerenti. Non legge o copia contenuti documentali, scrive atomicamente e rifiuta path assoluti, Windows assoluti o esterni al workspace. Disponibile `fo pipeline quality --input quality-input.json`.
+
+Verifiche: 3 test V6.3, 22 test mirati V6.1-V6.3/document inventory/CLI e regression engine 593 test OK; smoke `fo pipeline quality --help`, compilazione, `git diff --check`, controllo del confine (solo libreria standard nel servizio), privacy scan del perimetro e `roadmap_audit.py` OK. Nessuna decisione architetturale o modifica a rule/knowledge richiede decision log.
+
+### V6.3a - Data-quality CLI guided setup
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Eliminare la compilazione manuale di dichiarazioni JSON dal percorso operativo di controllo qualità: la CLI deve mostrare copertura e gap rilevabili e raccogliere soltanto le aspettative di monitoraggio non deducibili.
+
+- Dipende da: V6.3.
+- Repository: `engine`, `workspace`.
+- Output: `fo pipeline quality` leggibile e `fo pipeline quality setup` con configurazione workspace-local gestita dalla CLI.
+- Test: report senza configurazione, wizard con default da inventario, gap mensile configurato, resume/configurazione e CLI.
+- Done quando: l’operatore non deve creare o modificare JSON per sapere cosa manca; i criteri non deducibili diventano data gap o domande esplicite.
+
+Esito: completato con il report workspace-local senza `--input` e `fo pipeline quality setup`. Il report espone documenti, finding e data gap delle coperture mensili non configurate; il setup usa categoria e mesi osservati come contesto, salva progressivamente `data-quality-policy/v1` e permette di escludere esplicitamente una categoria. Nessun totale, regola di qualità o contenuto documentale è dedotto o copiato. Verifiche: 5 test mirati V6.3/V6.3a, smoke `fo pipeline quality --help` e `fo pipeline quality setup --help`, regression engine 596 test, compilazione, audit roadmap, `git diff --check`, controllo import del servizio (sola libreria standard) e privacy scan del perimetro OK.
+
+### V6.3b - Operations compliance code audit
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Esito: audit completato. Corretto un difetto di compatibilita' dei default CLI: con `--workspace` non predefinito, refresh, lineage e quality ora derivano manifest, sidecar e report dal workspace selezionato invece che dal default di repository. Verifiche: 16 test mirati V6.1-V6.3b, smoke `fo` dei quattro comandi pipeline, regression engine 600 test, compilazione, `git diff --check`, controllo dipendenze dei servizi e audit roadmap OK. Nessun follow-up o decision log necessario.
+
+Eseguire il code audit obbligatorio dopo V6.1, V6.2, V6.3 e V6.3a, usando la checklist del bootstrap e verificando confini, contratti, test, privacy, data gaps, error handling e duplicazioni. Correggere soltanto difetti piccoli e verificabili oppure registrare follow-up espliciti.
+
+- Dipende da: V6.3a.
+- Repository: `engine`, `workspace`.
+- Test: test mirati dei moduli V6, smoke CLI, regression e audit roadmap.
+- Done quando: il contatore audit è azzerato con evidenze riproducibili e ogni debito residuo è esplicito.
+
+### V6.3c - Question-first operator analysis journey
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Esito: completato con `fo ask [question]` e `operator-analysis/v1`. Il journey usa router/catalogo V5 ma non esegue tool: inventaria solo gli `schema_version` degli snapshot workspace-local e restituisce diagnosi, fatti, assunzioni, gap, limiti, provenienza e prossima azione, senza persistere la domanda o richiedere JSON manuale. Verifiche: 21 test mirati V6.3c/router/catalogo/registry, smoke `fo ask --help`, regression engine 605 test, compilazione, audit roadmap, controllo dipendenze/privacy e `git diff --check` OK.
+
+Esporre un singolo ingresso guidato per domande decisionali familiari, riusando le capability deterministiche e gli snapshot esistenti senza chiedere sequenze di comandi tecnici o lettura/modifica manuale di JSON.
+
+- Dipende da: V6.3b, V5.12.
+- Repository: `engine`, `workspace`.
+- Output: journey `fo` question-first, selezione/riconoscimento della domanda supportata, raccolta progressiva dei soli dati mancanti e risposta leggibile.
+- Test: journey end-to-end con fixture sintetiche; fatti già presenti, dati mancanti, errore recuperabile, provenance/limiti, tool non supportato e assenza di JSON manuale.
+- Done quando: l'operatore ottiene da una domanda una diagnosi o risposta leggibile con fatti, assunzioni, `data_gaps`, limiti, provenienza e prossima azione; i calcoli restano esclusivamente nei tool deterministici registrati.
+
+### V6.3d - Local LLM intent-assist with deterministic gates
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Integrare facoltativamente un LLM eseguito solo in locale per proporre intenti e chiarimenti nel journey `fo ask`, mantenendo il router/catalogo deterministici come autorita' per supporto, dati minimi e autorizzazione dei tool.
+
+- Dipende da: V6.3c, V5.11, V5.12.
+- Repository: `engine`, `workspace`.
+- Output: proposta locale di intenti con confidence e motivazione, validata contro `supported-question-catalog/v1`, con fallback al routing lessicale.
+- Vincoli: modello/prompt/testo domanda restano locali e non sono persistiti; un output del modello non puo' invocare tool, scegliere dati, autorizzare piani, calcolare valori fiscali, previdenziali o finanziari, ne' superare rifiuti/gap/guardrail deterministici.
+- Test: modello locale assente, output malformato o fuori catalogo, prompt injection, conflitto fra proposta e router, fallback, privacy e evaluation suite sintetica.
+- Done quando: il journey espone separatamente proposta LLM e validazione deterministica, conserva il fallback riproducibile e rifiuta qualsiasi percorso che aggiri catalogo, planner, executor o guardrail.
+
+Esito: completato con adapter `local_intent_assist` della sola libreria standard, limitato a HTTP loopback OpenAI-compatible e attivato esplicitamente da `fo ask --local-intent-assist`. Il modello produce soltanto una proposta effimera di intenti/confidence; `operator-analysis/v1` espone proposta, validation e fallback separati, ma la route selezionata resta quella lessicale deterministica. Injection non raggiunge il modello; indisponibilita', output malformato, intenti fuori catalogo o conflitti non modificano route, dati minimi, tool, planner, executor o guardrail. Prompt, domanda, output e modello non sono persistiti e non sono introdotti calcoli fiscali, previdenziali o finanziari. Verifiche: 18 test mirati (inclusa evaluation sintetica e CLI), regression engine 613 test, compilazione, smoke `fo ask --help`, controllo loopback/import, privacy scan, `git diff --check` e audit roadmap OK.
+
+### V6.3e - Question-first analysis response rendering
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Trasformare l'esito di `fo ask` da diagnostica tecnica a risposta operativa leggibile, senza eseguire automaticamente tool o calcoli.
+
+- Dipende da: V6.3d.
+- Repository: `engine`, `workspace`.
+- Output: rendering `fo ask` question-first con sintesi della domanda riconosciuta, soli fatti minimi rilevanti, stato espresso in linguaggio naturale, limiti e prossima azione eseguibile o motivo esplicito per cui non e' ancora disponibile.
+- Vincoli: non mostrare l'inventario completo degli snapshot come risposta primaria; non presentare ID di tool o `schema_version` come istruzioni per l'operatore; `ready_for_analysis` non puo' suggerire che un calcolo sia gia' stato eseguito; nessun tool viene invocato, nessun calcolo fiscale/previdenziale/finanziario viene introdotto e nessun testo della domanda viene persistito.
+- Rendering richiesto: per una domanda supportata, indicare (1) decisione compresa, (2) fatti minimi presenti e mancanti con nomi leggibili, (3) cosa il sistema puo' preparare ma non ha ancora eseguito, (4) limiti e revisione umana richiesta, (5) una prossima azione realmente disponibile. Se il piano separato non e' ancora esposto da CLI, dirlo esplicitamente senza fingere un comando di approvazione.
+- Test: fixture con molti snapshot irrilevanti, input completo, gap, domanda non supportata, injection, assistente locale disponibile/non disponibile, assenza di JSON tecnico nel rendering e coerenza fra testo leggibile e `operator-analysis/v1`.
+- Done quando: un operatore comprende da solo che cosa e' stato capito, quali soli dati contano per la domanda, se si tratta di una diagnosi o di un'analisi eseguita e qual e' il prossimo passo concretamente disponibile; nessun inventario tecnico o istruzione non eseguibile resta nel percorso primario.
+
+Esito: completato con il campo `presentation` di `operator-analysis/v1` e il rendering CLI question-first. Per una domanda di liquidita', la CLI mostra la decisione, tre soli fatti rilevanti con label leggibili, diagnosi di prontezza e nessun calcolo eseguito; snapshot irrilevanti, ID di tool e versioni schema restano fuori dall'output primario. Gap e prossima azione usano gli stessi label leggibili; quando l'analisi e' pronta ma il comando per il piano manca, il limite e' dichiarato senza simulare un'azione. L'assistente locale resta opzionale e comprensibile, ma non rende visibili ID tecnici ne' modifica il router. Verifiche: 19 test mirati, regression engine 614 test, smoke reale `fo ask`, compilazione, controllo confini/privacy, `git diff --check` e audit roadmap OK. Nessuna modifica a rules/knowledge o decision log necessaria.
+
 ### V6.4 — Compliance calendar and alerts
 
-**Stato:** `planned`
+**Stato:** `done`
+**Tipo:** `functional`
 
 Gestire scadenze fiscali, documentali, previdenziali, polizze, rinnovi, review e trigger familiari.
 
@@ -58,9 +147,14 @@ Gestire scadenze fiscali, documentali, previdenziali, polizze, rinnovi, review e
 - Test: ricorrenze, scadenze mobili, alert duplicati e timezone.
 - Done quando: ogni alert mostra fonte, responsabilità e azione richiesta.
 
+Esito: completato con `compliance-calendar/v1`, policy `it.compliance-calendar.2026.v1`, alert locali deduplicati e journey `fo compliance calendar|setup`. Il rule pack dichiarativo porta fonte, validita', owner e azione; l'engine calcola solamente ricorrenze annuali, date una tantum, ultimo giorno lavorativo e timezone. Le scadenze locali sono raccolte progressivamente senza JSON manuale e una fonte mancante diventa `source_not_verified`, non un obbligo implicito. Nessun importo, debito o obbligo fiscale individuale e' calcolato.
+
+Verifiche: 5 test V6.4 (ricorrenza, mobile, timezone, deduplicazione, errori, source gap e CLI) e regression engine 619 test OK; smoke `fo compliance calendar --help`, compilazione, JSON validation knowledge/rules, `git diff --check`, privacy/confine (sola libreria standard, workspace-local) e audit roadmap OK. Il quarto incremento funzionale dopo V6.3b rende dovuto l'audit prima del prossimo incremento funzionale.
+
 ### V6.5 — Regulatory update workflow
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Rilevare e valutare cambi normativi seguendo Knowledge → Rules → Tests → Engine, con validità temporale e approvazione.
 
@@ -72,6 +166,7 @@ Rilevare e valutare cambi normativi seguendo Knowledge → Rules → Tests → E
 ### V6.6 — Secrets, encryption and access control
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Proteggere workspace, token, backup e dati identificativi con cifratura, secret store e least privilege.
 
@@ -83,6 +178,7 @@ Proteggere workspace, token, backup e dati identificativi con cifratura, secret 
 ### V6.7 — Sanitized export and packaging
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Creare export allowlist per codice, roadmap e report, con redazione dei dati personali e manifest dei file.
 
@@ -95,6 +191,7 @@ Creare export allowlist per codice, roadmap e report, con redazione dei dati per
 ### V6.8 — Backup, restore and disaster recovery
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Definire backup cifrati, retention, verifica integrità, restore selettivo e recovery drill.
 
@@ -107,6 +204,7 @@ Definire backup cifrati, retention, verifica integrità, restore selettivo e rec
 ### V6.9 — Audit trail and approvals
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Registrare chi o cosa ha importato dati, modificato assunzioni, approvato scenari e generato raccomandazioni.
 
@@ -119,6 +217,7 @@ Registrare chi o cosa ha importato dati, modificato assunzioni, approvato scenar
 ### V6.10 — Regression, release and model governance
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Unificare test unitari, golden data, scenari, regole, AI evaluations e migrazioni in gate di release.
 
@@ -131,6 +230,7 @@ Unificare test unitari, golden data, scenari, regole, AI evaluations e migrazion
 ### V6.11 — Annual review and contingency plan
 
 **Stato:** `planned`
+**Tipo:** `functional`
 
 Produrre una review annuale con KPI, eventi, cambi normativi, scostamenti, rischi e piano di aggiornamento.
 

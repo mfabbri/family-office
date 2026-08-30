@@ -24,12 +24,62 @@ fo planning goals wizard
 
 Dalla root del progetto sono disponibili anche wrapper locali, ad esempio `.\fo.ps1 validate`. I comandi `python -m family_office_engine.cli.main ...` sono fallback tecnici da checkout sorgente, non il percorso operativo preferito. Le procedure utente devono documentare prima il percorso `fo ...`, usando default del workspace, wizard e comandi senza path JSON.
 
+## Principio per gli input strutturati
+
+La modifica diretta di un JSON non è il percorso operativo normale. Ogni capability destinata all'operatore deve offrire come default un wizard, import, generatore o comando `prepare`, con valori già disponibili mostrati come contesto, salvataggio progressivo e validazione locale. Un JSON diretto resta ammesso soltanto quando strettamente necessario per un contratto avanzato o un'integrazione esterna: il comando deve indicarne il motivo, fornire draft/guida validabile e non renderlo l'unico modo per completare il flusso ordinario.
+
+Le analisi per l'operatore devono inoltre partire da una domanda o decisione familiare, non da una sequenza di comandi interni. Il journey riusa i dati disponibili, chiede solo ciò che manca e presenta un esito leggibile con fatti, assunzioni, `data_gaps`, limiti, provenienza e prossima azione. Snapshot JSON, comandi `status` e `validate` restano strumenti diagnostici, non la guida operativa primaria.
+
 PowerShell non esegue comandi dalla cartella corrente con il solo nome. Per usare `fo` senza prefisso `.\`, prepara la sessione dalla root:
 
 ```powershell
 . .\use-family-office.ps1
 fo validate
 ```
+
+## `fo pipeline refresh`
+
+Aggiorna solo gli snapshot locali resi obsoleti da input cambiati e registra il manifest privato `pipeline-run/v1` in `family-office-workspace/snapshots/pipeline-run.manifest.json`.
+
+```text
+fo pipeline refresh
+fo pipeline refresh --dry-run
+```
+
+Il DAG V1 aggiorna l'inventario documenti e il catalogo degli snapshot che ne dipende. Il manifest conserva soltanto path relativi al workspace, hash e stati `executed`/`skipped`/`failed`; non contiene il contenuto dei documenti e non esegue comandi arbitrari. In caso di fallimento il manifest baseline precedente resta invariato.
+
+## `fo pipeline lineage`
+
+Crea o controlla il sidecar privato `artifact-lineage/v1` di uno snapshot o report. La dichiarazione di build e' JSON nel workspace e indica artefatto, fonti `input`/`rule_pack`, relative versioni, data di osservazione e `freshness_policy.max_age_days`; il comando non copia contenuti documentali.
+
+```text
+fo pipeline lineage build --input lineage-input.json
+fo pipeline lineage check --as-of-date 2026-08-28
+```
+
+Il check restituisce `fresh` oppure `stale` (exit code `2`) e segnala fonti modificate o mancanti, rule pack cambiati, artefatto modificato e scadenza. `--as-of-date` e' obbligatorio: la freshness resta quindi riproducibile e non dipende dall'orologio della macchina. Path assoluti, `..` fuori workspace e path Windows assoluti sono rifiutati.
+
+## `fo pipeline quality`
+
+Genera `data-quality-report/v1` dall'inventario privato, senza richiedere JSON manuale. Il report mette in coda duplicati SHA-256 e documenti non classificati e rende esplicite come `data_gaps` le categorie mensili osservate la cui copertura attesa non è ancora stata dichiarata; non legge né copia contenuti documentali.
+
+```text
+fo pipeline quality
+fo pipeline quality setup
+```
+
+`setup` mostra le categorie e i mesi già osservati e chiede soltanto se monitorare la copertura mensile, con primo mese precompilato dall'inventario e ultimo mese modificabile. Salva progressivamente la sola policy operativa in `snapshots/data-quality.policy.json`; una categoria esclusa esplicitamente non resta un gap implicito. Default: report `../family-office-workspace/snapshots/data-quality.report.json`. Workspace e output devono restare nel workspace; path assoluti, inclusi quelli Windows, e path esterni sono rifiutati.
+
+## `fo compliance calendar`
+
+Mostra `compliance-calendar/v1` e gli alert locali da un rule pack versionato con fonti, validità, responsabile e azione richiesta. La data è obbligatoria per rendere gli alert riproducibili; il comando non determina obblighi fiscali individuali né calcola importi.
+
+```text
+fo compliance calendar --as-of-date 2026-06-01
+fo compliance setup
+```
+
+`setup` registra progressivamente una scadenza locale (review, rinnovo o documento) senza modificare JSON. Una fonte omessa resta un `data_gap` esplicito e richiede verifica o revisione professionale. Il calendario resta in `../family-office-workspace/snapshots/compliance-calendar.snapshot.json`; il rule pack iniziale è `../family-office-rules/compliance/calendar-policy-2026.json`.
 
 ## `fo payroll import`
 
@@ -1430,6 +1480,20 @@ Default principali:
 - sorgenti default: liquidity, tax-aware portfolio, cross-border IT-ES, real estate, protection, estate plan e work-exit nel workspace snapshots; `--investment-opportunity-comparison` puo' essere ripetuto per ciascun confronto `investment-opportunity-comparison/v1` (immobile, camper o altra alternativa gia' valutata)
 
 I pacchetti d'investimento selezionano `comparison_id` e scenario `base|upside|adverse`, conservano hash e gap della fonte, e dichiarano separatamente `personal_utility.annual_economic_benefit`: non e' mai cash flow imponibile. Se mancano classificazione fiscale/attivita', benchmark, vincoli household o utilita' personale, oppure se i punteggi sono a pari merito, il riepilogo stampa `top=review_required`; l'ordinamento resta soltanto un supporto ispezionabile alla revisione umana. Il comando non calcola nuove imposte, pensioni, rendimenti, effetti legali o raccomandazioni.
+
+## `fo ask`
+
+Punto di ingresso question-first per una domanda familiare, senza JSON manuale o sequenze di comandi tecnici.
+
+```text
+fo ask "Come gestisco la liquidita familiare?"
+fo ask
+fo ask "Come gestisco la liquidita familiare?" --local-intent-assist --local-intent-model my-local-model
+```
+
+Il secondo comando chiede soltanto la domanda. Il journey mostra la decisione compresa, i soli fatti minimi rilevanti, assunzioni, `data_gaps`, limiti, provenienza e prossima azione; non presenta l'inventario tecnico completo del workspace. Verifica soltanto la presenza dei dati necessari, non ne legge i contenuti. Non salva il testo della domanda, non invoca tool registrati e non calcola valori fiscali, previdenziali o finanziari. Una domanda non supportata o dati minimi assenti ottiene un errore recuperabile e indica cosa aggiungere prima di ripetere `fo ask`; con dati completi dichiara esplicitamente che l'analisi non e' ancora stata eseguita e se il comando per il piano separato non e' disponibile.
+
+`--local-intent-assist` e' facoltativo: invia prompt e domanda solo a un endpoint HTTP loopback OpenAI-compatible (default `127.0.0.1:11434`) e mostra una proposta di intento separata. Catalogo e router lessicale restano l'unica autorita' per intenti, dati minimi e tool; modello assente, output malformato, proposta fuori catalogo, conflitto o injection mantengono il fallback deterministico. Prompt, domanda e risposta del modello non vengono salvati.
 
 ## `fo orchestration tool-registry build`
 

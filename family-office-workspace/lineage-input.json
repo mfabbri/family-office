@@ -1,0 +1,17 @@
+{
+  "schema_version": "artifact-lineage-input/v1",
+  "as_of_date": "2026-08-28",
+  "artifact_path": "snapshots/pipeline-catalog.snapshot.json",
+  "producer_version": "pipeline-catalog/v1",
+  "freshness_policy": {
+    "max_age_days": 30
+  },
+  "sources": [
+    {
+      "source_id": "document-inventory",
+      "kind": "input",
+      "version": "document-inventory/v1",
+      "path": "snapshots/document-inventory.snapshot.json"
+    }
+  ]
+}

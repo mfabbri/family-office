@@ -11,10 +11,10 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 2 | `roadmap-v2.md` | Cashflow, fiscalità, RITA e successione V1 | `done` |
 | 3 | `roadmap-v3-decision-core.md` | Modello decisionale spiegabile | `done` |
 | 4 | `roadmap-v4-wealth-planning.md` | Pianificazione patrimoniale multi-obiettivo | `done` |
-| 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `in_progress` |
-| 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `planned` |
+| 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `done` |
+| 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `in_progress` |
 
-La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `done`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. La roadmap V5 e' la roadmap attiva e richiede i tool deterministici V4 come base.
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `done`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. La roadmap V5 e' `done` dopo V5.12a; V6 e' la roadmap attiva e usa le capability deterministiche e i contratti V5 come base.
 
 Nota di governance: `roadmap_audit.py` richiede esattamente una roadmap con stato `in_progress`. Quando tutti gli incrementi della roadmap attiva sono `done`, mantenere quella roadmap `in_progress` fino a quando la transizione successiva non apre formalmente la nuova roadmap attiva nello stesso aggiornamento.
 
@@ -119,7 +119,8 @@ Questi requisiti valgono in tutte le roadmap e possono generare incrementi abili
 - provenance, versionamento e data gaps obbligatori;
 - compatibilità multipiattaforma dei path;
 - CLI semplice da usare: ogni capability utente deve preferire comandi corti con default del workspace, demo/smoke senza path JSON lunghi e help chiaro prima di richiedere opzioni avanzate;
-- compilazione manuale di file JSON ridotta al minimo: quando un input strutturato resta necessario, deve essere accompagnato da draft, template, guida leggibile e validazione locale; gli incrementi futuri devono preferire import, wizard, generatori o comandi `prepare` dove possibile;
+- modifica manuale di file JSON vietata come percorso operativo normale: ogni capability utente deve offrire per default un import, wizard, generatore o comando `prepare` con default del workspace e salvataggio progressivo. Un JSON diretto e' ammesso solo se strettamente necessario per un contratto avanzato o integrazione esterna; l'incremento deve documentarne il motivo, offrire una guida/draft validabile localmente e non puo' rendere quel file l'unica strada per il flusso ordinario;
+- UX question-first obbligatoria per le capability decisionali: il percorso utente parte da una domanda o decisione familiare, riusa e mostra i fatti disponibili, chiede solo dati mancanti e restituisce una risposta leggibile con assunzioni, `data_gaps`, limiti, provenienza e prossima azione. JSON, snapshot e sottocomandi di stato/validazione sono infrastruttura e non possono essere l'unico percorso documentato per ottenere un risultato;
 - dipendenze Python esterne dichiarate in `family-office-engine/pyproject.toml`, installate nel venv del repository e verificate con l'interprete del venv prima di eseguire parser, CLI o test;
 - output riproducibili con input e seed dichiarati;
 - privacy conforme, titolarità trasparente verso autorità e intermediari;

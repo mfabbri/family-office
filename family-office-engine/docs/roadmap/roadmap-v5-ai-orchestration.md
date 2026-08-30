@@ -24,7 +24,7 @@ L'output dell'LLM non diventa automaticamente un fatto del workspace.
 
 ### V5.1 — Tool registry and invocation contract
 
-**Stato:** `in_progress`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Registrare tool disponibili, schema input/output, prerequisiti, livello di rischio e policy di autorizzazione.

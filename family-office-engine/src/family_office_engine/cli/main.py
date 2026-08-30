@@ -233,6 +233,29 @@ from family_office_engine.services.local_conversation_api import (
     LocalConversationApiError,
     serve_local_conversation_api,
 )
+from family_office_engine.services.pipeline_refresh import (
+    PipelineRefreshError,
+    refresh_pipeline,
+)
+from family_office_engine.services.artifact_lineage import (
+    ArtifactLineageError,
+    build_artifact_lineage,
+    check_artifact_freshness,
+)
+from family_office_engine.services.document_data_quality import (
+    DocumentDataQualityError,
+    build_workspace_document_data_quality,
+    setup_workspace_document_data_quality,
+)
+from family_office_engine.services.compliance_calendar import (
+    ComplianceCalendarError,
+    build_compliance_calendar,
+    setup_workspace_compliance_event,
+)
+from family_office_engine.services.operator_analysis import (
+    OperatorAnalysisError,
+    analyze_operator_question,
+)
 from family_office_engine.simulation.retirement import (
     RetirementSimulationError,
     simulate_retirement,
@@ -305,6 +328,18 @@ def default_documents_path() -> Path:
 
 def default_document_manifest_output() -> Path:
     return resolve_repo("workspace") / "documents" / "manifest.json"
+
+
+def default_pipeline_manifest_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "pipeline-run.manifest.json"
+
+
+def default_artifact_lineage_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "artifact-lineage.sidecar.json"
+
+
+def default_document_data_quality_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "data-quality.report.json"
 
 
 def default_inps_pension_input() -> Path:
@@ -3269,6 +3304,65 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Move files after writing planned operations",
     )
+    pipeline = subparsers.add_parser("pipeline", help="Refresh workspace snapshots and verify lineage")
+    pipeline_subparsers = pipeline.add_subparsers(dest="pipeline_command")
+    pipeline_refresh_parser = pipeline_subparsers.add_parser(
+        "refresh", help="Run only stale deterministic refresh steps",
+    )
+    pipeline_refresh_parser.add_argument(
+        "--workspace",
+        type=Path,
+        default=resolve_repo("workspace"),
+        help="Private workspace root (default: family-office-workspace)",
+    )
+    pipeline_refresh_parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=None,
+        help="Workspace-local pipeline baseline manifest",
+    )
+    pipeline_refresh_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show stale steps without writing snapshots or a manifest",
+    )
+    pipeline_lineage_parser = pipeline_subparsers.add_parser(
+        "lineage", help="Build or check workspace-local artifact lineage",
+    )
+    pipeline_lineage_subparsers = pipeline_lineage_parser.add_subparsers(dest="lineage_command")
+    lineage_build_parser = pipeline_lineage_subparsers.add_parser(
+        "build", help="Build an artifact-lineage/v1 sidecar from a JSON declaration",
+    )
+    lineage_build_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    lineage_build_parser.add_argument("--input", type=Path, required=True, help="Workspace-relative lineage declaration JSON")
+    lineage_build_parser.add_argument("--output", type=Path, help="Workspace-local lineage sidecar output")
+    lineage_check_parser = pipeline_lineage_subparsers.add_parser(
+        "check", help="Check a lineage sidecar against current workspace files",
+    )
+    lineage_check_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    lineage_check_parser.add_argument("--lineage", type=Path, help="Workspace-local lineage sidecar")
+    lineage_check_parser.add_argument("--as-of-date", required=True, help="ISO date used for reproducible freshness evaluation")
+    pipeline_quality_parser = pipeline_subparsers.add_parser(
+        "quality", help="Show workspace document data-quality and missing coverage",
+    )
+    pipeline_quality_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    pipeline_quality_parser.add_argument("--output", type=Path, help="Workspace-local data-quality report output")
+    pipeline_quality_parser.add_argument("--as-of-date", help="Optional ISO date for reproducible monthly coverage")
+    pipeline_quality_subparsers = pipeline_quality_parser.add_subparsers(dest="quality_command")
+    pipeline_quality_setup_parser = pipeline_quality_subparsers.add_parser(
+        "setup", help="Ask only for monthly coverage expectations not present in the inventory",
+    )
+    pipeline_quality_setup_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    pipeline_quality_setup_parser.add_argument("--as-of-date", default=date.today().isoformat(), help="ISO date used as the default final expected month")
+    compliance = subparsers.add_parser("compliance", help="Show local compliance deadlines and alerts")
+    compliance_subparsers = compliance.add_subparsers(dest="compliance_command")
+    compliance_calendar_parser = compliance_subparsers.add_parser("calendar", help="Build the sourced local compliance calendar")
+    compliance_calendar_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace root")
+    compliance_calendar_parser.add_argument("--policy", type=Path, default=resolve_repo("rules") / "compliance" / "calendar-policy-2026.json", help="Versioned compliance rule pack")
+    compliance_calendar_parser.add_argument("--as-of-date", required=True, help="ISO date for reproducible alerts")
+    compliance_calendar_parser.add_argument("--output", type=Path, help="Workspace-local compliance calendar output")
+    compliance_setup_parser = compliance_subparsers.add_parser("setup", help="Add one workspace-local review, renewal, or document deadline")
+    compliance_setup_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace root")
     pension = subparsers.add_parser("pension", help="Import pension sources")
     pension_subparsers = pension.add_subparsers(dest="pension_command")
     inps_parser = pension_subparsers.add_parser(
@@ -4768,6 +4862,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     orchestration = subparsers.add_parser("orchestration", help="Inspect deterministic orchestration contracts")
     orchestration_subparsers = orchestration.add_subparsers(dest="orchestration_command")
+    ask_parser = subparsers.add_parser(
+        "ask", help="Start a guided family-office question diagnosis",
+    )
+    ask_parser.add_argument("question", nargs="?", help="Family decision or question; never persisted verbatim")
+    ask_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace root")
+    ask_parser.add_argument("--local-intent-assist", action="store_true", help="Use an optional loopback-only local model for a non-authoritative intent proposal")
+    ask_parser.add_argument("--local-intent-endpoint", default="http://127.0.0.1:11434/v1/chat/completions", help="Loopback OpenAI-compatible local model endpoint")
+    ask_parser.add_argument("--local-intent-model", default="local-intent-assist", help="Local model name sent only to the loopback endpoint")
     orchestration_registry_parser = orchestration_subparsers.add_parser(
         "tool-registry",
         help="Build and inspect the deterministic tool registry",
@@ -5677,6 +5779,91 @@ def main(argv: list[str] | None = None) -> int:
             f"({args.manifest})"
         )
         return 0
+
+    if args.command == "pipeline" and args.pipeline_command == "refresh":
+        try:
+            manifest = args.manifest or args.workspace / "snapshots" / "pipeline-run.manifest.json"
+            run = refresh_pipeline(args.workspace, manifest, dry_run=args.dry_run)
+        except (PipelineRefreshError, ValueError) as exc:
+            print(f"pipeline refresh: ERROR ({exc})")
+            return 1
+        print(
+            "pipeline refresh: "
+            f"{run['status']} executed={run['summary']['executed']} "
+            f"skipped={run['summary']['skipped']} ({manifest})"
+        )
+        return 0
+
+    if args.command == "pipeline" and args.pipeline_command == "lineage":
+        try:
+            if args.lineage_command == "build":
+                output = args.output or args.workspace / "snapshots" / "artifact-lineage.sidecar.json"
+                lineage = build_artifact_lineage(args.input, output, args.workspace)
+                print(f"pipeline lineage: {lineage['status']} ({output})")
+                return 0
+            if args.lineage_command == "check":
+                lineage_path = args.lineage or args.workspace / "snapshots" / "artifact-lineage.sidecar.json"
+                report = check_artifact_freshness(lineage_path, args.workspace, args.as_of_date)
+                print(f"pipeline lineage: {report['status']} issues={len(report['issues'])} ({lineage_path})")
+                return 0 if report["status"] == "fresh" else 2
+            print("pipeline lineage: ERROR (choose build or check)")
+            return 2
+        except ArtifactLineageError as exc:
+            print(f"pipeline lineage: ERROR ({exc})")
+            return 1
+
+    if args.command == "pipeline" and args.pipeline_command == "quality":
+        try:
+            if args.quality_command == "setup":
+                policy = setup_workspace_document_data_quality(args.workspace, args.as_of_date, input)
+                print(
+                    "pipeline quality setup: saved "
+                    f"monthly_categories={len(policy['expected_periods'])} "
+                    f"({args.workspace / 'snapshots' / 'data-quality.policy.json'})"
+                )
+                print("Next: run 'fo pipeline quality' to see the current report.")
+                return 0
+            output = args.output or args.workspace / "snapshots" / "data-quality.report.json"
+            report = build_workspace_document_data_quality(args.workspace, output, args.as_of_date)
+        except DocumentDataQualityError as exc:
+            print(f"pipeline quality: ERROR ({exc})")
+            return 1
+        print(
+            "pipeline quality: "
+            f"{report['status']} documents={report['summary']['document_count']} "
+            f"findings={report['summary']['finding_count']} data_gaps={report['summary']['data_gap_count']}"
+        )
+        for finding in report["findings"]:
+            print(f"- {finding['severity'].upper()} {finding['code']}: {finding['message']}")
+        for gap in report["data_gaps"]:
+            print(f"- DATA GAP {gap['category']}: {gap['action']}")
+        if report["data_gaps"]:
+            print("Next: run 'fo pipeline quality setup' to configure monthly coverage.")
+        print(f"Report: {output}")
+        return 0 if report["status"] == "ready" else 2
+
+    if args.command == "compliance":
+        try:
+            if args.compliance_command == "setup":
+                result = setup_workspace_compliance_event(args.workspace, input)
+                print(f"compliance setup: {result['status']} events={result['event_count']} ({result['path']})")
+                print("Next: run 'fo compliance calendar --as-of-date YYYY-MM-DD' to see sourced alerts.")
+                return 0
+            if args.compliance_command == "calendar":
+                output = args.output or args.workspace / "snapshots" / "compliance-calendar.snapshot.json"
+                report = build_compliance_calendar(args.policy, args.workspace, args.as_of_date, output)
+                print(f"compliance calendar: {report['status']} events={report['summary']['event_count']} alerts={report['summary']['alert_count']} data_gaps={report['summary']['data_gap_count']}")
+                for alert in report["alerts"]:
+                    print(f"- {alert['alert_date']}: {alert['owner']} — {alert['required_action']} (source: {', '.join(alert['source_refs']) or 'not verified'})")
+                if report["data_gaps"]:
+                    print("Next: add an authoritative source in 'fo compliance setup' or obtain professional review.")
+                print(f"Calendar: {output}")
+                return 0 if report["status"] == "ready" else 2
+            print("compliance: ERROR (choose calendar or setup)")
+            return 2
+        except ComplianceCalendarError as exc:
+            print(f"compliance: ERROR ({exc})")
+            return 1
 
     if args.command == "pension" and args.pension_command == "import-inps":
         try:
@@ -7080,6 +7267,41 @@ def main(argv: list[str] | None = None) -> int:
             f"({args.output})"
         )
         return 0
+
+    if args.command == "ask":
+        question = args.question if args.question is not None else input("What family decision do you want to assess? ")
+        try:
+            assist = {"endpoint": args.local_intent_endpoint, "model": args.local_intent_model} if args.local_intent_assist else None
+            result = analyze_operator_question(question, args.workspace, local_intent_assist=assist)
+        except OperatorAnalysisError as exc:
+            print(f"ask: ERROR ({exc})")
+            print("Next: run 'fo ask \"your family-office question\"'.")
+            return 1
+        presentation = result["presentation"]
+        print(f"Decision understood: {presentation['decision']}")
+        print(f"Status: {presentation['status_message']}")
+        if presentation["relevant_facts"]:
+            print("Relevant facts:")
+            for fact in presentation["relevant_facts"]:
+                print(f"- {'Available' if fact['available'] else 'Missing'}: {fact['label']}")
+        assist = result["intent_assist"]
+        if assist["enabled"]:
+            print(f"Local language assistant: {assist['status'].replace('_', ' ')}; deterministic routing remains authoritative.")
+        print("Assumptions:")
+        for assumption in result["assumptions"]:
+            print(f"- {assumption}")
+        if result["data_gaps"]:
+            print("Data gaps:")
+            for gap in presentation["missing_facts"]:
+                print(f"- {gap}")
+        print("Limitations:")
+        for limitation in result["limitations"]:
+            print(f"- {limitation}")
+        print(
+            "Provenance: " + presentation["provenance_summary"]
+        )
+        print(f"Next: {result['next_action']}")
+        return 0 if result["status"] == "ready_for_analysis" else 2
 
     if (
         args.command == "orchestration"

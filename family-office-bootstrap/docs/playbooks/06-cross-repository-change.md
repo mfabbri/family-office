@@ -9,6 +9,8 @@ Definire prima:
 - ordine di modifica;
 - compatibilità e migrazione;
 - test per ogni confine.
+- percorso CLI per gli input strutturati: wizard, import, generatore o `prepare` come default; JSON manuale solo se strettamente necessario, motivato e validato localmente.
+- journey utente question-first: domanda/decisione, fatti riutilizzabili, dati mancanti, tool deterministici coinvolti e risposta leggibile con provenienza, limiti e prossima azione; i contratti interni non devono emergere come procedura operativa.
 
 ## Ordine tipico
 

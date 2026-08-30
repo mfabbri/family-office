@@ -31,6 +31,47 @@ Se l'import mostra `not_extracted`, lanciare prima `payroll diagnose` per contro
 
 I test dell'engine usano solo fixture sintetiche e non includono dati personali.
 
+## Pipeline refresh
+
+Il test unitario/integrativo `test_pipeline_refresh.py` copre run completo, refresh incrementale, propagazione ai dipendenti, errore senza aggiornamento del baseline, dry-run e confinamento nel workspace:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest discover -s tests/unit -p test_pipeline_refresh.py
+```
+
+## Artifact lineage
+
+`test_artifact_lineage.py` copre hash e versioni dichiarate, fonti input/rule pack modificate o mancanti, scadenza, path portabili/confinati e i due comandi CLI:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest discover -s tests/unit -p test_artifact_lineage.py
+```
+
+## Document data quality
+
+`test_document_data_quality.py` copre duplicati per hash, documenti non classificati, gap mensili dichiarati, totali documentali incoerenti, report senza JSON con data gap espliciti, setup persistito/ripreso e CLI `fo pipeline quality`:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest discover -s tests/unit -p test_document_data_quality.py
+```
+
+## Operator analysis journey
+
+`test_operator_analysis.py` copre il journey `fo ask` con fixture sintetiche: fatti workspace riusati, gap espliciti, domanda non supportata, testo non persistito, prompt minimo e output leggibile senza JSON. Include V6.3e: workspace con snapshot irrilevanti, soli fatti minimi in linguaggio leggibile, distinzione fra diagnosi e analisi non eseguita, gap senza ID tecnici e prossima azione onesta quando manca il comando per il piano. `test_local_intent_assist.py` aggiunge l'evaluation sintetica dell'assistente locale: proposta valida, conflitto, output fuori catalogo o malformato, modello assente, injection, privacy, endpoint non loopback e output CLI.
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests/unit/test_operator_analysis.py tests/unit/test_local_intent_assist.py
+fo ask --help
+```
+
+## Compliance calendar
+
+`test_compliance_calendar.py` copre ricorrenze annuali, ultimo giorno lavorativo, timezone, deduplicazione alert, policy non valida, fonti locali mancanti e journey CLI `fo compliance calendar|setup` con fixture sintetiche.
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_compliance_calendar
+```
+
 ## Tax Rules
 
 Verifica calcolo con rule pack IRPEF nazionale 2026:

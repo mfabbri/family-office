@@ -15,6 +15,20 @@
   ],
   "citations": [
     {
+      "citation_id": "it.ade.ivafe-ivie.2026",
+      "title": "2026 IVAFE and IVIE payment calendar entries",
+      "issuer": "Agenzia delle Entrate",
+      "source_type": "official_calendar",
+      "authority_level": "official_guidance",
+      "url": "https://www1.agenziaentrate.gov.it/servizi/scadenzario/main.php?chi=3991&come=514&cosa=11515&entroil=30-06-2026&op=4&vista=0",
+      "jurisdictions": ["IT"],
+      "topics": ["compliance", "taxation", "ivafe", "ivie", "deadlines"],
+      "valid_from": "2026-01-01",
+      "valid_to": "2026-12-31",
+      "verified_at": "2026-08-29",
+      "source_status": "active"
+    },
+    {
       "citation_id": "eu.regulation.883-2004",
       "title": "Regulation (EC) No 883/2004 on social security coordination",
       "issuer": "European Union",
@@ -201,6 +215,7 @@
     }
   ],
   "documents": [
+    {"document_id": "knowledge.compliance.calendar", "path": "compliance/calendar.md", "topics": ["compliance", "taxation", "deadlines"], "jurisdictions": ["IT"], "citation_ids": ["it.ade.ivafe-ivie.2026"]},
     {"document_id": "knowledge.compliance.aml-crs-guardrails", "path": "compliance/aml-crs-guardrails.md", "topics": ["compliance", "aml", "crs", "guardrails"], "jurisdictions": ["EU", "IT", "ES", "OECD_CRS"], "citation_ids": ["eu.aml.regulation.2024-1624", "oecd.crs.2025"]},
     {"document_id": "knowledge.taxation.irpef", "path": "taxation/irpef.md", "topics": ["taxation", "irpef"], "jurisdictions": ["IT"], "citation_ids": ["it.law.207-2024.irpef"]},
     {"document_id": "knowledge.taxation.impatriati", "path": "taxation/impatriati.md", "topics": ["taxation", "impatriati"], "jurisdictions": ["IT"], "citation_ids": []},

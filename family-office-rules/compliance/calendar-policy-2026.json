@@ -1,0 +1,22 @@
+{
+  "schema_version": "compliance-calendar-policy/v1",
+  "policy_id": "it.compliance-calendar.2026.v1",
+  "jurisdictions": ["IT"],
+  "valid_from": "2026-01-01",
+  "valid_to": "2026-12-31",
+  "verified_at": "2026-08-29",
+  "source_refs": ["it.ade.ivafe-ivie.2026"],
+  "events": [
+    {
+      "event_id": "it-ivafe-ivie-2026",
+      "title": "IVAFE/IVIE balance and first advance payment review",
+      "category": "tax",
+      "schedule": {"kind": "annual", "month": 6, "day": 30},
+      "timezone": "Europe/Rome",
+      "owner": "household tax reviewer",
+      "required_action": "Verify the applicable official deadline and prepare the payment or professional review.",
+      "source_refs": ["it.ade.ivafe-ivie.2026"],
+      "alert_offsets_days": [30, 7, 0]
+    }
+  ]
+}
