@@ -260,6 +260,7 @@ from family_office_engine.services.regulatory_change import (
     write_regulatory_change,
 )
 from family_office_engine.services.security import SecurityError, build_security_check
+from family_office_engine.services.sanitized_export import SanitizedExportError, build_sanitized_export
 from family_office_engine.services.operator_analysis import (
     OperatorAnalysisError,
     analyze_operator_question,
@@ -2148,6 +2149,93 @@ def run_wealth_strategy_wizard(input_path: Path, overwrite: bool = False) -> dic
     return {"status": "prepared", "input_path": str(input_path), "data_gap_count": len(data["data_gaps"])}
 
 
+def _work_exit_readiness_requirements() -> list[dict[str, Any]]:
+    return [
+        {"input_id": "primary_employment", "category": "employment_income", "member_id": "primary", "accepted_value_basis": ["net"], "requires_stream_bounds": True},
+        {"input_id": "spouse_employment", "category": "spouse_income", "member_id": "spouse", "accepted_value_basis": ["net"], "requires_stream_bounds": True},
+        {"input_id": "household_expenses", "category": "expenses", "accepted_value_basis": ["net"]},
+        {"input_id": "household_net_worth", "category": "net_worth", "accepted_value_basis": ["not_applicable"]},
+        {"input_id": "bridge_liquidity", "category": "liquidity", "accepted_value_basis": ["not_applicable"], "requires_liquid_asset": True},
+        {"input_id": "rita", "category": "rita_complementary_pension", "member_id": "primary", "accepted_value_basis": ["gross"], "requires_stream_bounds": True},
+        {"input_id": "inps", "category": "inps_pension", "member_id": "primary", "accepted_value_basis": ["gross"], "requires_stream_bounds": True},
+        {"input_id": "spain_eu", "category": "spain_eu_pension", "member_id": "primary", "accepted_value_basis": ["gross"], "requires_stream_bounds": True},
+        {"input_id": "other_income", "category": "other_income", "accepted_value_basis": ["net"], "requires_stream_bounds": True},
+    ]
+
+
+def _work_exit_wizard_defaults(existing: dict[str, Any] | None) -> dict[str, str]:
+    adults = existing.get("adults") if isinstance(existing, dict) and isinstance(existing.get("adults"), list) else []
+    by_role = {item.get("role"): item for item in adults if isinstance(item, dict)}
+    constraints = existing.get("sustainability_constraints") if isinstance(existing, dict) and isinstance(existing.get("sustainability_constraints"), dict) else {}
+    candidate_dates = existing.get("candidate_dates") if isinstance(existing, dict) and isinstance(existing.get("candidate_dates"), list) else []
+    as_of_date = str((existing or {}).get("as_of_date") or date.today().isoformat())
+    return {
+        "household_id": str((existing or {}).get("household_id") or "household_private"), "as_of_date": as_of_date,
+        "primary_birth": str(by_role.get("primary", {}).get("date_of_birth") or "unknown"), "spouse_birth": str(by_role.get("spouse", {}).get("date_of_birth") or "unknown"),
+        "candidate_date": str(candidate_dates[0] if candidate_dates else as_of_date),
+        "annual_spending_need": str(constraints.get("annual_spending_need") or "0.00"), "available_bridge_assets": str(constraints.get("available_bridge_assets") or "0.00"), "horizon_years": str(constraints.get("horizon_years") or 35),
+    }
+
+
+def _work_exit_wizard_data(values: dict[str, str], last_answered: str | None = None) -> dict[str, Any]:
+    adults, gaps = [], []
+    for role, label in (("primary", "primary_birth"), ("spouse", "spouse_birth")):
+        birth_date = values[label]
+        if birth_date == "unknown":
+            gaps.append({"code": f"unknown_{role}_date_of_birth", "message": f"{role.title()} date of birth must be documented before work-exit feasibility can run."})
+            adults.append({"person_id": role, "role": role, "date_of_birth": "unknown"})
+        else:
+            adults.append({"person_id": role, "role": role, "date_of_birth": birth_date})
+            gaps.append({"code": f"missing_{role}_inps_contributory_estimate", "message": f"No {role} contributory estimate was declared; use documented pension sources rather than a placeholder."})
+    if values["annual_spending_need"] == "0.00": gaps.append({"code": "unknown_annual_spending_need", "message": "Annual household spending need must be documented or supplied by a lifecycle expenses snapshot."})
+    if values["available_bridge_assets"] == "0.00": gaps.append({"code": "unknown_available_bridge_assets", "message": "Available bridge assets must be documented or supplied by net-worth and liquidity snapshots."})
+    if last_answered is not None: gaps.append({"code": "wizard_incomplete", "message": "Work-exit wizard was interrupted before final review.", "last_answered": last_answered})
+    return {"schema_version": "work-exit-feasibility-input/v1", "record_type": "WorkExitFeasibilityInput", "household_id": values["household_id"], "as_of_date": values["as_of_date"], "candidate_granularity": "explicit_dates", "candidate_dates": [values["candidate_date"]], "sustainability_constraints": {"annual_spending_need": values["annual_spending_need"], "available_bridge_assets": values["available_bridge_assets"], "minimum_terminal_assets": "0.00", "horizon_years": int(values["horizon_years"])}, "adults": adults, "data_gaps": gaps}
+
+
+def _work_exit_readiness_manifest(values: dict[str, str], work_exit_data: dict[str, Any]) -> dict[str, Any]:
+    available = [path.name for path in (default_inps_pension_output(), default_it_es_eu_pension_pro_rata_output(), default_pension_income_output(), default_net_worth_output(), default_liquidity_plan_output(), default_lifecycle_expenses_output()) if path.exists()]
+    return {"schema_version": "work-transition-readiness-input/v1", "record_type": "WorkTransitionReadinessInput", "household_id": values["household_id"], "as_of_date": values["as_of_date"], "household_members": ["primary", "spouse"], "required_inputs": _work_exit_readiness_requirements(), "sources": []}
+
+
+def _save_work_exit_wizard_progress(input_path: Path, readiness_input_path: Path, values: dict[str, str], last_answered: str) -> None:
+    data = _work_exit_wizard_data(values, last_answered)
+    _write_wizard_json(input_path, data, True, WorkExitFeasibilityError, "work-exit feasibility input")
+    _write_wizard_json(readiness_input_path, _work_exit_readiness_manifest(values, data), True, WorkTransitionReadinessError, "work-transition readiness input")
+
+
+def run_work_exit_wizard(input_path: Path, readiness_input_path: Path, readiness_output_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    input_path = _validate_v66a_input_path(input_path, WorkExitFeasibilityError)
+    readiness_input_path = _validate_v66a_input_path(readiness_input_path, WorkTransitionReadinessError)
+    readiness_output_path = _validate_v66a_input_path(readiness_output_path, WorkTransitionReadinessError)
+    targets = (input_path, readiness_input_path, readiness_output_path)
+    if len(set(targets)) != len(targets):
+        raise WorkExitFeasibilityError("work-exit wizard input and readiness paths must be distinct")
+    existing = _read_optional_wizard_json(input_path, WorkExitFeasibilityError, "work-exit feasibility input")
+    if existing is not None and not overwrite:
+        return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
+    existing_supporting = [path for path in (readiness_input_path, readiness_output_path) if path.exists()]
+    if existing_supporting and not overwrite:
+        raise WorkExitFeasibilityError("readiness draft or snapshot already exists; use --overwrite to replace it")
+    values = _work_exit_wizard_defaults(existing)
+    available = [path.name for path in (default_inps_pension_output(), default_it_es_eu_pension_pro_rata_output(), default_pension_income_output(), default_net_worth_output(), default_liquidity_plan_output(), default_lifecycle_expenses_output()) if path.exists()]
+    print("Prepariamo i fatti necessari per valutare quando un'uscita dal lavoro puo' essere sostenibile. Non calcoliamo pensioni, imposte o raccomandazioni.")
+    print("Fatti disponibili: " + (", ".join(available) if available else "nessuno snapshot Work Exit nel workspace; i dati mancanti resteranno gap espliciti."))
+    values["household_id"] = _prompt_text("Come vuoi chiamare questo nucleo? Usa un'etichetta tecnica locale, per esempio `famiglia_casa`.", values["household_id"]); _save_work_exit_wizard_progress(input_path, readiness_input_path, values, "household_id")
+    values["as_of_date"] = _prompt_date("A quale data si riferiscono questi dati? Se si riferiscono a oggi, premi Invio; altrimenti inserisci YYYY-MM-DD.", values["as_of_date"]); _save_work_exit_wizard_progress(input_path, readiness_input_path, values, "as_of_date")
+    values["primary_birth"] = _prompt_date_or_unknown("Qual e' la data di nascita della persona principale? Premi Invio per `unknown`: diventera' un dato da verificare.", values["primary_birth"]); _save_work_exit_wizard_progress(input_path, readiness_input_path, values, "primary_birth")
+    values["spouse_birth"] = _prompt_date_or_unknown("Qual e' la data di nascita dell'altra persona adulta? Premi Invio per `unknown`: diventera' un dato da verificare.", values["spouse_birth"]); _save_work_exit_wizard_progress(input_path, readiness_input_path, values, "spouse_birth")
+    values["candidate_date"] = _prompt_date("Qual e' la prima data che vuoi verificare per l'uscita dal lavoro? Non e' una previsione del sistema.", values["candidate_date"]); _save_work_exit_wizard_progress(input_path, readiness_input_path, values, "candidate_date")
+    values["annual_spending_need"] = _prompt_non_negative_decimal("Qual e' il fabbisogno annuo dichiarato della famiglia? Premi Invio se incerto: resta `0.00` e diventa un data_gap.", values["annual_spending_need"]); _save_work_exit_wizard_progress(input_path, readiness_input_path, values, "annual_spending_need")
+    values["available_bridge_assets"] = _prompt_non_negative_decimal("Quali asset sono dichiarati disponibili per il periodo ponte? Premi Invio se incerto: resta `0.00` e diventa un data_gap.", values["available_bridge_assets"]); _save_work_exit_wizard_progress(input_path, readiness_input_path, values, "available_bridge_assets")
+    values["horizon_years"] = str(_prompt_positive_int("Per quanti anni vuoi controllare la sostenibilita'? Il default segue il servizio esistente.", int(values["horizon_years"])))
+    data = _work_exit_wizard_data(values)
+    _write_wizard_json(input_path, data, True, WorkExitFeasibilityError, "work-exit feasibility input")
+    _write_wizard_json(readiness_input_path, _work_exit_readiness_manifest(values, data), True, WorkTransitionReadinessError, "work-transition readiness input")
+    readiness = build_work_transition_readiness(readiness_input_path, readiness_output_path)
+    return {"status": "prepared", "input_path": str(input_path), "readiness_input_path": str(readiness_input_path), "readiness_output_path": str(readiness_output_path), "data_gap_count": len(data["data_gaps"]), "readiness_gap_count": len(readiness["data_gaps"]), "primary_ready": all(values[label] != "unknown" for label in ("primary_birth", "spouse_birth"))}
+
+
 def _write_wizard_json(
     path: Path,
     data: dict[str, Any],
@@ -2987,6 +3075,36 @@ def _prompt_decimal_text(label: str, default: str) -> str:
     return value or default
 
 
+def _prompt_non_negative_decimal(label: str, default: str) -> str:
+    while True:
+        value = _prompt_decimal_text(label, default)
+        try:
+            parsed = Decimal(value)
+        except (InvalidOperation, ValueError):
+            print("Valore non valido: inserisci un numero decimale non negativo oppure premi Invio.")
+            continue
+        if parsed < 0:
+            print("Valore non valido: il numero non può essere negativo.")
+            continue
+        return value
+
+
+def _prompt_positive_int(label: str, default: int) -> int:
+    while True:
+        value = input(f"{label} [{default}]: ").strip()
+        if not value:
+            return default
+        try:
+            parsed = int(value)
+        except ValueError:
+            print("Valore non valido: inserisci un numero intero positivo.")
+            continue
+        if parsed <= 0:
+            print("Valore non valido: l'orizzonte deve essere maggiore di zero.")
+            continue
+        return parsed
+
+
 def _prompt_choice(label: str, default: str, choices: set[str]) -> str:
     value = input(f"{label} [{default}]: ").strip().lower()
     return value if value in choices else default
@@ -3499,6 +3617,15 @@ def build_parser() -> argparse.ArgumentParser:
     security_check_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace root")
     security_check_parser.add_argument("--repository", type=Path, default=resolve_repo("engine"), help="Repository to scan for accidental secrets")
     security_check_parser.add_argument("--key-path", type=Path, help="Optional workspace-relative secret store path")
+    export = subparsers.add_parser("export", help="Create a deterministic technical sharing package")
+    export_subparsers = export.add_subparsers(dest="export_command")
+    export_sanitized_parser = export_subparsers.add_parser(
+        "sanitized", help="Package fixed public code and documentation only"
+    )
+    export_sanitized_parser.add_argument("--source", type=Path, default=WORKSPACE_ROOT, help="Repository root containing the fixed allowlist")
+    export_sanitized_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace containing the export target")
+    export_sanitized_parser.add_argument("--output", type=Path, default=Path("exports") / "family-office-sanitized.zip", help="Workspace-relative ZIP target")
+    export_sanitized_parser.add_argument("--overwrite", action="store_true", help="Replace an existing sanitized package")
     pension = subparsers.add_parser("pension", help="Import pension sources")
     pension_subparsers = pension.add_subparsers(dest="pension_command")
     inps_parser = pension_subparsers.add_parser(
@@ -5408,6 +5535,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_work_exit_demo_output(),
         help="Output synthetic work-exit feasibility snapshot JSON path",
     )
+    planning_work_exit_wizard_parser = planning_work_exit_subparsers.add_parser(
+        "wizard", help="Collect workspace-local work-exit facts and readiness gaps"
+    )
+    planning_work_exit_wizard_parser.add_argument("--input", type=Path, default=default_work_exit_input())
+    planning_work_exit_wizard_parser.add_argument("--readiness-input", type=Path, default=default_work_transition_readiness_input())
+    planning_work_exit_wizard_parser.add_argument("--readiness-output", type=Path, default=default_work_transition_readiness_output())
+    planning_work_exit_wizard_parser.add_argument("--overwrite", action="store_true", help="Resume or revise an existing private draft")
     planning_work_transition_parser = planning_subparsers.add_parser(
         "work-transition",
         help="Prepare phased work-transition planning inputs",
@@ -6050,6 +6184,24 @@ def main(argv: list[str] | None = None) -> int:
         print(f"secret store: {report['secret_store']['path']} permissions={report['secret_store']['permissions']}")
         print("log policy: relative paths and finding codes only; secrets and file contents are never emitted")
         return 0 if report["status"] == "ready" else 2
+
+    if args.command == "export" and args.export_command == "sanitized":
+        try:
+            manifest = build_sanitized_export(args.source, args.workspace, args.output, overwrite=args.overwrite)
+        except SanitizedExportError as exc:
+            print(f"export sanitized: ERROR ({exc}). Next action: review the target, allowlist and manifest policy before retrying.")
+            return 1
+        counts = manifest["counts"]
+        missing_roots = manifest.get("missing_allowlist_roots", [])
+        print(
+            "export sanitized: package created. "
+            f"Facts: {counts['included']} allowlisted files included and {counts['excluded']} excluded. "
+            "Assumptions: only fixed code, roadmap and declared report paths were considered. "
+            f"Data gaps: {len(missing_roots)} allowlist roots unavailable ({', '.join(missing_roots) if missing_roots else 'none'}). "
+            "Limits: no workspace data, snapshots, backups, history, virtual environments or PDFs are included. "
+            "Next action: inspect manifest.json in the ZIP before sharing it."
+        )
+        return 0
 
     if args.command == "pension" and args.pension_command == "import-inps":
         try:
@@ -7955,6 +8107,34 @@ def main(argv: list[str] | None = None) -> int:
             f"{len(snapshot['data_gaps'])} gaps "
             f"({args.output})"
         )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "work-exit"
+        and args.planning_work_exit_command == "wizard"
+    ):
+        try:
+            result = run_work_exit_wizard(args.input, args.readiness_input, args.readiness_output, args.overwrite)
+        except (EOFError, KeyboardInterrupt):
+            print("planning work-exit wizard: interrupted; rerun with `--overwrite` to resume/revise.")
+            return 1
+        except (WorkExitFeasibilityError, WorkTransitionReadinessError) as exc:
+            print(f"planning work-exit wizard: ERROR ({exc})")
+            return 1
+        if result["status"] == "existing":
+            print(f"planning work-exit wizard: bozza gia presente ({result['input_path']}). Per rivedere le risposte, esegui di nuovo con `--overwrite`.")
+        else:
+            print(
+                "planning work-exit wizard: bozza salvata con "
+                f"{result['data_gap_count']} dati da verificare e readiness con {result['readiness_gap_count']} gap "
+                f"({result['input_path']}; {result['readiness_input_path']}). "
+                "Fatti: dati dichiarati e snapshot presenti sono separati. Assunzioni: data candidata e orizzonte dichiarati. "
+                "Limiti: nessuna pensione, imposta o raccomandazione e' stata calcolata. "
+                "Prossima azione: completa i gap con fonti documentate, aggiorna la readiness e poi esegui `fo planning work-exit build`."
+                if result.get("primary_ready")
+                else "Prossima azione: completa le date di nascita degli adulti; il build resta bloccato per evitare una valutazione incompleta del nucleo."
+            )
         return 0
 
     if (

@@ -1276,6 +1276,26 @@ Output personale previsto:
 
 Il contratto `work-transition-readiness/v1` verifica freshness, precedence, provenance, gross/net, periodi, bounds degli stream, liquidita' e doppio conteggio. Il comando produce sempre il report diagnostico; un blocker imposta `optimization_allowed=false` e impedisce ai successivi incrementi Work Transition di emettere date apparenti.
 
+## Work-exit guided input wizard V6.6d
+
+Test mirati:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_work_exit_wizard
+```
+
+Verificano draft workspace-local, salvataggio progressivo, ripresa con `--overwrite`, gap per valori incerti, riepilogo question-first, readiness diagnostica e rifiuto dei path esterni.
+
+## Sanitized export V6.7
+
+Test mirati:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_sanitized_export
+```
+
+Verificano allowlist fissa, esclusioni difensive, confinamento e collisione dei path, riproducibilita' ZIP e manifest con path POSIX e SHA-256.
+
 ## Work-transition scenario
 
 Test mirati e integrazione CLI:

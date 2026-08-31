@@ -182,13 +182,14 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 - Il wizard crea un input personale nel workspace: chiede conferma esplicita di nessun contributo spagnolo futuro e registra come gap l'importo teorico spagnolo se non e' disponibile.
 - `planning spanish-eu-theoretical-pension build` genera lo snapshot teorico usando i default del workspace; per anni futuri usa assunzioni proiettive dichiarate e marcate come non ufficiali. `planning it-es-eu-pension build` lo usa automaticamente se esiste, senza edit manuale dell'importo e senza passare path JSON.
 
-## `work-exit-feasibility-input/v1` planned
+## `work-exit-feasibility-input/v1`
 
-- Stato: pianificato in V4.8c; non ancora disponibile nella CLI.
-- Comando previsto: `planning work-exit build`.
+- Stato: disponibile tramite `planning work-exit wizard`; il JSON manuale resta un percorso avanzato.
+- Comandi: `planning work-exit wizard`, `planning work-exit build`.
 - Obiettivo: cercare la prima data sostenibile per smettere di lavorare, non calcolare solo una data predefinita.
-- Default previsto: usare snapshot gia' presenti nel workspace per INPS, pro-rata spagnolo, pensione del coniuge, pension income, patrimonio, liquidita' e spese.
-- Campi probabili: data di partenza ricerca, granularita' date candidate, adulti del nucleo inclusi, vincoli minimi di sostenibilita', assunzioni future esplicite, riferimenti a snapshot e data gaps.
+- Il wizard salva la bozza nel workspace e crea il manifest `work-transition-readiness-input/v1`; fonti e snapshot mancanti restano gap espliciti.
+- Il build usa gli snapshot gia' presenti nel workspace per INPS, pro-rata spagnolo, pensione del coniuge, pension income, patrimonio, liquidita' e spese.
+- Campi: data di partenza ricerca, granularita' date candidate, adulti del nucleo inclusi, vincoli minimi di sostenibilita', assunzioni future esplicite, riferimenti a snapshot e `data_gaps`.
 - Nota: date come `2037` devono essere candidate o filtri diagnostici; il risultato primario resta la prima data sostenibile con spiegazione delle date scartate. La pensione del coniuge e' parte del calcolo household; se manca, deve restare un gap esplicito.
 
 ## `pension-scenario/v1`

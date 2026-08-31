@@ -1326,9 +1326,9 @@ Il comando produce `it-es-eu-pension-pro-rata/v1` con data nascita, scenario pen
 
 `fo planning spanish-eu-theoretical-pension build` produce `spanish-eu-theoretical-pension/v1` da input pro-rata, riconciliazione contributiva spagnola e rule pack `spanish-eu-theoretical-pension`. Per anni futuri non osservabili, come il 2039, usa solo assunzioni proiettive dichiarate nel rule pack e marca lo snapshot come `planning_projection_not_official_future_law`: e' una stima di pianificazione, non una regola ufficiale futura. Per mesi UE non spagnoli nella finestra di base usa solo la base spagnola reale piu' vicina nel tempo aggiornata con IPC ufficiale o proiettato; se IPC, basi ES o copertura mensile non sono disponibili, scrive data gaps. `fo planning it-es-eu-pension wizard` crea l'input personale guidato senza fixture sintetiche: propone i mesi spagnoli dalla riconciliazione disponibile, chiede mesi italiani normalizzati, mese di pensionamento, conferma esplicita di nessun contributo spagnolo futuro e importo teorico spagnolo da sole basi ES. Se l'importo teorico non e' noto, lo registra come data gap invece di inventarlo.
 
-## `fo planning work-exit build` planned
+## `fo planning work-exit build`
 
-Capability pianificata in V4.8c, non ancora disponibile nella CLI.
+Capability disponibile; per introdurre o aggiornare i dati usare prima `fo planning work-exit wizard`.
 
 Obiettivo: trovare la prima data sostenibile per smettere di lavorare partendo da oggi, non valutare soltanto una data target statica.
 
@@ -1347,6 +1347,26 @@ Default previsti:
 - output: `../family-office-workspace/snapshots/work-exit-feasibility.snapshot.json`
 
 Il comando dovra' produrre `work-exit-feasibility/v1` con date candidate, prima data sostenibile oppure blocco spiegato, motivi delle date scartate, stima INPS interna per candidato/persona, quota spagnola pro-rata, pensione del coniuge, totale lordo separato per persona e fonte, eventuali bridge e data gaps. Date esplicite come `2037` sono candidate diagnostiche o filtri della ricerca, non l'obiettivo primario. Se la pensione del coniuge non e' disponibile o stimabile, il comando dovra' produrre un gap esplicito per evitare una data household incompleta. Per anni futuri non osservabili usera' solo assunzioni proiettive dichiarate nei rule pack; non calcolera' certificazioni ufficiali INPS, P1 ufficiale, netto fiscale non gia' disponibile o raccomandazioni.
+
+## `fo planning work-exit wizard`
+
+Raccoglie dalla CLI gli input personali per la valutazione dell'uscita dal lavoro e crea nel workspace privato il draft `work-exit-feasibility/v1` insieme al manifest `work-transition-readiness/v1`.
+
+```text
+fo planning work-exit wizard
+```
+
+Il wizard mostra gli snapshot già disponibili come contesto, salva progressivamente dopo ogni risposta e può essere ripreso con `--overwrite`. I valori incerti diventano `data_gaps`; non calcola pensioni, imposte o raccomandazioni. Dopo avere completato o corretto i gap, eseguire `fo planning work-transition readiness` e quindi `fo planning work-exit build`.
+
+## `fo export sanitized`
+
+Prepara un archivio tecnico condivisibile senza includere il workspace privato:
+
+```text
+fo export sanitized
+```
+
+Il comando usa come sorgente il root del repository e scrive per default `family-office-workspace/exports/family-office-sanitized.zip`. Considera soltanto l'allowlist fissa di codice Python, roadmap e report dichiarati; non accetta pattern di inclusione arbitrari. Esclude sempre workspace privato, snapshot, backup, `.venv`, `.history` e PDF e redige marker deterministici per email, IBAN, telefoni e credenziali nei file testuali ammessi. Il target deve restare nel workspace; se esiste va indicato `--overwrite`. Lo ZIP include `manifest.json` con path POSIX relativi, SHA-256 dei byte esportati e conteggi inclusi/esclusi; la scrittura e' atomica e l'output non mostra contenuti privati. Prima della condivisione, ispezionare il manifest incluso: il pacchetto non e' un backup o un meccanismo di restore.
 
 ## `fo retirement simulate`
 

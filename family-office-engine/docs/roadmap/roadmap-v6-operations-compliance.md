@@ -247,7 +247,7 @@ Verifiche: 26 test mirati del perimetro (1 skip ACL Windows), regression engine 
 
 ### V6.6d — Work-exit guided input wizard
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Raccogliere dalla CLI gli input necessari per stimare la prima data sostenibile di uscita dal lavoro, senza richiedere la compilazione manuale di JSON.
@@ -260,10 +260,18 @@ Raccogliere dalla CLI gli input necessari per stimare la prima data sostenibile 
 - Out of scope: nuovi calcoli pensionistici o finanziari, import automatici, certificazioni INPS, consulenza fiscale o raccomandazioni.
 - Done quando: un operatore può introdurre e validare i dati necessari dalla CLI e poi eseguire il calcolo work-exit senza modificare JSON manualmente.
 
+Esito: completato con `fo planning work-exit wizard`. Il wizard raccoglie dati dichiarati, salva progressivamente input e manifest readiness nel workspace, supporta revisione con `--overwrite`, mostra il contesto degli snapshot senza copiarne contenuti e conserva gli incerti come `data_gaps`. I path sono confinati e distinti; date adulte mancanti mantengono il nucleo esplicito ma bloccano l'invito al build. Il manifest non inventa fonti: gli snapshot devono essere collegati nel relativo workflow di readiness prima del calcolo. Nessun nuovo calcolo pensionistico, finanziario o fiscale e' stato introdotto.
+
+Verifiche: 7 test wizard mirati; regression engine 647 test OK (1 skip); compilazione, `pip check`, routing validator, `roadmap_audit.py`, privacy/path review e `git diff --check` OK. La documentazione CLI e testing e' allineata; V6.7 resta pianificato e non avviato.
+
 ### V6.7 — Sanitized export and packaging
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
+
+Esito: completato con `fo export sanitized`. L'engine produce un archivio ZIP deterministico con allowlist fissa per codice Python, roadmap e report dichiarati; esclude workspace, snapshot, backup, `.venv`, `.history`, PDF e symlink, redige marker deterministici per dati sensibili nei file testuali ammessi e registra `manifest.json` con hash SHA-256 dei byte esportati, conteggi, esclusioni e radici allowlist mancanti. Il target resta confinato al workspace, la sostituzione richiede `--overwrite` e la scrittura usa un temporaneo univoco e atomico. Non sono stati introdotti upload, backup, restore, rete o dati personali.
+
+Verifiche: 15 test mirati export/security/validate OK (2 skip ambientali); regression engine 657 test OK (2 skip); help CLI, compilazione, `pip check`, `git diff --check`, routing validator, privacy/path review e `roadmap_audit.py` OK. Review indipendente finale approvata; V6.8 resta pianificato e non avviato.
 
 Creare export allowlist per codice, roadmap e report, con redazione dei dati personali e manifest dei file.
 

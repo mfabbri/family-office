@@ -1,5 +1,9 @@
 # Decision Log
 
+- 2026-08-31 — V6.7 completa `fo export sanitized` con ownership runtime nell'engine e planner/contesto nel bootstrap. La policy deliberata e' allowlist-only, workspace-local, deterministica e senza rete: manifest versionato con hash dei byte sanitizzati, esclusioni difensive, redazione testuale di credenziali/contatti, symlink rifiutati e overwrite esplicito. Le radici allowlist mancanti restano gap visibili all'operatore. Verifiche: 657 test engine (2 skip), review privacy indipendente approvata, compilazione, dipendenze, routing, diff check e audit roadmap OK.
+
+- 2026-08-31 — V6.6d completa il percorso CLI question-first per Work Exit: `fo planning work-exit wizard` salva input e readiness manifest workspace-local con checkpoint, revisione esplicita, path distinti e `data_gaps`; non inventa binding o fonti per gli snapshot e non introduce calcoli. Il build resta subordinato a una readiness colmata con fonti documentate. Verifiche: 648 test engine (1 skip), compilazione, dipendenze, routing, privacy e audit roadmap OK.
+
 - 2026-08-30 — V6.6d viene aggiunto prima di V6.7 come incremento abilitante richiesto dall'uso operativo del motore: il percorso ordinario per `work-transition-readiness/v1` e `work-exit-feasibility/v1` sarà un wizard CLI workspace-local, con salvataggio progressivo, `data_gaps` espliciti e nessuna modifica manuale di JSON. Non introduce nuovi calcoli o raccomandazioni.
 
 - 2026-08-30 — V6.6c chiude il gate di audit dopo quattro incrementi funzionali: le approvazioni normative richiedono evidenza dei test e checklist Knowledge/Rules esplicita; le policy calendario fuori validità diventano `data_gaps`; lo scanner segreti usa allowlist per percorso invece di marker nel contenuto; gli ID degli eventi locali sono allocati senza collisioni. Il follow-up sulla data odierna nei wizard V6.6b resta separato per non ampliare lo scope dell'audit.

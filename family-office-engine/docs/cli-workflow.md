@@ -42,13 +42,14 @@ I comandi `python -m family_office_engine.cli.main ...` restano fallback tecnici
 
 L'obiettivo operativo non e' scegliere a mano una data di pensionamento e calcolarla isolatamente. Il percorso corretto e' trovare la prima data sostenibile, partendo da oggi, in cui il nucleo puo' smettere di lavorare secondo vincoli dichiarati.
 
-Capability pianificata in V4.8c:
+Il percorso operativo e' ora disponibile in forma guidata:
 
 ```text
+fo planning work-exit wizard
 fo planning work-exit build
 ```
 
-Questo comando non e' ancora disponibile. Quando implementato dovra' usare i default del workspace e scansionare date candidate, producendo `work-exit-feasibility/v1` con prima data sostenibile, motivi delle date scartate, stima INPS interna per candidato, quota spagnola pro-rata, pensione del coniuge, eventuali bridge, patrimonio/spese e data gaps. Date esplicite come `2037` saranno solo candidate diagnostiche o filtri, non l'obiettivo primario. Se la pensione del coniuge non e' disponibile o stimabile, il comando dovra' produrre un gap esplicito per evitare una data di uscita household incompleta.
+Il wizard introduce i dati minimi nel workspace, salva progressivamente la bozza e produce anche il manifest di readiness. Le risposte ignote restano `data_gaps` espliciti; il manifest non inventa fonti e puo' quindi risultare bloccato. Gli snapshot disponibili sono mostrati come contesto, ma devono essere collegati alla readiness tramite il relativo percorso CLI prima di poter colmare i gap. Solo dopo, `planning work-exit build` calcola la prima data sostenibile, con motivi delle date scartate e provenance degli input selezionati. Date esplicite come `2037` sono candidate diagnostiche o filtri, non l'obiettivo primario.
 
 ## Comandi demo
 
