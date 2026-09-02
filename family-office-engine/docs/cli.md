@@ -1687,3 +1687,32 @@ fo compliance regulatory prepare --change-id it.demo.2026.v2 --summary "..." --s
 ```
 
 La proposta `regulatory-change/v1` espone fonte, autorita', validita', retroattivita', impatto, data gaps, test richiesti e checklist. Una fonte non autorevole o una validita' retroattiva resta in revisione. L'approvazione richiede evidenza nominativa dei test e la conferma esplicita dei passaggi Knowledge e Rules: `approve --input <path> --approver <name> --tests-passed --knowledge-updated --rule-pack-versioned --test-evidence <test-name>`. `rollback --input <path> --reason <reason>` registra il ripristino. I file sono accettati solo dentro il workspace.
+
+## `fo backup`
+
+Protegge il workspace privato localmente quando la domanda operativa e' “posso ricostruire i miei file se questa copia si perde?”.
+
+```text
+fo backup create
+fo backup verify --input backups/workspace.fobak
+fo backup restore --input backups/workspace.fobak --target recovery --path planning
+fo backup drill --input backups/workspace.fobak --target recovery-drill
+```
+
+`create` genera uno ZIP deterministico dei file regolari del workspace e lo cifra con il secret store V6.6; scrive anche `workspace.fobak.manifest.json` con hash, dimensioni, retention ed esclusioni. `.security`, `backups`, `.history`, `.venv`, cache, temporanei e symlink non entrano nel payload: la chiave non viene mai salvata nel backup. Non viene usata rete.
+
+`verify` controlla hash del payload, autenticazione della chiave e integrita' ZIP. `restore` accetta uno o piu' `--path` relativi e rifiuta traversal; senza `--path` ripristina tutto nella destinazione workspace-local indicata. `drill` richiede una directory vuota dentro il workspace e dimostra il recupero senza sovrascrivere dati. `--retention N` conserva le N copie piu' recenti nella directory del backup.
+
+## `fo audit`
+
+Registra operazioni rilevanti e approvazioni in un log locale append-only:
+
+```text
+fo audit append --event-type recommendation --actor engine --subject-id scenario-1 --action generated --reference evidence:abc
+fo audit append --event-type approval --actor reviewer --subject-id scenario-1 --action approve --reference test:golden
+fo audit append --event-type revocation --actor reviewer --subject-id scenario-1 --action revoke --reference reason:changed
+fo audit verify
+fo audit replay
+```
+
+Gli eventi `audit-event/v1` contengono solo riferimenti, non contenuti personali. Sequenza, hash dell'evento precedente e SHA-256 rilevano modifica, inserimento, cancellazione o riordinamento; approvazioni e revoche restano eventi distinti. `replay` ricostruisce lo stato delle approvazioni e fallisce se la catena e' alterata. Il log e' confinato al workspace e non usa rete.

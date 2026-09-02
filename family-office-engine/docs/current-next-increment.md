@@ -2,7 +2,7 @@
 
 ## ID e titolo
 
-V6.8 - Backup, restore and disaster recovery.
+V6.9a - Operations compliance code audit.
 
 ## Stato
 
@@ -14,16 +14,22 @@ V6.8 - Backup, restore and disaster recovery.
 
 ## Motivazione e dipendenze
 
-V6.7 ha reso disponibile un export tecnico sanitizzato. Il prossimo incremento definira' backup cifrati, retention, verifica integrita', restore selettivo e recovery drill.
+V6.9 ha completato audit trail append-only, replay e approval workflow. La cadenza richiede ora l'audit operativo prima di V6.10.
 
-Dipendenza: V6.7 `done`.
+Dipendenza: V6.9 `done`.
 
 ## Obiettivo e criteri di accettazione
 
-Definire backup cifrati, retention, verifica integrita', restore selettivo e recovery drill con manifest riproducibile.
+Verificare confini, contratti, test, privacy, dipendenze, data gaps e allineamento CLI/documentazione del perimetro V6.6d-V6.9.
 
-Out of scope: implementare V6.8 in questa sessione; il prossimo incremento non e' avviato.
+Dipendenza: V6.1 e V5.10 `done`.
+
+## Piano concreto
+
+- Selezionato automaticamente per azzerare la cadenza code-audit; non avviato in questa sessione.
+
+Out of scope: implementare V6.9a o V6.10 in questa sessione.
 
 ## Prossima azione
 
-Selezione completata; V6.8 resta pianificato e non viene avviato in questa sessione.
+Prossima azione: eseguire V6.9a nel prossimo task, poi selezionare V6.10.

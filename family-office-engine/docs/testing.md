@@ -1331,3 +1331,8 @@ $env:PYTHONPATH='src'; python -m unittest tests.unit.test_planning_wizards_v66a
 I test usano esclusivamente risposte sintetiche e verificano draft workspace-local, `--overwrite`, provenance, `data_gaps` espliciti e prossima azione leggibile. Verificano anche i testi question-first: etichetta tecnica locale del nucleo, data a cui si riferiscono i dati, default `0.00` che diventa `data_gap` se il valore non è noto e spiegazione dei pacchetti wealth-strategy come alternative da confrontare.
 
 `test_regulatory_change.py` copre `regulatory-change/v1`: fonte autorevole, fonte non autorevole, validita' retroattiva, gate Knowledge/Rules/test evidence, rollback e confinamento workspace. `test_compliance_calendar.py` verifica anche validita' temporale della policy e ID locali non contigui; `test_security.py` verifica che un marker `fixture` in un commento non sopprima la rilevazione. La CLI viene esercitata nello stesso test con `prepare` e `approve`.
+
+`test_backup.py` verifica round-trip cifrato, manifest/hash, esclusione della chiave e dei backup, corruzione, retention, restore selettivo, traversal, drill su directory vuota e summary `fo backup`. I test usano solo fixture sintetiche e chiavi generate localmente.
+### V6.9 audit trail
+
+`test_audit_trail.py` verifica append/verify/replay, approvazione e revoca come eventi distinti, clock skew, tamper detection, confinamento al workspace e i tre comandi CLI. Il log usa fixture sintetiche e non persiste contenuti personali.

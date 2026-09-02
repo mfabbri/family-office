@@ -19,3 +19,8 @@ La cifratura non viene applicata automaticamente agli snapshot esistenti: l'oper
 ## Regola operativa
 
 Un finding non deve essere risolto nascondendo il file o il contenuto allo scanner. La correzione deve rimuovere il segreto dal repository/log, cifrare esplicitamente l'artefatto nel workspace o ridurre i permessi con uno strumento ACL appropriato.
+
+V6.8 aggiunge backup workspace-local cifrati con Fernet e manifest laterale di hash. Il payload esclude secret store, backup precedenti, cache, temporanei e symlink; il restore valida traversal e autenticita' prima di scrivere. La chiave resta separata: perdita della chiave e' un data gap operativo che richiede il secret store conservato dall'operatore.
+### Audit trail V6.9
+
+Il log locale `audit-event/v1` salva esclusivamente attore, soggetto, azione e riferimento validati; non salva documenti o testo libero multi-linea. Ogni riga e' concatenata con SHA-256 alla precedente e `verify` controlla schema, sequenza, catena e hash. La revoca non modifica eventi precedenti. Il controllo dell'orologio rifiuta timestamp futuri oltre cinque minuti; la firma remota e l'identita' federata sono fuori perimetro.

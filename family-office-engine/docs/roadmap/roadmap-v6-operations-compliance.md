@@ -283,20 +283,23 @@ Creare export allowlist per codice, roadmap e report, con redazione dei dati per
 
 ### V6.8 — Backup, restore and disaster recovery
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
-Definire backup cifrati, retention, verifica integrità, restore selettivo e recovery drill.
+Implementare backup cifrati, retention, verifica integrità, restore selettivo e recovery drill con manifest riproducibile.
 
 - Dipende da: V6.6.
 - Repository: `bootstrap`, `workspace`.
 - Output: runbook e manifest backup.
 - Test: restore su directory vuota, backup corrotto, chiave mancante e versioni.
 - Done quando: il workspace può essere ricostruito con una prova documentata.
+- Piano corrente: ownership del contratto e del runtime nell'engine; secret store workspace-local già introdotto da V6.6; archivio ZIP deterministico cifrato con manifest laterale, retention esplicita, restore selettivo confinato e drill su destinazione vuota. La chiave non viene inclusa nel backup e upload/cloud restano fuori scope.
+- Esito: completato con `fo backup create|verify|restore|drill`. Il payload ZIP è deterministico prima della cifratura Fernet, il manifest laterale conserva hash e dimensioni senza contenuti, retention conserva le copie più recenti, verify controlla autenticazione/ZIP/hash, restore accetta solo selezioni relative e destinazioni workspace-local, drill richiede una directory vuota. Secret store, backup, cache, temporanei, virtualenv, history e symlink sono esclusi.
+- Verifiche: 5 test mirati backup, regression engine 662 test OK con 2 skip ambientali, compileall, `pip check`, smoke `fo backup --help`, routing validator, privacy/path review, `git diff --check` e `roadmap_audit.py` OK.
 
 ### V6.9 — Audit trail and approvals
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Registrare chi o cosa ha importato dati, modificato assunzioni, approvato scenari e generato raccomandazioni.
@@ -306,6 +309,10 @@ Registrare chi o cosa ha importato dati, modificato assunzioni, approvato scenar
 - Output: append-only `audit-event/v1` e approval workflow.
 - Test: modifica, revoca, replay, clock skew e tamper detection.
 - Done quando: ogni raccomandazione ad alto impatto ha una catena di approvazione ricostruibile.
+
+Esito: completato con `audit-event/v1`, servizio locale append-only e CLI `fo audit append|verify|replay`. Ogni evento conserva sequenza, timestamp con timezone, attore, soggetto, azione, riferimento, hash del precedente e SHA-256 proprio; il log non contiene documenti o testo personale. Il replay ricostruisce approvazioni e revoche senza riscrivere eventi, mentre verify rileva modifica, inserimento, cancellazione o riordinamento e rifiuta clock skew oltre cinque minuti. Firma remota, identita' federata e rete restano fuori scope.
+
+Verifiche: 4 test mirati V6.9, regression engine 666 test con 2 skip ambientali, smoke `fo audit --help` e CLI append/verify/replay, compilazione, `pip check`, validazione planner, `roadmap_audit.py`, `git diff --check` e review privacy/path OK.
 
 ### V6.10 — Regression, release and model governance
 
@@ -340,3 +347,14 @@ Produrre una review annuale con KPI, eventi, cambi normativi, scostamenti, risch
 - Normativa e modelli AI sono soggetti a governance e regression test.
 - Alert e review hanno owner, fonte e azione.
 - Il sistema è recuperabile e auditabile senza dipendere dalla memoria dell'operatore.
+### V6.9a - Operations compliance code audit
+
+**Stato:** `planned`
+**Tipo:** `audit`
+
+Eseguire il code audit obbligatorio dopo V6.6d, V6.7, V6.8 e V6.9 con la checklist del bootstrap. Il perimetro comprende backup, audit trail, approval workflow, CLI, contratti, test, documentazione e planner. Correggere solo difetti piccoli e verificabili; registrare follow-up espliciti per ogni debito non risolto.
+
+- Dipende da: V6.9.
+- Repository: `bootstrap`, `engine`, `workspace`.
+- Test: test mirati del perimetro, smoke CLI, regression e audit roadmap.
+- Done quando: il contatore audit e' azzerato con evidenze riproducibili e ogni debito residuo e' esplicito.

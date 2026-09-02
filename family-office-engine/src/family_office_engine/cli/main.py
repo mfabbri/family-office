@@ -261,6 +261,8 @@ from family_office_engine.services.regulatory_change import (
 )
 from family_office_engine.services.security import SecurityError, build_security_check
 from family_office_engine.services.sanitized_export import SanitizedExportError, build_sanitized_export
+from family_office_engine.services.backup import BackupError, create_backup, recovery_drill, restore_backup, verify_backup
+from family_office_engine.services.audit_trail import AuditTrailError, append_audit_event, replay_audit, verify_audit_log
 from family_office_engine.services.operator_analysis import (
     OperatorAnalysisError,
     analyze_operator_question,
@@ -3626,6 +3628,47 @@ def build_parser() -> argparse.ArgumentParser:
     export_sanitized_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace containing the export target")
     export_sanitized_parser.add_argument("--output", type=Path, default=Path("exports") / "family-office-sanitized.zip", help="Workspace-relative ZIP target")
     export_sanitized_parser.add_argument("--overwrite", action="store_true", help="Replace an existing sanitized package")
+    backup = subparsers.add_parser("backup", help="Protect and recover the private workspace locally")
+    backup_subparsers = backup.add_subparsers(dest="backup_command")
+    backup_create = backup_subparsers.add_parser("create", help="Create an encrypted workspace backup")
+    backup_create.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    backup_create.add_argument("--output", type=Path, default=Path("backups") / "workspace.fobak")
+    backup_create.add_argument("--key-path", type=Path)
+    backup_create.add_argument("--retention", type=int, default=3)
+    backup_create.add_argument("--overwrite", action="store_true")
+    backup_verify = backup_subparsers.add_parser("verify", help="Verify backup authentication and contents")
+    backup_verify.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    backup_verify.add_argument("--input", type=Path, required=True)
+    backup_verify.add_argument("--key-path", type=Path)
+    backup_restore = backup_subparsers.add_parser("restore", help="Restore selected paths from a backup")
+    backup_restore.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    backup_restore.add_argument("--input", type=Path, required=True)
+    backup_restore.add_argument("--target", type=Path, required=True)
+    backup_restore.add_argument("--path", action="append", default=[])
+    backup_restore.add_argument("--key-path", type=Path)
+    backup_restore.add_argument("--overwrite", action="store_true")
+    backup_drill = backup_subparsers.add_parser("drill", help="Prove recovery into an empty directory")
+    backup_drill.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    backup_drill.add_argument("--input", type=Path, required=True)
+    backup_drill.add_argument("--target", type=Path, required=True)
+    backup_drill.add_argument("--key-path", type=Path)
+    audit = subparsers.add_parser("audit", help="Record and verify local append-only audit events")
+    audit_subparsers = audit.add_subparsers(dest="audit_command")
+    audit_append = audit_subparsers.add_parser("append", help="Append an audit event")
+    audit_append.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    audit_append.add_argument("--log", type=Path, default=Path("snapshots") / "audit-events.jsonl")
+    audit_append.add_argument("--event-type", required=True, choices=["import", "assumption_change", "recommendation", "approval", "revocation"])
+    audit_append.add_argument("--actor", required=True)
+    audit_append.add_argument("--subject-id", required=True)
+    audit_append.add_argument("--action", required=True)
+    audit_append.add_argument("--reference", required=True)
+    audit_append.add_argument("--occurred-at")
+    audit_verify = audit_subparsers.add_parser("verify", help="Verify audit chain and hashes")
+    audit_verify.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    audit_verify.add_argument("--log", type=Path, default=Path("snapshots") / "audit-events.jsonl")
+    audit_replay = audit_subparsers.add_parser("replay", help="Replay approvals and revocations")
+    audit_replay.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
+    audit_replay.add_argument("--log", type=Path, default=Path("snapshots") / "audit-events.jsonl")
     pension = subparsers.add_parser("pension", help="Import pension sources")
     pension_subparsers = pension.add_subparsers(dest="pension_command")
     inps_parser = pension_subparsers.add_parser(
@@ -6185,6 +6228,27 @@ def main(argv: list[str] | None = None) -> int:
         print("log policy: relative paths and finding codes only; secrets and file contents are never emitted")
         return 0 if report["status"] == "ready" else 2
 
+    if args.command == "audit":
+        try:
+            audit_log = args.log if args.log.is_absolute() else args.workspace / args.log
+            if args.audit_command == "append":
+                event = append_audit_event(audit_log, args.workspace, event_type=args.event_type, actor=args.actor, subject_id=args.subject_id, action=args.action, reference=args.reference, occurred_at=args.occurred_at)
+                print(f"audit append: OK sequence={event['sequence']} ({audit_log})")
+                return 0
+            if args.audit_command == "verify":
+                result = verify_audit_log(audit_log, args.workspace)
+                print(f"audit verify: {result['status']} events={result['event_count']} ({audit_log})")
+                return 0
+            if args.audit_command == "replay":
+                result = replay_audit(audit_log, args.workspace)
+                print(f"audit replay: {result['status']} events={result['event_count']} approvals={len(result['approvals'])} ({audit_log})")
+                return 0
+            print("audit: ERROR (choose append, verify or replay)")
+            return 2
+        except (AuditTrailError, OSError, json.JSONDecodeError) as exc:
+            print(f"audit: ERROR ({exc})")
+            return 1
+
     if args.command == "export" and args.export_command == "sanitized":
         try:
             manifest = build_sanitized_export(args.source, args.workspace, args.output, overwrite=args.overwrite)
@@ -6202,6 +6266,32 @@ def main(argv: list[str] | None = None) -> int:
             "Next action: inspect manifest.json in the ZIP before sharing it."
         )
         return 0
+
+    if args.command == "backup":
+        try:
+            if args.backup_command == "create":
+                result = create_backup(args.workspace, args.output, args.key_path, retention=args.retention, overwrite=args.overwrite)
+                print(f"backup create: ready files={len(result['files'])} retention={result['retention']} ({result['output_path']})")
+                print("Facts: encrypted workspace payload and sidecar manifest created. Assumptions: secret store remains separate.")
+                print("Limits: no remote upload or key backup. Next action: run 'fo backup verify --input <backup>'.")
+                return 0
+            if args.backup_command == "verify":
+                result = verify_backup(args.workspace, args.input, args.key_path)
+                print(f"backup verify: {result['status']} files={result['file_count']} ({result['manifest']})")
+                return 0
+            if args.backup_command == "restore":
+                result = restore_backup(args.workspace, args.input, args.target, args.key_path, args.path, overwrite=args.overwrite)
+                print(f"backup restore: {result['status']} files={result['file_count']} ({result['target']})")
+                return 0
+            if args.backup_command == "drill":
+                result = recovery_drill(args.workspace, args.input, args.target, args.key_path)
+                print(f"backup drill: {result['status']} files={result['file_count']} ({result['target']})")
+                return 0
+            print("backup: ERROR (choose create, verify, restore or drill). Next action: run 'fo backup --help'.")
+            return 2
+        except BackupError as exc:
+            print(f"backup: ERROR ({exc}). Next action: verify the workspace, key and target before retrying.")
+            return 1
 
     if args.command == "pension" and args.pension_command == "import-inps":
         try:
