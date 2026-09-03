@@ -13,6 +13,7 @@ Questo file deve restare breve. È una mappa, non un manuale completo.
 - Aggiornare test e documentazione solo quando realmente impattati.
 - Non dichiarare completato un incremento senza verifiche riproducibili.
 - Non salvare chain-of-thought nel planner o nei log di routing.
+- La delega non sostituisce l'esecuzione: il parent deve mantenere attivo il percorso critico, limitare le attese a finestre bounded, evitare polling indefinito e dichiarare subito timeout, fallback o blocker con evidenze.
 
 ## Avvio a contesto ridotto
 
@@ -30,6 +31,7 @@ Questo file deve restare breve. È una mappa, non un manuale completo.
    `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py`;
    un errore blocca gli incrementi funzionali finché la cadenza audit non è ripristinata.
 9. Consultare decision log, long-term roadmap o altre roadmap solo in presenza di una dipendenza concreta.
+10. Prima di chiudere una sessione eseguire `python family-office-bootstrap/planning/validate-execution-guardrails.py`; un errore impedisce di dichiarare completato l'incremento.
 
 ## Routing modelli
 

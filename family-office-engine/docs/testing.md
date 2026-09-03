@@ -1336,3 +1336,7 @@ I test usano esclusivamente risposte sintetiche e verificano draft workspace-loc
 ### V6.9 audit trail
 
 `test_audit_trail.py` verifica append/verify/replay, approvazione e revoca come eventi distinti, clock skew, tamper detection, confinamento al workspace e i tre comandi CLI. Il log usa fixture sintetiche e non persiste contenuti personali.
+
+### V6.10 release governance
+
+`test_release_governance.py` verifica il contratto `release-gate/v1`, version matrix/hash, evaluation sintetica, rollback non automatico, incompatibilità di schema, regressione rispetto al baseline e il percorso CLI `fo release check`. Il gate reale usa solo comandi locali allowlistati (`unittest`, `compileall`, `pip check` e audit roadmap), non rete o workspace reale.

@@ -1,6 +1,6 @@
 # CLI
 
-Guida generale e ordine d'uso: `docs/cli-workflow.md`.
+Per partire da una domanda familiare: [guida alle domande e alle feature](feature-guide.md). Guida generale e ordine d'uso: `docs/cli-workflow.md`.
 
 Mappa degli input JSON compilabili: `docs/json-input-guides.md`.
 
@@ -80,6 +80,16 @@ fo compliance setup
 ```
 
 `setup` registra progressivamente una scadenza locale (review, rinnovo o documento) senza modificare JSON. Una fonte omessa resta un `data_gap` esplicito e richiede verifica o revisione professionale. Il calendario resta in `../family-office-workspace/snapshots/compliance-calendar.snapshot.json`; il rule pack iniziale è `../family-office-rules/compliance/calendar-policy-2026.json`.
+
+## `fo review annual`
+
+Risponde alla domanda “che cosa deve riesaminare la famiglia quest'anno?” usando i soli metadati degli snapshot workspace-local:
+
+```text
+fo review annual --year 2026 --as-of-date 2026-09-03
+```
+
+La review `annual-review/v1` espone copertura delle fonti, freshness, gap, eventi dichiarati, rischi, priorità e azioni di contingenza. Non ristampa contenuti personali e non esegue calcoli fiscali, previdenziali o finanziari. `needs_review` restituisce exit code `2`; per una review mirata si possono ripetere le opzioni `--required-source`.
 
 ## `fo security check`
 
@@ -1358,6 +1368,16 @@ fo planning work-exit wizard
 
 Il wizard mostra gli snapshot già disponibili come contesto, salva progressivamente dopo ogni risposta e può essere ripreso con `--overwrite`. I valori incerti diventano `data_gaps`; non calcola pensioni, imposte o raccomandazioni. Dopo avere completato o corretto i gap, eseguire `fo planning work-transition readiness` e quindi `fo planning work-exit build`.
 
+## `fo planning work-transition sources setup`
+
+Collega guidatamente le snapshot gia' disponibili nel workspace agli input del gate Work Transition, senza richiedere modifica manuale del manifest:
+
+```text
+fo planning work-transition sources setup
+```
+
+Il comando usa per default il manifest e l'output del workspace privato. Mostra le fonti rilevate con schema, data, categoria, membro e value basis e richiede una scelta esplicita (`0` mantiene un gap; `k` mantiene un binding esistente). Ogni scelta viene salvata progressivamente con provenance, hash della snapshot originale e `binding_pointer`; verifica nuovamente hash e presenza della fonte prima del salvataggio, e rifiuta un manifest non conforme al contratto. I metadata dichiarati (`period`, bounds, liquidita' e coverage) vengono preservati; se mancano per un requisito, il comando mostra un gap azionabile. Per sostituire un binding esistente usare `--overwrite`. Al termine riesegue la readiness e riporta selection, `data_gaps`, limiti e prossima azione. Non esegue calcoli fiscali, pensionistici o finanziari. Dettaglio del contratto e del fallback JSON avanzato: `docs/work-transition-readiness.md`.
+
 ## `fo export sanitized`
 
 Prepara un archivio tecnico condivisibile senza includere il workspace privato:
@@ -1628,6 +1648,12 @@ fo orchestration evaluate --candidate-id release-2026-08-28
 ```
 
 Esegue il dataset sintetico versionato `evaluations/v5.11-orchestration-evaluation.json` e scrive `orchestration-evaluation-report/v1`. `--candidate-id` identifica il candidato modello/prompt senza includerne il testo; `--baseline` accetta esclusivamente un report generato dallo stesso dataset. Il release gate fallisce se un caso critico, una soglia o il confronto col baseline regredisce. Il comando non invoca LLM e non usa dati personali o calcoli finanziari/fiscali.
+
+## `fo release check`
+
+    fo release check --candidate-id release-2026-09-02 --output release-gate/report.json
+
+Esegue il gate locale `release-gate/v1`: regression unit dell'engine, compilazione, dipendenze, audit roadmap ed evaluation sintetica V5.11. Il report registra versioni e hash di engine, rule pack ed evaluation, esito dei controlli e un rollback plan dichiarativo. `--baseline` confronta anche la release precedente: incompatibilità di schema o regressioni fanno fallire il gate. Il comando usa solo comandi locali allowlistati, non legge il workspace reale, non usa rete/upload/deploy e non esegue automaticamente il rollback.
 
 ## `fo orchestration local-api serve`
 

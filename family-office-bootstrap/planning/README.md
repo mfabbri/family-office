@@ -31,6 +31,8 @@ Il planner viene marcato `superseded` e ricalcolato.
 - date ISO 8601 UTC;
 - aggiornamenti piccoli e leggibili in diff.
 
+Prima di dichiarare completata una sessione eseguire `python planning/validate-execution-guardrails.py`. Il gate verifica che gli stati attivi abbiano una prossima azione concreta e che gli stati completati abbiano test, review quando richiesta, nessun blocker e non più di due eventi sostanziali di delega/escalation.
+
 Se `jsonschema` e' installato:
 
 ```powershell

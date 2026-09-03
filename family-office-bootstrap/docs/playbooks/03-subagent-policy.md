@@ -24,6 +24,19 @@ Il parent è un router/controller. La delega resta selettiva, ma è obbligatoria
 - Il parent non deve rileggere integralmente i file già sintetizzati da un explorer affidabile salvo incongruenze.
 - Più agenti non devono modificare gli stessi file in parallelo.
 
+## Esecuzione effettiva del parent
+
+La delega non può trasformare il parent in un osservatore passivo. Prima di delegare il parent deve compiere il primo passo locale non bloccante: definire il piano, preparare il contratto o delimitare i file e i test. Dopo la delega deve mantenere il percorso critico attivo con lavoro non sovrapposto.
+
+- Usare al massimo una finestra di attesa bounded per richiesta; durante l'attesa eseguire verifiche locali o preparare l'integrazione.
+- Se la finestra scade, controllare subito worktree e stato dell'agent; non ripetere polling indefinito.
+- Dopo un timeout o un risultato incompleto, il parent deve scegliere esplicitamente una sola azione: continuare localmente un fix bounded, inviare una richiesta di stato/consegna, oppure dichiarare un blocker con evidenze.
+- Non delegare review prima che l'implementazione abbia prodotto diff e test mirati, salvo un gate architetturale esplicitamente prerequisito.
+- Un reviewer può produrre NO-GO; il parent deve integrare o correggere direttamente i finding bounded, senza aprire una catena indefinita di deleghe.
+- Ogni incremento deve avere un limite operativo: massimo due subagent sostanziali, massimo un ciclo di implementazione e un ciclo di review; ulteriori cicli richiedono un blocker documentato e una decisione nel planner.
+- Il completion report deve elencare separatamente codice runtime, test, documentazione e file preesistenti preservati; non basta dire “implementato” o “test verdi”.
+- Prima della chiusura eseguire `python planning/validate-execution-guardrails.py`; se fallisce, lo stato resta attivo o blocked e non si dichiara completato il lavoro.
+
 ## Quando parallelizzare
 
 Solo se i workstream sono indipendenti, ad esempio:

@@ -17,6 +17,10 @@ Non eseguire ripetutamente l'intera suite durante modifiche locali se i test mir
 - T3: review high-effort, eventualmente subagent read-only.
 - T4–T5: review indipendente, fonti/assunzioni e scenari avversi.
 
+## Gate operativo
+
+La review e' un gate, non un sostituto dell'implementazione. Il parent deve avere gia' un diff verificabile e test mirati prima di invocare il reviewer, salvo una review architetturale esplicitamente prerequisita. Le attese sul reviewer sono bounded: dopo un timeout si controlla il worktree e si prosegue localmente, si chiede una consegna sintetica oppure si registra un blocker; non si effettua polling indefinito. Un NO-GO deve produrre finding azionabili e un solo ciclo di correzione bounded. Se il finding non e' bounded o il ciclo fallisce, l'incremento resta `in_progress` e il planner registra evidenze, impatto e prerequisito.
+
 ## CLI UX checks
 
 Quando cambia un comando CLI o un wizard, verificare almeno:

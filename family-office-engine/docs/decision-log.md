@@ -188,6 +188,18 @@
 - V6.6a introduce wizard CLI question-first per gli input di wealth strategy, protezione e successione. La scelta deliberata e' mantenere i wizard come raccolta di dichiarazioni: draft e checkpoint restano workspace-local, valori incerti diventano `data_gaps`, `fo ask` propone i comandi guidati e nessun calcolo, import o effetto legale viene introdotto. Un input fuori workspace viene rifiutato; la protezione con valori ignoti resta `review_required` anche se i numeri di base sono zero.
 - 2026-08-30 — V6.6b viene pianificato per correggere il residuo di usabilità dei wizard: domande in linguaggio semplice e spiegazioni contestuali devono chiarire significato, motivo della richiesta e passo successivo a un operatore non tecnico, senza cambiare i contratti o introdurre nuovi calcoli.
 - 2026-08-30 — V6.6b completa la semplificazione UX: i default temporali usano la data odierna esplicitamente descritta, i fatti disponibili hanno etichette familiari e i wizard spiegano etichette locali, `data_gap` e alternative strategiche. Il draft workspace modificato durante l'uso resta un dato locale escluso da commit e push.
+# Decision — V6.11 annual review metadata boundary
+
+2026-09-03: `annual-review/v1` resta un report deterministico di governance operativa: legge soltanto metadati degli snapshot workspace-locali, verifica copertura, periodo, freshness, gap già dichiarati ed eventi espliciti, quindi ordina rischi e azioni di contingenza. Non legge o ristampa note/importi personali, non usa rete e non calcola valori fiscali, previdenziali o finanziari. Cambio residenza ed evento straordinario sono trigger di revisione umana, non interpretazioni automatiche.
+
 # Decision — V6.9 local audit chain
 
 2026-09-02: il runtime dell'audit trail resta nell'engine e usa un JSONL append-only workspace-local con hash SHA-256 concatenati. Approval e revocation sono eventi immutabili; il replay ricostruisce lo stato senza sovrascrivere il log. Si memorizzano riferimenti validati e non contenuti personali. Firma remota, identita' federata e rete restano fuori scope.
+
+# Decision — V6.10 local release gate
+
+2026-09-02: la semantica di `release-gate/v1` e il runtime restano nell'engine, mentre rules, knowledge, bootstrap ed evaluation forniscono sorgenti versionate verificabili. `fo release check` usa solo comandi locali allowlistati e produce evidenze, version matrix e rollback plan senza rete, upload, deploy o accesso al workspace reale. Il rollback resta dichiarativo: l'esecuzione richiede un operatore e non viene automatizzata dal gate.
+
+# Decision — V6.10b work-transition source binding
+
+2026-09-02: `work-transition-readiness/v1` non può restare operativo con il solo manifest `sources: []` prodotto dal wizard. V6.10b viene aggiunto prima di V6.11 per introdurre un setup guidato che rilevi gli snapshot workspace-locali, mostri schema/member/value basis e generi binding e provenance validabili. La scelta della fonte non sarà silenziosa; JSON manuale resterà soltanto fallback avanzato. Nessun nuovo calcolo pensionistico, finanziario o fiscale viene introdotto.

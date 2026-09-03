@@ -34,7 +34,10 @@ class WorkTransitionReadinessError(ValueError):
     pass
 
 
-def build_work_transition_readiness(input_path: Path, output_path: Path) -> dict[str, Any]:
+def build_work_transition_readiness(
+    input_path: Path, output_path: Path, workspace_root: Path | None = None
+) -> dict[str, Any]:
+    workspace_root = workspace_root or _workspace_root()
     manifest = _read_json(input_path, "work-transition readiness input")
     if manifest.get("schema_version") != INPUT_SCHEMA_VERSION:
         raise WorkTransitionReadinessError(
@@ -53,7 +56,7 @@ def build_work_transition_readiness(input_path: Path, output_path: Path) -> dict
     freshness_policy = _freshness_policy(manifest.get("freshness_policy"))
 
     evaluated = [
-        _evaluate_source(candidate, requirement, as_of_date, freshness_policy)
+        _evaluate_source(candidate, requirement, as_of_date, freshness_policy, workspace_root)
         for requirement in requirements
         for candidate in candidates
         if candidate["input_id"] == requirement["input_id"]
@@ -168,7 +171,7 @@ def build_work_transition_readiness(input_path: Path, output_path: Path) -> dict
             "investment, work-exit date or LLM calculation."
         ),
     }
-    _assert_output_scope(output_path)
+    _assert_output_scope(output_path, workspace_root)
     return _write_snapshot(snapshot, output_path)
 
 
@@ -289,6 +292,7 @@ def _evaluate_source(
     requirement: dict[str, Any],
     as_of_date: date,
     freshness_policy: dict[str, Any],
+    workspace_root: Path,
 ) -> dict[str, Any]:
     item = dict(candidate)
     path = item["resolved_path"]
@@ -303,6 +307,9 @@ def _evaluate_source(
     expected = item["expected_schema_versions"]
     if expected and schema_version not in expected:
         item["exclusion_reasons"].append("unexpected_schema_version")
+    adapter_provenance_reason = _adapter_source_snapshot_reason(source, workspace_root)
+    if adapter_provenance_reason is not None:
+        item["exclusion_reasons"].append(adapter_provenance_reason)
     if item["category"] != requirement["category"]:
         item["exclusion_reasons"].append("manifest_category_mismatch")
     if item["member_id"] != requirement.get("member_id"):
@@ -448,6 +455,33 @@ def _valid_optional_date(value: Any) -> bool:
     return True
 
 
+def _adapter_source_snapshot_reason(adapter: dict[str, Any], workspace_root: Path) -> str | None:
+    """Verify an explicit binding adapter without following references outside workspace."""
+    if adapter.get("schema_version") != "work-transition-source-binding/v1":
+        return None
+    reference = adapter.get("source_snapshot")
+    if not isinstance(reference, dict):
+        return "missing_source_snapshot"
+    raw_path = reference.get("path")
+    expected_hash = reference.get("content_hash")
+    if not isinstance(raw_path, str) or not raw_path or not isinstance(expected_hash, str) or not expected_hash:
+        return "missing_source_snapshot"
+    declared_path = Path(raw_path.replace("\\", "/"))
+    if declared_path.is_absolute():
+        return "missing_source_snapshot"
+    workspace_root = workspace_root.resolve()
+    source_path = (workspace_root / declared_path).resolve()
+    try:
+        source_path.relative_to(workspace_root)
+    except ValueError:
+        return "missing_source_snapshot"
+    try:
+        source = _read_json(source_path, "bound source snapshot")
+    except WorkTransitionReadinessError:
+        return "missing_source_snapshot"
+    return None if _content_hash(source) == expected_hash else "source_snapshot_hash_mismatch"
+
+
 def _json_pointer(value: Any, pointer: str) -> Any:
     if pointer == "":
         return value
@@ -501,8 +535,8 @@ def _write_snapshot(snapshot: dict[str, Any], output_path: Path) -> dict[str, An
     return snapshot
 
 
-def _assert_output_scope(output_path: Path) -> None:
-    workspace_root = _workspace_root()
+def _assert_output_scope(output_path: Path, workspace_root: Path | None = None) -> None:
+    workspace_root = workspace_root or _workspace_root()
     try:
         output_path.resolve().relative_to(workspace_root.resolve())
     except ValueError as exc:

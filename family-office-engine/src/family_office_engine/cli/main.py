@@ -200,6 +200,12 @@ from family_office_engine.services.work_transition_readiness import (
     WorkTransitionReadinessError,
     build_work_transition_readiness,
 )
+from family_office_engine.services.work_transition_source_binding import (
+    WorkTransitionSourceBindingError,
+    bind_work_transition_source,
+    discover_work_transition_sources,
+    validate_work_transition_readiness_manifest,
+)
 from family_office_engine.services.work_transition_scenario import (
     WorkTransitionScenarioError,
     build_work_transition_scenario,
@@ -252,6 +258,7 @@ from family_office_engine.services.compliance_calendar import (
     build_compliance_calendar,
     setup_workspace_compliance_event,
 )
+from family_office_engine.services.annual_review import AnnualReviewError, build_annual_review
 from family_office_engine.services.regulatory_change import (
     RegulatoryChangeError,
     approve_regulatory_change,
@@ -263,6 +270,7 @@ from family_office_engine.services.security import SecurityError, build_security
 from family_office_engine.services.sanitized_export import SanitizedExportError, build_sanitized_export
 from family_office_engine.services.backup import BackupError, create_backup, recovery_drill, restore_backup, verify_backup
 from family_office_engine.services.audit_trail import AuditTrailError, append_audit_event, replay_audit, verify_audit_log
+from family_office_engine.services.release_governance import ReleaseGovernanceError, build_release_gate
 from family_office_engine.services.operator_analysis import (
     OperatorAnalysisError,
     analyze_operator_question,
@@ -660,6 +668,10 @@ def default_work_transition_scenario_output() -> Path:
 
 def default_work_transition_scenario_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-work-transition-scenario.synthetic.snapshot.json"
+
+
+def default_annual_review_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "annual-review.snapshot.json"
 
 
 def default_lifecycle_expenses_input() -> Path:
@@ -2238,6 +2250,53 @@ def run_work_exit_wizard(input_path: Path, readiness_input_path: Path, readiness
     return {"status": "prepared", "input_path": str(input_path), "readiness_input_path": str(readiness_input_path), "readiness_output_path": str(readiness_output_path), "data_gap_count": len(data["data_gaps"]), "readiness_gap_count": len(readiness["data_gaps"]), "primary_ready": all(values[label] != "unknown" for label in ("primary_birth", "spouse_birth"))}
 
 
+def run_work_transition_source_setup(manifest_path: Path, output_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    manifest_path = _validate_v66a_input_path(manifest_path, WorkTransitionSourceBindingError)
+    output_path = _validate_v66a_input_path(output_path, WorkTransitionSourceBindingError)
+    manifest = _read_optional_wizard_json(manifest_path, WorkTransitionSourceBindingError, "work-transition readiness manifest")
+    if manifest is None:
+        raise WorkTransitionSourceBindingError("Readiness manifest is missing; run `fo planning work-exit wizard` first.")
+    validate_work_transition_readiness_manifest(manifest)
+    workspace = resolve_repo("workspace")
+    discovery = discover_work_transition_sources(workspace, manifest["required_inputs"])
+    print("Quali dati posso usare per stimare quando smettere di lavorare? Le fonti restano nel workspace privato; scegli esplicitamente ogni binding.")
+    bound_count = 0
+    for requirement in manifest["required_inputs"]:
+        input_id = requirement["input_id"]
+        candidates = discovery["candidates_by_input"][input_id]
+        existing = [item for item in manifest.get("sources", []) if item.get("input_id") == input_id]
+        print(f"\n{input_id}: categoria={requirement['category']}, membro={requirement.get('member_id') or 'nucleo'}.")
+        if existing:
+            print("Binding esistente: scegli `k` per mantenerlo oppure una fonte per sostituirlo.")
+        if not candidates:
+            print("Nessuna snapshot compatibile: rimane un data_gap esplicito.")
+            continue
+        for index, candidate in enumerate(candidates, start=1):
+            print(f"  {index}. {candidate['workspace_path']} | schema={candidate['schema_version']} | as_of={candidate['as_of_date']} | basis={candidate['value_basis']} | kind={candidate['source_kind']}")
+            for gap in candidate["metadata_gaps"]:
+                print(f"     gap: {gap['code']} — {gap['message']}")
+        choice = _prompt_source_binding_choice("Scegli numero, `0` per lasciare il gap" + (", `k` per mantenere" if existing else ""), len(candidates), bool(existing))
+        if choice == "keep" or choice is None:
+            continue
+        bind_work_transition_source(manifest_path, workspace, input_id=input_id, candidate=candidates[choice], overwrite=overwrite)
+        manifest = _read_optional_wizard_json(manifest_path, WorkTransitionSourceBindingError, "work-transition readiness manifest") or manifest
+        bound_count += 1
+    readiness = build_work_transition_readiness(manifest_path, output_path, workspace_root=workspace)
+    return {"bound_count": bound_count, "discovery_gap_count": len(discovery["data_gaps"]), "readiness": readiness, "manifest_path": str(manifest_path), "output_path": str(output_path)}
+
+
+def _prompt_source_binding_choice(label: str, count: int, allow_keep: bool) -> int | str | None:
+    while True:
+        value = input(f"{label} [0]: ").strip().lower()
+        if not value or value == "0":
+            return None
+        if allow_keep and value == "k":
+            return "keep"
+        if value.isdigit() and 1 <= int(value) <= count:
+            return int(value) - 1
+        print("Scelta non valida: inserisci un numero mostrato, 0 oppure k quando disponibile.")
+
+
 def _write_wizard_json(
     path: Path,
     data: dict[str, Any],
@@ -3585,6 +3644,15 @@ def build_parser() -> argparse.ArgumentParser:
     compliance_calendar_parser.add_argument("--output", type=Path, help="Workspace-local compliance calendar output")
     compliance_setup_parser = compliance_subparsers.add_parser("setup", help="Add one workspace-local review, renewal, or document deadline")
     compliance_setup_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace root")
+    review = subparsers.add_parser("review", help="Review what the family should revisit")
+    review_subparsers = review.add_subparsers(dest="review_command")
+    annual_review_parser = review_subparsers.add_parser("annual", help="Build a deterministic annual review from workspace metadata")
+    annual_review_parser.add_argument("--workspace", type=Path, default=resolve_repo("workspace"), help="Private workspace root")
+    annual_review_parser.add_argument("--year", type=int, required=True, help="Review year")
+    annual_review_parser.add_argument("--as-of-date", required=True, help="ISO date used for reproducible freshness")
+    annual_review_parser.add_argument("--required-source", action="append", help="Required snapshot schema version; repeat to override defaults")
+    annual_review_parser.add_argument("--freshness-days", type=int, default=365, help="Maximum age for a source to be fresh")
+    annual_review_parser.add_argument("--output", type=Path, default=default_annual_review_output(), help="Workspace-local annual review output")
     regulatory = compliance_subparsers.add_parser("regulatory", help="Prepare and govern a versioned regulatory change")
     regulatory_subparsers = regulatory.add_subparsers(dest="regulatory_command")
     regulatory_prepare = regulatory_subparsers.add_parser("prepare", help="Prepare a source-backed change proposal")
@@ -3669,6 +3737,13 @@ def build_parser() -> argparse.ArgumentParser:
     audit_replay = audit_subparsers.add_parser("replay", help="Replay approvals and revocations")
     audit_replay.add_argument("--workspace", type=Path, default=resolve_repo("workspace"))
     audit_replay.add_argument("--log", type=Path, default=Path("snapshots") / "audit-events.jsonl")
+    release = subparsers.add_parser("release", help="Run the deterministic local release gate")
+    release_subparsers = release.add_subparsers(dest="release_command")
+    release_check = release_subparsers.add_parser("check", help="Check tests, evaluations, versions and rollback plan")
+    release_check.add_argument("--candidate-id", required=True, help="Release candidate identifier; no prompt or personal data")
+    release_check.add_argument("--output", type=Path, required=True, help="Release-gate report path outside the real workspace")
+    release_check.add_argument("--baseline", type=Path, help="Prior release-gate/v1 report for regression comparison")
+    release_check.add_argument("--rollback-strategy", default="operator_restore_previous_release")
     pension = subparsers.add_parser("pension", help="Import pension sources")
     pension_subparsers = pension.add_subparsers(dest="pension_command")
     inps_parser = pension_subparsers.add_parser(
@@ -5613,6 +5688,26 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Use the synthetic readiness manifest included with the engine",
     )
+    planning_work_transition_sources_parser = planning_work_transition_subparsers.add_parser(
+        "sources",
+        help="Explicitly bind recognized workspace-local snapshots to readiness inputs",
+    )
+    planning_work_transition_sources_subparsers = planning_work_transition_sources_parser.add_subparsers(
+        dest="planning_work_transition_sources_command"
+    )
+    planning_work_transition_sources_setup_parser = planning_work_transition_sources_subparsers.add_parser(
+        "setup",
+        help="Guide explicit source selection, preserve provenance, then rebuild readiness",
+    )
+    planning_work_transition_sources_setup_parser.add_argument(
+        "--input", type=Path, default=default_work_transition_readiness_input(), help="Workspace-local readiness manifest path"
+    )
+    planning_work_transition_sources_setup_parser.add_argument(
+        "--output", type=Path, default=default_work_transition_readiness_output(), help="Workspace-local readiness snapshot path"
+    )
+    planning_work_transition_sources_setup_parser.add_argument(
+        "--overwrite", action="store_true", help="Allow an explicit selection to replace an existing binding"
+    )
     planning_work_transition_scenario_parser = planning_work_transition_subparsers.add_parser(
         "scenario",
         help="Build work-transition-scenario/v1 monthly FTE phases",
@@ -6164,6 +6259,29 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Report: {output}")
         return 0 if report["status"] == "ready" else 2
 
+    if args.command == "review" and args.review_command == "annual":
+        try:
+            report = build_annual_review(
+                args.workspace,
+                args.year,
+                args.as_of_date,
+                args.output,
+                required_sources=args.required_source or (),
+                freshness_days=args.freshness_days,
+            )
+        except (AnnualReviewError, OSError, json.JSONDecodeError) as exc:
+            print(f"annual review: ERROR ({exc})")
+            return 1
+        print(
+            f"annual review: {report['status']} year={report['review_year']} "
+            f"findings={len(report['findings'])} data_gaps={len(report['data_gaps'])} ({args.output})"
+        )
+        print(f"Question: {report['question']}")
+        for finding in report["findings"]:
+            print(f"- {finding['priority']}: {finding['message']}")
+        print(f"Next: {report['next_action']}")
+        return 0 if report["status"] == "ready" else 2
+
     if args.command == "compliance":
         try:
             if args.compliance_command == "setup":
@@ -6209,7 +6327,7 @@ def main(argv: list[str] | None = None) -> int:
                     return 0
                 print("compliance regulatory: ERROR (choose prepare, approve or rollback)")
                 return 2
-            print("compliance: ERROR (choose calendar or setup)")
+            print("compliance: ERROR (choose calendar, regulatory or setup)")
             return 2
         except (ComplianceCalendarError, RegulatoryChangeError, OSError, json.JSONDecodeError) as exc:
             print(f"compliance: ERROR ({exc})")
@@ -6248,6 +6366,25 @@ def main(argv: list[str] | None = None) -> int:
         except (AuditTrailError, OSError, json.JSONDecodeError) as exc:
             print(f"audit: ERROR ({exc})")
             return 1
+
+    if args.command == "release" and args.release_command == "check":
+        try:
+            report = build_release_gate(
+                ENGINE_ROOT,
+                candidate_id=args.candidate_id,
+                output_path=args.output,
+                baseline_path=args.baseline,
+                rollback_strategy=args.rollback_strategy,
+            )
+        except ReleaseGovernanceError as exc:
+            print(f"release check: ERROR ({exc})")
+            return 1
+        status = "passed" if report["release_gate"]["passed"] else "failed"
+        print(
+            f"release check: {status} candidate={report['candidate_id']} "
+            f"checks={len(report['checks'])} failures={len(report['release_gate']['failures'])} ({args.output})"
+        )
+        return 0 if status == "passed" else 2
 
     if args.command == "export" and args.export_command == "sanitized":
         try:
@@ -8249,6 +8386,29 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['summary']['blocking_gap_count']} blockers, "
             f"{snapshot['summary']['warning_count']} warnings "
             f"({output_path})"
+        )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "work-transition"
+        and args.planning_work_transition_command == "sources"
+        and args.planning_work_transition_sources_command == "setup"
+    ):
+        try:
+            result = run_work_transition_source_setup(args.input, args.output, overwrite=args.overwrite)
+        except (WorkTransitionSourceBindingError, WorkTransitionReadinessError) as exc:
+            print(f"planning work-transition sources setup: ERROR ({exc})")
+            return 1
+        readiness = result["readiness"]
+        print(
+            "planning work-transition sources setup: "
+            f"{readiness['status']} bound={result['bound_count']}, "
+            f"selected={readiness['summary']['selected_input_count']}/{readiness['summary']['required_input_count']}, "
+            f"gaps={len(readiness['data_gaps'])} ({result['output_path']}). "
+            "Fatti: fonti workspace-local selezionate esplicitamente. Assunzioni: schema e value basis dichiarati. "
+            "Limiti: nessun calcolo fiscale, pensionistico o finanziario. "
+            "Prossima azione: risolvi i data_gap indicati oppure prosegui con il percorso Work Exit quando la readiness e' pronta."
         )
         return 0
 

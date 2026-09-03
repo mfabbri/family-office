@@ -316,7 +316,7 @@ Verifiche: 4 test mirati V6.9, regression engine 666 test con 2 skip ambientali,
 
 ### V6.10 — Regression, release and model governance
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Unificare test unitari, golden data, scenari, regole, AI evaluations e migrazioni in gate di release.
@@ -327,9 +327,51 @@ Unificare test unitari, golden data, scenari, regole, AI evaluations e migrazion
 - Test: release candidata, regressione fiscale, modello AI diverso e schema incompatibile.
 - Done quando: ogni release ha evidenze, versioni e criteri di rollback.
 
+Piano corrente: ownership del contratto `release-gate/v1` e del runtime nell'engine; `fo release check` genera una matrice versioni/hash e coordina soltanto controlli locali allowlistati, inclusa evaluation sintetica V5.11 e regression engine. Il rollback è un piano dichiarativo e non esegue deploy, restore o upload.
+
+Esito: completato con servizio deterministico `release_governance`, contratto `release-gate/v1` e CLI `fo release check`. Il gate raccoglie versioni/hash di engine, rule pack ed evaluation, esegue solo regression, compilazione, dipendenze, audit roadmap ed evaluation sintetica V5.11, rileva regressioni baseline e incompatibilità di schema e conserva un rollback plan non automatico. Nessuna rete, upload, deploy, workspace reale, nuova regola o nuovo calcolo è stato introdotto.
+
+Verifiche: 14 test mirati V6.10/V5.11/tool registry OK; gate reale passed con 5 controlli; regression engine 670 test OK con 2 skip ambientali; compileall, pip check, routing validator, planner JSON, privacy/architettura, `git diff --check` e `roadmap_audit.py` OK. V6.11 resta pianificato e non avviato.
+
+### V6.10a — Initial feature guide
+
+**Stato:** `done`
+**Tipo:** `docs`
+
+Creare una guida iniziale unica e concisa, orientata alle domande familiari, che renda scopribili tutte le feature disponibili senza richiedere la lettura della reference tecnica.
+
+- Dipende da: V6.10.
+- Repository: `engine`.
+- Output: guida question-first unica collegata dalla documentazione CLI/workflow.
+- Contenuto minimo: domande supportate, percorso `fo ask`, wizard e build, scenari e report, demo sintetiche, import documentali, compliance/security/backup/audit, data gaps, limiti e prossima azione.
+- Test/review: link e comandi verificati, nessun comando obsoleto, distinzione fra demo sintetiche e dati reali, privacy review e controllo di completezza rispetto alla CLI pubblica.
+- Done quando: un nuovo operatore può partire da una domanda come “quando posso smettere di lavorare?” e trovare il percorso corretto fino all'output, senza JSON manuale o gergo non spiegato.
+
+Esito: completato con `docs/feature-guide.md`, collegato da `cli-workflow.md` e `cli.md`. La guida copre il percorso `fo ask`, work-exit, patrimonio/protezione/successione, scenari e investimenti, import e qualità dati, pensioni/cashflow/fiscalità, compliance/sicurezza/backup/audit/release, demo sintetiche, stati, gap, limiti e prossime azioni. I comandi pubblici citati sono stati verificati con `fo ... --help`; nessun runtime, contratto, regola o dato personale è stato modificato. Nessun decision log update necessario: non sono state introdotte nuove decisioni architetturali o normative.
+
+### V6.10b — Guided work-transition source binding
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Rendere utilizzabile il percorso Work Transition collegando dalla CLI gli snapshot già disponibili alle fonti richieste da `work-transition-readiness/v1`.
+
+- Dipende da: V6.10a.
+- Repository: `engine`, `workspace`.
+- Output: `fo planning work-transition sources setup` o percorso guidato equivalente, con manifest `work-transition-readiness-input/v1` workspace-local e salvataggio progressivo.
+- Scope: rilevare snapshot disponibili, mostrare categoria/member/value basis/schema, chiedere solo conferma o dati mancanti, generare binding pointer e provenance, validare freshness/stream bounds/liquidità e rieseguire readiness.
+- Categorie minime: reddito principale e coniuge, spese, patrimonio, liquidità ponte, RITA, INPS, Spagna/UE e altri redditi.
+- UX: partire dalla domanda “quali dati posso usare per stimare quando smettere di lavorare?”, distinguere fonti disponibili, fonti mancanti, conflitti e gap; JSON manuale resta fallback avanzato documentato.
+- Out of scope: nuovi calcoli pensionistici/finanziari/fiscali, import automatico non dichiarato, scelta silenziosa della fonte, dati personali fuori workspace.
+- Done quando: il wizard work-exit può portare da `sources: []` a una readiness validata o a gap specifici e azionabili, senza richiedere la modifica manuale del manifest.
+
+Esito: completato con servizio deterministico di discovery/binding workspace-local e comando `fo planning work-transition sources setup`. Il setup rileva solo snapshot con schema supportato, mostra categoria/membro/basis/data, richiede scelta esplicita, salva progressivamente adapter con provenance, hash e `binding_pointer`, preserva periodi, bounds, liquidità e coverage dichiarati e lascia gap azionabili quando i metadata mancano. Il readiness gate verifica a ogni esecuzione presenza e hash della snapshot originale, workspace configurabile, compatibilità del manifest e path sicuri. Nessun nuovo calcolo pensionistico, finanziario o fiscale è stato introdotto.
+
+Verifiche: 23 test mirati V6.10b + readiness OK; regression engine 677 test OK con 2 skip ambientali; readiness CLI 2/2 OK; review T3 indipendente GO; compileall, pip check, privacy/path review, planner JSON, `git diff --check` e `roadmap_audit.py` OK. V6.11 resta pianificato e non avviato.
+
 ### V6.11 — Annual review and contingency plan
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `functional`
 
 Produrre una review annuale con KPI, eventi, cambi normativi, scostamenti, rischi e piano di aggiornamento.
@@ -340,6 +382,10 @@ Produrre una review annuale con KPI, eventi, cambi normativi, scostamenti, risch
 - Test: anno incompleto, dati obsoleti, cambio residenza e evento straordinario.
 - Done quando: il sistema indica cosa riesaminare, perché e con quale priorità.
 
+Esito: completato con contratto `annual-review/v1`, servizio deterministico workspace-local e comando `fo review annual`. La review usa solo metadati degli snapshot, produce KPI di copertura/freshness/gap, intercetta eventi dichiarati di cambio residenza o straordinari e genera finding prioritari e contingency actions; `needs_review` resta esplicito e richiede revisione umana. Nessun contenuto personale viene ristampato, nessuna rete o import automatico è usato e nessun calcolo fiscale, previdenziale o finanziario è stato introdotto.
+
+Verifiche: 5 test mirati annual review/CLI, regression engine 682 test OK con 2 skip ambientali, compileall, pip check, smoke `fo review annual --help`, roadmap audit, validation execution guardrails, review architetturale/privacy del perimetro e `git diff --check` OK.
+
 ## Exit criteria V6
 
 - Pipeline e aggiornamenti sono incrementali, tracciati e riproducibili.
@@ -349,7 +395,7 @@ Produrre una review annuale con KPI, eventi, cambi normativi, scostamenti, risch
 - Il sistema è recuperabile e auditabile senza dipendere dalla memoria dell'operatore.
 ### V6.9a - Operations compliance code audit
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `audit`
 
 Eseguire il code audit obbligatorio dopo V6.6d, V6.7, V6.8 e V6.9 con la checklist del bootstrap. Il perimetro comprende backup, audit trail, approval workflow, CLI, contratti, test, documentazione e planner. Correggere solo difetti piccoli e verificabili; registrare follow-up espliciti per ogni debito non risolto.
@@ -358,3 +404,7 @@ Eseguire il code audit obbligatorio dopo V6.6d, V6.7, V6.8 e V6.9 con la checkli
 - Repository: `bootstrap`, `engine`, `workspace`.
 - Test: test mirati del perimetro, smoke CLI, regression e audit roadmap.
 - Done quando: il contatore audit e' azzerato con evidenze riproducibili e ogni debito residuo e' esplicito.
+
+Esito: audit completato sul perimetro V6.6d-V6.9. Confini dei servizi, contratti, CLI, test, documentazione, privacy, path workspace-local, data gaps, error handling e dipendenze risultano coerenti; backup e restore escludono segreti, backup precedenti, temporanei e symlink, mentre audit trail e approval replay mantengono catena hashata e riferimenti senza contenuti personali. Non sono state rilevate lacune piccole e verificabili da correggere né follow-up tecnici da aprire. La modifica preesistente al draft personale nel workspace è rimasta fuori dal cambiamento.
+
+Verifiche: 46 test mirati V6.6d-V6.9 e 15 test cadenza/CLI OK; regression completa engine, compilazione, pip check, smoke `fo backup --help`/`fo audit --help`, validazione planner, privacy/path review, `git diff --check` e `roadmap_audit.py` OK. V6.10 resta pianificato e non avviato.

@@ -10,6 +10,12 @@ Con i default del workspace privato:
 fo planning work-transition readiness
 ```
 
+Per collegare le snapshot gia' presenti senza modificare a mano il manifest:
+
+```text
+fo planning work-transition sources setup
+```
+
 Smoke sintetico riproducibile:
 
 ```text
@@ -17,6 +23,16 @@ fo planning work-transition readiness --demo
 ```
 
 Il manifest predefinito e' `family-office-workspace/planning/work-transition-readiness.json`; lo snapshot viene scritto in `family-office-workspace/snapshots/work-transition-readiness.snapshot.json`.
+
+## Setup guidato delle fonti
+
+Il percorso parte dalla domanda: "quali dati posso usare per stimare quando smettere di lavorare?" Scansiona soltanto `family-office-workspace/snapshots/`, mostra per ciascuna fonte riconosciuta path locale, schema, data, categoria, membro, value basis e tipo, poi richiede una scelta esplicita per ogni input. Una fonte non viene mai selezionata automaticamente; piu' fonti compatibili restano un conflitto visibile, mentre una categoria senza snapshot compatibile resta un `data_gap`.
+
+Ogni scelta salva subito un adapter workspace-local in `planning/work-transition-source-bindings/` e aggiorna il manifest. L'adapter non copia o modifica il contenuto della fonte: ne conserva path relativo, schema e hash nella provenance e dichiara il `binding_pointer` verificabile richiesto dal gate. Prima di salvare, il setup rilegge la fonte e blocca il binding se e' stata cancellata, sostituita o se il suo hash non corrisponde piu' alla rilevazione; va quindi rieseguito. A ogni readiness il gate ripete la verifica: una fonte originaria mancante e' esclusa come `missing_source_snapshot`, una fonte mutata come `source_snapshot_hash_mismatch`. Il path della fonte originaria viene sempre risolto e letto soltanto dentro il workspace configurato. Se un input ha gia' un binding, `--overwrite` e' necessario per sostituirlo; `k` lo mantiene e `0` lascia il gap esplicito. Al termine il comando riesegue automaticamente la readiness, che resta responsabile dei controlli di freshness, stream bounds, liquidita' e conflitti di coverage.
+
+Quando la snapshot dichiara `period`, `stream_start_date`, `stream_end_date`, `liquidity_tier` o `coverage_keys`, il setup li copia senza reinterpretarli nella source entry. Se un requisito richiede bounds, periodo o liquidita' e la fonte non li dichiara, mostra un `data_gap` azionabile: rigenerare o documentare la fonte, senza usare valori inventati. Il manifest viene validato contro il contratto `work-transition-readiness-input/v1` prima di qualsiasi scrittura; un JSON malformato genera un errore CLI recuperabile.
+
+Il setup riconosce soltanto snapshot con schema supportato per payroll, spese lifecycle, patrimonio, piano liquidita', RITA, INPS e coordinamento Spagna/UE. Uno schema non riconosciuto non viene interpretato come dato finanziario o previdenziale. Il JSON diretto resta un fallback avanzato per integrazioni esterne, ma non e' il percorso operativo normale.
 
 ## Manifest
 

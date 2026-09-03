@@ -32,4 +32,6 @@ formule/scenari/leverage, il secondo fonti/validità temporale/fiscalità/compli
 Non usare LLM per sostituire calcoli fiscali, pensionistici o finanziari deterministici.
 Mantieni knowledge → rules → tests → engine, provenance, data gaps e privacy. Esegui
 i test proporzionati al rischio e aggiorna lo stato solo con evidenze riproducibili.
+
+Durante l'implementazione il parent mantiene il percorso critico attivo: esegue il primo passo locale non bloccante prima della delega, usa finestre di attesa bounded, non fa polling indefinito e, dopo un timeout o un NO-GO, corregge direttamente i finding bounded oppure registra un blocker con evidenze. Il report finale deve distinguere codice runtime, test, documentazione e modifiche preesistenti.
 ```

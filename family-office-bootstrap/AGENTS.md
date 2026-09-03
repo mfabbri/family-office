@@ -18,3 +18,4 @@ Il bootstrap governa metodo, playbook, planner e orchestrazione. Non contiene da
 - Per transizioni full-time/part-time/cessazione/pensione usare anche `docs/playbooks/11-work-transition-retirement-bridge.md`.
 - Aggiornare un documento di governance solo se la modifica ne cambia davvero il contenuto operativo.
 - Il log `planning/.runtime/model-routing.ndjson` è telemetria locale: non versionarlo.
+- Prima della chiusura eseguire `python planning/validate-execution-guardrails.py`; il gate controlla evidenze, review, blocker e budget deleghe.

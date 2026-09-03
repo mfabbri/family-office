@@ -2,6 +2,8 @@
 
 Questa guida orienta l'uso della CLI senza dover leggere il codice. I dati reali restano sempre in `family-office-workspace/`; il repository engine contiene solo codice, documentazione ed esempi sintetici.
 
+Per partire da una domanda familiare, consulta prima la [guida alle domande e alle feature](feature-guide.md); questa pagina conserva il workflow operativo dettagliato.
+
 ## Comandi base
 
 L'interfaccia operativa e' `fo`. Dalla root del progetto puoi usare il wrapper locale:
