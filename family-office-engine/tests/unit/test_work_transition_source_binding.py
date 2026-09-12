@@ -145,7 +145,7 @@ class WorkTransitionSourceBindingTests(unittest.TestCase):
             malformed["unexpected"] = True
             manifest_path.write_text(json.dumps(malformed), encoding="utf-8")
             stdout = io.StringIO()
-            with patch.dict(os.environ, {"FO_WORKSPACE_PATH": str(root)}), redirect_stdout(stdout):
+            with patch.dict(os.environ, {"FO_WORKSPACE_PATH": str(root)}), patch("builtins.input", side_effect=["0"]), redirect_stdout(stdout):
                 code = main(["planning", "work-transition", "sources", "setup", "--input", str(manifest_path)])
             self.assertEqual(1, code)
             self.assertIn("does not match work-transition-readiness-input schema", stdout.getvalue())
@@ -175,6 +175,19 @@ class WorkTransitionSourceBindingTests(unittest.TestCase):
             self.assertIn("scegli esplicitamente", stdout.getvalue())
             self.assertIn("planning work-transition sources setup: blocked", stdout.getvalue())
             self.assertEqual(1, len(json.loads(manifest_path.read_text(encoding="utf-8"))["sources"]))
+
+    def test_cli_explains_how_to_resolve_missing_sources(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            manifest_path = self._prepare(root)
+            stdout = io.StringIO()
+            with patch.dict(os.environ, {"FO_WORKSPACE_PATH": str(root)}), patch("builtins.input", side_effect=["0"]), redirect_stdout(stdout):
+                code = main(["planning", "work-transition", "sources", "setup", "--input", str(manifest_path), "--output", str(root / "snapshots" / "readiness.json")])
+            self.assertEqual(0, code)
+            output = stdout.getvalue()
+            self.assertIn("Serve: snapshot liquidity-plan/v1", output)
+            self.assertIn("Genera/importa con: fo planning liquidity build", output)
+            self.assertIn("`--overwrite` sostituisce binding esistenti ma non crea snapshot mancanti", output)
 
 
 if __name__ == "__main__":

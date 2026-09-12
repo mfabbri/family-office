@@ -393,6 +393,64 @@ Verifiche: 5 test mirati annual review/CLI, regression engine 682 test OK con 2 
 - Normativa e modelli AI sono soggetti a governance e regression test.
 - Alert e review hanno owner, fonte e azione.
 - Il sistema è recuperabile e auditabile senza dipendere dalla memoria dell'operatore.
+
+### V6.12 - Lifecycle expenses guided wizard
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Rendere il percorso per dichiarare le spese lifecycle utilizzabile senza compilare manualmente file JSON.
+
+- Dipende da: V6.11.
+- Repository: `engine`, `bootstrap`.
+- Output: `fo expenses wizard`, input `LifecycleExpensePlan` e snapshot lifecycle generati nel workspace privato.
+- UX: partire dalla domanda familiare, raccogliere solo dati dichiarati, salvare progressivamente, supportare ripresa/revisione e mostrare gap, limiti e prossima azione.
+- Test: wizard completo, ripresa, validazione valori, path workspace-local, build snapshot e regressione CLI.
+- Out of scope: stime di spesa, fiscalità, pensioni, rendimenti, import documentali e raccomandazioni.
+- Done quando: un operatore può creare e validare il piano lifecycle con `fo expenses wizard` e ottenere lo snapshot senza modificare JSON manualmente.
+
+Esito: completato con `fo expenses wizard`. Il wizard raccoglie piano, fase, cadenza annuale/mensile/una tantum, importi e inflazione dichiarata, converte deterministicamente gli importi mensili in annuali, salva progressivamente nel workspace privato, supporta `--overwrite` e invoca il builder deterministico `lifecycle-expenses/v1`. Mostra gap, limiti e prossima azione; il JSON resta un artefatto interno e `build-lifecycle` rimane il percorso tecnico avanzato. Nessun nuovo calcolo fiscale, previdenziale o finanziario e' stato introdotto.
+
+Verifiche: test mirati lifecycle/CLI 97 OK; regression engine 684 test OK con 2 skip ambientali; help CLI, compileall, roadmap audit, execution guardrails e `git diff --check` OK. Path wizard confinati al workspace e nessun dato personale aggiunto al repository software.
+
+### V6.13 - Bank expense export ingestion and review
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Permettere di ricavare importi e tipologie di spesa da un export bancario senza inserimento manuale riga per riga.
+
+- Dipende da: V6.12.
+- Repository: `engine`, `bootstrap`, `workspace`.
+- Input: export CSV/XLSX dichiarato dall'utente in `family-office-workspace/documents/banca/spese/`; `inbox` resta deposito temporaneo prima dell'organizzazione.
+- Output: transazioni normalizzate e classificate con provenance, gap e revisione esplicita, quindi piano `lifecycle-expenses/v1`.
+- UX: import deterministico di date/importi/segni/valuta, classificazione locale opzionale di merchant e categoria, riepilogo mensile e conferma delle proposte prima del build.
+- Sicurezza: il modello locale non calcola somme né decide valori; trasferimenti, rimborsi, duplicati, colonne ambigue e categorie incerte restano regole/gap/revisione umana. Prompt e contenuti non escono dal workspace e non vengono persistiti come log del modello.
+- Test: CSV/XLSX sintetici, valute e segni, duplicati/rimborsi/trasferimenti, categorie incerte, provenance, path e fallback senza modello locale.
+- Out of scope: import online dalla banca, credenziali, consulenza, fiscalità, investimenti, pensioni e raccomandazioni automatiche.
+- Done quando: un operatore può importare un export locale, rivedere le categorie proposte e generare un piano lifecycle senza compilare JSON manualmente.
+
+Esito: completato con `fo expenses import-bank` e `fo expenses review-bank`. L'import legge CSV/XLSX dal workspace privato, tutti i fogli del workbook, intestazioni italiane `Data/Causale/Dare/Avere` e date seriali Excel, normalizza date/importi/segni/valute, deduplica fingerprint equivalenti, ignora righe incomplete tracciandole in gap e propone categorie deterministiche; la revisione raggruppata permette il dettaglio locale con `d`, quindi conferma, esclusione o correzione. Le categorie approvate generano `lifecycle-expenses/v1` per anno osservato con provenance e gap storico esplicito. Nessun LLM è necessario per il fallback e nessun calcolo numerico è affidato a un modello.
+
+Verifiche: 103 test mirati bank-expenses/lifecycle/CLI OK; regression engine 690 test OK con 2 skip ambientali; compileall, help CLI, roadmap audit, execution guardrails, privacy/path review e `git diff --check` OK. Validato anche l'export reale presente nel workspace: 4.226 transazioni, 3.663 possibili spese e 2 gap espliciti per righe incomplete/non-transazione.
+
+### V6.14 - Efficient bank expense categorization review
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Ridurre il lavoro manuale nella revisione delle spese bancarie raggruppando i movimenti per esercente normalizzato e rendendo visibili solo le eccezioni che richiedono attenzione.
+
+- Dipende da: V6.13.
+- Repository: `engine`, `bootstrap`, `workspace`.
+- Scope: normalizzazione deterministica dell'esercente con conservazione della descrizione originale; raggruppamento per esercente/categoria proposta; riepilogo con conteggio, totale calcolato, periodo e campione; dettaglio espandibile del gruppo; conferma/esclusione/correzione in blocco; separazione di gruppi ambigui, nuovi, anomali o a bassa confidenza.
+- Regole locali: una correzione confermata può essere salvata tramite comando CLI come regola workspace-local riutilizzabile nelle importazioni successive, con priorità e provenance esplicite; nessuna modifica manuale del JSON è il percorso ordinario.
+- UX: il percorso principale resta `fo expenses review-bank`; il programma deve proporre prima i gruppi ad alta omogeneità e mostrare le eccezioni con una prossima azione chiara.
+- Sicurezza: importi, somme, soglie, raggruppamenti e applicazione delle regole restano deterministici. Un modello locale può eventualmente suggerire merchant/category, ma non può decidere o calcolare valori e ogni proposta resta sottoposta a revisione umana.
+- Test: alias dello stesso esercente, descrizioni originali preservate, gruppi separati per categoria, campioni e drill-down, correzioni in blocco, regole riutilizzate, eccezioni/anomalie, provenance, path/privacy e regressione completa.
+- Out of scope: collegamento online alla banca, credenziali, categorizzazione contabile/fiscale automatica, calcoli finanziari, raccomandazioni e auto-approvazione senza conferma umana.
+- Done quando: per un export reale l'operatore può revisionare gruppi omogenei con una decisione per gruppo, ispezionare le eccezioni e riutilizzare le correzioni nelle importazioni successive, senza perdere il dettaglio originale.
+Esito: completato con merchant normalizzato e fingerprint deterministici nelle righe importate, gruppi `bank-expense-review/v2` per merchant/categoria, campioni, periodo, totale, confidenza, priorità ed eccezioni. `fo expenses review-bank` permette conferma, esclusione e correzione in blocco, drill-down delle descrizioni raw e salvataggio workspace-local di regole `bank-expense-review-rules/v1` con provenance; l'import successivo le applica deterministicamente. Verifiche: 7 test bank-expenses, 2 CLI wrapper, 6 lifecycle, regression engine 692 test (2 skip Windows), smoke help CLI, compilazione, audit roadmap, validator planner, privacy/import scan e `git diff --check` OK.
 ### V6.9a - Operations compliance code audit
 
 **Stato:** `done`
@@ -408,3 +466,7 @@ Eseguire il code audit obbligatorio dopo V6.6d, V6.7, V6.8 e V6.9 con la checkli
 Esito: audit completato sul perimetro V6.6d-V6.9. Confini dei servizi, contratti, CLI, test, documentazione, privacy, path workspace-local, data gaps, error handling e dipendenze risultano coerenti; backup e restore escludono segreti, backup precedenti, temporanei e symlink, mentre audit trail e approval replay mantengono catena hashata e riferimenti senza contenuti personali. Non sono state rilevate lacune piccole e verificabili da correggere né follow-up tecnici da aprire. La modifica preesistente al draft personale nel workspace è rimasta fuori dal cambiamento.
 
 Verifiche: 46 test mirati V6.6d-V6.9 e 15 test cadenza/CLI OK; regression completa engine, compilazione, pip check, smoke `fo backup --help`/`fo audit --help`, validazione planner, privacy/path review, `git diff --check` e `roadmap_audit.py` OK. V6.10 resta pianificato e non avviato.
+
+## Governance blocker after V6.14
+
+V6.14 è completato e non esiste nella roadmap attiva alcun incremento `planned`, `in_progress` o `blocked` selezionabile; V6.9a è già `done` nonostante la posizione finale nel file. L'impatto è che non si può determinare o implementare un ulteriore incremento senza inventare scope. Prerequisito: aggiungere un incremento pianificato nella roadmap V6 oppure aprire formalmente una roadmap successiva e il relativo gate nell'indice. La roadmap V6 resta `in_progress` per mantenere l'unica roadmap attiva richiesta dall'audit.

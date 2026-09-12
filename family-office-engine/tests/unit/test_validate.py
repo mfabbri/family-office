@@ -196,7 +196,7 @@ class ValidateCliTest(unittest.TestCase):
                     ]
                 )
 
-            self.assertEqual(exit_code, 0)
+            self.assertEqual(exit_code, 0, stdout.getvalue())
             self.assertTrue(output_path.exists())
             self.assertIn("assumptions: OK", stdout.getvalue())
 
@@ -562,6 +562,69 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(output_path.exists())
             self.assertIn("expenses: complete 1 entries, 2 years, 0 gaps", stdout.getvalue())
+
+    def test_main_expenses_wizard_collects_plan_and_builds_snapshot(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "household" / "lifecycle-expenses.json"
+            output_path = root / "snapshots" / "lifecycle-expenses.snapshot.json"
+            answers = ["famiglia", "2026-09-03", "1", "casa", "working_life", "annual", "12000", "0.02", "2026", "2056"]
+            stdout = io.StringIO()
+            with patch("family_office_engine.cli.main._validate_v66a_input_path", side_effect=lambda path, error: path.resolve()), patch(
+                "builtins.input", side_effect=answers
+            ), redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "expenses",
+                        "wizard",
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                        "--household-snapshot",
+                        str(root / "household.snapshot.json"),
+                        "--timeline-snapshot",
+                        str(root / "timeline.snapshot.json"),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0, stdout.getvalue())
+            self.assertTrue(input_path.exists())
+            self.assertTrue(output_path.exists())
+            self.assertIn("expenses wizard: completato 1 voci, 0 gap", stdout.getvalue())
+            self.assertIn("Esempio di una voce", stdout.getvalue())
+            self.assertEqual(json.loads(output_path.read_text(encoding="utf-8"))["status"], "complete")
+
+    def test_main_expenses_wizard_annualizes_monthly_amount(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_path = root / "household" / "lifecycle-expenses.json"
+            output_path = root / "snapshots" / "lifecycle-expenses.snapshot.json"
+            answers = ["famiglia", "2026-09-03", "1", "affitto", "all_phases", "monthly", "1200", "0.02", "2026", "2056"]
+            stdout = io.StringIO()
+            with patch("family_office_engine.cli.main._validate_v66a_input_path", side_effect=lambda path, error: path.resolve()), patch(
+                "builtins.input", side_effect=answers
+            ), redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "expenses",
+                        "wizard",
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                        "--household-snapshot",
+                        str(root / "household.snapshot.json"),
+                        "--timeline-snapshot",
+                        str(root / "timeline.snapshot.json"),
+                    ]
+                )
+
+            snapshot = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(snapshot["expense_entries"][0]["amount"], "14400.00")
+            self.assertEqual(snapshot["expense_entries"][0]["frequency"], "annual")
+            self.assertIn("annualizzato", stdout.getvalue())
 
     def test_main_investments_import_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

@@ -34,6 +34,12 @@ from family_office_engine.ingestion.bank_insurance import (
     BankInsuranceImportError,
     import_bank_insurance,
 )
+from family_office_engine.ingestion.bank_expenses import (
+    BankExpensesError,
+    import_bank_expense_exports,
+    review_bank_expenses,
+    review_bank_expenses_grouped,
+)
 from family_office_engine.ingestion.payroll import (
     PayrollImportError,
     diagnose_payroll_input,
@@ -682,6 +688,146 @@ def default_lifecycle_expenses_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "lifecycle-expenses.snapshot.json"
 
 
+def run_lifecycle_expenses_wizard(
+    input_path: Path,
+    household_snapshot_path: Path,
+    timeline_snapshot_path: Path,
+    output_path: Path,
+    overwrite: bool = False,
+) -> dict[str, Any]:
+    input_path = _validate_v66a_input_path(input_path, LifecycleExpensesError)
+    output_path = _validate_v66a_input_path(output_path, LifecycleExpensesError)
+    household_snapshot_path = _validate_v66a_input_path(household_snapshot_path, LifecycleExpensesError)
+    timeline_snapshot_path = _validate_v66a_input_path(timeline_snapshot_path, LifecycleExpensesError)
+    existing = _read_optional_wizard_json(input_path, LifecycleExpensesError, "lifecycle expense plan")
+    if existing is not None and not overwrite:
+        return {"status": "existing", "input_path": str(input_path), "data_gap_count": len(existing.get("data_gaps", []))}
+
+    defaults = _lifecycle_expenses_defaults(existing)
+    print("Quanto costa oggi e come cambia nel tempo la vita della famiglia?")
+    print("Inserisci solo importi dichiarati in EUR: il wizard non stima spese, inflazione, imposte o rendimenti.")
+    print("I dati vengono salvati nel workspace privato dopo ogni risposta; Invio mantiene il valore mostrato.")
+    print("Esempio di una voce: spese quotidiane | working_life | annual | 36.000 EUR/anno | 0.02 = 2% annuo.")
+    household_id = _prompt_text("Come vuoi chiamare questo nucleo? Solo etichetta locale, es. famiglia_casa", defaults["household_id"])
+    as_of_date = _prompt_date("A quale data si riferiscono le cifre? Premi Invio se sono aggiornate a oggi (YYYY-MM-DD)", defaults["as_of_date"])
+    entry_count = _prompt_positive_int("Quante categorie vuoi inserire? Es. casa, vita quotidiana, viaggi", max(1, len(defaults["entries"])))
+    entries: list[dict[str, Any]] = []
+    for index in range(entry_count):
+        prior = defaults["entries"][index] if index < len(defaults["entries"]) else {}
+        entry_id = str(prior.get("entry_id") or f"expense_{index + 1}")
+        label = _prompt_text(f"Nome della categoria {index + 1} (es. casa, spese quotidiane, viaggi)", str(prior.get("category") or f"spesa_{index + 1}"))
+        phase = _prompt_choice(
+            f"In quale fase vale '{label}'? working_life, retirement oppure all_phases se vale in entrambe",
+            str(prior.get("phase") or "working_life"),
+            {"working_life", "retirement", "all_phases"},
+        )
+        frequency = _prompt_choice(
+            f"'{label}' è annuale (annual), mensile (monthly) o una tantum (one_time)?",
+            str(prior.get("frequency") or "annual"),
+            {"annual", "monthly", "one_time"},
+        )
+        if frequency == "monthly":
+            monthly_amount = _prompt_non_negative_decimal(
+                f"Quanto paghi al mese per '{label}'? Inserisci l'importo mensile in EUR, es. 1200 (0 se non noto)",
+                str(prior.get("amount") or "0.00"),
+            )
+            amount = str((Decimal(monthly_amount) * Decimal("12")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+            print(f"Importo annualizzato per '{label}': {amount} EUR (importo mensile × 12).")
+            output_frequency = "annual"
+            provenance = "user_declared:expenses_wizard;monthly_to_annual"
+        else:
+            amount = _prompt_non_negative_decimal(
+                f"Quanto spendi per '{label}'? Inserisci il totale annuo in EUR, es. 36000, oppure l'importo una tantum se hai scelto one_time (0 se non noto)",
+                str(prior.get("amount") or "0.00"),
+            )
+            output_frequency = frequency
+            provenance = "user_declared:expenses_wizard"
+        inflation = _prompt_non_negative_decimal(
+            f"Quanto vuoi far variare ogni anno '{label}'? Inserisci 0.02 per +2%; 0.00 se non vuoi assumere variazioni", str(prior.get("annual_inflation_rate") or "0.00")
+        )
+        start_year = _prompt_int(f"Da quale anno considerare '{label}'? Es. 2026", int(prior.get("start_year") or date.today().year))
+        end_default = int(prior.get("end_year") or (start_year if frequency == "one_time" else start_year + 30))
+        end_year = _prompt_int(f"Fino a quale anno considerare '{label}'? Per una tantum usa lo stesso anno", end_default)
+        entry = {
+            "entry_id": entry_id,
+            "category": label,
+            "phase": phase,
+            "owner_type": "household",
+            "frequency": output_frequency,
+            "currency": "EUR",
+            "amount": amount,
+            "annual_inflation_rate": inflation,
+            "start_year": start_year,
+            "end_year": end_year,
+            "provenance": provenance,
+        }
+        entries.append(entry)
+        _write_lifecycle_expenses_progress(input_path, household_id, as_of_date, entries, "expense_entries")
+
+    data = _lifecycle_expenses_data(household_id, as_of_date, entries)
+    _write_wizard_json(input_path, data, True, LifecycleExpensesError, "lifecycle expense plan")
+    snapshot = build_lifecycle_expenses(
+        input_path,
+        output_path,
+        household_snapshot_path=household_snapshot_path,
+        timeline_snapshot_path=timeline_snapshot_path,
+    )
+    return {
+        "status": "prepared",
+        "input_path": str(input_path),
+        "output_path": str(output_path),
+        "entry_count": snapshot["summary"]["entry_count"],
+        "data_gap_count": snapshot["summary"]["data_gap_count"],
+    }
+
+
+def _lifecycle_expenses_defaults(existing: dict[str, Any] | None) -> dict[str, Any]:
+    existing = existing or {}
+    entries = existing.get("expense_entries") if isinstance(existing.get("expense_entries"), list) else []
+    return {
+        "household_id": str(existing.get("household_id") or "household_private"),
+        "as_of_date": str(existing.get("as_of_date") or date.today().isoformat()),
+        "entries": [entry for entry in entries if isinstance(entry, dict)],
+    }
+
+
+def _lifecycle_expenses_data(
+    household_id: str, as_of_date: str, entries: list[dict[str, Any]], incomplete: str | None = None
+) -> dict[str, Any]:
+    gaps: list[dict[str, Any]] = []
+    for entry in entries:
+        if str(entry.get("amount")) in {"0", "0.0", "0.00"}:
+            gaps.append(
+                {
+                    "code": "unknown_expense_amount",
+                    "entry_id": entry.get("entry_id"),
+                    "message": "Expense amount was left at zero and must be documented before relying on the plan.",
+                }
+            )
+    if incomplete:
+        gaps.append({"code": "wizard_incomplete", "message": "Wizard interrupted before final review.", "last_answered": incomplete})
+    return {
+        "schema_version": "lifecycle-expenses/v1",
+        "record_type": "LifecycleExpensePlan",
+        "household_id": household_id,
+        "as_of_date": as_of_date,
+        "expense_entries": entries,
+        "data_gaps": gaps,
+    }
+
+
+def _write_lifecycle_expenses_progress(
+    input_path: Path, household_id: str, as_of_date: str, entries: list[dict[str, Any]], last_answered: str
+) -> None:
+    _write_wizard_json(
+        input_path,
+        _lifecycle_expenses_data(household_id, as_of_date, entries, last_answered),
+        True,
+        LifecycleExpensesError,
+        "lifecycle expense plan",
+    )
+
+
 def default_investments_italy_input() -> Path:
     return resolve_repo("workspace") / "documents" / "investimenti" / "italia"
 
@@ -708,6 +854,22 @@ def default_insurance_documents_input() -> Path:
 
 def default_bank_insurance_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "bank-insurance.snapshot.json"
+
+
+def default_bank_expenses_dir() -> Path:
+    return resolve_repo("workspace") / "documents" / "banca" / "spese"
+
+
+def default_bank_expenses_transactions_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "bank-expense-transactions.snapshot.json"
+
+
+def default_bank_expenses_review_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "bank-expense-review.snapshot.json"
+
+
+def default_bank_expenses_rules_output() -> Path:
+    return resolve_repo("workspace") / "rules" / "bank-expense-review.rules.json"
 
 
 def default_payroll_input() -> Path:
@@ -2269,7 +2431,11 @@ def run_work_transition_source_setup(manifest_path: Path, output_path: Path, ove
         if existing:
             print("Binding esistente: scegli `k` per mantenerlo oppure una fonte per sostituirlo.")
         if not candidates:
+            guidance = _work_transition_source_guidance(requirement)
             print("Nessuna snapshot compatibile: rimane un data_gap esplicito.")
+            print(f"  Serve: snapshot {guidance['schema']} con {guidance['metadata']}.")
+            print(f"  Genera/importa con: {guidance['command']}.")
+            print("  Dopo averla generata: ripeti `fo planning work-transition sources setup --overwrite`.")
             continue
         for index, candidate in enumerate(candidates, start=1):
             print(f"  {index}. {candidate['workspace_path']} | schema={candidate['schema_version']} | as_of={candidate['as_of_date']} | basis={candidate['value_basis']} | kind={candidate['source_kind']}")
@@ -2283,6 +2449,22 @@ def run_work_transition_source_setup(manifest_path: Path, output_path: Path, ove
         bound_count += 1
     readiness = build_work_transition_readiness(manifest_path, output_path, workspace_root=workspace)
     return {"bound_count": bound_count, "discovery_gap_count": len(discovery["data_gaps"]), "readiness": readiness, "manifest_path": str(manifest_path), "output_path": str(output_path)}
+
+
+def _work_transition_source_guidance(requirement: Mapping[str, Any]) -> dict[str, str]:
+    guidance = {
+        "employment_income": ("payroll/v1", "fo payroll import", "as_of_date; per il reddito: stream_start_date e stream_end_date"),
+        "spouse_income": ("payroll/v1", "fo payroll import", "as_of_date; per il reddito: stream_start_date e stream_end_date"),
+        "expenses": ("lifecycle-expenses/v1", "fo expenses build-lifecycle", "as_of_date e periodo coperto"),
+        "net_worth": ("net-worth/v1", "fo net-worth consolidate", "as_of_date"),
+        "liquidity": ("liquidity-plan/v1", "fo planning liquidity build", "as_of_date e liquidity_tier per gli asset ponte"),
+        "rita_complementary_pension": ("rita-options/v1", "fo rita optimize", "as_of_date; stream_start_date e stream_end_date"),
+        "inps_pension": ("inps-pension/v1", "fo pension import-inps", "as_of_date; stream_start_date e stream_end_date"),
+        "spain_eu_pension": ("it-es-eu-pension-pro-rata/v1", "fo pension coordinate-it-es", "as_of_date; stream_start_date e stream_end_date"),
+        "other_income": ("una fonte other_income supportata", "nessun importer automatico dedicato: lascia il gap o prepara una fonte dichiarata da validare", "as_of_date; stream_start_date e stream_end_date"),
+    }
+    schema, command, metadata = guidance.get(str(requirement.get("category")), ("uno schema supportato", "controlla `fo --help`", "as_of_date e i metadati richiesti dalla categoria"))
+    return {"schema": schema, "command": command, "metadata": metadata}
 
 
 def _prompt_source_binding_choice(label: str, count: int, allow_keep: bool) -> int | str | None:
@@ -3936,6 +4118,32 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_lifecycle_expenses_output(),
         help="Output lifecycle expenses snapshot JSON path",
     )
+    lifecycle_expenses_wizard_parser = expenses_subparsers.add_parser(
+        "wizard",
+        help="Ask for lifecycle expenses and build the private snapshot",
+    )
+    lifecycle_expenses_wizard_parser.add_argument("--input", type=Path, default=default_lifecycle_expenses_input(), help="Private lifecycle expense plan path")
+    lifecycle_expenses_wizard_parser.add_argument("--household-snapshot", type=Path, default=default_household_facts_output(), help="Existing household facts snapshot path")
+    lifecycle_expenses_wizard_parser.add_argument("--timeline-snapshot", type=Path, default=default_timeline_events_output(), help="Existing timeline events snapshot path")
+    lifecycle_expenses_wizard_parser.add_argument("--output", type=Path, default=default_lifecycle_expenses_output(), help="Output lifecycle expenses snapshot path")
+    lifecycle_expenses_wizard_parser.add_argument("--overwrite", action="store_true", help="Revise an existing plan and rebuild its snapshot")
+    bank_expenses_import_parser = expenses_subparsers.add_parser(
+        "import-bank",
+        help="Import local CSV/XLSX bank expense exports",
+    )
+    bank_expenses_import_parser.add_argument("--input-dir", type=Path, default=default_bank_expenses_dir(), help="Private bank expense export directory")
+    bank_expenses_import_parser.add_argument("--output", type=Path, default=default_bank_expenses_transactions_output(), help="Normalized bank expense transactions snapshot")
+    bank_expenses_import_parser.add_argument("--rules", type=Path, default=default_bank_expenses_rules_output(), help="Optional workspace-local merchant rules")
+    bank_expenses_review_parser = expenses_subparsers.add_parser(
+        "review-bank",
+        help="Review bank expense category proposals and build lifecycle expenses",
+    )
+    bank_expenses_review_parser.add_argument("--input", type=Path, default=default_bank_expenses_transactions_output(), help="Normalized bank expense transactions snapshot")
+    bank_expenses_review_parser.add_argument("--output", type=Path, default=default_bank_expenses_review_output(), help="Reviewed bank expenses snapshot")
+    bank_expenses_review_parser.add_argument("--lifecycle-output", type=Path, default=default_lifecycle_expenses_input(), help="Private lifecycle plan generated from approved expenses")
+    bank_expenses_review_parser.add_argument("--household-id", default="household_private", help="Local household label")
+    bank_expenses_review_parser.add_argument("--as-of-date", default=None, help="Reference date YYYY-MM-DD; defaults to today")
+    bank_expenses_review_parser.add_argument("--rules", type=Path, default=default_bank_expenses_rules_output(), help="Workspace-local merchant rules written for later imports")
     investments = subparsers.add_parser("investments", help="Import investment statements")
     investments_subparsers = investments.add_subparsers(dest="investments_command")
     investments_import_parser = investments_subparsers.add_parser(
@@ -8408,7 +8616,8 @@ def main(argv: list[str] | None = None) -> int:
             f"gaps={len(readiness['data_gaps'])} ({result['output_path']}). "
             "Fatti: fonti workspace-local selezionate esplicitamente. Assunzioni: schema e value basis dichiarati. "
             "Limiti: nessun calcolo fiscale, pensionistico o finanziario. "
-            "Prossima azione: risolvi i data_gap indicati oppure prosegui con il percorso Work Exit quando la readiness e' pronta."
+            "Prossima azione: risolvi i data_gap indicati; `--overwrite` sostituisce binding esistenti ma non crea snapshot mancanti. "
+            "Quando la readiness e' pronta, esegui `fo planning work-exit build`."
         )
         return 0
 
@@ -8490,6 +8699,124 @@ def main(argv: list[str] | None = None) -> int:
             f"{snapshot['summary']['data_gap_count']} gaps "
             f"({args.output})"
         )
+        return 0
+
+    if args.command == "expenses" and args.expenses_command == "import-bank":
+        try:
+            input_dir = _validate_v66a_input_path(args.input_dir, BankExpensesError)
+            output_path = _validate_v66a_input_path(args.output, BankExpensesError)
+            rules_path = _validate_v66a_input_path(args.rules, BankExpensesError)
+            snapshot = import_bank_expense_exports(input_dir, output_path, rules_path if rules_path.exists() else None)
+        except BankExpensesError as exc:
+            print(f"expenses import-bank: ERROR ({exc})")
+            return 1
+        print(
+            "expenses import-bank: "
+            f"{snapshot['status']} {snapshot['summary']['transaction_count']} transazioni, "
+            f"{snapshot['summary']['expense_count']} possibili spese, "
+            f"{len(snapshot['data_gaps'])} gap ({args.output})"
+        )
+        print("Prossima azione: esegui `fo expenses review-bank` per confermare o correggere le categorie.")
+        return 0
+
+    if args.command == "expenses" and args.expenses_command == "review-bank":
+        try:
+            input_path = _validate_v66a_input_path(args.input, BankExpensesError)
+            output_path = _validate_v66a_input_path(args.output, BankExpensesError)
+            lifecycle_path = _validate_v66a_input_path(args.lifecycle_output, BankExpensesError)
+            source = json.loads(input_path.read_text(encoding="utf-8"))
+            transactions = source.get("transactions", [])
+            rules_path = _validate_v66a_input_path(args.rules, BankExpensesError)
+            grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
+            for item in transactions:
+                if item.get("include_in_expenses"):
+                    key = (str(item.get("merchant_fingerprint") or item.get("description") or "unknown"), str(item.get("category_proposal") or "unknown"))
+                    grouped.setdefault(key, []).append(item)
+            decisions: dict[str, str] = {}
+            print("Quali gruppi di spesa vuoi confermare per costruire il piano lifecycle?")
+            print("Mostro prima le eccezioni; somme, periodi e campioni sono calcolati dal programma.")
+            ordered = sorted(grouped.items(), key=lambda pair: (0 if pair[0][1] == "unknown" or len(pair[1]) == 1 else 1, pair[0][1], pair[0][0]))
+            for index, ((fingerprint, proposal), items) in enumerate(ordered, start=1):
+                group_id = f"merchant_group_{index:04d}"
+                total = sum((abs(Decimal(str(item.get("amount") or "0"))) for item in items), Decimal("0")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                while True:
+                    choice = input(
+                        f"{items[0].get('merchant_normalized', items[0].get('description', 'unknown'))} / {proposal}: {len(items)} movimenti, {total} EUR. "
+                        "[d=dettaglio, y=conferma, n=escludi, c=cambia] "
+                    ).strip().lower()
+                    if choice in {"d", "detail"}:
+                        print(f"Dettaglio gruppo '{group_id}' (merchant raw preservato):")
+                        for item in sorted(items, key=lambda value: (value.get("date", ""), value.get("transaction_id", ""))):
+                            print(
+                                f"  {item.get('date', '?')} | {item.get('description', '?')} | "
+                                f"{item.get('amount', '?')} {item.get('currency', 'EUR')}"
+                            )
+                        continue
+                    if choice in {"y", "yes"}:
+                        decisions[group_id] = proposal
+                        break
+                    if choice in {"n", "no"}:
+                        decisions[group_id] = "unknown"
+                        break
+                    if choice in {"c", "change"}:
+                        decisions[group_id] = _prompt_text("Nuova categoria locale", proposal)
+                        break
+                    print("Scelta non valida: usa d, y, n oppure c.")
+            result = review_bank_expenses_grouped(
+                input_path,
+                output_path,
+                lifecycle_path,
+                args.household_id,
+                args.as_of_date or date.today().isoformat(),
+                decisions,
+                rules_path,
+            )
+            lifecycle_snapshot = build_lifecycle_expenses(lifecycle_path, default_lifecycle_expenses_output())
+        except (EOFError, KeyboardInterrupt):
+            print("expenses review-bank: interrotto; rilancia il comando per ripetere la revisione.")
+            return 1
+        except (BankExpensesError, LifecycleExpensesError, json.JSONDecodeError) as exc:
+            print(f"expenses review-bank: ERROR ({exc})")
+            return 1
+        print(
+            "expenses review-bank: "
+            f"{result['review']['summary']['approved_group_count']} gruppi approvati, "
+            f"{result['review']['summary']['unresolved_group_count']} gruppi da rivedere, "
+            f"{len(result['review']['data_gaps'])} gap"
+        )
+        print(
+            "Lifecycle expenses: "
+            f"{lifecycle_snapshot['status']}, {lifecycle_snapshot['summary']['entry_count']} voci, "
+            f"{lifecycle_snapshot['summary']['data_gap_count']} gap ({default_lifecycle_expenses_output()})"
+        )
+        print("Prossima azione: verifica i gap e ripeti `fo planning work-transition sources setup --overwrite` quando il piano è pronto.")
+        return 0
+
+    if args.command == "expenses" and args.expenses_command == "wizard":
+        try:
+            result = run_lifecycle_expenses_wizard(
+                args.input, args.household_snapshot, args.timeline_snapshot, args.output, args.overwrite
+            )
+        except (EOFError, KeyboardInterrupt):
+            print("expenses wizard: interrotto; rilancia con `--overwrite` per riprendere o correggere il piano.")
+            return 1
+        except LifecycleExpensesError as exc:
+            print(f"expenses wizard: ERROR ({exc})")
+            return 1
+        if result["status"] == "existing":
+            print(
+                "expenses wizard: piano gia' presente "
+                f"({result['input_path']}; rilancia con `--overwrite` per modificarlo e ricostruire lo snapshot)"
+            )
+            return 0
+        print(
+            "expenses wizard: completato "
+            f"{result['entry_count']} voci, {result['data_gap_count']} gap ({result['output_path']})"
+        )
+        if result["data_gap_count"]:
+            print("Prossima azione: verifica i gap dichiarati prima di usare il piano per decisioni familiari.")
+        else:
+            print("Prossima azione: ripeti `fo planning work-transition sources setup --overwrite` per collegare le spese.")
         return 0
 
     if args.command == "tax-documents" and args.tax_documents_command == "import":

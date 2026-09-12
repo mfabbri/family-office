@@ -203,3 +203,20 @@
 # Decision — V6.10b work-transition source binding
 
 2026-09-02: `work-transition-readiness/v1` non può restare operativo con il solo manifest `sources: []` prodotto dal wizard. V6.10b viene aggiunto prima di V6.11 per introdurre un setup guidato che rilevi gli snapshot workspace-locali, mostri schema/member/value basis e generi binding e provenance validabili. La scelta della fonte non sarà silenziosa; JSON manuale resterà soltanto fallback avanzato. Nessun nuovo calcolo pensionistico, finanziario o fiscale viene introdotto.
+
+# Decision — V6.12 lifecycle expenses wizard
+
+2026-09-03: `fo expenses wizard` diventa il percorso ordinario per dichiarare le spese lifecycle. Il wizard salva progressivamente un `LifecycleExpensePlan` workspace-local, accetta cadenze annuali, mensili e una tantum e converte deterministicamente la cadenza mensile nel totale annuo richiesto da `lifecycle-expenses/v1`. `build-lifecycle` resta disponibile come percorso tecnico avanzato; non vengono introdotte stime, fiscalità, pensioni, rendimenti o import automatici.
+
+# Decision — V6.13 bank expense export boundary
+
+2026-09-03: gli export bancari delle spese devono essere copiati dall'operatore in `family-office-workspace/documents/banca/spese/`; `family-office-workspace/inbox/` resta un deposito temporaneo per l'inventario e l'organizzazione. L'import sarà deterministico per numeri, date, segni, valuta, deduplicazione e aggregazione. Un modello locale potrà assistere soltanto la classificazione di merchant/categoria, con proposta, confidenza e revisione umana; non sarà autorità per somme, rimborsi, trasferimenti, fiscalità o raccomandazioni. Il contenuto resterà workspace-local e prompt/output del modello non saranno persistiti come log.
+
+2026-09-06: V6.14 adotta `bank-expense-review/v2` e `bank-expense-review-rules/v1`. Il raggruppamento usa fingerprint del merchant normalizzato insieme alla categoria proposta, così categorie diverse non vengono fuse; singleton e categorie unknown restano eccezioni prioritarie. Le regole salvate dalla correzione umana conservano fingerprint, priorità, id e provenance e sono applicate solo all'import locale successivo. Nessun dato personale viene persistito nel repository software e nessun modello calcola somme o autorizza decisioni.
+2026-09-03: gli export bancari delle spese devono essere copiati dall'operatore in `family-office-workspace/documents/banca/spese/`; `family-office-workspace/inbox/` resta un deposito temporaneo per l'inventario e l'organizzazione. L'import sarà deterministico per numeri, date, segni, valuta, deduplicazione e aggregazione. Un modello locale potrà assistere soltanto la classificazione di merchant/categoria, con proposta, confidenza e revisione umana; non sarà autorità per somme, rimborsi, trasferimenti, fiscalità o raccomandazioni. Il contenuto resterà workspace-local e prompt/output del modello non saranno persistiti come log. La revisione CLI espone `d` per ispezionare localmente le righe di una categoria prima della decisione.
+
+# Decision — V6.14 efficient review boundary
+
+2026-09-03: il prossimo incremento della revisione spese userà gruppi per esercente normalizzato, campione e drill-down, decisioni in blocco ed eccezioni esplicite. La descrizione originale resterà sempre disponibile; le correzioni potranno diventare regole workspace-local con provenance. Normalizzazione, somme, soglie e applicazione delle regole resteranno deterministiche e la revisione umana resterà obbligatoria.
+
+2026-09-06: dopo V6.14 la roadmap V6 non espone un incremento pianificato selezionabile. Il lavoro si ferma con blocker di governance: serve un nuovo incremento approvato nella roadmap V6 oppure l'apertura formale di una roadmap successiva con gate nell'indice; non viene inventato scope tecnico per colmare il vuoto.

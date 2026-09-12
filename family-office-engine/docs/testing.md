@@ -388,6 +388,7 @@ $env:PYTHONPATH='src'; python -m unittest tests.unit.test_lifecycle_expenses
 Verifica CLI sul workspace privato:
 
 ```text
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main expenses wizard
 $env:PYTHONPATH='src'; python -m family_office_engine.cli.main expenses build-lifecycle
 ```
 
@@ -397,7 +398,17 @@ Lo snapshot risultante viene scritto in:
 ..\family-office-workspace\snapshots\lifecycle-expenses.snapshot.json
 ```
 
-Il modello produce `lifecycle-expenses/v1` da un piano spese esplicito in `household/lifecycle-expenses.json`. Applica inflazione solo quando dichiarata e registra gap per periodi o eventi mancanti; non stima budget, fiscalita', sanita', cambi, rendimenti o raccomandazioni.
+Il wizard produce `lifecycle-expenses/v1` nel workspace privato e invoca il builder. Il modello applica inflazione solo quando dichiarata e registra gap per periodi o eventi mancanti; non stima budget, fiscalita', sanita', cambi, rendimenti o raccomandazioni.
+
+Per il percorso da export bancario:
+
+```text
+$env:PYTHONPATH='src'; python -m unittest tests.unit.test_bank_expenses
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main expenses import-bank
+$env:PYTHONPATH='src'; python -m family_office_engine.cli.main expenses review-bank
+```
+
+I test verificano CSV, segni, categorie deterministiche, esclusione di crediti e trasferimenti, revisione e generazione del piano lifecycle.
 
 ## Decision Scenario V2
 

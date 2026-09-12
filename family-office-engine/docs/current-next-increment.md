@@ -2,7 +2,7 @@
 
 ## ID e titolo
 
-V6.11 - Annual review and contingency plan.
+V6.14 - Efficient bank expense categorization review.
 
 ## Stato
 
@@ -14,26 +14,37 @@ V6.11 - Annual review and contingency plan.
 
 ## Motivazione e dipendenze
 
-V6.10b e' completato. V6.11 e' il primo incremento funzionale successivo con dipendenze V6.3-V6.10 soddisfatte.
+V6.13 è completato e l'export reale contiene gruppi numerosi, ad esempio `food` con 87 movimenti. V6.14 è stato il primo incremento planned successivo e non cambia il contratto di importazione: migliora soltanto l'efficienza e la leggibilità della revisione.
 
 ## Obiettivo e criteri di accettazione
 
-Produrre una review annuale con KPI, eventi, cambi normativi, scostamenti, rischi e piano di aggiornamento.
-
-Done when: il sistema indica cosa riesaminare, perche' e con quale priorita', distinguendo dati completi, obsoleti o mancanti.
+L'operatore deve poter confermare un gruppo omogeneo con una sola decisione, vedere un campione e aprire il dettaglio completo solo quando serve, correggere gruppi in blocco e riutilizzare le correzioni come regole locali. Le descrizioni originali devono restare disponibili e i gruppi ambigui o anomali devono rimanere esplicitamente revisionabili.
 
 ## Piano concreto
 
-- Definire il contratto deterministico `annual-review/v1` su metadati e snapshot workspace-local, senza leggere contenuti personali.
-- Implementare `fo review annual` con riepilogo question-first di copertura, freshness, eventi, rischi, priorita' e azioni di contingenza.
-- Coprire anno incompleto, dati obsoleti, cambio residenza ed evento straordinario con test unitari/integrativi e controlli di privacy/path.
+1. Definire un normalizzatore deterministico di merchant con fingerprint stabile e descrizione raw preservata.
+2. Estendere il contratto di review con gruppi, campioni, periodo, totale calcolato, confidenza/provenance e motivi di eccezione.
+3. Aggiornare `review-bank` con conferma/esclusione/correzione in blocco, drill-down e ordinamento per priorità di revisione.
+4. Aggiungere il percorso CLI per salvare e applicare regole locali versionate, senza rendere il JSON un passaggio operativo.
+5. Coprire casi limite, privacy/path, test CLI/integrativi, regressione e validazione architetturale.
 
-Out of scope: lavoro parziale di V6.11, nuovi calcoli normativi non pianificati, dati personali fuori workspace.
+Implementazione avviata: il contratto di import resta `bank-expense-transactions/v1`; il nuovo output di review
+sarà `bank-expense-review/v2`, con regole workspace-local versionate e applicate solo in modo deterministico.
 
-## Prossima azione
-
-V6.11 completato e verificato. La roadmap V6 non definisce ancora un incremento successivo: mantenere V6 come roadmap attiva fino a una transizione formale e non avviare lavoro ulteriore in questa sessione.
+Esito: completato. L'import conserva merchant normalizzato/fingerprint e applica regole locali opzionali; `review-bank` usa gruppi, campioni, periodo, totale, priorità ed eccezioni, con conferma/esclusione/correzione per gruppo e drill-down raw. Verifiche: 7 test bank-expenses, 2 CLI wrapper, 6 lifecycle, regression engine 692 test (2 skip Windows), py_compile, smoke help CLI, `roadmap_audit.py`, validator planner, privacy/import scan e `git diff --check` OK.
 
 ## Blocker di selezione successiva
 
-Evidenze: tutti gli incrementi della roadmap V6 sono `done`, `roadmap_audit.py` restituisce `audit_due=false` e l'indice non definisce V6.12 né una roadmap successiva `in_progress`/`planned`. Impatto: non esiste un incremento con scope e criteri di accettazione verificabili da implementare senza inventare lavoro. Prerequisito: definire formalmente il prossimo incremento o aprire la roadmap successiva nell'indice, mantenendo una sola roadmap `in_progress`.
+V6.14 è completato e la roadmap V6 non contiene incrementi `planned`, `in_progress` o `blocked` selezionabili: l'unica voce successiva nel file è V6.9a, già `done`. Impatto: non è possibile completare un nuovo incremento senza inventare scope o aprire una nuova roadmap. Prerequisito: il maintainer deve aggiungere un incremento pianificato compatibile nella roadmap V6 oppure aprire formalmente la roadmap successiva e il relativo gate nell'indice.
+
+## Comandi operativi previsti
+
+```text
+fo expenses review-bank
+```
+
+Export stabile: `family-office-workspace/documents/banca/spese/`. `family-office-workspace/inbox/` resta deposito temporaneo.
+
+## Stop condition
+
+Fermarsi se la normalizzazione fonde esercenti distinti senza evidenza, se una regola non conserva provenance o se la conferma in blocco impedisce di ispezionare le eccezioni. Non introdurre LLM obbligatorio, connessioni online o calcoli finanziari.

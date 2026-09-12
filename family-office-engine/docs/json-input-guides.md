@@ -97,7 +97,7 @@ Questa pagina elenca gli input JSON che l'utente puo' dover compilare manualment
 ## `lifecycle-expenses/v1` input
 
 - Default: `../family-office-workspace/household/lifecycle-expenses.json`.
-- Comando: `expenses build-lifecycle`.
+- Percorso operativo: `fo expenses wizard`; `expenses build-lifecycle` resta disponibile come comando tecnico avanzato.
 - Campi: anni o periodi, categorie di spesa, importi annui o ricorrenti, valuta, inflazione dichiarata e provenance.
 - Nota: il motore annualizza solo spese dichiarate e non stima budget mancanti.
 

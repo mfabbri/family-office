@@ -101,11 +101,13 @@ fo pension import-inps
 fo pension import-spain
 fo pension reconcile-spain
 fo pension compose-income
+fo expenses import-bank
+fo expenses review-bank
+fo expenses wizard
 fo expenses build-lifecycle
 fo planning pension-contributions build
 fo planning it-es-eu-pension wizard
 fo planning it-es-eu-pension build
-fo expenses build-lifecycle
 fo tax calculate
 fo tax reconcile
 fo rita optimize

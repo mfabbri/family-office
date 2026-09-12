@@ -471,6 +471,44 @@ Per escludere le opzioni RITA:
 fo pension compose-income --no-rita
 ```
 
+## `fo expenses wizard`
+
+Percorso operativo question-first per rispondere a: “quali spese devo considerare per capire il costo della vita della famiglia nel tempo?”. Raccoglie solo importi, periodi, frequenza e inflazione dichiarati, salva progressivamente nel workspace privato e costruisce automaticamente lo snapshot lifecycle.
+
+Durante la compilazione, per ogni voce inserisci il nome comprensibile della categoria (per esempio `casa` o `spese quotidiane`), la fase (`working_life`, `retirement` oppure `all_phases` se vale in entrambe), la cadenza (`annual`, `monthly` o `one_time`), l'importo e una variazione annua opzionale (`0.02` significa +2%). Per `monthly` il wizard moltiplica deterministicamente l'importo per 12 e salva il totale annuo richiesto dal modello. Se non conosci un importo, lascia `0.00`: il risultato lo segnalerà come `data_gap`. Mantieni una sola voce quando una spesa, come l'affitto, vale in entrambe le fasi.
+
+Uso:
+
+```text
+fo expenses wizard
+```
+
+Se il piano esiste già, usare `fo expenses wizard --overwrite` per rivederlo. Il wizard mostra i gap e i limiti; non stima spese, fiscalità, pensioni o rendimenti.
+
+## `fo expenses import-bank`
+
+Importa gli export locali delle spese bancarie da CSV o XLSX. La directory stabile consigliata è `../family-office-workspace/documents/banca/spese/`; `inbox` è solo deposito temporaneo. Sono riconosciute intestazioni italiane come `Data`, `Causale`, `Dare`, `Avere` e date Excel seriali. Date, importi, segni, valuta, deduplicazione e aggregazioni sono deterministici. Il comando propone categorie locali per le descrizioni, ma non considera la proposta definitiva.
+
+Uso:
+
+```text
+fo expenses import-bank
+```
+
+Al termine esegui `fo expenses review-bank`.
+
+## `fo expenses review-bank`
+
+Mostra le categorie proposte raggruppate, consente di confermarle, escluderle o correggerle e genera il piano lifecycle senza compilazione manuale del JSON.
+
+Uso:
+
+```text
+fo expenses review-bank
+```
+
+`d` mostra il dettaglio locale dei movimenti della categoria (data, descrizione e importo), poi ripropone la scelta. `y` conferma, `n` esclude dal piano, `c` permette di indicare una categoria locale. Stipendi, crediti, trasferimenti e rimborsi non vengono aggregati come spese. Le categorie non confermate restano `data_gap`. Il modello locale, se collegato in futuro, potrà solo proporre classificazioni: non calcolerà importi né sostituirà la revisione umana.
+
 ## `fo expenses build-lifecycle`
 
 Costruisce un cashflow annuo di spese da un piano esplicito:
@@ -492,7 +530,7 @@ Default:
 - timeline snapshot: `../family-office-workspace/snapshots/timeline-events.snapshot.json`
 - output: `../family-office-workspace/snapshots/lifecycle-expenses.snapshot.json`
 
-Il comando annualizza solo spese dichiarate nel piano, con importi EUR e inflazione esplicita. Non stima budget mancanti, fiscalita', costi sanitari, rendimenti o raccomandazioni.
+Il comando annualizza solo spese dichiarate nel piano, con importi EUR e inflazione esplicita. È il percorso tecnico avanzato usato dal wizard; non stima budget mancanti, fiscalita', costi sanitari, rendimenti o raccomandazioni.
 
 ## `fo scenarios compose-v2`
 

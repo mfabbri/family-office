@@ -33,9 +33,9 @@ I comandi `python -m family_office_engine.cli.main ...` restano fallback tecnici
 
 1. `validate`: verifica layout dei repository.
 2. `documents inventory` e `documents organize`: controlla e classifica i documenti nel workspace.
-3. Import documentali: `payroll`, `investments`, `bank-insurance`, `tax-documents`, `fonte`, `pension import-spain`.
+3. Import documentali: `payroll`, `investments`, `bank-insurance`, `tax-documents`, `fonte`, `pension import-spain`; per gli export delle spese bancarie usare `expenses import-bank` e poi `expenses review-bank`.
 4. Normalizzazioni household: `household validate`, `household ownership validate`, `household availability validate`, `household timeline validate`.
-5. Pensione e cashflow: `pension import-inps`, `pension reconcile-spain`; per pensione spagnola autonoma calcolabile `pension estimate-spain`; per caso misto Italia-Spagna `planning it-es-eu-pension wizard`, `planning spanish-eu-theoretical-pension build`, `planning it-es-eu-pension build`; poi `pension compose-income` ed `expenses build-lifecycle`.
+5. Pensione e cashflow: `pension import-inps`, `pension reconcile-spain`; per pensione spagnola autonoma calcolabile `pension estimate-spain`; per caso misto Italia-Spagna `planning it-es-eu-pension wizard`, `planning spanish-eu-theoretical-pension build`, `planning it-es-eu-pension build`; poi `pension compose-income` e `expenses wizard` per dichiarare le spese lifecycle senza compilare JSON, oppure `expenses build-lifecycle` per il percorso tecnico avanzato.
 6. Patrimonio e pianificazione: `net-worth consolidate`, `planning goals`, `planning liquidity`, `planning decumulation`, `planning pension-contributions`.
 7. Scenario decisionale: `scenarios compose-v2`, `scenarios evaluate`, `scenarios sensitivity`, `scenarios score`, `scenarios dossier`.
 8. Report e dashboard: `dashboard build`, `report build`.

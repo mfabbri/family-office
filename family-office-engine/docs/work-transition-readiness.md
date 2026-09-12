@@ -34,6 +34,8 @@ Quando la snapshot dichiara `period`, `stream_start_date`, `stream_end_date`, `l
 
 Il setup riconosce soltanto snapshot con schema supportato per payroll, spese lifecycle, patrimonio, piano liquidita', RITA, INPS e coordinamento Spagna/UE. Uno schema non riconosciuto non viene interpretato come dato finanziario o previdenziale. Il JSON diretto resta un fallback avanzato per integrazioni esterne, ma non e' il percorso operativo normale.
 
+Se nessuna fonte e' disponibile, il comando stampa per ogni requisito lo schema atteso, il comando di import/build suggerito e i metadati minimi necessari. `--overwrite` sostituisce soltanto binding gia' presenti: non crea snapshot mancanti. Dopo avere prodotto una fonte, ripetere `fo planning work-transition sources setup --overwrite`, poi `fo planning work-transition readiness` e infine `fo planning work-exit build` quando non restano gap bloccanti.
+
 ## Manifest
 
 Il contratto e' `schemas/work-transition-readiness-input.schema.json`. Il manifest dichiara:
