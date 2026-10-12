@@ -42,6 +42,14 @@ def build_spanish_pension_net_it_resident(
     status = "complete"
     rule = _find_rule_for_year(rule_pack, plan_input["tax_year"])
     irpef_rule = _find_rule_for_year(irpef_rule_pack, plan_input["tax_year"])
+    if rule is not None and irpef_rule is not None:
+        declared_irpef_pack_id = rule["italian_irpef_rule_pack_id"]
+        loaded_irpef_pack_id = irpef_rule_pack["rule_pack_id"]
+        if declared_irpef_pack_id != loaded_irpef_pack_id:
+            raise SpanishPensionNetItResidentError(
+                "Loaded IRPEF rule pack does not match the Spanish pension net rule declaration: "
+                f"expected {declared_irpef_pack_id}, got {loaded_irpef_pack_id}."
+            )
     if rule is None or irpef_rule is None:
         status = "blocked_missing_rule"
         if rule is None:
@@ -371,7 +379,10 @@ def _validate_rule_pack(data: dict[str, Any]) -> None:
     if not isinstance(data["rules"], list) or not data["rules"]:
         raise SpanishPensionNetItResidentError("Rule pack must contain at least one rule")
     for rule in data["rules"]:
-        for field in ("rule_id", "valid_from", "valid_to", "resident_country", "source_country"):
+        for field in (
+            "rule_id", "valid_from", "valid_to", "resident_country", "source_country",
+            "italian_irpef_rule_pack_id",
+        ):
             if field not in rule:
                 raise SpanishPensionNetItResidentError(f"Spanish pension net rule missing field: {field}")
 

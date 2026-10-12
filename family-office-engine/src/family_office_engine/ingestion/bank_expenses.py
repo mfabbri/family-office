@@ -143,6 +143,19 @@ def review_bank_expenses_grouped(
             reviewed.append(reviewed_item)
         if approved and approved != proposal and rules_path is not None:
             _upsert_rule(rules_path, fingerprint, approved, group["provenance"])
+    aggregated_unknown_transactions = sum(
+        int(group["transaction_count"])
+        for group in group_records
+        if group["category_proposal"] == "unknown" and group["approved_category"] == "other"
+    )
+    if aggregated_unknown_transactions:
+        gaps.append(
+            {
+                "code": "unknown_expenses_aggregated",
+                "count": aggregated_unknown_transactions,
+                "message": "Unclassified bank expenses were retained as one other lifecycle total; category detail was not inferred.",
+            }
+        )
     reviewed_snapshot = {
         "schema_version": GROUPED_REVIEW_SCHEMA_VERSION,
         "record_type": "BankExpenseGroupedReview",
@@ -251,13 +264,22 @@ def _build_lifecycle_plan(snapshot: dict[str, Any], household_id: str, as_of_dat
 def _read_rows(path: Path) -> list[dict[str, str]]:
     if path.suffix.lower() == ".xlsx":
         try:
-            rows = _read_all_xlsx_sheets(path)
+            sheets = _read_all_xlsx_sheets(path)
         except Exception as exc:
             raise BankExpensesError(f"Invalid XLSX export: {path.name}") from exc
-        if not rows:
+        if not sheets:
             raise BankExpensesError(f"XLSX export contains no rows: {path.name}")
-        headers = [_header(value) for value in rows[0]]
-        return [dict(zip(headers, row + [""] * (len(headers) - len(row)))) for row in rows[1:] if any(value.strip() for value in row)]
+        result: list[dict[str, str]] = []
+        for rows in sheets:
+            if not rows:
+                continue
+            headers = [_header(value) for value in rows[0]]
+            result.extend(
+                dict(zip(headers, row + [""] * (len(headers) - len(row))))
+                for row in rows[1:]
+                if any(value.strip() for value in row)
+            )
+        return result
     try:
         text = path.read_text(encoding="utf-8-sig")
     except OSError as exc:
@@ -270,16 +292,17 @@ def _read_rows(path: Path) -> list[dict[str, str]]:
     return [{_header(key): (value or "").strip() for key, value in row.items()} for row in rows]
 
 
-def _read_all_xlsx_sheets(path: Path) -> list[list[str]]:
+def _read_all_xlsx_sheets(path: Path) -> list[list[list[str]]]:
     try:
         with zipfile.ZipFile(path) as workbook:
             shared_strings = _shared_strings(workbook)
             sheet_names = sorted(name for name in workbook.namelist() if name.startswith("xl/worksheets/sheet") and name.endswith(".xml"))
             if not sheet_names:
                 raise BankExpensesError(f"XLSX workbook contains no worksheets: {path.name}")
-            rows: list[list[str]] = []
+            sheets: list[list[list[str]]] = []
             for sheet_name in sheet_names:
                 root = ElementTree.fromstring(workbook.read(sheet_name))
+                rows: list[list[str]] = []
                 for row in root.findall(".//{http://schemas.openxmlformats.org/spreadsheetml/2006/main}sheetData/{http://schemas.openxmlformats.org/spreadsheetml/2006/main}row"):
                     values: list[str] = []
                     for cell in row.findall("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}c"):
@@ -288,7 +311,9 @@ def _read_all_xlsx_sheets(path: Path) -> list[list[str]]:
                             values.append("")
                         values.append(_cell_value(cell, shared_strings))
                     rows.append(values)
-            return rows
+                if rows:
+                    sheets.append(rows)
+            return sheets
     except (OSError, zipfile.BadZipFile, ElementTree.ParseError) as exc:
         raise BankExpensesError(f"Invalid XLSX export: {path.name}") from exc
 
@@ -299,8 +324,8 @@ def _normalize_rows(rows: list[dict[str, str]], path: Path) -> tuple[list[dict[s
     result = []
     skipped_rows = 0
     for line_number, row in enumerate(rows, start=2):
-        date_text = _first(row, "date", "data", "transaction_date", "data_operazione")
-        description = _first(row, "description", "descrizione", "merchant", "causale", "details")
+        date_text = _first(row, "date", "data", "transaction_date", "data_operazione", "data_contabile", "data_valuta")
+        description = _first(row, "description", "descrizione", "descrizione_operazione", "merchant", "causale", "causale_abi", "details")
         if _fold(date_text) in {"data", "date"} and _fold(description) in {"causale", "descrizione", "description", "merchant"}:
             continue
         if any(_fold(value) in {"dare", "avere", "importo", "amount", "debit", "credit"} for value in row.values()):
@@ -331,24 +356,86 @@ def _normalize_rows(rows: list[dict[str, str]], path: Path) -> tuple[list[dict[s
 
 
 def _propose_category(description: str, amount: Decimal) -> tuple[str, bool]:
-    text = _fold(description)
+    text = " ".join(re.sub(r"[^a-z0-9]+", " ", _fold(description)).split())
     if amount >= 0:
         if any(token in text for token in ("stipendio", "salary", "paga")):
             return "income", False
         return "non_expense_credit", False
+    non_expense_tokens = (
+        "satispay app top up",
+        "ricarica satispay",
+        "satispay europe",
+        "satispay wallet",
+        "spese tenuta conto",
+        "spese gestione carta",
+        "cartabcc addebito e c mensile",
+        "carta del credito cooperativo addebito e c mensile",
+        "carta di credito cooperativo addebito e c mensile",
+        "carta movimento",
+        "commissioni",
+        "comm messa disposizione fondi",
+        "recupero spese invio e c",
+        "spese invio e c",
+        "ritenuta fiscale",
+        "ritenute alla fonte",
+        "interessi e competenze",
+        "imposta di bollo",
+        "addebito bolli",
+        "rec bollo",
+        "imposte e tasse",
+        "delega f24",
+        "fondi comuni",
+        "sottoscrizione fondi",
+        "sottosc fondi",
+        "sottosc",
+        "sicav",
+        "etica sgr",
+        "pac etica",
+        "coinbase",
+        "american express italia srl",
+        "decurtazione mutuo",
+    )
+    if any(token in text for token in non_expense_tokens):
+        return "financial_non_expense", False
+    explicit_atm_withdrawal = any(
+        token in text
+        for token in (
+            "prelievo atm",
+            "prelevamento atm",
+            "prelievo bancomat",
+            "prelevamento bancomat",
+            "prel bancomat",
+            "bancomat ns",
+            "nostro bancomat",
+        )
+    )
+    card_payment_markers = (
+        "pagamento pos",
+        "operazione pos",
+        "pagamento pagobancomat",
+        "operazione pagobancomat",
+        "spesa pagobancomat",
+        "pagamenti pagobancomat",
+        "pagament maestro",
+        "maestro vpay",
+        "payment pos",
+    )
+    looks_like_card_payment = any(marker in text for marker in card_payment_markers)
+    if explicit_atm_withdrawal and not looks_like_card_payment:
+        return "cash_withdrawal", True
     rules = {
         "transfer": ("bonifico", "giroconto", "trasferimento", "ricarica conto"),
         "refund": ("rimborso", "storno", "restituzione"),
         "housing": ("affitto", "canone", "immobiliare"),
-        "food": ("supermercato", "esselunga", "conad", "coop", "carrefour", "alimentari"),
-        "utilities": ("enel", "utenza", "gas", "acqua", "energia", "telefono", "internet"),
-        "transport": ("benzina", "carburante", "trenitalia", "autostrada", "parcheggio", "taxi"),
-        "health": ("farmacia", "medico", "sanitario", "ospedale"),
+        "food": ("supermercato", "esselunga", "conad", "coop", "carrefour", "lidl", "alimentari", "pescheria", "ristorante", "pizzeria", "rist pizz", "sushi", "toki", "chiosco", "buffet", "vecchia malga", "bar", "caffe", "gelateria", "pasticceria", "panificio", "forno", "trattoria", "osteria", "taverna", "mensa", "refezione", "pizza", "kebab", "rosticceria", "macelleria"),
+        "utilities": ("enel", "hera", "utenza", "gas", "acqua", "energia", "telefono", "internet", "telecomitalia", "tim", "vodafone", "fastweb"),
+        "transport": ("benzina", "carburante", "agip", "lul ticket machine", "trenitalia", "telepass", "autostrada", "parcheggio", "taxi", "psa renting", "officina", "carrozzeria", "gommista", "lavaggio auto"),
+        "health": ("farmacia", "medico", "sanitario", "sanitaria", "ausl", "ospedale", "veterinario", "dentista", "ottica", "laboratorio analisi"),
         "insurance": ("assicurazione", "polizza"),
-        "leisure": ("ristorante", "cinema", "hotel", "vacanza", "viaggio"),
+        "leisure": ("cinema", "cinedream", "hotel", "vacanza", "viaggio", "chalet dello sport", "palestra", "piscina", "teatro", "museo", "sport"),
     }
     for category, tokens in rules.items():
-        if any(token in text for token in tokens):
+        if any(re.search(rf"\b{re.escape(token)}\b", text) for token in tokens):
             return category, category not in {"transfer", "refund"}
     return "unknown", True
 

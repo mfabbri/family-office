@@ -11,12 +11,15 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 2 | `roadmap-v2.md` | Cashflow, fiscalità, RITA e successione V1 | `done` |
 | 3 | `roadmap-v3-decision-core.md` | Modello decisionale spiegabile | `done` |
 | 4 | `roadmap-v4-wealth-planning.md` | Pianificazione patrimoniale multi-obiettivo | `done` |
-| 5 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `done` |
-| 6 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `in_progress` |
+| 5 | `roadmap-v4b-work-transition.md` | Transizione graduale dal lavoro e ponte pensionistico | `in_progress` |
+| 6 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `done` |
+| 7 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `deferred` |
 
-La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `done`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. La roadmap V5 e' `done` dopo V5.12a; V6 e' la roadmap attiva e usa le capability deterministiche e i contratti V5 come base.
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `done`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. V4B viene riattivata per completare il prerequisito deterministico della transizione lavoro-pensione; V5 resta `done` dopo V5.12a. V6 è differita durante il completamento del gate V4B e riprenderà dopo la transizione formalizzata nello stesso aggiornamento che chiuderà V4B.
 
 Nota di governance: `roadmap_audit.py` richiede esattamente una roadmap con stato `in_progress`. Quando tutti gli incrementi della roadmap attiva sono `done`, mantenere quella roadmap `in_progress` fino a quando la transizione successiva non apre formalmente la nuova roadmap attiva nello stesso aggiornamento.
+
+Decisione di priorità 2026-10-11: sospendere temporaneamente nuovi incrementi V6 e riattivare V4B, richiesta per il journey automatico di uscita dal lavoro. La roadmap V6 mantiene gli stati dei suoi incrementi ma non è selezionabile finché V4B non completa il gate V4.20.
 
 `done_with_gaps` indica che la capability è disponibile ma alcuni formati o fonti reali restano da aggiungere tramite incrementi mirati. Non blocca la roadmap successiva se i gap non sono prerequisiti dell'incremento selezionato.
 

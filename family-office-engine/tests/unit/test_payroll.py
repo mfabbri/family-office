@@ -68,6 +68,32 @@ class PayrollIngestionTest(unittest.TestCase):
             self.assertEqual(written["extraction_status"], "extracted")
             self.assertEqual(written["summary"]["record_count"], 1)
             self.assertEqual(written["summary"]["net_pay_total"], "2500.00")
+            self.assertEqual(written["as_of_date"], "2026-01-31")
+            self.assertEqual(written["stream_start_date"], "2026-01-01")
+            self.assertEqual(written["stream_end_date"], "2026-01-31")
+            self.assertEqual(written["value_basis"], "net")
+
+    def test_import_payroll_keeps_gap_when_period_metadata_is_missing(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            input_dir = root / "buste-paga"
+            output_path = root / "payroll.snapshot.json"
+            input_dir.mkdir()
+            (input_dir / "synthetic-payslip.pdf").write_text("placeholder", encoding="utf-8")
+            text_without_period = PAYSLIP_TEXT.replace("Gennaio 2026", "Periodo corrente")
+
+            with patch(
+                "family_office_engine.ingestion.payroll._extract_pdf_text",
+                return_value=text_without_period,
+            ):
+                result = import_payroll(input_dir, output_path)
+
+            self.assertNotIn("as_of_date", result)
+            self.assertNotIn("stream_start_date", result)
+            self.assertIn(
+                "missing_payroll_period_metadata",
+                {gap["code"] for gap in result["data_gaps"]},
+            )
 
     def test_diagnose_payroll_input_reports_counts_without_amounts(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

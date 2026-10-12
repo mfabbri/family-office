@@ -10,7 +10,7 @@
     "other_italian_taxable_income": "30000.00"
   },
   "rule_pack": {
-    "rule_pack_id": "it.spanish-pension-net-it-resident.2026.v1",
+    "rule_pack_id": "it.spanish-pension-net-it-resident.2026.v2",
     "schema_version": "spanish-pension-net-it-resident-rule-pack/v1"
   },
   "streams": [
@@ -30,14 +30,14 @@
         "definitive": false
       },
       "italian_tax": {
-        "incremental_tax": "7350.00"
+        "incremental_tax": "7030.00"
       },
       "foreign_tax_credit": {
         "status": "not_applicable",
         "amount": "0.00"
       },
       "net": {
-        "annual_amount": "13650.00",
+        "annual_amount": "13970.00",
         "currency": "EUR"
       },
       "data_gaps": []
@@ -46,7 +46,7 @@
   "summary": {
     "stream_count": 1,
     "complete_stream_count": 1,
-    "net_annual_total": "13650.00",
+    "net_annual_total": "13970.00",
     "data_gap_count": 0,
     "warning_count": 0
   },

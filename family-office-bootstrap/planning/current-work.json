@@ -1,19 +1,194 @@
 {
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
-  "status": "blocked",
-  "selected_at": "2026-09-03T18:00:00Z",
-  "updated_at": "2026-09-06T10:30:00Z",
+  "status": "completed",
+  "selected_at": "2026-10-12T19:42:24Z",
+  "updated_at": "2026-10-12T20:03:23Z",
   "roadmap_basis": [
-    {"path": "family-office-engine/docs/roadmap/roadmap-index.md", "section": "Algoritmo di selezione", "reason": "V6.13 e' done; V6.14 e' il primo incremento planned con dipendenze soddisfatte."},
-    {"path": "family-office-engine/docs/roadmap/roadmap-v6-operations-compliance.md", "section": "V6.14 - Efficient bank expense categorization review", "reason": "Incremento selezionato per ridurre la revisione manuale dei gruppi numerosi senza cambiare il contratto di import."}
+    {
+      "path": "family-office-engine/docs/roadmap/roadmap-index.md",
+      "section": "Algoritmo di selezione",
+      "reason": "V4B viene riattivata come unica roadmap attiva per completare il gate deterministico Work Transition; V6 è differita fino a V4.20."
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "section": "V4.14 — Entitlement-driven pension timeline IT/ES/EU; micro-incremento V4.14e",
+      "reason": "V4.14e ha verificato documentalmente fonti e limiti per il 2027-2028; i gap di tracciabilità del valore base 71 e della provenance pack sono esplicitati e instradati al pianificato V4.14f, senza calcoli individuali."
+    },
+    {
+      "path": "family-office-engine/docs/current-next-increment.md",
+      "section": "V4.14e — verifica del perimetro italiano 2026-2028",
+      "reason": "V4.14e documenta fonti legislative/attuative 2027-2028 e rende espliciti i gap del valore base 71 e della provenance pack; il prossimo micro-incremento pianificato è V4.14f."
+    }
   ],
-  "increment": {"id": "V6.14", "title": "Efficient bank expense categorization review", "objective": "Ridurre la revisione manuale degli export bancari con gruppi per esercente, campioni, eccezioni e regole locali riutilizzabili.", "scope": ["normalizzazione merchant deterministica con raw preservato", "review per gruppi e campioni", "drill-down ed eccezioni", "decisioni in blocco", "regole workspace-local con provenance"], "out_of_scope": ["connessione online alla banca", "credenziali", "categorizzazione fiscale automatica", "calcoli finanziari", "raccomandazioni", "auto-approvazione senza revisione umana"], "candidate_files": ["family-office-engine/src/family_office_engine/ingestion/bank_expenses.py", "family-office-engine/src/family_office_engine/cli/main.py", "family-office-engine/tests/unit/test_bank_expenses.py", "family-office-engine/docs"], "stop_condition": "Fermarsi se la normalizzazione fonde esercenti distinti senza evidenza, se una regola perde provenance o se le eccezioni non restano ispezionabili; non affidare all'LLM numeri o decisioni."},
-  "task_envelope": {"mode": "feature-slice", "risk_domain": "privacy", "objective": "Preparare un incremento implementabile per rendere efficiente la revisione locale delle spese bancarie senza esporre dati personali o delegare calcoli a modelli.", "repositories": ["family-office-engine", "family-office-bootstrap", "family-office-workspace"], "read_set": ["AGENTS.md", "family-office-engine/AGENTS.md", "family-office-bootstrap/docs/playbooks/00-task-router.md", "family-office-bootstrap/docs/playbooks/01-context-budget.md", "family-office-bootstrap/docs/playbooks/04-micro-increment.md", "family-office-engine/docs/roadmap/roadmap-index.md", "family-office-engine/docs/roadmap/roadmap-v6-operations-compliance.md", "family-office-engine/docs/current-next-increment.md", "family-office-engine/docs/decision-log.md", "family-office-engine/src/family_office_engine/ingestion/bank_expenses.py"], "write_set": ["family-office-engine/docs/roadmap/roadmap-v6-operations-compliance.md", "family-office-engine/docs/current-next-increment.md", "family-office-engine/docs/decision-log.md", "family-office-bootstrap/planning/current-work.json"], "test_command": "python family-office-engine/src/family_office_engine/governance/roadmap_audit.py; python family-office-bootstrap/planning/validate-execution-guardrails.py", "stop_conditions": ["non fondere esercenti ambigui", "non salvare dati personali nel repository software", "non affidare somme o decisioni all'LLM", "mantenere drill-down ed eccezioni revisionabili"]},
-  "verification": {"tests": ["roadmap_audit.py OK prima della selezione", "7 test bank expenses OK", "2 test CLI wrapper OK", "6 test lifecycle OK", "regression engine 692 test OK (2 skip Windows)", "py_compile, smoke CLI help, privacy/import scan e git diff --check OK", "roadmap_audit.py e validate-execution-guardrails.py OK"], "documentation_touchpoints": ["family-office-engine/docs/roadmap/roadmap-v6-operations-compliance.md", "family-office-engine/docs/current-next-increment.md", "family-office-engine/docs/decision-log.md", "family-office-engine/docs/cli.md", "family-office-bootstrap/planning/current-work.json"], "result": "passed", "notes": "V6.14 completato senza leggere o copiare export personali nel repository software."},
-  "review": {"status": "pending", "agent": "fo_reviewer", "model": "gpt-5.6-terra", "evidence": []},
-  "blockers": [{"code": "no_selectable_roadmap_increment", "evidence": "roadmap-v6-operations-compliance.md contiene solo incrementi done nella coda dopo V6.14; roadmap-index.md non definisce una roadmap successiva", "impact": "impossibile selezionare e completare un nuovo incremento senza modificare arbitrariamente lo scope", "prerequisite": "aggiungere un incremento planned nella roadmap V6 oppure aprire formalmente la roadmap successiva e il relativo gate nell'indice"}],
-  "session_notes": ["Export bancari reali devono restare in family-office-workspace.", "Posizione stabile: documents/banca/spese; inbox e' solo deposito temporaneo.", "V6.14 migliora la revisione senza cambiare il contratto V6.13.", "V6.14 implementato e verificato senza leggere o copiare export personali nel repository software."],
-  "next_action": {"mode": "review", "description": "Rimuovere il blocker di governance aggiungendo un incremento planned o aprendo formalmente la roadmap successiva; poi ricalcolare il prossimo incremento."},
-  "routing": {"policy_version": "3.1", "tier": "medium", "task_class": "implementation", "agent": "fo_implementer", "model": "gpt-5.6-terra", "reasoning_effort": "medium", "rationale": "V6.14 scrive runtime deterministico, CLI e test entro contratti esistenti; non introduce fiscalità, finanza o trade-off architetturali aperti.", "trace": [{"at": "2026-09-03T19:30:00Z", "event": "selected", "tier": "low", "agent": "fo_planner", "model": "gpt-5.6-luna", "reasoning_effort": "low", "reason": "Formalizzazione V6.14 richiesta dall'utente e chiusura sessione senza implementazione."}, {"at": "2026-09-06T10:00:00Z", "event": "fallback", "tier": "medium", "agent": "fo_implementer", "model": "gpt-5.6-terra", "reasoning_effort": "medium", "reason": "Implementazione mantenuta nel percorso critico del parent perché il runtime non espone un canale di delega custom separato; scope e gate restano quelli del playbook."}]}
+  "increment": {
+    "id": "V4.14e",
+    "title": "Italian pension-law validity checkpoint for 2026-2028",
+    "objective": "Verificare con fonti legislative primarie e atti attuativi vincolanti italiani successivi al 2026-09-09 la validità documentale del solo perimetro ordinary old-age eligibility già approvato per dipendenti FPLD/AGO, senza ampliare regole o timeline.",
+    "scope": [
+      "verificare la L. 199/2025 art. 1 comma 185 come fonte legislativa primaria e il decreto direttoriale MEF-Lavoro 19-12-2025 come atto attuativo vincolante, con efficacia 2027-2028",
+      "confrontare l'età ordinaria e l'alternativa contributiva a 71 anni del pack FPLD/AGO con le disposizioni e istruzioni ufficiali vigenti, distinguendo legge, decreto e circolare INPS",
+      "registrare in Knowledge fonti, data di verifica, ambito, decorrenze ed eccezioni; annotare separatamente il limite della snapshot Normattiva al 2026-09-09",
+      "ottenere review normativa indipendente limitata alla validità e al perimetro già approvato; lasciare bloccate le categorie/eccezioni non coperte"
+    ],
+    "out_of_scope": [
+      "bridge, RITA, decumulo, simulazione e optimizer V4.15-V4.18",
+      "modifiche a rule pack o engine, calcolo di date/importi/stream, o dichiarazioni di entitlement individuale",
+      "estensione del GO limitato a profili gravosi/usuranti, comparti speciali, altre gestioni, cumulo o eccezioni individuali",
+      "approvazione della timeline V4.14 o riuso del GO limitato V4.14b per eventi diversi da eligibility",
+      "lettura o modifica di dati personali nel workspace",
+      "qualsiasi calcolo fiscale, previdenziale o finanziario affidato a LLM"
+    ],
+    "candidate_files": [
+      "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+      "family-office-rules/italy/2026/inps-old-age-eligibility.json",
+      "family-office-knowledge/pensions/inps-theoretical-pension-it.md",
+      "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "family-office-engine/docs/decision-log.md"
+    ],
+    "stop_condition": "Reviewer indipendente conferma la gerarchia e le sole affermazioni supportate, registrando i gap sulla catena storica del valore base 71 e sulla provenance del pack. Nessuna ricertificazione del rule pack, servizio, calcolo, estensione di scope o sblocco della timeline V4.14."
+  },
+  "verification": {
+    "tests": [
+      "employment-income projection: 9 tests passed, FTE 100/60/40, annualization, extra pay, provenance/hash and workspace boundaries",
+      "tax calculation regression: 6 tests passed",
+      "work-transition plan/scenario/employment-projection focused suite: 15 tests passed; plan collects declared FTE phases and monthly bases, orchestrates the deterministic builders when readiness allows, preserves workspace-local drafts and blocking gaps, and never asks for pension or optimizer candidate dates",
+      "Work Transition and tax regression suite: 62 tests passed",
+      "roadmap audit, execution guardrails, planner JSON validation, py_compile and git diff --check passed",
+      "work-transition regression: 45 tests passed",
+      "roadmap next-step refresh: roadmap audit, execution guardrails and git diff check",
+      "normative post-implementation review: GO limited",
+      "IRPEF/cross-border correction: 131 focused tax, projection, cross-border and CLI tests passed, including historical 2025 pack, exact/above-threshold brackets, declared-vs-loaded rule-pack mismatch rejection and updated synthetic dossier",
+      "IRPEF/cross-border correction: 131 focused tax, projection, cross-border and CLI tests passed; post-fix normative review GO limited; V4.13 completion criteria verified",
+      "V4.14 independent normative review completed: NO-GO for full executable timeline; findings require source/version refresh for ES and EU, Article 57 handling, and strict separation of eligibility, administrative recognition, economic effective date and first payment. No implementation tests run for V4.14.",
+      "V4.14b roadmap planning update: roadmap_audit.py OK (current=V4.14b, type=functional); planner JSON Schema OK; execution guardrails OK; git diff --check OK. No runtime freshness checker implemented in this planning slice.",
+      "V4.14b source remediation: INPS, BOE, EUR-Lex 883/2004 and EUR-Lex 987/2009 primary sources rechecked on 2026-10-11; three Knowledge notes updated with strict unsupported-scope/data-gap boundaries and corrected EU under-one-year/overlap description. No executable rule or engine code changed pending independent normative gate.",
+      "Pension test baseline before runtime remediation: 21 tests passed across test_it_es_eu_pension_pro_rata, test_eu_pension_coordination and test_spanish_statutory_pension.",
+      "V4.14b bounded implementation: 56 focused EU coordination, pro-rata, Spanish statutory/rule-pack, cross-border dossier and tool-registry tests passed. Unclassified IT-ES overlap blocks both entitlement and pro-rata; Article 57 under-one-year cases and unconfirmed Spanish insured/equivalent status block the Spanish pro-rata; Spanish period 2037 fails closed outside the encoded base-reguladora schedule.",
+      "Final bounded normative review returned NO-GO: eu_pension_coordination could mark complete with candidate dates in 2039 outside the EU rule pack 2026 validity. Parent added fail-closed candidate-date validation for IT and ES plus missing/invalid date regressions; reran six focused modules, 58 tests passed. Independent post-fix review remains required and is not authorized within this cycle.",
+      "Authorized post-fix review cycle returned NO-GO: dossier-level status was partial but national entitlement statuses could remain positive outside rule-pack validity. Parent now downgrades both national statuses to not_assessed_rule_pack_period whenever candidate dates are missing, invalid, or out of period; regression asserts the downgrade; six focused modules pass 58/58. User authorized one additional independent review cycle on 2026-10-11; the existing normative reviewer thread is being reused, without a new delegation.",
+      "Final authorized post-fix normative review returned GO limited: both national entitlement statuses are downgraded to not_assessed_rule_pack_period for missing, invalid, or out-of-period candidate dates; no blocker was identified in the scoped diff. Reviewer did not rerun tests; parent had rerun the six focused modules with 58/58 passing. This does not approve the full V4.14 timeline or V4.14c freshness audit.",
+      "Post-review verification: roadmap_audit.py OK; planner JSON Schema OK; execution guardrails OK; git diff --check OK. Increment remains partial because quarterly freshness enforcement and broader V4.14 criteria are not complete.",
+      "V4.14 primary-source checks reconfirmed official INPS ordinary old-age date differences by management, Spain 2026 ordinary-age thresholds, EU Regulation 883/2004 Article 52 theoretical/pro-rata distinction, and monthly payment calendars; legacy single retirement_date inputs cannot establish all separate events. Two bounded normative-review delegates timed out without findings; implementation remains gated. Existing work-transition-plan CLI regression: 4 tests passed after running outside the restricted temp sandbox.",
+      "Live CLI smoke test with synthetic household and work phases: `fo planning work-transition plan` ran in an isolated temporary workspace; readiness correctly blocked at 0/9 required sources, no scenario/date was emitted, and payroll/contribution/pension/optimizer gaps were shown. Temporary synthetic workspace was removed after verifying its exact path and contents.",
+      "Existing synthetic cross-border CLI demo: `fo planning it-es-eu-pension demo` returned complete/eligible_by_totalization for its preselected 2026-12 date, 60 ES months / 240 non-overlapping EU months, 25% ratio, and no data gaps. This is a fixture-based check at an input candidate date, not a date search or household sustainable-exit result. Output file removed after inspection.",
+      "V4.14b freshness slice: 69 tests passed across freshness audit, EU coordination, Spanish statutory pension, cross-border dossier, Work Transition source binding and release governance. `fo release check` now invokes freshness audit as an independent blocking check even when unit regression is disabled; tests cover invocation and failure. Real release-gate smoke with `run_tests=False` passed compileall, pip check, roadmap audit, pension freshness and synthetic orchestration evaluation. Local CLI audit on 2026-10-11 reports all four active IT/ES/EU packs fresh and network_checked=false. The reviewer completed a scoped static normative review with limited GO after the user authorized an extended timeout; the reviewer did not rerun tests. This GO does not approve the V4.14 timeline or additional packs.",
+      "Perimeter review of three additional packs completed read-only: contribution deductibility belongs to V4.4; IT-ES tax classification and Spanish pension net belong to V4.6a/V4.6b. Excluded from V4.14 freshness; their consumers are not freshness-covered by that exclusion. Their source metadata is insufficient for the current checker, so separate governance requires its own scope, source-contract review and tests.",
+      "Independent post-implementation review of Italian old-age eligibility returned NO-GO on cessation, alternative-path evidence, temporal binding and pack-driven rules. Parent fixed findings, added source-specific provision-period coverage and fail-closed pack validation, and formalized the five-event timeline contract. Independent reviewer returned GO limited after post-fix and final metadata hardening. Final related suite: 81 tests passed; CLI audit 5/5 fresh, network_checked=false; roadmap audit, compile, planner schema, guardrails and diff-check passed. V4.14b/V4.14c are done; V4.14 remains blocked.",
+      "V4.14b closure gate: 81 related tests pass, including three gap-aware timeline-schema tests and malformed-pack/source-period regressions; normative post-fix reviewer GO limited; freshness CLI 5/5 fresh without network; compile, roadmap audit, planner schema, guardrails and diff-check pass. This closes only the V4.14b prerequisite; the V4.14 timeline remains blocked.",
+      "V4.14d document review: official legal sources and administrative guidance mapped separately for five events across IT/ES/EU; initial normative NO-GO findings addressed; post-fix reviewer GO limited. No runtime tests applicable. Roadmap audit, planner JSON Schema (repository venv), execution guardrails, JSON parse and git diff --check pass.",
+      "V4.14d initial normative matrix review: NO-GO limited to the document. Findings: separate binding legal sources from administrative guidance; add precise articles, consolidated versions and effective periods; limit cessation claim to employed profiles; leave individual decision and actual first-payment dates as evidence-only gaps. Parent corrected the matrix with official Normattiva/BOE/EUR-Lex acts and clarified procedures; no rule or calculation added.",
+      "V4.14d post-fix normative review returned GO limited for the matrix only. Reviewer confirmed EU articles 6, 50-57 and 987/2009 articles 45-46/50, Spanish RD 453/2022 articles 2-4 and LGSS articles 165.1/205.1. Parent applied two non-blocking documentation corrections: separate Normattiva retrieval date from returned text validity date and cite Reg. 987/2009 art. 48 for notifying claimant of decisions. No calculations or runtime rules changed.",
+      "V4.14e: initial independent NO-GO on source hierarchy and provenance traceability; post-fix reviewer accepted limited documentary GO after clarifying statute/decreto direttoriale/INPS circular roles, explicitly retaining historic-71 and pack-provenance gaps, then correcting two remaining ambiguous Knowledge phrases. No rule-pack/code changes; no runtime tests applicable. Roadmap, planner validation, guardrails and diff-check passed."
+    ],
+    "documentation_touchpoints": [
+      "family-office-engine/docs/current-next-increment.md",
+      "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+      "family-office-engine/docs/employment-income-projection.md",
+      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "family-office-engine/docs/roadmap/roadmap-index.md",
+      "family-office-engine/docs/roadmap/roadmap-v6-operations-compliance.md",
+      "family-office-engine/docs/decision-log.md",
+      "family-office-engine/docs/roadmap/work-transition-implementation-plan.md",
+      "family-office-bootstrap/planning/current-work.json"
+    ],
+    "result": "passed",
+    "notes": "V4.14e chiusa con GO limitato esclusivamente alla documentazione della gerarchia L.199/2025 (legge), decreto direttoriale 19-12-2025 (atto attuativo vincolante) e circolare INPS 28/2026 (guidance), nonché all'esplicitazione dei gap per la catena storica del valore base 71 e per la provenance INPS-only del pack. Reviewer indipendente post-fix ha indicato due correzioni editoriali finali, applicate; ha confermato che i gap sono adeguatamente registrati. Nessun pack/codice modificato, nessun GO operativo ulteriore, V4.14 resta blocked. Nessun dato personale letto.",
+    "task_envelope": {
+      "mode": "normative-change",
+      "risk_domain": "pension",
+      "objective": "Verificare e sottoporre a review indipendente la base normativa italiana 2026-2028 del solo perimetro eligibility ordinaria già approvato, mantenendo eccezioni e gap fuori scope.",
+      "repositories": [
+        "family-office-engine",
+        "family-office-knowledge",
+        "family-office-bootstrap"
+      ],
+      "read_set": [
+        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+        "family-office-rules/italy/2026/inps-old-age-eligibility.json",
+        "Fonti ufficiali GU, Normattiva e INPS su requisiti pensionistici 2027-2028"
+      ],
+      "write_set": [
+        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+        "family-office-engine/docs/current-next-increment.md",
+        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+        "family-office-engine/docs/decision-log.md"
+      ],
+      "test_command": "Review documentale contro fonti ufficiali; validazione JSON planner; roadmap audit; execution guardrails; git diff --check",
+      "stop_conditions": [
+        "No rule pack, engine service, pension amount, entitlement decision, candidate date, economic stream or date inference",
+        "No extension beyond the existing ordinary FPLD/AGO eligibility scope and 2026-2028 period",
+        "No runtime or pack changes; a source-check does not approve recognition, effective date, first payment or the full timeline",
+        "Do not read or write family-office-workspace/",
+        "V4.14 stays blocked unless a separate normative gate approves a precisely scoped implementation"
+      ]
+    }
+  },
+  "blockers": [],
+    "session_notes": [
+    "User requires the optimizer to find the feasible date from capital and future pension streams; do not request a target retirement date.",
+    "The architecture-review agent did not return; existing approved V4B architecture is the contract boundary.",
+    "The implementer returned after bounded waits with the explicit data_gaps CLI wording and focused test coverage; the parent integrated the projection build command and final verification.",
+    "Other worktree modifications predate this slice and remain untouched.",
+    "The implementer for the interactive wizard slice returned after bounded waits without edits; the parent completed the critical path locally.",
+    "Bounded V4.13 wizard slice: focused plan/scenario/projection suite passes (15 tests); plan saves declared phase/month drafts and runs builders only after readiness permits, without asking pension or optimizer candidate dates.",
+    "Independent normative review found the 2026 IRPEF second bracket must be 33% under Law 199/2025 art. 1(3), not 35%; GO for versioned 2026 pack and consumers after tests. Monthly INPS pension-capital precision remains unsupported and blocked; employee withholding and other payroll gaps unchanged.",
+    "The delegated implementer created the approved IRPEF/rules/consumer changes but did not return test results after bounded waits; parent reviewed the diff and added just-above-bracket regressions.",
+    "Post-implementation normative review returned NO-GO for stale cross-border sample/expectations, missing 2025 retrieved_on, and absent cross-border declared-vs-loaded rule-pack ID validation. Parent fallback implemented these exact findings; expanded 131-test regression now passes and a fresh independent gate is requested.",
+    "User asked to test as soon as possible; ran the actual Work Transition plan CLI with synthetic values in an isolated workspace. It correctly stopped on 9 missing source bindings and emitted no retirement date. Also ran the existing synthetic IT-ES-EU pension demo, which validates eligibility/pro-rata at its preselected 2026-12 candidate only; it does not search for the earliest date. No personal workspace data was accessed; generated smoke files were removed.",
+    "Fresh bounded fo_normative_reviewer session completed after the user reported the quota reset; it returned a detailed NO-GO and no usage-limit error. Primary-source spot-check confirmed INPS age thresholds vary by year and contribution regime, EUR-Lex Articles 50/52/56/57 include separate deferment and under-one-year provisions, and Seguridad Social describes EU aggregation for entitlement and calculation.",
+    "User authorized one final bounded resumption of the existing reviewer thread; it returned NO-GO for out-of-period candidate dates in the EU dossier. Parent added fail-closed date validation and reran 58 focused tests successfully. Another independent post-fix review is required and needs a new explicit decision; V4.14b remains blocked.",
+    "User authorized the next freshness-audit step. The fo_implementer delegate received two bounded waits without a delivered result and was closed; parent fallback now implements the critical path locally. No personal workspace data was accessed.",
+    "Freshness implementation and release-gate regression: 69 focused tests pass; the local audit is fresh for 4 active packs. Two prior 30-second review windows timed out without verdict. User then explicitly authorized a session-only longer timeout; the existing reviewer returned limited GO after 81 seconds total review wait. The reviewer did not rerun tests; parent test evidence remains 69 passed.",
+    "Normative perimeter review excluded the contribution-deduction and two IT-ES pension tax packs from V4.14 freshness; docs updated and governance checks passed. For the next Italian old-age eligibility review, official INPS pages on old-age requirements and 2027-2028 adjustments plus Circular 104/2026 were checked on 2026-10-11. The delegated normative reviewer did not return within three bounded 60-second windows (180 seconds total); no GO/NO-GO is inferred, no rule or runtime change made, and V4.14b remains in_progress.",
+    "User explicitly authorized a five-minute review window for this resumed execution. The reviewer returned a scoped GO; no timeout was treated as a gate failure or completion.",
+    "Normative reviewer returned limited GO for a dedicated eligibility-only FPLD/AGO employee ordinary old-age rule for requirements met in 2026-2028. The GO requires confirmed cohort/management, dated contribution evidence, threshold and pension amount evidence for the pure-contributory 20-year path, cessation evidence, and fail-closed gaps for unsupported profiles/periods. It does not approve the V4.14 timeline or the existing amount-estimate pack.",
+    "Independent post-implementation reviewer returned NO-GO on four implementation gaps and stale inventory wording. Parent corrected cessation evidence, temporal binding, unknown five-year alternative handling, and pack-driven thresholds/cohort/scope; added legal source provision periods and refreshed current perimeter to five packs/seven consumers. Related suite: 77 tests pass; roadmap audit, planner schema, guardrails, diff check pass; pension freshness CLI reports 5/5 fresh without network. Reuse the reviewer for a bounded post-fix cycle before considering V4.14b closure.",
+    "fo_docs_editor documented the normative GO and exclusions in current-next, active roadmap and decision log; only documentation changed in that sidecar.",
+    "V4.14b implementation delivered; parent hardened unknown-scope flags, source-bound DOB/cohort/contribution/amount evidence, invalid age-threshold dates, and independent 71-year path handling. Expanded related suite passes 75 tests; roadmap audit, planner schema, compile and guardrails pass. Independent post-implementation normative review is pending; V4.14 timeline remains blocked.",
+    "Session retrospective (2026-10-12): added reusable guidance to playbook 07 on legal-source hierarchy, effective-date/source-version traceability, bounded review cycles, post-fix editorial closure conditions, and GO limits by artifact. V4.14e remains completed as documentary-only GO limited; V4.14f is planned. No family workspace data accessed."
+  ],
+  "next_action": {
+      "mode": "recalculate",
+      "description": "Selezionare V4.14f pianificato: ricostruire la provenance normativa source-bound del rule pack eligibility IT e verificare regressioni sintetiche/fail-closed senza estendere lo scope o sbloccare V4.14."
+  },
+  "routing": {
+    "policy_version": "3.1",
+    "tier": "critical",
+    "task_class": "normative",
+    "agent": "fo_normative_reviewer",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "rationale": "Il micro-incremento delimita affermazioni pensionistiche ad alto impatto e richiede gate indipendente; il reviewer verifica fonti, periodi, attori e non-derivabilità senza approvare calcoli.",
+      "trace": [
+      {
+          "at": "2026-10-12T19:42:24Z",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+          "reason": "V4.14e è un checkpoint normativo T4 per la validità e il perimetro di regole pensionistiche ad alto impatto; review indipendente obbligatoria prima della chiusura."
+        },
+        {
+          "at": "2026-10-12T19:43:00Z",
+          "event": "delegated",
+          "tier": "critical",
+          "agent": "fo_normative_reviewer",
+          "model": "gpt-5.6-sol",
+          "reasoning_effort": "xhigh",
+          "reason": "Review normativa iniziale read-only V4.14e: NO-GO limitato per gerarchia delle fonti e tracciabilità del valore base 71/provenance pack."
+        },
+        {
+          "at": "2026-10-12T19:46:00Z",
+          "event": "delegated",
+          "tier": "critical",
+          "agent": "fo_normative_reviewer",
+          "model": "gpt-5.6-sol",
+          "reasoning_effort": "xhigh",
+          "reason": "Review indipendente post-fix V4.14e: confermare gerarchia legge/decreto attuativo/circolare e che gap sulla soglia 71 e sulla provenance del rule pack restino espliciti, senza attribuire GO normativo ulteriore."
+      }
+      ]
+  }
 }

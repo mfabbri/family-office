@@ -1,6 +1,6 @@
 {
   "schema_version": "spanish-pension-net-it-resident-rule-pack/v1",
-  "rule_pack_id": "it.spanish-pension-net-it-resident.2026.v1",
+  "rule_pack_id": "it.spanish-pension-net-it-resident.2026.v2",
   "jurisdiction": "IT",
   "source_country": "ES",
   "currency": "EUR",
@@ -17,6 +17,13 @@
       "title": "Agenzia Entrate, dichiarazione precompilata 2026, lavoro dipendente e pensioni",
       "url": "https://infoprecompilata.agenziaentrate.gov.it/portale/semplificata-mod-lavoro-dipendente-e-pensioni",
       "verified_on": "2026-07-23"
+    },
+    {
+      "source_id": "gazzetta.legge-2025-199.art1-comma3",
+      "title": "Legge 30 dicembre 2025, n. 199, art. 1 comma 3",
+      "url": "https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticoloDefault/originario?atto.codiceRedazionale=25G00212&atto.dataPubblicazioneGazzetta=2025-12-30&atto.tipoProvvedimento=LEGGE",
+      "published_on": "2025-12-30",
+      "retrieved_on": "2026-10-11"
     },
     {
       "source_id": "agenziaentrate.precompilata.quadro-ce-2026",
@@ -51,13 +58,13 @@
   },
   "rules": [
     {
-      "rule_id": "it.spanish-pension-net-it-resident.2026",
+      "rule_id": "it.spanish-pension-net-it-resident.2026.v2",
       "valid_from": "2026-01-01",
       "valid_to": "2026-12-31",
       "resident_country": "IT",
       "source_country": "ES",
       "supported_classification_schema": "it-es-pension-tax-classification/v1",
-      "italian_irpef_rule_pack_id": "it.irpef-national.2026.v1",
+      "italian_irpef_rule_pack_id": "it.irpef-national.2026.v2",
       "taxable_when_taxing_power_country": "IT",
       "exempt_when_taxing_power_country": "ES"
     }

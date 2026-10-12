@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pension Entitlement Timeline Contract",
+  "description": "Gap-aware contract only; no eligibility calculator, pension amount, or payment-timing inference is authorized by this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_type", "status", "member_id", "as_of_date", "events", "data_gaps", "limitations"],
+  "properties": {
+    "schema_version": {"const": "pension-entitlement-timeline/v1"},
+    "record_type": {"const": "PensionEntitlementTimeline"},
+    "status": {"enum": ["not_assessed", "partial", "blocked"]},
+    "member_id": {"type": "string", "minLength": 1},
+    "as_of_date": {"type": "string", "format": "date"},
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eligibility_date", "requirements_met_date", "official_recognition_date", "economic_effective_date", "first_cash_payment_date"],
+      "properties": {
+        "eligibility_date": {"$ref": "#/$defs/event"},
+        "requirements_met_date": {"$ref": "#/$defs/event"},
+        "official_recognition_date": {"$ref": "#/$defs/event"},
+        "economic_effective_date": {"$ref": "#/$defs/event"},
+        "first_cash_payment_date": {"$ref": "#/$defs/event"}
+      }
+    },
+    "data_gaps": {"type": "array", "items": {"$ref": "#/$defs/gap"}},
+    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "date", "source_refs", "data_gaps"],
+      "properties": {
+        "status": {"enum": ["supported", "not_assessed", "not_applicable"]},
+        "date": {"type": ["string", "null"], "format": "date"},
+        "source_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "data_gaps": {"type": "array", "items": {"$ref": "#/$defs/gap"}}
+      },
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "supported"}}, "required": ["status"]}, "then": {"properties": {"date": {"type": "string", "format": "date"}, "source_refs": {"minItems": 1}}}},
+        {"if": {"properties": {"status": {"const": "not_assessed"}}, "required": ["status"]}, "then": {"properties": {"date": {"type": "null"}, "data_gaps": {"minItems": 1}}}},
+        {"if": {"properties": {"status": {"const": "not_applicable"}}, "required": ["status"]}, "then": {"properties": {"date": {"type": "null"}}}}
+      ]
+    },
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "message": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -4,6 +4,11 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
 
+from family_office_engine.governance.pension_source_freshness import (
+    PensionSourceFreshnessError,
+    require_fresh_pension_rule_pack,
+)
+
 SCHEMA_VERSION = "spanish-eu-theoretical-pension/v1"
 RECORD_TYPE = "SpanishEuTheoreticalPensionEstimate"
 RULE_PACK_SCHEMA_VERSION = "spanish-eu-theoretical-pension-rule-pack/v1"
@@ -83,6 +88,10 @@ def build_spanish_eu_theoretical_pension(
 
 
 def load_spanish_eu_theoretical_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
+    try:
+        require_fresh_pension_rule_pack(rule_pack_path)
+    except PensionSourceFreshnessError as exc:
+        raise SpanishEuTheoreticalPensionError(str(exc)) from exc
     data = _read_json(rule_pack_path, "Spanish EU theoretical pension rule pack")
     required = (
         "schema_version",

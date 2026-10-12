@@ -1,17 +1,21 @@
 {
   "schema_version": "spanish-statutory-pension-rule-pack/v1",
-  "rule_pack_id": "es.seguridad-social.statutory-retirement.general.2026-baseline.v1",
+  "rule_pack_id": "es.seguridad-social.statutory-retirement.general.2026-baseline.v2",
   "jurisdiction": "ES",
   "currency": "EUR",
   "status": "baseline_not_official_calculation",
   "valid_from": "2026-01-01",
-  "valid_to": null,
+  "valid_to": "2036-12-31",
   "source_refs": [
     {
       "source_id": "boe.lgss.rdl-8-2015.consolidated",
       "title": "Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social",
+      "authority": "Agencia Estatal Boletín Oficial del Estado",
+      "jurisdiction": "ES",
       "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724",
-      "retrieved_on": "2026-07-16",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "Articulo 205",
         "Articulo 210",
@@ -23,8 +27,12 @@
     {
       "source_id": "seg-social.gestion-pago.devengo-abono",
       "title": "Seguridad Social, Gestion/Pago, Devengo/Abono",
+      "authority": "Instituto Nacional de la Seguridad Social / Seguridad Social",
+      "jurisdiction": "ES",
       "url": "https://www.seg-social.es/wps/portal/wss/internet/Pensionistas/GestionPago/33468/38854",
-      "retrieved_on": "2026-07-16",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "Devengo / Abono"
       ]

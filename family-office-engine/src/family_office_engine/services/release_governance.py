@@ -41,6 +41,14 @@ def build_release_gate(
         _run_check(root, "compileall", [sys.executable, "-m", "compileall", "-q", "src", "tests"]),
         _run_check(root, "dependencies", [sys.executable, "-m", "pip", "check"]),
         _run_check(root.parent, "roadmap_audit", [sys.executable, str(root / "src" / "family_office_engine" / "governance" / "roadmap_audit.py")]),
+        _run_check(root, "pension_source_freshness", [
+            sys.executable,
+            "-m",
+            "family_office_engine.cli.main",
+            "planning",
+            "pension-sources",
+            "audit",
+        ]),
     ])
     evaluation = _run_evaluation(root, baseline_path)
     checks.append({"check_id": "orchestration_evaluation", "status": "passed" if evaluation["release_gate"]["passed"] else "failed"})

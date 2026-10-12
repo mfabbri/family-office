@@ -5,6 +5,11 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
 
+from family_office_engine.governance.pension_source_freshness import (
+    PensionSourceFreshnessError,
+    require_fresh_pension_rule_pack,
+)
+
 SCHEMA_VERSION = "work-exit-feasibility/v1"
 INPUT_SCHEMA_VERSION = "work-exit-feasibility-input/v1"
 INPS_SCHEMA_VERSION = "inps-theoretical-pension/v1"
@@ -524,6 +529,10 @@ def _candidate_dates(data: dict[str, Any]) -> list[date]:
 
 
 def _load_rule_pack(path: Path) -> dict[str, Any]:
+    try:
+        require_fresh_pension_rule_pack(path)
+    except PensionSourceFreshnessError as exc:
+        raise WorkExitFeasibilityError(str(exc)) from exc
     data = _read_json(path, "INPS theoretical pension rule pack")
     if data.get("schema_version") != RULE_PACK_SCHEMA_VERSION:
         raise WorkExitFeasibilityError(f"Unsupported INPS rule pack schema: {data.get('schema_version')}")

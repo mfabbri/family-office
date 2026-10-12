@@ -1,6 +1,6 @@
 {
-  "schema_version": "eu-pension-coordination-rule-pack/v1",
-  "rule_pack_id": "eu.it-es.pension-coordination.2026.v2",
+  "schema_version": "eu-pension-coordination-rule-pack/v2",
+  "rule_pack_id": "eu.it-es.pension-coordination.2026.v3",
   "jurisdictions": [
     "IT",
     "ES",
@@ -8,52 +8,74 @@
   ],
   "currency": "EUR",
   "status": "coordination_method_not_official_decision",
+  "valid_from": "2026-01-01",
+  "valid_to": "2026-12-31",
   "source_refs": [
     {
       "source_id": "eurlex.reg-883-2004",
       "title": "Regulation (EC) No 883/2004 on the coordination of social security systems",
+      "authority": "European Parliament and Council of the European Union",
+      "jurisdiction": "EU",
       "url": "https://eur-lex.europa.eu/eli/reg/2004/883/oj/eng",
-      "retrieved_on": "2026-07-23",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "Article 50",
         "Article 51",
         "Article 52",
-        "Article 56"
+        "Article 56",
+        "Article 57"
       ]
     },
     {
-      "source_id": "europa.your-europe.state-pensions-abroad",
-      "title": "Your Europe, State pensions abroad",
-      "url": "https://europa.eu/youreurope/citizens/work/retire-abroad/state-pensions-abroad/index_en.htm",
-      "retrieved_on": "2026-07-23",
+      "source_id": "eurlex.reg-987-2009",
+      "title": "Regulation (EC) No 987/2009 laying down the procedure for implementing Regulation (EC) No 883/2004",
+      "authority": "European Parliament and Council of the European Union",
+      "jurisdiction": "EU",
+      "url": "https://eur-lex.europa.eu/eli/reg/2009/987/oj/eng",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
-        "Eligibility periods",
-        "How your pension is calculated"
+        "Article 12",
+        "Article 13",
+        "Article 43"
       ]
     },
     {
-      "source_id": "seg-social.jubilacion.requisitos",
-      "title": "Seguridad Social, Pension de jubilacion, requisitos",
-      "url": "https://prestaciones.seg-social.es/servicio/pension-jubilacion.html?categoria=jubilacion",
-      "retrieved_on": "2026-07-23",
+      "source_id": "boe.lgss.rdl-8-2015.consolidated",
+      "title": "BOE, Real Decreto Legislativo 8/2015, Ley General de la Seguridad Social",
+      "authority": "Agencia Estatal Boletín Oficial del Estado",
+      "jurisdiction": "ES",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
-        "Requisitos"
+        "Articulo 205",
+        "Disposicion transitoria septima"
       ]
     },
     {
-      "source_id": "seg-social.jubilacion.cuantia",
-      "title": "Seguridad Social, Prestaciones/Pensiones de Trabajadores, cuantia",
-      "url": "https://www.seg-social.es/wps/portal/wss/internet/Trabajadores/PrestacionesPensionesTrabajadores/10963/28393/28396/28475/177458",
-      "retrieved_on": "2026-07-23",
+      "source_id": "seg-social.eu-coordination.old-age",
+      "title": "Seguridad Social, EU coordination for old-age and survivors benefits",
+      "authority": "Instituto Nacional de la Seguridad Social / Seguridad Social",
+      "jurisdiction": "ES",
+      "url": "https://www.seg-social.es/wps/portal/wss/internet/InformacionUtil/32078/966/1819/1823",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
-        "Base reguladora",
-        "Porcentaje"
+        "aggregation for acquisition of entitlement and calculation",
+        "double calculation and pro-rata",
+        "insured or equivalent status and specific contribution period"
       ]
     }
   ],
   "coordination_principles": {
     "separate_national_entitlements": true,
-    "aggregation_for_entitlement_only": true,
+    "aggregation_for_entitlement_and_theoretical_calculation": true,
     "no_transfer_or_merger_of_contributions": true,
     "compare_independent_and_pro_rata_when_calculable": true,
     "separate_payment_by_country": true
@@ -62,6 +84,7 @@
     "date_of_birth",
     "retirement_date",
     "recent_contribution_anchor_date",
+    "spanish_insured_or_equivalent_status",
     "inps_history_status",
     "future_assumptions_status",
     "dated_insurance_periods",
@@ -73,6 +96,7 @@
     "minimum_total_contribution_months": 180,
     "specific_contribution_months_within_lookback": 24,
     "specific_contribution_lookback_months": 180,
+    "insured_or_equivalent_status_required": true,
     "ordinary_age_if_long_career": {
       "years": 65,
       "months": 0,
@@ -82,7 +106,7 @@
       "years": 66,
       "months": 10
     },
-    "totalization_applies_to_entitlement_only": true,
+    "totalization_applies_to_entitlement_and_theoretical_calculation": true,
     "recent_contribution_anchor_required": true,
     "source_provision": "Seguridad Social jubilacion requisitos 2026"
   },
@@ -96,7 +120,19 @@
       "ratio_decimals": 6,
       "mode": "ROUND_HALF_UP"
     },
-    "minimum_spanish_period_months_for_pro_rata": 12,
+    "article_57_under_one_year": {
+      "less_than_one_year_threshold_months": 12,
+      "no_autonomous_right_condition_required": true,
+      "both_conditions_required_for_exception": true,
+      "other_member_states_include_periods_in_theoretical_amount": true,
+      "all_states_exempt_branch": "institution_level_determination_required",
+      "unmodeled_branch_action": "blocking_data_gap"
+    },
+    "overlap_policy": {
+      "legal_basis": "Regulation (EC) No 987/2009 Article 12",
+      "monthly_deduplication_alone_sufficient": false,
+      "unclassified_overlap_action": "blocking_data_gap"
+    },
     "no_foreign_bases_in_spanish_theoretical_amount": true
   },
   "calculation_limits": [
@@ -104,11 +140,11 @@
     "Does not create official P1 decisions.",
     "Does not calculate tax, net amounts, exchange rates or application procedures.",
     "Spanish pro-rata amounts require dated non-overlapping periods and an explicit Spanish theoretical amount.",
-    "Italian periods can be used for entitlement aggregation only, not as Spanish contribution bases."
+    "Italian periods can be used for entitlement and theoretical/pro-rata calculation under EU coordination, not as Spanish contribution bases."
   ],
   "limitations": [
     "Internal coordination dossier only; not an official INPS or Seguridad Social decision.",
-    "Periods are aggregated only to test entitlement and explain pro-rata mechanics.",
+    "Periods may be aggregated for acquisition of entitlement and theoretical/pro-rata calculation under applicable coordination rules.",
     "Contributions remain under their national schemes and are not transferred or merged.",
     "Human review is required before administrative or legal use."
   ]

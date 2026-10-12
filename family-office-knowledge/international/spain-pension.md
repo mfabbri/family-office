@@ -15,9 +15,15 @@ Non copre:
 
 ## Fonti primarie
 
-- BOE, Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social, testo consolidato consultato il 2026-07-16.
-- BOE, stesso testo consolidato, ultima actualizacion publicada il 2026-02-04, Articolo 210 e Disposizione transitoria nona per la percentuale maturata.
+- BOE, Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social, testo consolidato consultato il 2026-10-11: https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724. Il consolidato è strumento informativo; per ciascuna regola eseguibile vanno controllati anche l'atto modificativo ufficiale e la sua decorrenza.
+- BOE, stesso testo, articoli 205 e 210 e disposizioni transitorie settima, nona e quadragesima; per la soglia ordinaria 2026 la DT settima indica 65 anni con almeno 38 anni e 3 mesi, altrimenti 66 anni e 10 mesi. La stessa tabella fissa dal 2027 65 anni con almeno 38 anni e 6 mesi, altrimenti 67 anni.
 - Seguridad Social, Gestion/Pago, Devengo/Abono, consultato il 2026-07-16, per periodicita' di pagamento delle pensioni ordinarie.
+
+## Limite di validità operativa
+
+La verifica corrente della LGSS non trasforma una regola con decorrenza futura in un'autorizzazione a estrapolare oltre il suo periodo esplicitamente codificato. Ogni rule pack deve dichiarare la finestra normativa effettivamente riesaminata; il consolidato BOE va ricontrollato insieme agli atti modificativi e alle rispettive date di efficacia. Il requisito specifico dei 2 anni nei 15 precedenti necessita di un anchor coerente con il fatto causante e dello stato di assicurazione/assimilazione; senza questi dati l'esito è un gap, anche quando età e contribuzione totale risultano sufficienti.
+
+Il calendario di pagamento o il numero di mensilità non prova la data di riconoscimento, la decorrenza economica o il primo accredito. Questi eventi restano separati e non derivabili da questa nota.
 
 ## Requisiti ordinari codificati nel baseline
 

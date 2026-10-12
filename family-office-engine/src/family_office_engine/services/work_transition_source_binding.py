@@ -139,7 +139,14 @@ def _read_snapshot(path: Path, workspace: Path) -> dict[str, Any] | None:
     schema_version = data.get("schema_version")
     if schema_version not in _SCHEMA_OPTIONS or not isinstance(data.get("as_of_date"), str):
         return None
-    return {"workspace_path": _relative(path, workspace), "schema_version": schema_version, "as_of_date": data["as_of_date"], "content_hash": _hash(data), "metadata": _snapshot_metadata(data)}
+    return {
+        "workspace_path": _relative(path, workspace),
+        "schema_version": schema_version,
+        "as_of_date": data["as_of_date"],
+        "content_hash": _hash(data),
+        "metadata": _snapshot_metadata(data),
+        "local_summary": _local_summary(data),
+    }
 
 
 def _compatible(snapshot: dict[str, Any], requirement: dict[str, Any]) -> bool:
@@ -154,6 +161,24 @@ def _candidate(snapshot: dict[str, Any], requirement: dict[str, Any]) -> dict[st
     member_id = requirement.get("member_id")
     metadata_gaps = _metadata_gaps(requirement, snapshot["metadata"])
     return {**snapshot, "candidate_id": f"{requirement['input_id']}:{snapshot['workspace_path']}", "input_id": requirement["input_id"], "category": category, "member_id": member_id, "value_basis": value_basis, "source_kind": source_kind, "metadata_gaps": metadata_gaps}
+
+
+def _local_summary(data: dict[str, Any]) -> dict[str, Any]:
+    """Return a small, local-only decision summary for interactive source choice."""
+    records = data.get("records") if isinstance(data.get("records"), list) else []
+    documents = data.get("documents") if isinstance(data.get("documents"), list) else []
+    periods = sorted({record.get("period_label") for record in records if isinstance(record, dict) and isinstance(record.get("period_label"), str)})
+    employers = sorted({record.get("employer") for record in records if isinstance(record, dict) and isinstance(record.get("employer"), str) and record.get("employer")})
+    summary = data.get("summary") if isinstance(data.get("summary"), dict) else {}
+    result: dict[str, Any] = {
+        "document_count": len(documents),
+        "record_count": int(summary.get("record_count", len(records))),
+        "periods": periods,
+        "employers": employers,
+    }
+    if isinstance(summary.get("net_pay_total"), str):
+        result["net_pay_total"] = summary["net_pay_total"]
+    return result
 
 
 def _source_id(input_id: str, content_hash: str) -> str:

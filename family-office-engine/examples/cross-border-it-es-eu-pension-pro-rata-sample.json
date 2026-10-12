@@ -5,8 +5,8 @@
   "retirement_date": "2026-12",
   "scenario": "ordinary",
   "rule_pack": {
-    "rule_pack_id": "eu.it-es.pension-coordination.2026.v2",
-    "schema_version": "eu-pension-coordination-rule-pack/v1"
+    "rule_pack_id": "eu.it-es.pension-coordination.2026.v3",
+    "schema_version": "eu-pension-coordination-rule-pack/v2"
   },
   "sources": [
     {
@@ -23,7 +23,7 @@
     "totalized": {
       "eligible": true,
       "total_eu_months": 240,
-      "aggregation_for_entitlement_only": true
+      "aggregation_for_entitlement_and_theoretical_calculation": true
     }
   },
   "spanish_pro_rata_pension": {

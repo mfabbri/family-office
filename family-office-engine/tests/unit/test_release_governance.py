@@ -58,6 +58,31 @@ class ReleaseGovernanceTest(unittest.TestCase):
             self.assertIn("release check: passed", stdout.getvalue())
             self.assertEqual("release-gate/v1", json.loads(output.read_text(encoding="utf-8"))["schema_version"])
 
+    def test_release_gate_runs_pension_source_freshness_audit(self):
+        with tempfile.TemporaryDirectory() as folder, patch(
+            "family_office_engine.services.release_governance.subprocess.run",
+            return_value=self._completed(),
+        ) as run:
+            build_release_gate(ENGINE, candidate_id="synthetic-pension-gate", output_path=None, run_tests=False)
+
+        commands = [call.args[0] for call in run.call_args_list]
+        self.assertTrue(
+            any(command[-2:] == ["pension-sources", "audit"] and "planning" in command for command in commands)
+        )
+
+    def test_release_gate_fails_when_pension_source_freshness_audit_fails(self):
+        def result_for(command, **_kwargs):
+            return self._completed(1 if "pension-sources" in command else 0)
+
+        with patch(
+            "family_office_engine.services.release_governance.subprocess.run",
+            side_effect=result_for,
+        ):
+            report = build_release_gate(ENGINE, candidate_id="stale-pension-source", run_tests=False)
+
+        self.assertFalse(report["release_gate"]["passed"])
+        self.assertIn("pension_source_freshness", report["release_gate"]["failures"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -35,7 +35,7 @@ I comandi `python -m family_office_engine.cli.main ...` restano fallback tecnici
 2. `documents inventory` e `documents organize`: controlla e classifica i documenti nel workspace.
 3. Import documentali: `payroll`, `investments`, `bank-insurance`, `tax-documents`, `fonte`, `pension import-spain`; per gli export delle spese bancarie usare `expenses import-bank` e poi `expenses review-bank`.
 4. Normalizzazioni household: `household validate`, `household ownership validate`, `household availability validate`, `household timeline validate`.
-5. Pensione e cashflow: `pension import-inps`, `pension reconcile-spain`; per pensione spagnola autonoma calcolabile `pension estimate-spain`; per caso misto Italia-Spagna `planning it-es-eu-pension wizard`, `planning spanish-eu-theoretical-pension build`, `planning it-es-eu-pension build`; poi `pension compose-income` e `expenses wizard` per dichiarare le spese lifecycle senza compilare JSON, oppure `expenses build-lifecycle` per il percorso tecnico avanzato.
+5. Pensione e cashflow: `pension import-inps`, `pension reconcile-spain`; per pensione spagnola autonoma calcolabile `pension estimate-spain`. I wizard `planning it-es-eu-pension` richiedono un mese pensionistico esplicito e servono solo per scenari avanzati/diagnostici; non usarli per cercare la prima data sostenibile. L'optimizer automatico Italia-Spagna è pianificato nel percorso Work Transition. Poi `pension compose-income` e `expenses wizard` per dichiarare le spese lifecycle senza compilare JSON, oppure `expenses build-lifecycle` per il percorso tecnico avanzato.
 6. Patrimonio e pianificazione: `net-worth consolidate`, `planning goals`, `planning liquidity`, `planning decumulation`, `planning pension-contributions`.
 7. Scenario decisionale: `scenarios compose-v2`, `scenarios evaluate`, `scenarios sensitivity`, `scenarios score`, `scenarios dossier`.
 8. Report e dashboard: `dashboard build`, `report build`.
@@ -44,14 +44,20 @@ I comandi `python -m family_office_engine.cli.main ...` restano fallback tecnici
 
 L'obiettivo operativo non e' scegliere a mano una data di pensionamento e calcolarla isolatamente. Il percorso corretto e' trovare la prima data sostenibile, partendo da oggi, in cui il nucleo puo' smettere di lavorare secondo vincoli dichiarati.
 
-Il percorso operativo e' ora disponibile in forma guidata:
+L'optimizer che deve trovare automaticamente la data non è ancora disponibile. Per avviare la raccolta question-first dei dati senza scegliere una data, usa:
+
+```text
+fo planning work-transition plan
+```
+
+Il comando crea/riprende il manifest nel workspace, mostra e fa associare esplicitamente le fonti, poi raccoglie le fasi FTE e le basi mensili che l'utente può documentare. Produce readiness, scenario e proiezione quando i rispettivi gate sono soddisfatti; i dati mancanti restano gap espliciti. Non esegue ancora timeline pensionistica, bridge, simulazione o optimizer e non restituisce date. Per la diagnostica legacy, che invece chiede una data candidata, restano disponibili:
 
 ```text
 fo planning work-exit wizard
 fo planning work-exit build
 ```
 
-Il wizard introduce i dati minimi nel workspace, salva progressivamente la bozza e produce anche il manifest di readiness. Le risposte ignote restano `data_gaps` espliciti; il manifest non inventa fonti e puo' quindi risultare bloccato. Gli snapshot disponibili sono mostrati come contesto, ma devono essere collegati alla readiness tramite il relativo percorso CLI prima di poter colmare i gap. Solo dopo, `planning work-exit build` calcola la prima data sostenibile, con motivi delle date scartate e provenance degli input selezionati. Date esplicite come `2037` sono candidate diagnostiche o filtri, non l'obiettivo primario.
+Il wizard legacy salva progressivamente input e readiness; build valuta il contratto `work-exit-feasibility/v1`, ma non modella il percorso completo full-time/part-time/cessazione, la proiezione mensile di lavoro e contributi, né il bridge integrato richiesto dall'optimizer. Il comando question-first `work-transition plan` è l'ingresso progressivo già disponibile; la risposta completa con date generate verrà abilitata solo quando la pipeline V4.13-V4.20 sarà pronta.
 
 ## Comandi demo
 

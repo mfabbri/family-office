@@ -1,11 +1,17 @@
 import json
+from datetime import date
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
+from family_office_engine.governance.pension_source_freshness import (
+    PensionSourceFreshnessError,
+    require_fresh_pension_rule_pack,
+)
+
 SCHEMA_VERSION = "eu-pension-coordination-it-es/v1"
 RECORD_TYPE = "EuPensionCoordinationItEsSnapshot"
-RULE_PACK_SCHEMA_VERSION = "eu-pension-coordination-rule-pack/v1"
+RULE_PACK_SCHEMA_VERSION = "eu-pension-coordination-rule-pack/v2"
 
 
 class EuPensionCoordinationError(ValueError):
@@ -27,13 +33,19 @@ def coordinate_it_es_pensions(
 
     italian = _italian_entitlement(inps, italian_contribution_months)
     spanish_entitlement = _spanish_entitlement(spanish)
+    rule_period_gaps = _rule_period_gaps(inps, spanish, rule_pack)
+    for country_result, country in ((italian, "IT"), (spanish_entitlement, "ES")):
+        gaps = rule_period_gaps[country]
+        country_result["data_gaps"].extend(gaps)
+        if gaps:
+            country_result["entitlement"]["status"] = "not_assessed_rule_pack_period"
     data_gaps = []
     data_gaps.extend(italian["data_gaps"])
     data_gaps.extend(spanish_entitlement["data_gaps"])
 
     period_summary = _period_summary(italian, spanish_entitlement)
     pro_rata = _pro_rata_diagnostics(italian, spanish_entitlement, period_summary)
-    status = _status(italian, spanish_entitlement, period_summary)
+    status = _status(italian, spanish_entitlement, period_summary, rule_period_gaps)
 
     snapshot = {
         "schema_version": SCHEMA_VERSION,
@@ -43,6 +55,8 @@ def coordinate_it_es_pensions(
             "path": str(rule_pack_path),
             "rule_pack_id": rule_pack["rule_pack_id"],
             "schema_version": rule_pack["schema_version"],
+            "valid_from": rule_pack["valid_from"],
+            "valid_to": rule_pack["valid_to"],
             "source_refs": rule_pack["source_refs"],
             "limitations": rule_pack["limitations"],
         },
@@ -60,8 +74,9 @@ def coordinate_it_es_pensions(
             "Italian and Spanish entitlements remain separate and are paid by their respective institutions.",
         ],
         "notes": (
-            "EU coordination aggregates periods only where needed for entitlement and pro-rata diagnostics. "
-            "It does not transfer, merge or recalculate national contributions."
+            "EU coordination aggregates periods for entitlement and theoretical/pro-rata calculation under the rule "
+            "pack. It does not transfer, merge, or recalculate national contribution bases, and it does not determine "
+            "official recognition or payment."
         ),
     }
     return _write_snapshot(snapshot, output_path)
@@ -74,6 +89,8 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
         "rule_pack_id",
         "jurisdictions",
         "currency",
+        "valid_from",
+        "valid_to",
         "source_refs",
         "coordination_principles",
         "required_inputs",
@@ -87,11 +104,75 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
         raise EuPensionCoordinationError(f"Unsupported EU pension coordination rule pack schema: {data['schema_version']}")
     if set(data["jurisdictions"]) != {"IT", "ES", "EU"}:
         raise EuPensionCoordinationError("EU pension coordination jurisdictions must be IT, ES and EU")
+    valid_from = _candidate_month(data["valid_from"])
+    valid_to = _candidate_month(data["valid_to"])
+    if valid_from is None or valid_to is None or valid_from > valid_to:
+        raise EuPensionCoordinationError("EU pension coordination rule pack must have a valid ordered validity period")
     _validate_source_refs(data["source_refs"])
+    try:
+        require_fresh_pension_rule_pack(rule_pack_path)
+    except PensionSourceFreshnessError as exc:
+        raise EuPensionCoordinationError(str(exc)) from exc
     _validate_principles(data["coordination_principles"])
+    if not isinstance(data.get("pro_rata_method"), dict):
+        raise EuPensionCoordinationError("EU pension coordination rule pack must contain pro_rata_method")
+    if not isinstance(data["pro_rata_method"].get("article_57_under_one_year"), dict):
+        raise EuPensionCoordinationError("EU pension coordination rule pack must define article_57_under_one_year")
+    if not isinstance(data["pro_rata_method"].get("overlap_policy"), dict):
+        raise EuPensionCoordinationError("EU pension coordination rule pack must define overlap_policy")
     if not isinstance(data["limitations"], list) or not data["limitations"]:
         raise EuPensionCoordinationError("EU pension coordination rule pack must contain limitations")
     return data
+
+
+def _rule_period_gaps(
+    inps: dict[str, Any], spanish: dict[str, Any], rule_pack: dict[str, Any]
+) -> dict[str, list[dict[str, Any]]]:
+    valid_from = rule_pack["valid_from"][:7]
+    valid_to = rule_pack["valid_to"][:7]
+    projection = inps.get("projection", {}) if isinstance(inps.get("projection"), dict) else {}
+    candidates = {
+        "IT": (projection.get("retirement_date"), "INPS projection"),
+        "ES": (spanish.get("retirement_date"), "Spanish statutory pension snapshot"),
+    }
+    result: dict[str, list[dict[str, Any]]] = {"IT": [], "ES": []}
+    for country, (candidate, source_label) in candidates.items():
+        candidate_month = _candidate_month(candidate)
+        if candidate_month is None:
+            result[country].append(
+                {
+                    "code": "missing_or_invalid_retirement_date_for_rule_pack_period",
+                    "message": f"{source_label} must provide a valid retirement date before the coordination rule pack can be applied.",
+                    "country": country,
+                }
+            )
+        elif not valid_from <= candidate_month <= valid_to:
+            result[country].append(
+                {
+                    "code": "retirement_date_outside_rule_pack_period",
+                    "message": f"{source_label} retirement date is outside the coordination rule pack validity period.",
+                    "country": country,
+                    "retirement_date": candidate,
+                    "valid_from": rule_pack["valid_from"],
+                    "valid_to": rule_pack["valid_to"],
+                }
+            )
+    return result
+
+
+def _candidate_month(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        if len(value) == 7:
+            date.fromisoformat(f"{value}-01")
+            return value
+        if len(value) == 10:
+            parsed = date.fromisoformat(value)
+            return parsed.strftime("%Y-%m")
+    except ValueError:
+        return None
+    return None
 
 
 def _italian_entitlement(inps: dict[str, Any], italian_contribution_months: int | None) -> dict[str, Any]:
@@ -237,12 +318,17 @@ def _pro_rata_diagnostics(
     return base
 
 
-def _status(italian: dict[str, Any], spanish: dict[str, Any], period_summary: dict[str, Any]) -> str:
+def _status(
+    italian: dict[str, Any],
+    spanish: dict[str, Any],
+    period_summary: dict[str, Any],
+    rule_period_gaps: dict[str, list[dict[str, Any]]],
+) -> str:
     has_it = italian["entitlement"]["status"] != "missing_projection"
     has_es = spanish["entitlement"]["status"] != "not_calculable"
     if not has_it and not has_es:
         return "blocked_missing_inputs"
-    if period_summary["status"] == "normalized" and has_it and has_es:
+    if period_summary["status"] == "normalized" and has_it and has_es and not any(rule_period_gaps.values()):
         return "complete"
     return "partial"
 
@@ -255,6 +341,7 @@ def _validate_source_refs(source_refs: Any) -> None:
         "https://europa.eu/",
         "https://prestaciones.seg-social.es/",
         "https://www.seg-social.es/",
+        "https://www.boe.es/",
     )
     for source_ref in source_refs:
         for field in ("source_id", "title", "url", "retrieved_on", "provisions"):
@@ -269,7 +356,7 @@ def _validate_source_refs(source_refs: Any) -> None:
 def _validate_principles(principles: dict[str, Any]) -> None:
     for field in (
         "separate_national_entitlements",
-        "aggregation_for_entitlement_only",
+        "aggregation_for_entitlement_and_theoretical_calculation",
         "no_transfer_or_merger_of_contributions",
         "compare_independent_and_pro_rata_when_calculable",
         "separate_payment_by_country",

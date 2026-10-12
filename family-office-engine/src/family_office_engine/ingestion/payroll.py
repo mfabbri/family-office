@@ -1,5 +1,7 @@
 import json
 import re
+from calendar import monthrange
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -25,9 +27,12 @@ def import_payroll(input_dir: Path, output_path: Path) -> dict[str, Any]:
             }
         )
 
+    readiness_metadata, metadata_gaps = _readiness_metadata(records)
+    data_gaps.extend(metadata_gaps)
     snapshot = {
         "schema_version": SCHEMA_VERSION,
         "record_type": "PayrollSnapshot",
+        **readiness_metadata,
         "source": {
             "type": "classified-payroll-documents",
             "path": str(input_dir),
@@ -256,6 +261,84 @@ def _period_year(text: str) -> int | None:
     if label is None:
         return None
     return int(label.split()[-1])
+
+
+_MONTH_NUMBERS = {
+    "gennaio": 1,
+    "febbraio": 2,
+    "marzo": 3,
+    "aprile": 4,
+    "maggio": 5,
+    "giugno": 6,
+    "luglio": 7,
+    "agosto": 8,
+    "settembre": 9,
+    "ottobre": 10,
+    "novembre": 11,
+    "dicembre": 12,
+}
+
+
+def _readiness_metadata(records: list[dict[str, Any]]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Derive only metadata observable from parsed payroll periods.
+
+    The import does not infer household members or future employment.  The stream
+    bounds describe the observed payroll envelope; the Work Transition setup still
+    requires an explicit primary/spouse binding.
+    """
+    periods: list[tuple[date, date]] = []
+    missing_periods = 0
+    for record in records:
+        label = record.get("period_label")
+        if not isinstance(label, str):
+            missing_periods += 1
+            continue
+        match = re.fullmatch(r"([A-Za-zÀ-ÿ]+)\s+(\d{4})", label.strip())
+        if not match:
+            missing_periods += 1
+            continue
+        month = _MONTH_NUMBERS.get(match.group(1).lower())
+        if month is None:
+            missing_periods += 1
+            continue
+        try:
+            start = date(int(match.group(2)), month, 1)
+            end = date(start.year, start.month, monthrange(start.year, start.month)[1])
+        except ValueError:
+            missing_periods += 1
+            continue
+        periods.append((start, end))
+
+    gaps: list[dict[str, Any]] = []
+    if missing_periods:
+        gaps.append(
+            {
+                "code": "missing_payroll_period_metadata",
+                "message": "One or more payroll records have no deterministic month and year; Work Transition bounds remain incomplete.",
+                "record_count": missing_periods,
+            }
+        )
+    if not periods:
+        return {}, gaps
+
+    stream_start = min(start for start, _ in periods)
+    stream_end = max(end for _, end in periods)
+    metadata = {
+        "as_of_date": stream_end.isoformat(),
+        "period": {"start_date": stream_start.isoformat(), "end_date": stream_end.isoformat()},
+        "stream_start_date": stream_start.isoformat(),
+        "stream_end_date": stream_end.isoformat(),
+    }
+    if records and all(record.get("net_pay") is not None for record in records):
+        metadata["value_basis"] = "net"
+    else:
+        gaps.append(
+            {
+                "code": "missing_payroll_net_basis",
+                "message": "At least one payroll record has no extracted net pay; Work Transition cannot declare a complete net stream.",
+            }
+        )
+    return metadata, gaps
 
 
 def _employer(text: str) -> str | None:

@@ -241,10 +241,10 @@ family_office_engine.services.eu_pension_coordination
 
 Funzioni principali:
 
-- `load_rule_pack(rule_pack_path)`: carica e valida `eu-pension-coordination-rule-pack/v1`.
+- `load_rule_pack(rule_pack_path)`: carica e valida `eu-pension-coordination-rule-pack/v2`, con validità 2026 esplicita, fonti ufficiali aggiornate e regole fail-closed per art. 57 e periodi sovrapposti.
 - `coordinate_it_es_pensions(inps_snapshot_path, spanish_pension_snapshot_path, rule_pack_path, output_path, italian_contribution_months=None)`: legge `inps-pension/v1` e `spanish-statutory-pension/v1`, applica il metodo UE e scrive `eu-pension-coordination-it-es/v1`.
 
-`eu-pension-coordination-it-es/v1` mantiene separate le prestazioni nazionali Italia e Spagna, registra i periodi normalizzati disponibili, espone i rapporti di periodo quando calcolabili e dichiara il pro-rata come non calcolabile finche' manca un importo teorico nazionale. La totalizzazione e' rappresentata solo come criterio di diritto/diagnostica: i contributi non vengono trasferiti o fusi.
+`eu-pension-coordination-it-es/v1` mantiene separate le prestazioni nazionali Italia e Spagna, registra i periodi normalizzati disponibili, espone i rapporti di periodo quando calcolabili e dichiara il pro-rata come non calcolabile finche' manca un importo teorico nazionale. I periodi UE possono concorrere all'acquisizione del diritto e al calcolo teorico/pro-rata senza trasferire o fondere le basi nazionali; sovrapposizioni non classificate, casi art. 57 e date pensionistiche fuori validità del rule pack richiedono gap bloccanti.
 
 Il servizio non calcola pensione INPS da regole normative, non produce P1 ufficiale, non calcola fiscalita', netto, cambio valuta, domande amministrative o coordinamento di pensioni complementari.
 

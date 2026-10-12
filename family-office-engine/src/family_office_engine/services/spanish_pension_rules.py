@@ -3,6 +3,11 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
+from family_office_engine.governance.pension_source_freshness import (
+    PensionSourceFreshnessError,
+    require_fresh_pension_rule_pack,
+)
+
 RULE_PACK_SCHEMA_VERSION = "spanish-statutory-pension-rule-pack/v1"
 
 
@@ -11,6 +16,10 @@ class SpanishPensionRulesError(ValueError):
 
 
 def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
+    try:
+        require_fresh_pension_rule_pack(rule_pack_path)
+    except PensionSourceFreshnessError as exc:
+        raise SpanishPensionRulesError(str(exc)) from exc
     try:
         data = json.loads(rule_pack_path.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:

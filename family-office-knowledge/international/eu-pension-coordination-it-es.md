@@ -15,7 +15,8 @@ Non copre fiscalita', netto, domanda amministrativa, P1 ufficiale, ricorsi, pens
 
 Verifica fonti: 2026-07-23.
 
-- Regolamento (CE) n. 883/2004, EUR-Lex, in particolare articoli 50, 51, 52 e 56.
+- Regolamento (CE) n. 883/2004, EUR-Lex, in particolare articoli 50, 51, 52, 56 e 57: https://eur-lex.europa.eu/eli/reg/2004/883/oj/eng.
+- Regolamento (CE) n. 987/2009, EUR-Lex, in particolare articoli 12 e 13 per aggregazione, sovrapposizioni e conversione dei periodi, e articolo 43 per disposizioni aggiuntive di calcolo: https://eur-lex.europa.eu/eli/reg/2009/987/oj/eng.
 - Your Europe, State pensions abroad, sezione su eligibility periods e calcolo pro-rata, ultima verifica indicata dalla fonte 2025-04-25.
 - Seguridad Social, pensione contributiva di jubilacion ordinaria, requisiti 2026: 66 anni e 10 mesi con almeno 15 anni di contributi oppure 65 anni con almeno 38 anni e 3 mesi, in entrambi i casi con almeno 2 anni nel periodo specifico di riferimento.
 - Seguridad Social, cuantia pensione di jubilacion, base reguladora: dal 2026 transizione tra metodo 300/350 e alternativa sulle migliori basi nel periodo transitorio.
@@ -24,7 +25,7 @@ Verifica fonti: 2026-07-23.
 
 Ogni Paese resta competente per la propria legislazione e per la propria quota di prestazione. I contributi italiani e spagnoli non vengono trasferiti o fusi.
 
-Quando il diritto nazionale richiede periodi minimi, l'istituzione competente deve considerare, se necessario, anche i periodi maturati negli altri Stati membri per verificare il diritto. Questa totalizzazione non trasforma i periodi esteri in contributi nazionali e non produce una pensione unica.
+Quando necessario, i periodi assicurativi/residenziali degli altri Stati membri concorrono sia all'acquisizione del diritto sia al calcolo teorico/pro-rata, secondo la normativa applicabile. Non diventano basi contributive nazionali né producono una pensione unica. La precedente formulazione del rule pack `aggregation_for_entitlement_only` è quindi troppo restrittiva e va rimossa/corretta prima di qualsiasi uso eseguibile.
 
 Per il calcolo, ogni istituzione determina secondo le proprie regole:
 
@@ -88,3 +89,11 @@ versionato.
 ## Uso operativo
 
 Il motore deve produrre un dossier che mantenga separate le prestazioni nazionali, dichiari i periodi usati per il coordinamento e blocchi il pro-rata quando mancano periodi normalizzati o importi teorici nazionali. Le stime interne non sostituiscono il documento P1 o le decisioni delle istituzioni competenti.
+
+## Periodi inferiori a un anno e sovrapposizioni
+
+L'articolo 57 del Reg. 883/2004 consente di non erogare una quota per periodi sotto un anno soltanto quando ricorrono entrambe le condizioni: durata inferiore a un anno e nessun diritto acquisibile considerando quei soli periodi secondo la legislazione nazionale. Gli altri Stati devono comunque considerarli nel calcolo dell'importo teorico previsto dall'articolo 52(1)(b)(i); se l'esonero liberasse tutti gli Stati, l'articolo 57(3) assegna la prestazione secondo la regola dell'ultimo Stato le cui condizioni sono soddisfatte. Non codificare quindi una soglia autonoma e assoluta di 12 mesi.
+
+L'articolo 56(1)(b) rinvia al regolamento di applicazione per le sovrapposizioni. Il Reg. 987/2009, articolo 12, prevede regole diverse per periodi obbligatori/volontari, periodi equivalenti, dati temporali non precisi e aggregazione senza doppio conteggio; l'articolo 13 disciplina la conversione tra unità. La deduplicazione uniforme per mese non sostituisce tali regole: quando natura o unità dei periodi non sono classificabili, il motore deve produrre un gap invece di scegliere arbitrariamente quale Stato prevale.
+
+Fonti di coordinamento: [Reg. 883/2004](https://eur-lex.europa.eu/eli/reg/2004/883/oj/eng), [Reg. 987/2009](https://eur-lex.europa.eu/eli/reg/2009/987/oj/eng), [Seguridad Social, coordinamento UE per prestazioni di vecchiaia e superstiti](https://www.seg-social.es/wps/portal/wss/internet/InformacionUtil/32078/966/1819/1823).

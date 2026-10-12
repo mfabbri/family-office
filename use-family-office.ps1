@@ -24,4 +24,10 @@ $env:FO_RULES_PATH = Join-Path $Root "family-office-rules"
 $env:FO_KNOWLEDGE_PATH = Join-Path $Root "family-office-knowledge"
 $env:FO_WORKSPACE_PATH = Join-Path $Root "family-office-workspace"
 
+# Use the workspace engine explicitly, even when the current PowerShell session
+# already has an older global `fo` command or cached PATH resolution.
+function fo {
+    & (Join-Path $env:FO_ENGINE_PATH ".venv\Scripts\fo.exe") @args
+}
+
 Write-Host "Family Office CLI ready. Try: fo validate"

@@ -3,6 +3,7 @@ import io
 import tempfile
 import unittest
 import zipfile
+from decimal import Decimal
 from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
@@ -10,6 +11,7 @@ from unittest.mock import patch
 from family_office_engine.cli.main import main
 from family_office_engine.ingestion.bank_expenses import (
     _parse_date,
+    _propose_category,
     import_bank_expense_exports,
     review_bank_expenses,
     review_bank_expenses_grouped,
@@ -17,6 +19,23 @@ from family_office_engine.ingestion.bank_expenses import (
 
 
 class BankExpensesTest(unittest.TestCase):
+    def test_category_proposal_covers_common_unknown_merchants_and_financial_rows(self):
+        self.assertEqual(_propose_category("Operazione POS Eurozona TOKI Faenza", Decimal("-25")), ("food", True))
+        self.assertEqual(_propose_category("Operazione POS Eurozona CINEDREAM Faenza", Decimal("-10")), ("leisure", True))
+        self.assertEqual(_propose_category("Prelevamento su nostro bancomat", Decimal("-100")), ("cash_withdrawal", True))
+        self.assertEqual(_propose_category("Prelievo bancomat data ora op sportello Faenza", Decimal("-50")), ("cash_withdrawal", True))
+        self.assertEqual(
+            _propose_category("Prelievo pagament maestro vpay data ora op LUL ticket machine pagamento POS no zona euro", Decimal("-18")),
+            ("transport", True),
+        )
+        self.assertEqual(_propose_category("Prelievo non meglio specificato", Decimal("-20")), ("unknown", True))
+        self.assertEqual(_propose_category("Spese tenuta conto", Decimal("-5")), ("financial_non_expense", False))
+        self.assertEqual(_propose_category("HERA S.P.A. utenza", Decimal("-48.21")), ("utilities", True))
+        self.assertEqual(_propose_category("Sottosc fondi PAC Etica SGR", Decimal("-1000")), ("financial_non_expense", False))
+        self.assertEqual(_propose_category("Spesa PagoBANCOMAT al distributore AGIP", Decimal("-60")), ("transport", True))
+        self.assertEqual(_propose_category("Prelievo pagament maestro vpay LUL ticket machine Victoria", Decimal("-18")), ("transport", True))
+        self.assertEqual(_propose_category("Spesa PagoBANCOMAT Locali Parco", Decimal("-25")), ("unknown", True))
+
     def test_import_normalizes_categories_and_excludes_non_expenses(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -63,6 +82,35 @@ class BankExpensesTest(unittest.TestCase):
             self.assertEqual(snapshot["summary"]["transaction_count"], 2)
             self.assertEqual({item["date"] for item in snapshot["transactions"]}, {"2020-01-01", "2021-01-01"})
 
+    def test_import_uses_headers_of_each_excel_sheet(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            source = root / "documents" / "banca" / "spese"
+            source.mkdir(parents=True)
+            workbook = source / "different-layouts.xlsx"
+
+            def sheet(headers, values):
+                header_cells = "".join(
+                    f'<c r="{column}1" t="inlineStr"><is><t>{header}</t></is></c>'
+                    for column, header in zip(("A", "B", "C"), headers)
+                )
+                value_cells = "".join(
+                    f'<c r="{column}2" t="inlineStr"><is><t>{value}</t></is></c>'
+                    for column, value in zip(("A", "B", "C"), values)
+                )
+                return (
+                    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'
+                    f'<row>{header_cells}</row><row>{value_cells}</row></sheetData></worksheet>'
+                )
+
+            with zipfile.ZipFile(workbook, "w") as archive:
+                archive.writestr("xl/worksheets/sheet1.xml", sheet(("Data", "Descrizione", "Dare"), ("43831", "Supermercato", "100")))
+                archive.writestr("xl/worksheets/sheet2.xml", sheet(("Data Contabile", "Importo", "Descrizione"), ("44197", "-50", "Farmacia")))
+
+            snapshot = import_bank_expense_exports(source, root / "transactions.json")
+            self.assertEqual(snapshot["summary"]["transaction_count"], 2)
+            self.assertEqual({item["category_proposal"] for item in snapshot["transactions"]}, {"food", "health"})
+
     def test_review_builds_lifecycle_plan_only_from_approved_categories(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -104,11 +152,38 @@ class BankExpensesTest(unittest.TestCase):
             output = io.StringIO()
             with patch("family_office_engine.cli.main._validate_v66a_input_path", side_effect=lambda path, error: path.resolve()), patch(
                 "family_office_engine.cli.main.default_lifecycle_expenses_output", return_value=lifecycle_snapshot
-            ), patch("builtins.input", side_effect=["d", "y"]), redirect_stdout(output):
+            ), patch("builtins.input", side_effect=["n", "d", "y"]), redirect_stdout(output):
                 self.assertEqual(main(["expenses", "review-bank", "--input", str(transactions), "--output", str(review), "--lifecycle-output", str(lifecycle)]), 0)
             self.assertIn("Affitto", output.getvalue())
             self.assertTrue(review.exists())
             self.assertTrue(lifecycle_snapshot.exists())
+
+    def test_cli_reviews_homogeneous_groups_in_batch_and_keeps_exceptions(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            source = root / "documents" / "banca" / "spese"
+            source.mkdir(parents=True)
+            (source / "export.csv").write_text(
+                "date,description,amount\n"
+                "2026-01-01,Supermercato Via Roma,-10\n"
+                "2026-02-01,Supermercato Via Roma,-20\n"
+                "2026-03-01,Acquisto speciale,-5\n",
+                encoding="utf-8",
+            )
+            transactions = root / "transactions.json"
+            review = root / "review.json"
+            lifecycle = root / "lifecycle.json"
+            lifecycle_snapshot = root / "lifecycle.snapshot.json"
+            import_bank_expense_exports(source, transactions)
+            output = io.StringIO()
+            with patch("family_office_engine.cli.main._validate_v66a_input_path", side_effect=lambda path, error: path.resolve()), patch(
+                "family_office_engine.cli.main.default_lifecycle_expenses_output", return_value=lifecycle_snapshot
+            ), patch("builtins.input", side_effect=["y", "e"]), redirect_stdout(output):
+                self.assertEqual(main(["expenses", "review-bank", "--input", str(transactions), "--output", str(review), "--lifecycle-output", str(lifecycle)]), 0)
+            self.assertIn("Confermata in blocco la categoria food: 1 gruppi", output.getvalue())
+            reviewed = json.loads(review.read_text(encoding="utf-8"))
+            self.assertEqual(1, reviewed["summary"]["approved_group_count"])
+            self.assertEqual(1, reviewed["summary"]["unresolved_group_count"])
 
     def test_grouped_review_preserves_raw_rows_and_exposes_exceptions(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

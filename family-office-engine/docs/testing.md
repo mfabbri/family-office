@@ -1351,3 +1351,5 @@ I test usano esclusivamente risposte sintetiche e verificano draft workspace-loc
 ### V6.10 release governance
 
 `test_release_governance.py` verifica il contratto `release-gate/v1`, version matrix/hash, evaluation sintetica, rollback non automatico, incompatibilità di schema, regressione rispetto al baseline e il percorso CLI `fo release check`. Il gate reale usa solo comandi locali allowlistati (`unittest`, `compileall`, `pip check` e audit roadmap), non rete o workspace reale.
+
+Il release gate esegue inoltre sempre `fo planning pension-sources audit`, anche se `run_tests=False`: fonti pensionistiche senza provenance o con review scaduta bloccano il rilascio. Il report dichiara espressamente che l'audit non usa la rete; i test coprono sia la chiamata sia il failure path.

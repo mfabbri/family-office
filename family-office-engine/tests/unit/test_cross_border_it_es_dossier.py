@@ -43,7 +43,7 @@ class CrossBorderItEsDossierTest(unittest.TestCase):
             self.assertEqual(written["pension_flows"]["streams"][0]["gross"]["annual_amount"], "21000.00")
             self.assertEqual(written["pension_flows"]["streams"][0]["gross"]["currency"], "EUR")
             self.assertEqual(written["pension_rights"]["spanish_entitlement"]["status"], "eligible_by_totalization")
-            self.assertEqual(written["pension_taxation"]["net_streams"][0]["net"]["annual_amount"], "13650.00")
+            self.assertEqual(written["pension_taxation"]["net_streams"][0]["net"]["annual_amount"], "13970.00")
             self.assertEqual(written["pension_taxation"]["classifications"][0]["rule_id"], "it-es.treaty.private-pension.article-18.2026")
             self.assertEqual(written["foreign_asset_monitoring"]["totals"]["total_wealth_tax_due"], "528.00")
             self.assertTrue(written["summary"]["review_required"])

@@ -4,9 +4,9 @@
 
 - Giurisdizioni: Italia e Spagna.
 - Periodo d'imposta: 2026.
-- Verificato il: 2026-07-23.
+- Verificato il: 2026-10-11.
 
-Questa nota supporta il rule pack `it.spanish-pension-net-it-resident.2026.v1` e il contratto engine `spanish-pension-net-it-resident/v1`.
+Questa nota supporta il rule pack `it.spanish-pension-net-it-resident.2026.v2` e il contratto engine `spanish-pension-net-it-resident/v1`.
 
 ## Fonti
 
@@ -14,7 +14,7 @@ Questa nota supporta il rule pack `it.spanish-pension-net-it-resident.2026.v1` e
 - Agenzia delle Entrate, dichiarazione precompilata 2026, Quadro CE: il credito d'imposta per redditi prodotti all'estero richiede imposte estere definitive e dati per determinare credito teorico ed effettivo ex art. 165 TUIR. URL: https://infoprecompilata.agenziaentrate.gov.it/portale/quadro-ce
 - DPR 22 dicembre 1986, n. 917, art. 165, credito d'imposta per redditi prodotti all'estero: le imposte pagate all'estero a titolo definitivo sono detraibili nei limiti della quota d'imposta italiana corrispondente al rapporto tra redditi esteri e reddito complessivo netto. URL: https://www.normattiva.it/uri-res/N2Ls?urn:nir:presidente.repubblica:decreto:1986-12-22;917~art165!vig
 - MEF, circolare n. 9/E del 5 marzo 2015, determinazione del credito d'imposta: riepiloga la formula RE x imposta italiana / RCN e i limiti dell'imposta italiana netta. URL: https://def.finanze.it/DocTribFrontend/getPrassiDetail.do?id=%7B8F43B1E3-7F72-4A17-8572-1F6905FC28F3%7D
-- Legge 30 dicembre 2024, n. 207, art. 1 comma 2: scaglioni IRPEF nazionali usati dal rule pack `it.irpef-national.2026.v1`. URL: https://www.gazzettaufficiale.it/eli/id/2024/12/31/24G00229/sg
+- Legge 30 dicembre 2025, n. 199, art. 1 comma 3: per il 2026 sostituisce il 35% con il 33% nell'art. 11, comma 1, lettera b), TUIR. Fonte primaria verificata il 2026-10-11. URL: https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticoloDefault/originario?atto.codiceRedazionale=25G00212&atto.dataPubblicazioneGazzetta=2025-12-30&atto.tipoProvvedimento=LEGGE
 - Rule pack e knowledge V4.6a: `it-es-pension-tax-classification/v1` determina se la pensione e' imponibile in Italia, in Spagna o bloccata per fatti mancanti.
 
 ## Regole operative per il motore

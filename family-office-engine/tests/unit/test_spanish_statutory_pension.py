@@ -52,6 +52,13 @@ class SpanishStatutoryPensionTest(unittest.TestCase):
         self.assertEqual(result["base_reguladora"]["selected_base_count"], 304)
         self.assertEqual(result["ordinary_retirement_age"]["matched_rule"]["from_year"], 2027)
 
+    def test_blocks_retirement_year_after_published_transition_schedule(self):
+        result = self._estimate(_reconciliation(_months("2001-12", 308, "3100.00")), 2037)
+
+        self.assertEqual(result["status"], "blocked_missing_inputs")
+        self.assertIsNone(result["gross_pension"])
+        self.assertIn("missing_or_invalid_rule", {gap["code"] for gap in result["data_gaps"]})
+
     def _estimate(self, reconciliation: dict, retirement_year: int) -> dict:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

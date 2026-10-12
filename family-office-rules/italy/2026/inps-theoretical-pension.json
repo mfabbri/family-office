@@ -10,8 +10,12 @@
     {
       "source_id": "inps.calcolo-pensione",
       "title": "INPS, Il calcolo della pensione",
+      "authority": "Istituto Nazionale della Previdenza Sociale",
+      "jurisdiction": "IT",
       "url": "https://www.inps.it/it/it/dettaglio-approfondimento.schede-informative.49949.il-calcolo-della-pensione.html",
       "retrieved_on": "2026-07-29",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "metodo contributivo",
         "montante individuale",
@@ -21,8 +25,12 @@
     {
       "source_id": "inps.montante-contributivo",
       "title": "INPS, Montante contributivo",
+      "authority": "Istituto Nazionale della Previdenza Sociale",
+      "jurisdiction": "IT",
       "url": "https://www.inps.it/it/it/dettaglio-approfondimento.schede-informative.49951.montante-contributivo.html",
       "retrieved_on": "2026-07-29",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "aliquota computo dipendenti 33%",
         "rivalutazione composta"
@@ -31,8 +39,12 @@
     {
       "source_id": "minlav.coefficienti-2025",
       "title": "Ministero del Lavoro, Decreto direttoriale 20 novembre 2024",
+      "authority": "Ministero del Lavoro e delle Politiche Sociali",
+      "jurisdiction": "IT",
       "url": "https://www.lavoro.gov.it/documenti-e-norme/normative/pagine/decreto-direttoriale-del-20112024",
       "retrieved_on": "2026-07-29",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "coefficienti di trasformazione dal 1 gennaio 2025"
       ]

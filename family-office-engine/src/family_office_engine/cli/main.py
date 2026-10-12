@@ -36,6 +36,8 @@ from family_office_engine.ingestion.bank_insurance import (
 )
 from family_office_engine.ingestion.bank_expenses import (
     BankExpensesError,
+    _merchant_fingerprint,
+    _normalize_merchant,
     import_bank_expense_exports,
     review_bank_expenses,
     review_bank_expenses_grouped,
@@ -216,6 +218,10 @@ from family_office_engine.services.work_transition_scenario import (
     WorkTransitionScenarioError,
     build_work_transition_scenario,
 )
+from family_office_engine.services.employment_income_projection import (
+    EmploymentIncomeProjectionError,
+    build_employment_income_projection,
+)
 from family_office_engine.services.wealth_strategy import WealthStrategyError, build_wealth_strategy
 from family_office_engine.services.tool_registry import (
     ToolRegistryError,
@@ -265,6 +271,12 @@ from family_office_engine.services.compliance_calendar import (
     setup_workspace_compliance_event,
 )
 from family_office_engine.services.annual_review import AnnualReviewError, build_annual_review
+from family_office_engine.governance.pension_source_freshness import (
+    ACTIVE_PENSION_RULE_PACKS,
+    PensionSourceFreshnessError,
+    audit_active_pension_rule_packs,
+    record_pension_source_review,
+)
 from family_office_engine.services.regulatory_change import (
     RegulatoryChangeError,
     approve_regulatory_change,
@@ -672,8 +684,20 @@ def default_work_transition_scenario_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "work-transition-scenario.snapshot.json"
 
 
+def default_work_transition_plan_readiness_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "work-transition-readiness.json"
+
+
 def default_work_transition_scenario_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-work-transition-scenario.synthetic.snapshot.json"
+
+
+def default_employment_income_projection_input() -> Path:
+    return resolve_repo("workspace") / "planning" / "employment-income-projection.json"
+
+
+def default_employment_income_projection_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "employment-income-projection.snapshot.json"
 
 
 def default_annual_review_output() -> Path:
@@ -2427,7 +2451,10 @@ def run_work_transition_source_setup(manifest_path: Path, output_path: Path, ove
         input_id = requirement["input_id"]
         candidates = discovery["candidates_by_input"][input_id]
         existing = [item for item in manifest.get("sources", []) if item.get("input_id") == input_id]
-        print(f"\n{input_id}: categoria={requirement['category']}, membro={requirement.get('member_id') or 'nucleo'}.")
+        member_id = requirement.get("member_id")
+        print(f"\n{input_id}: categoria={requirement['category']}, membro={member_id or 'nucleo'}.")
+        if member_id:
+            print(f"  Scegli solo una fonte che appartiene alla persona identificata come `{member_id}`; il programma non deduce il nome dal PDF.")
         if existing:
             print("Binding esistente: scegli `k` per mantenerlo oppure una fonte per sostituirlo.")
         if not candidates:
@@ -2439,9 +2466,19 @@ def run_work_transition_source_setup(manifest_path: Path, output_path: Path, ove
             continue
         for index, candidate in enumerate(candidates, start=1):
             print(f"  {index}. {candidate['workspace_path']} | schema={candidate['schema_version']} | as_of={candidate['as_of_date']} | basis={candidate['value_basis']} | kind={candidate['source_kind']}")
+            summary = candidate.get("local_summary", {})
+            if summary:
+                details = [f"{summary.get('document_count', 0)} documenti", f"{summary.get('record_count', 0)} record"]
+                if summary.get("periods"):
+                    details.append("periodi=" + ", ".join(summary["periods"]))
+                if summary.get("employers"):
+                    details.append("datori=" + ", ".join(summary["employers"]))
+                if summary.get("net_pay_total") is not None:
+                    details.append(f"totale netto osservato={summary['net_pay_total']} EUR")
+                print("     Riepilogo locale: " + "; ".join(details) + ".")
             for gap in candidate["metadata_gaps"]:
                 print(f"     gap: {gap['code']} — {gap['message']}")
-        choice = _prompt_source_binding_choice("Scegli numero, `0` per lasciare il gap" + (", `k` per mantenere" if existing else ""), len(candidates), bool(existing))
+        choice = _prompt_source_binding_choice("Inserisci il numero della fonte da associare, `0` se nessuna corrisponde" + (", `k` per mantenere il binding attuale" if existing else ""), len(candidates), bool(existing))
         if choice == "keep" or choice is None:
             continue
         bind_work_transition_source(manifest_path, workspace, input_id=input_id, candidate=candidates[choice], overwrite=overwrite)
@@ -2449,6 +2486,244 @@ def run_work_transition_source_setup(manifest_path: Path, output_path: Path, ove
         bound_count += 1
     readiness = build_work_transition_readiness(manifest_path, output_path, workspace_root=workspace)
     return {"bound_count": bound_count, "discovery_gap_count": len(discovery["data_gaps"]), "readiness": readiness, "manifest_path": str(manifest_path), "output_path": str(output_path)}
+
+
+def run_work_transition_plan_wizard(manifest_path: Path, readiness_output_path: Path, overwrite: bool = False) -> dict[str, Any]:
+    """Run the currently supported, question-first readiness stage of `plan`."""
+    manifest_path = _validate_v66a_input_path(manifest_path, WorkTransitionReadinessError)
+    readiness_output_path = _validate_v66a_input_path(readiness_output_path, WorkTransitionReadinessError)
+    existing = _read_optional_wizard_json(manifest_path, WorkTransitionReadinessError, "work-transition readiness manifest")
+    if existing is not None:
+        validate_work_transition_readiness_manifest(existing)
+    if existing is not None and not overwrite:
+        print("Fatti disponibili: riuso il manifest locale esistente e mostro le fonti da verificare.")
+    else:
+        defaults = existing or {}
+        print("Domanda familiare: da quando possiamo ridurre o cessare il lavoro mantenendo sostenibili reddito e patrimonio?")
+        print("Questo primo passo organizza fatti e fonti locali; non calcola date, pensioni, bridge o sostenibilita'.")
+        household_id = _prompt_text(
+            "Come vuoi chiamare questo nucleo? Usa un'etichetta tecnica locale, per esempio `famiglia_casa`.",
+            str(defaults.get("household_id") or "household_private"),
+        )
+        as_of_date = _prompt_date(
+            "A quale data si riferiscono i fatti disponibili? Premi Invio per oggi.",
+            str(defaults.get("as_of_date") or date.today().isoformat()),
+        )
+        manifest = {
+            "schema_version": "work-transition-readiness-input/v1",
+            "record_type": "WorkTransitionReadinessInput",
+            "household_id": household_id,
+            "as_of_date": as_of_date,
+            "household_members": ["primary", "spouse"],
+            "required_inputs": _work_exit_readiness_requirements(),
+            "sources": [],
+        }
+        _write_wizard_json(manifest_path, manifest, True, WorkTransitionReadinessError, "work-transition readiness manifest")
+
+    setup = run_work_transition_source_setup(manifest_path, readiness_output_path, overwrite=overwrite)
+    scenario_result = _run_work_transition_scenario_wizard(setup["readiness"], overwrite)
+    return {
+        "manifest_path": str(manifest_path),
+        "readiness_output_path": str(readiness_output_path),
+        "readiness": setup["readiness"],
+        "bound_count": setup["bound_count"],
+        **scenario_result,
+        "blockers": [
+            "employment_income_projection_blocked: V4.13 still has material unsupported payroll/contribution components.",
+            *scenario_result["blockers"],
+            "pension_entitlement_timeline_not_implemented: V4.14 is required before pension dates or streams.",
+            "retirement_bridge_not_implemented: V4.15 is required before bridge cash flows.",
+            "work_transition_optimizer_not_implemented: V4.17-V4.18 are required before candidate or sustainable dates.",
+        ],
+    }
+
+
+def _run_work_transition_scenario_wizard(readiness: dict[str, Any], overwrite: bool) -> dict[str, Any]:
+    """Collect declared phases and explicit monthly bases; build only through existing contracts."""
+    scenario_input_path = _validate_v66a_input_path(default_work_transition_scenario_input(), WorkTransitionScenarioError)
+    projection_input_path = _validate_v66a_input_path(default_employment_income_projection_input(), EmploymentIncomeProjectionError)
+    scenario_output_path = _validate_v66a_input_path(default_work_transition_scenario_output(), WorkTransitionScenarioError)
+    projection_output_path = _validate_v66a_input_path(default_employment_income_projection_output(), EmploymentIncomeProjectionError)
+
+    scenario_input = _read_optional_wizard_json(scenario_input_path, WorkTransitionScenarioError, "work-transition scenario input")
+    if scenario_input is None or overwrite:
+        phase_month_default = readiness["as_of_date"][:7] + "-01"
+        print(
+            "\nOra descrivi le fasi di lavoro dichiarate. Le date indicano solo i mesi coperti da ciascuna fase. "
+            f"Come riferimento, i fatti sono aggiornati al {readiness['as_of_date']}."
+        )
+        work_phases: list[dict[str, Any]] = []
+        members = readiness.get("household_members") or ["primary"]
+        for member_id in members:
+            count = _prompt_positive_int(f"Quante fasi vuoi dichiarare per {member_id}? (incluso eventuale periodo senza lavoro)", 1)
+            for index in range(1, count + 1):
+                phase_id = f"{member_id}_phase_{index:02d}"
+                status = _prompt_choice(
+                    f"{member_id}, fase {index}: stato full_time / part_time / not_working",
+                    "full_time",
+                    {"full_time", "part_time", "not_working"},
+                )
+                if status == "full_time":
+                    fte = 1.0
+                elif status == "not_working":
+                    fte = 0.0
+                else:
+                    fte = _prompt_fte(f"{member_id}, fase {index}: quota FTE tra 0 e 1", 0.6)
+                start = _prompt_month_start(f"{member_id}, fase {index}: primo mese coperto (YYYY-MM-01)", phase_month_default)
+                end = _prompt_month_start(f"{member_id}, fase {index}: ultimo mese coperto (YYYY-MM-01)", start)
+                work_phases.append({
+                    "phase_id": phase_id,
+                    "member_id": member_id,
+                    "start_date": start,
+                    "end_date": end,
+                    "status": status,
+                    "fte": fte,
+                    "compensation_policy_ref": "user-declared-compensation",
+                    "contribution_benefit_policy_ref": "user-declared-contribution-benefits",
+                    "contractual_constraints": [],
+                    "provenance": {"origin": "work-transition plan wizard; user-declared phase"},
+                })
+                scenario_input = {
+                    "schema_version": "work-transition-scenario-input/v1",
+                    "record_type": "WorkTransitionScenarioInput",
+                    "household_id": readiness["household_id"],
+                    "as_of_date": readiness["as_of_date"],
+                    "plan_start_date": min(item["start_date"] for item in work_phases),
+                    "plan_end_date": max(item["end_date"] for item in work_phases),
+                    "work_phases": list(work_phases),
+                    "declared_timeline_gaps": [],
+                }
+                _write_wizard_json(scenario_input_path, scenario_input, True, WorkTransitionScenarioError, "work-transition scenario draft")
+    else:
+        work_phases = scenario_input.get("work_phases", [])
+        print(f"Fatti riusabili: riprendo {len(work_phases)} fasi FTE dalla bozza locale {scenario_input_path}.")
+
+    projection_input = _read_optional_wizard_json(projection_input_path, EmploymentIncomeProjectionError, "employment-income projection input")
+    if projection_input is None or overwrite:
+        projection_input = {
+            "schema_version": "employment-income-projection-input/v1",
+            "record_type": "EmploymentIncomeProjectionInput",
+            "household_id": readiness["household_id"],
+            "as_of_date": readiness["as_of_date"],
+            "periods": [],
+        }
+    existing_period_keys = {
+        (item.get("member_id"), item.get("month"))
+        for item in projection_input.get("periods", [])
+        if isinstance(item, dict)
+    }
+    _write_wizard_json(projection_input_path, projection_input, True, EmploymentIncomeProjectionError, "employment-income projection draft")
+    print(f"Inserisci solo basi mensili documentate o dichiarate; Invio lascia il valore mancante e produce un data gap. Bozza: {projection_input_path}.")
+    for phase in work_phases:
+        if phase.get("status") == "not_working":
+            continue
+        current = date.fromisoformat(phase["start_date"])
+        end = date.fromisoformat(phase["end_date"])
+        while current <= end:
+            month = current.isoformat()
+            period_key = (phase["member_id"], month)
+            if overwrite or period_key not in existing_period_keys:
+                taxable = _prompt_optional_non_negative_decimal(f"{phase['member_id']} {month}: imponibile da lavoro esplicito in EUR")
+                taxable_basis = _prompt_choice("Base imponibile observed / declared", "declared", {"observed", "declared"}) if taxable is not None else None
+                pensionable = _prompt_optional_non_negative_decimal(f"{phase['member_id']} {month}: base pensionabile esplicita in EUR (opzionale)")
+                pensionable_basis = _prompt_choice("Base pensionabile observed / declared", "declared", {"observed", "declared"}) if pensionable is not None else None
+                if taxable is not None or pensionable is not None:
+                    period: dict[str, Any] = {
+                        "member_id": phase["member_id"],
+                        "month": month,
+                        "provenance": {"origin": "work-transition plan wizard; user-declared monthly base"},
+                    }
+                    if taxable is not None:
+                        period["taxable_income"] = taxable
+                        period["taxable_income_basis"] = taxable_basis
+                    if pensionable is not None:
+                        period["pensionable_base"] = pensionable
+                        period["pensionable_base_basis"] = pensionable_basis
+                    projection_input["periods"] = [
+                        item for item in projection_input["periods"]
+                        if (item.get("member_id"), item.get("month")) != period_key
+                    ] + [period]
+                    existing_period_keys.add(period_key)
+                _write_wizard_json(projection_input_path, projection_input, True, EmploymentIncomeProjectionError, "employment-income projection draft")
+            current = date(current.year + (1 if current.month == 12 else 0), 1 if current.month == 12 else current.month + 1, 1)
+
+    try:
+        scenario = build_work_transition_scenario(scenario_input_path, default_work_transition_readiness_output(), scenario_output_path)
+    except WorkTransitionScenarioError as exc:
+        return {
+            "scenario_input_path": str(scenario_input_path),
+            "projection_input_path": str(projection_input_path),
+            "scenario": None,
+            "projection": None,
+            "scenario_blocker": str(exc),
+            "blockers": [f"scenario_or_readiness_blocked: {exc}"],
+        }
+    try:
+        projection = build_employment_income_projection(
+            scenario_output_path,
+            projection_input_path,
+            default_italy_tax_rule_pack(),
+            default_work_exit_rule_pack(),
+            projection_output_path,
+        )
+    except EmploymentIncomeProjectionError as exc:
+        return {
+            "scenario_input_path": str(scenario_input_path),
+            "projection_input_path": str(projection_input_path),
+            "scenario": scenario,
+            "projection": None,
+            "scenario_blocker": None,
+            "blockers": [f"employment_income_projection_blocked: {exc}"],
+        }
+    blockers = []
+    if projection["status"] == "blocked":
+        blockers.append(f"employment_income_projection_blocked: {projection['summary']['blocking_gap_count']} data gaps require verified inputs/rules.")
+    return {
+        "scenario_input_path": str(scenario_input_path),
+        "projection_input_path": str(projection_input_path),
+        "scenario": scenario,
+        "projection": projection,
+        "scenario_blocker": None,
+        "blockers": blockers,
+    }
+
+
+def _prompt_month_start(label: str, default: str) -> str:
+    while True:
+        value = _prompt_text(label, default)
+        try:
+            parsed = date.fromisoformat(value)
+        except ValueError:
+            parsed = None
+        if parsed is not None and parsed.day == 1:
+            return parsed.isoformat()
+        print("Valore non valido: inserisci il primo giorno del mese nel formato YYYY-MM-01.")
+
+
+def _prompt_fte(label: str, default: float) -> float:
+    while True:
+        raw = _prompt_text(label, str(default))
+        try:
+            value = float(raw)
+        except ValueError:
+            value = -1
+        if 0 < value < 1:
+            return round(value, 4)
+        print("Valore non valido: per part_time inserisci un FTE maggiore di 0 e minore di 1.")
+
+
+def _prompt_optional_non_negative_decimal(label: str) -> str | None:
+    while True:
+        value = input(f"{label} [Invio = dato mancante]: ").strip()
+        if not value:
+            return None
+        try:
+            parsed = Decimal(value)
+        except InvalidOperation:
+            parsed = Decimal("-1")
+        if parsed.is_finite() and parsed >= 0:
+            return value
+        print("Valore non valido: inserisci un importo decimale non negativo o premi Invio.")
 
 
 def _work_transition_source_guidance(requirement: Mapping[str, Any]) -> dict[str, str]:
@@ -4591,6 +4866,31 @@ def build_parser() -> argparse.ArgumentParser:
     )
     planning = subparsers.add_parser("planning", help="Validate planning contracts")
     planning_subparsers = planning.add_subparsers(dest="planning_command")
+    planning_pension_sources_parser = planning_subparsers.add_parser(
+        "pension-sources",
+        help="Audit or record human review of active pension rule sources",
+    )
+    planning_pension_sources_subparsers = planning_pension_sources_parser.add_subparsers(
+        dest="planning_pension_sources_command"
+    )
+    planning_pension_sources_audit_parser = planning_pension_sources_subparsers.add_parser(
+        "audit",
+        help="Check pension source provenance and review dates locally (no network)",
+    )
+    planning_pension_sources_audit_parser.add_argument(
+        "--as-of-date",
+        default=date.today().isoformat(),
+        help="ISO date for a reproducible freshness check (default: today)",
+    )
+    planning_pension_sources_review_parser = planning_pension_sources_subparsers.add_parser(
+        "review",
+        help="Record an operator-confirmed source review; does not fetch or verify websites",
+    )
+    planning_pension_sources_review_parser.add_argument(
+        "--review-date",
+        default=date.today().isoformat(),
+        help="ISO date of the human source review (default: today)",
+    )
     planning_goals_parser = planning_subparsers.add_parser(
         "goals",
         help="Validate and normalize planning goals and constraints",
@@ -5875,6 +6175,19 @@ def build_parser() -> argparse.ArgumentParser:
     planning_work_transition_subparsers = planning_work_transition_parser.add_subparsers(
         dest="planning_work_transition_command"
     )
+    planning_work_transition_plan_parser = planning_work_transition_subparsers.add_parser(
+        "plan",
+        help="Question-first local readiness; stops before unavailable timeline, bridge and optimizer stages",
+    )
+    planning_work_transition_plan_parser.add_argument(
+        "--input", type=Path, default=default_work_transition_plan_readiness_input(), help="Workspace-local readiness manifest path"
+    )
+    planning_work_transition_plan_parser.add_argument(
+        "--readiness-output", type=Path, default=default_work_transition_readiness_output(), help="Workspace-local readiness snapshot path"
+    )
+    planning_work_transition_plan_parser.add_argument(
+        "--overwrite", action="store_true", help="Revise the local readiness manifest and source bindings"
+    )
     planning_work_transition_readiness_parser = planning_work_transition_subparsers.add_parser(
         "readiness",
         help="Build work-transition-readiness/v1 with source lineage and blocking gaps",
@@ -5942,6 +6255,32 @@ def build_parser() -> argparse.ArgumentParser:
         "--demo",
         action="store_true",
         help="Use synthetic readiness and scenario fixtures included with the engine",
+    )
+    planning_work_transition_projection_parser = planning_work_transition_subparsers.add_parser(
+        "projection",
+        help="Build the deterministic employment-income projection from a monthly scenario",
+    )
+    planning_work_transition_projection_subparsers = planning_work_transition_projection_parser.add_subparsers(
+        dest="planning_work_transition_projection_command"
+    )
+    planning_work_transition_projection_build_parser = planning_work_transition_projection_subparsers.add_parser(
+        "build",
+        help="Build employment-income-projection/v1 with explicit bases and provenance",
+    )
+    planning_work_transition_projection_build_parser.add_argument(
+        "--scenario", type=Path, default=default_work_transition_scenario_output(), help="Workspace-local scenario snapshot"
+    )
+    planning_work_transition_projection_build_parser.add_argument(
+        "--input", type=Path, default=default_employment_income_projection_input(), help="Workspace-local periodized projection input"
+    )
+    planning_work_transition_projection_build_parser.add_argument(
+        "--irpef-rule-pack", type=Path, default=default_italy_tax_rule_pack(), help="Versioned IRPEF rule pack"
+    )
+    planning_work_transition_projection_build_parser.add_argument(
+        "--inps-rule-pack", type=Path, default=default_work_exit_rule_pack(), help="Versioned INPS rule pack"
+    )
+    planning_work_transition_projection_build_parser.add_argument(
+        "--output", type=Path, default=default_employment_income_projection_output(), help="Workspace-local projection snapshot"
     )
     tax_documents = subparsers.add_parser("tax-documents", help="Import fiscal source documents")
     tax_documents_subparsers = tax_documents.add_subparsers(dest="tax_documents_command")
@@ -7046,6 +7385,61 @@ def main(argv: list[str] | None = None) -> int:
             f"{len(snapshot['data_gaps'])} gaps "
             f"({args.output})"
         )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "pension-sources"
+        and args.planning_pension_sources_command == "audit"
+    ):
+        try:
+            report = audit_active_pension_rule_packs(
+                resolve_repo("rules"),
+                args.as_of_date,
+            )
+        except ValueError as exc:
+            print(f"planning pension-sources audit: ERROR ({exc})")
+            return 1
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0 if report["status"] == "fresh" else 1
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "pension-sources"
+        and args.planning_pension_sources_command == "review"
+    ):
+        rules_root = resolve_repo("rules")
+        changed = 0
+        try:
+            for relative_path in ACTIVE_PENSION_RULE_PACKS:
+                rule_path = rules_root / relative_path
+                pack = json.loads(rule_path.read_text(encoding="utf-8"))
+                print(f"\n{pack.get('rule_pack_id', relative_path.as_posix())}")
+                for source in pack.get("source_refs", []):
+                    print(
+                        f"- {source.get('source_id')}: {source.get('title')}\n"
+                        f"  Autorità: {source.get('authority', 'mancante')} | Giurisdizione: {source.get('jurisdiction', 'mancante')}\n"
+                        f"  Disposizioni: {', '.join(source.get('provisions', []))}\n"
+                        f"  URL ufficiale: {source.get('url')}\n"
+                        "  Il programma non apre né controlla il sito ufficiale."
+                    )
+                    answer = input("Hai verificato la fonte e le disposizioni indicate? [s/N] ").strip().casefold()
+                    if answer not in {"s", "si", "sì", "y", "yes"}:
+                        continue
+                    recorded = record_pension_source_review(
+                        rule_path,
+                        source.get("source_id", ""),
+                        args.review_date,
+                    )
+                    changed += 1
+                    print(
+                        f"  review registrata: {recorded['reviewed_on']}; "
+                        f"prossima entro {recorded['next_review_due']}"
+                    )
+        except (OSError, json.JSONDecodeError, PensionSourceFreshnessError, ValueError) as exc:
+            print(f"planning pension-sources review: ERROR ({exc})")
+            return 1
+        print(f"\nplanning pension-sources review: aggiornate {changed} fonti; nessun controllo web eseguito")
         return 0
 
     if (
@@ -8516,6 +8910,35 @@ def main(argv: list[str] | None = None) -> int:
 
     if (
         args.command == "planning"
+        and args.planning_command == "work-transition"
+        and args.planning_work_transition_command == "projection"
+        and args.planning_work_transition_projection_command == "build"
+    ):
+        try:
+            snapshot = build_employment_income_projection(
+                args.scenario,
+                args.input,
+                args.irpef_rule_pack,
+                args.inps_rule_pack,
+                args.output,
+            )
+        except EmploymentIncomeProjectionError as exc:
+            print(f"planning work-transition projection: ERROR ({exc})")
+            return 1
+        print(
+            "planning work-transition projection: "
+            f"{snapshot['status']} periods={snapshot['summary']['period_count']}, "
+            f"blockers={snapshot['summary']['blocking_gap_count']}, "
+            f"warnings={snapshot['summary']['warning_count']} ({args.output})"
+        )
+        print("Fatti: basi mensili osservate/dichiarate e provenance sono state riusate senza inferenze.")
+        print("Assunzioni: nessuna aliquota payroll, contributo dipendente, TFR futuro o data pensionistica è stata inventata.")
+        print("Limiti: il risultato non calcola netto payroll completo e non alimenta date candidate o optimizer.")
+        print("Prossima azione: risolvi i data_gap bloccanti con fonti e rule pack verificati.")
+        return 0
+
+    if (
+        args.command == "planning"
         and args.planning_command == "work-exit"
         and args.planning_work_exit_command == "build"
     ):
@@ -8570,6 +8993,60 @@ def main(argv: list[str] | None = None) -> int:
                 if result.get("primary_ready")
                 else "Prossima azione: completa le date di nascita degli adulti; il build resta bloccato per evitare una valutazione incompleta del nucleo."
             )
+        return 0
+
+    if (
+        args.command == "planning"
+        and args.planning_command == "work-transition"
+        and args.planning_work_transition_command == "plan"
+    ):
+        try:
+            result = run_work_transition_plan_wizard(args.input, args.readiness_output, overwrite=args.overwrite)
+        except (EOFError, KeyboardInterrupt):
+            print("planning work-transition plan: interrupted; rerun to continue the workspace-local readiness setup.")
+            return 1
+        except (
+            WorkTransitionReadinessError,
+            WorkTransitionSourceBindingError,
+            WorkTransitionScenarioError,
+            EmploymentIncomeProjectionError,
+        ) as exc:
+            print(f"planning work-transition plan: ERROR ({exc})")
+            return 1
+        readiness = result["readiness"]
+        print(
+            "planning work-transition plan: readiness "
+            f"{readiness['status']}, selected={readiness['summary']['selected_input_count']}/"
+            f"{readiness['summary']['required_input_count']}, blockers={readiness['summary']['blocking_gap_count']} "
+            f"({result['readiness_output_path']})."
+        )
+        print("Fatti: fonti locali visualizzate e associate solo con scelta esplicita; fasi FTE e basi mensili dichiarate sono separate dalle osservazioni documentali.")
+        print("Assunzioni: FTE e periodi inseriti sono dichiarazioni dell'utente; nessun reddito o contributo viene derivato dal FTE.")
+        scenario = result.get("scenario")
+        projection = result.get("projection")
+        if scenario is not None:
+            print(
+                f"Scenario FTE: {scenario['status']}, {scenario['summary']['phase_count']} fasi, "
+                f"{scenario['summary']['timeline_month_count']} mesi ({default_work_transition_scenario_output()})."
+            )
+        if projection is not None:
+            print(
+                f"Proiezione lavoro: {projection['status']}, {projection['summary']['period_count']} periodi, "
+                f"{projection['summary']['blocking_gap_count']} gap bloccanti ({default_employment_income_projection_output()})."
+            )
+        gap_codes = sorted({str(gap.get("code", "unknown_gap")) for gap in readiness.get("data_gaps", [])})
+        print(
+            "Data gaps: "
+            + (", ".join(gap_codes) if gap_codes else "nessun gap dichiarato dalla readiness.")
+        )
+        if projection:
+            projection_codes = sorted({str(gap.get("code", "unknown_gap")) for gap in projection.get("data_gaps", [])})
+            print("Data gaps proiezione: " + (", ".join(projection_codes) if projection_codes else "nessuno."))
+        if result.get("scenario_blocker"):
+            print(f"Scenario non calcolato: {result['scenario_blocker']}")
+        print("Limiti: nessuna data pensionistica, candidata o sostenibile; nessuna timeline pensionistica, bridge, simulazione o optimizer e' stata eseguita.")
+        print("Blocker: " + " ".join(result["blockers"]))
+        print("Prossima azione: completa i gap con fonti e basi esplicite; la generazione automatica delle date resta V4.17-V4.20.")
         return 0
 
     if (
@@ -8730,14 +9207,106 @@ def main(argv: list[str] | None = None) -> int:
             grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
             for item in transactions:
                 if item.get("include_in_expenses"):
-                    key = (str(item.get("merchant_fingerprint") or item.get("description") or "unknown"), str(item.get("category_proposal") or "unknown"))
+                    normalized = str(item.get("merchant_normalized") or _normalize_merchant(str(item.get("description") or "unknown")))
+                    fingerprint = str(item.get("merchant_fingerprint") or _merchant_fingerprint(normalized))
+                    item["merchant_normalized"] = normalized
+                    item["merchant_fingerprint"] = fingerprint
+                    key = (fingerprint, str(item.get("category_proposal") or "unknown"))
                     grouped.setdefault(key, []).append(item)
             decisions: dict[str, str] = {}
             print("Quali gruppi di spesa vuoi confermare per costruire il piano lifecycle?")
-            print("Mostro prima le eccezioni; somme, periodi e campioni sono calcolati dal programma.")
-            ordered = sorted(grouped.items(), key=lambda pair: (0 if pair[0][1] == "unknown" or len(pair[1]) == 1 else 1, pair[0][1], pair[0][0]))
+            print("Mostro prima i riepiloghi per categoria; le eccezioni vengono dopo. Somme, periodi e campioni sono calcolati dal programma.")
+            ordered = sorted(grouped.items(), key=lambda pair: (0 if pair[0][1] == "unknown" else 1, pair[0][1], pair[0][0]))
+            category_candidates: dict[str, list[tuple[int, tuple[tuple[str, str], list[dict[str, Any]]]]]] = {}
+            for index, pair in enumerate(ordered, start=1):
+                proposal = pair[0][1]
+                if proposal != "unknown":
+                    category_candidates.setdefault(proposal, []).append((index, pair))
+            unknown_candidates = [
+                (index, pair)
+                for index, pair in enumerate(ordered, start=1)
+                if pair[0][1] == "unknown"
+            ]
+            known_items = sum(len(items) for candidates in category_candidates.values() for _, (_, items) in candidates)
+            unknown_items_count = sum(len(items) for _, (_, items) in unknown_candidates)
+            print("\nRIEPILOGO DEL LAVORO RICHIESTO")
+            print(f"- Movimenti totali inclusi nelle spese: {known_items + unknown_items_count}")
+            print(f"- Movimenti con categoria proposta: {known_items} (verifica per categoria)")
+            print(f"- Movimenti ancora da categorizzare: {unknown_items_count} in {len(unknown_candidates)} gruppi")
+            print(f"- Gruppi totali: {len(ordered)}")
+            if category_candidates:
+                print("\nCATEGORIE PROPOSTE")
+                for category, candidates in sorted(category_candidates.items()):
+                    category_count = sum(len(items) for _, (_, items) in candidates)
+                    print(f"  - {category}: {category_count} movimenti in {len(candidates)} gruppi")
+            if unknown_candidates:
+                print("\nDA CATEGORIZZARE")
+                print(f"  {unknown_items_count} movimenti in {len(unknown_candidates)} gruppi senza categoria proposta.")
+                print("  Dopo le categorie proposte scegli: e=escludi tutto, o=assegna tutto a other, n=apri i gruppi.")
+            print("")
+            if category_candidates:
+                print("Per ridurre la revisione manuale, le categorie proposte vengono mostrate una volta per categoria.")
+                print("La conferma è esplicita: se una categoria non è omogenea, scegli n e rivedi i gruppi sottostanti.")
+                for category, candidates in sorted(category_candidates.items()):
+                    category_items = [item for _, (_, items) in candidates for item in items]
+                    total = sum((abs(Decimal(str(item.get("amount") or "0"))) for item in category_items), Decimal("0")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                    dates = sorted(str(item.get("date") or "") for item in category_items if item.get("date"))
+                    merchants = []
+                    for _, ((fingerprint, _), items) in candidates:
+                        merchant = str(items[0].get("merchant_normalized") or fingerprint)
+                        if merchant not in merchants:
+                            merchants.append(merchant)
+                    sample = ", ".join(merchants[:3])
+                    period = f"{dates[0]}–{dates[-1]}" if dates else "periodo non disponibile"
+                    category_choice = input(
+                        f"Categoria {category}: {len(candidates)} gruppi, {len(category_items)} movimenti, {total} EUR, {period}. "
+                        f"Esempi: {sample}. [y=conferma, e=escludi, c=riclassifica, n=revisiona gruppi] y: "
+                    ).strip().lower()
+                    if category_choice in {"", "y", "yes", "s", "si"}:
+                        for index, ((fingerprint, proposal), items) in candidates:
+                            decisions[f"merchant_group_{index:04d}"] = proposal
+                        print(f"Confermata in blocco la categoria {category}: {len(candidates)} gruppi.")
+                    elif category_choice in {"e", "exclude", "escludi"}:
+                        for index, ((fingerprint, proposal), items) in candidates:
+                            decisions[f"merchant_group_{index:04d}"] = "unknown"
+                        print(f"Esclusa in blocco la categoria {category}: {len(candidates)} gruppi.")
+                    elif category_choice in {"c", "change", "cambia"}:
+                        replacement = _prompt_text("Nuova categoria per tutta la categoria proposta", category)
+                        for index, ((fingerprint, proposal), items) in candidates:
+                            decisions[f"merchant_group_{index:04d}"] = replacement
+                        print(f"Riclassificata in blocco la categoria {category} come {replacement}: {len(candidates)} gruppi.")
+            if unknown_candidates:
+                unknown_items = [item for _, (_, items) in unknown_candidates for item in items]
+                unknown_total = sum((abs(Decimal(str(item.get("amount") or "0"))) for item in unknown_items), Decimal("0")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                unknown_dates = sorted(str(item.get("date") or "") for item in unknown_items if item.get("date"))
+                unknown_merchants = []
+                for _, ((fingerprint, _), items) in unknown_candidates:
+                    merchant = str(items[0].get("merchant_normalized") or fingerprint)
+                    if merchant not in unknown_merchants:
+                        unknown_merchants.append(merchant)
+                unknown_period = f"{unknown_dates[0]}–{unknown_dates[-1]}" if unknown_dates else "periodo non disponibile"
+                ranked_unknown = sorted(unknown_candidates, key=lambda entry: (-len(entry[1][1]), entry[1][0][0]))
+                print("\nPRIMI GRUPPI NON CLASSIFICATI PER NUMEROSITA")
+                for _, ((fingerprint, _), items) in ranked_unknown[:10]:
+                    print(f"  - {len(items)} movimenti: {items[0].get('merchant_normalized', fingerprint)}")
+                print("Non serve classificare ogni movimento per costruire il piano: puoi mantenere il totale come blocco non classificato.")
+                unknown_choice = input(
+                    f"Eccezioni non classificate: {len(unknown_candidates)} gruppi, {len(unknown_items)} movimenti, {unknown_total} EUR, {unknown_period}. "
+                    f"Esempi: {', '.join(unknown_merchants[:3])}. [o=mantieni tutto nel totale come other, e=escludi, n=revisiona gruppi] o: "
+                ).strip().lower() or "o"
+                if unknown_choice in {"e", "exclude", "escludi"}:
+                    for index, _ in unknown_candidates:
+                        decisions[f"merchant_group_{index:04d}"] = "unknown"
+                    print(f"Escluse in blocco {len(unknown_candidates)} eccezioni non classificate.")
+                elif unknown_choice in {"o", "other"}:
+                    for index, _ in unknown_candidates:
+                        decisions[f"merchant_group_{index:04d}"] = "other"
+                    print(f"Classificate in blocco come other {len(unknown_candidates)} eccezioni; verifica il risultato lifecycle.")
+            print("Restano da revisionare singolarmente solo le eccezioni e le categorie non confermate.")
             for index, ((fingerprint, proposal), items) in enumerate(ordered, start=1):
                 group_id = f"merchant_group_{index:04d}"
+                if group_id in decisions:
+                    continue
                 total = sum((abs(Decimal(str(item.get("amount") or "0"))) for item in items), Decimal("0")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
                 while True:
                     choice = input(

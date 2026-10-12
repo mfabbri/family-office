@@ -120,7 +120,16 @@ Default input:
 - `../family-office-workspace/documents/redditi/buste-paga`, se esiste;
 - altrimenti `../family-office-workspace/inbox/bustepaga`.
 
-L'output console riporta stato, numero record, numero documenti e gap. Lo snapshot contiene i valori estratti dal cedolino; il comando non calcola imposte o netto da lordo.
+L'output console riporta stato, numero record, numero documenti e gap. Lo snapshot contiene i valori estratti dal cedolino; il comando non calcola imposte o netto da lordo. Quando i periodi mese/anno sono leggibili, aggiunge deterministicamente `as_of_date`, `stream_start_date`, `stream_end_date`, `period` e `value_basis: net`, così il risultato può essere rilevato dal percorso Work Transition. Questi bounds descrivono soltanto l'intervallo osservato nei cedolini: non provano la continuità futura del lavoro.
+
+Il payroll import non assegna automaticamente i record a `primary` o `spouse`. Dopo l'import, la scelta esplicita della fonte resta nel percorso question-first. La CLI mostra per ogni candidato il riepilogo locale disponibile — documenti, record, periodi, datori e totale netto osservato — così non è necessario aprire il JSON:
+
+```text
+fo planning work-transition sources setup --overwrite
+fo planning work-transition readiness
+```
+
+Se un cedolino non contiene un periodo deterministico o il netto non è stato estratto, lo snapshot conserva un `data_gap` e non viene trattato come fonte pronta. Il riepilogo viene mostrato solo durante la scelta e non viene scritto nel manifest o nel binding.
 
 ## `fo payroll diagnose`
 
@@ -495,17 +504,21 @@ Uso:
 fo expenses import-bank
 ```
 
-Al termine esegui `fo expenses review-bank`.
+Al termine esegui `fo expenses review-bank`. Se lo snapshot è stato generato prima del raggruppamento V6.14, rilancia `fo expenses import-bank` prima della review: l'import aggiorna i fingerprint deterministici; la review mantiene comunque un fallback per snapshot legacy.
 
 ## `fo expenses review-bank`
 
-Mostra le categorie proposte raggruppate, consente di confermarle, escluderle o correggerle e genera il piano lifecycle senza compilazione manuale del JSON.
+Per XLSX con più fogli e intestazioni diverse, l'import associa ogni foglio alle proprie colonne prima di normalizzare le righe. Questo evita descrizioni artificiali e categorie `unknown` causate dall'uso delle intestazioni del primo foglio.
+
+Mostra le categorie proposte raggruppate, consente di confermare in blocco i gruppi omogenei e di rivedere singolarmente le eccezioni, quindi genera il piano lifecycle senza compilazione manuale del JSON.
 
 Uso:
 
 ```text
 fo expenses review-bank
 ```
+
+Prima della revisione la CLI mostra un riepilogo leggibile del lavoro: movimenti totali, movimenti con categoria proposta e movimenti ancora da categorizzare, separando sempre gruppi e movimenti. Elenca poi il conteggio di ogni categoria proposta. Per ogni categoria `y` conferma tutto, `e` esclude tutto, `c` riclassifica tutto con una nuova categoria, `n` mantiene la revisione gruppo per gruppo. Per le eccezioni `unknown` propone una scelta aggregata: `o` le mantiene nel totale come `other` (default, utile per il piano lifecycle), `e` le esclude tutte, `n` le apre una per una. La scelta resta esplicita e il dettaglio raw non viene perso.
 
 `d` mostra il dettaglio locale dei movimenti della categoria (data, descrizione e importo), poi ripropone la scelta. `y` conferma, `n` esclude dal piano, `c` permette di indicare una categoria locale. Stipendi, crediti, trasferimenti e rimborsi non vengono aggregati come spese. Le categorie non confermate restano `data_gap`. Il modello locale, se collegato in futuro, potrà solo proporre classificazioni: non calcolerà importi né sostituirà la revisione umana.
 
@@ -1376,9 +1389,9 @@ Il comando produce `it-es-eu-pension-pro-rata/v1` con data nascita, scenario pen
 
 ## `fo planning work-exit build`
 
-Capability disponibile; per introdurre o aggiornare i dati usare prima `fo planning work-exit wizard`.
+Percorso legacy diagnostico, non equivalente all'optimizer phased-retirement pianificato. Il wizard associato chiede una data candidata; non usarlo per trovare automaticamente la prima data sostenibile.
 
-Obiettivo: trovare la prima data sostenibile per smettere di lavorare partendo da oggi, non valutare soltanto una data target statica.
+Il build valuta il contratto legacy annuale `work-exit-feasibility/v1`. Non modella ancora le fasi FTE, l'accumulo contributivo scenario-dependent e il bridge mensile necessari per trovare la data di uscita dal full-time.
 
 Uso previsto:
 
@@ -1394,17 +1407,17 @@ Default previsti:
 - patrimonio/liquidita'/spese: snapshot del workspace gia' prodotti dai comandi dedicati
 - output: `../family-office-workspace/snapshots/work-exit-feasibility.snapshot.json`
 
-Il comando dovra' produrre `work-exit-feasibility/v1` con date candidate, prima data sostenibile oppure blocco spiegato, motivi delle date scartate, stima INPS interna per candidato/persona, quota spagnola pro-rata, pensione del coniuge, totale lordo separato per persona e fonte, eventuali bridge e data gaps. Date esplicite come `2037` sono candidate diagnostiche o filtri della ricerca, non l'obiettivo primario. Se la pensione del coniuge non e' disponibile o stimabile, il comando dovra' produrre un gap esplicito per evitare una data household incompleta. Per anni futuri non osservabili usera' solo assunzioni proiettive dichiarate nei rule pack; non calcolera' certificazioni ufficiali INPS, P1 ufficiale, netto fiscale non gia' disponibile o raccomandazioni.
+Il build legacy produce date candidate valutate e motivi di scarto, con pensioni lorde e data gaps. Non rappresenta un optimizer mensile del pensionamento graduale e non deve essere presentato come la prima data household sostenibile. `fo planning work-transition plan` è disponibile come wizard progressivo di raccolta fonti/readiness; la simulazione e le date automatiche restano subordinate ai successivi incrementi V4.14-V4.20.
 
 ## `fo planning work-exit wizard`
 
-Raccoglie dalla CLI gli input personali per la valutazione dell'uscita dal lavoro e crea nel workspace privato il draft `work-exit-feasibility/v1` insieme al manifest `work-transition-readiness/v1`.
+Wizard legacy diagnostico. Raccoglie input per `work-exit-feasibility/v1` e crea anche il manifest `work-transition-readiness/v1`; chiede una prima data candidata e quindi non è il wizard dell'optimizer automatico pianificato.
 
 ```text
 fo planning work-exit wizard
 ```
 
-Il wizard mostra gli snapshot già disponibili come contesto, salva progressivamente dopo ogni risposta e può essere ripreso con `--overwrite`. I valori incerti diventano `data_gaps`; non calcola pensioni, imposte o raccomandazioni. Dopo avere completato o corretto i gap, eseguire `fo planning work-transition readiness` e quindi `fo planning work-exit build`.
+Il wizard mostra gli snapshot già disponibili come contesto, salva progressivamente dopo ogni risposta e può essere ripreso con `--overwrite`. I valori incerti diventano `data_gaps`; non calcola pensioni, imposte o raccomandazioni. Il percorso readiness/build resta disponibile per diagnosi e compatibilità; non produce le tre date del piano di transizione completo.
 
 ## `fo planning work-transition sources setup`
 
@@ -1415,6 +1428,18 @@ fo planning work-transition sources setup
 ```
 
 Il comando usa per default il manifest e l'output del workspace privato. Mostra le fonti rilevate con schema, data, categoria, membro e value basis e richiede una scelta esplicita (`0` mantiene un gap; `k` mantiene un binding esistente). Ogni scelta viene salvata progressivamente con provenance, hash della snapshot originale e `binding_pointer`; verifica nuovamente hash e presenza della fonte prima del salvataggio, e rifiuta un manifest non conforme al contratto. I metadata dichiarati (`period`, bounds, liquidita' e coverage) vengono preservati; se mancano per un requisito, il comando mostra un gap azionabile. Per sostituire un binding esistente usare `--overwrite`. Al termine riesegue la readiness e riporta selection, `data_gaps`, limiti e prossima azione. Non esegue calcoli fiscali, pensionistici o finanziari. Dettaglio del contratto e del fallback JSON avanzato: `docs/work-transition-readiness.md`.
+
+## `fo planning work-transition plan`
+
+Avvia il wizard question-first del percorso Work Transition senza chiedere una data di pensionamento o una data candidata:
+
+```text
+fo planning work-transition plan
+```
+
+Al primo avvio raccoglie l'etichetta locale del nucleo e la data dei fatti, poi guida l'associazione esplicita delle fonti già importate. Raccoglie le fasi FTE mensili dichiarate e, per ciascun mese lavorato, consente di inserire solo basi imponibili/pensionabili esplicite con provenienza. Ogni risposta utile aggiorna la bozza nel workspace; Invio lascia il dato mancante perché venga mostrato come `data_gap`. `--overwrite` riapre la raccolta. Nessun importo viene ricavato moltiplicando valori full-time per l'FTE.
+
+Il comando genera readiness e, quando il gate lo consente, gli snapshot scenario FTE V4.12 e proiezione lavoro V4.13. I gap della readiness o delle basi mensili impediscono i passaggi successivi e restano visibili. V4.13 è ancora parzialmente bloccato; il wizard non esegue timeline pensionistica V4.14, bridge V4.15, simulazione V4.16 o generazione/ranking delle date V4.17-V4.18. Non chiede una data pensionistica né una data candidata; gli artefatti vengono salvati solo sotto `family-office-workspace/`.
 
 ## `fo export sanitized`
 
@@ -1489,9 +1514,9 @@ python -m family_office_engine.cli.main tax-documents import
 
 Lo snapshot `tax-documents/v1` registra document type, anno/modello e campi fiscali riconosciuti con provenance. Non calcola IRPEF, addizionali, detrazioni o conguagli.
 
-## `fo planning work-exit build`
+## `fo planning work-exit build` (legacy diagnostico)
 
-Trova la prima data sostenibile di uscita dal lavoro del nucleo componendo stima INPS interna, benchmark INPS documentale, quota spagnola pro-rata, pensione del coniuge, patrimonio ponte e spese dichiarate.
+Valuta candidate del contratto legacy annuale `work-exit-feasibility/v1`, componendo stime pensionistiche e vincoli patrimoniali dichiarati. Non calcola il piano phased-retirement completo e non deve essere usato come optimizer della prima data di uscita dal full-time.
 
 Uso:
 
@@ -1515,7 +1540,7 @@ Default principali:
 - input sintetico: `examples/work-exit-feasibility-sample.json`
 - output sintetico: `../family-office-workspace/snapshots/cli-check-work-exit.synthetic.snapshot.json`
 
-Il comando produce `work-exit-feasibility/v1`: elenca candidate valutate, prima data sostenibile o blocco, motivi delle date scartate, `inps-theoretical-pension/v1` per candidato/persona, stream lordi separati per persona e fonte e data gaps. La stima INPS interna e' contributiva e proiettiva per pianificazione; non sostituisce INPS, non calcola netto fiscale, P1, ricongiunzioni, riscatti, decorrenze amministrative o raccomandazioni.
+Il comando produce `work-exit-feasibility/v1`: elenca candidate legacy valutate, motivi di scarto, `inps-theoretical-pension/v1` per candidato/persona, stream lordi separati e data gaps. La stima INPS interna è contributiva e proiettiva per pianificazione; non sostituisce INPS e non calcola netto fiscale, P1, ricongiunzioni, riscatti, decorrenze amministrative o raccomandazioni.
 
 ## `fo planning estate build`
 

@@ -1,0 +1,17 @@
+{
+  "schema_version": "inps-old-age-eligibility-rule-pack/v1",
+  "rule_pack_id": "it.inps-old-age-eligibility.2026-2028.v1",
+  "jurisdiction": "IT",
+  "valid_from": "2026-01-01",
+  "valid_to": "2028-12-31",
+  "post_1996_cohort_start": "1996-01-01",
+  "status": "deterministic_eligibility_screening_not_official_inps_decision",
+  "source_refs": [
+    {"source_id": "inps.pensione-vecchiaia", "title": "INPS, Pensione di vecchiaia", "authority": "Istituto Nazionale della Previdenza Sociale", "jurisdiction": "IT", "url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.pensione-di-vecchiaia.html", "retrieved_on": "2026-10-11", "reviewed_on": "2026-10-11", "next_review_due": "2027-01-09", "provisions": ["D.L. 201/2011, art. 24, comma 6 (requisito anagrafico ordinario)", "D.L. 201/2011, art. 24, comma 7 (limite minimo di importo e contribuzione effettiva; requisito applicabile nell'anno di decorrenza)", "pensione di vecchiaia ordinaria: requisito anagrafico e contributivo per le coorti anteriori/da 1 gennaio 1996", "alternativa contributiva: 71 anni e 5 anni effettivi, esclusa contribuzione figurativa"], "provision_periods": [{"provision_id": "ordinary_age_2026", "valid_from": "2026-01-01", "valid_to": "2026-12-31"}, {"provision_id": "contribution_threshold", "valid_from": "2026-01-01", "valid_to": "2028-12-31"}, {"provision_id": "post_1996_amount_threshold", "valid_from": "2026-01-01", "valid_to": "2028-12-31"}, {"provision_id": "post_1996_effective_contribution_alternative", "valid_from": "2026-01-01", "valid_to": "2028-12-31"}, {"provision_id": "employee_cessation", "valid_from": "2026-01-01", "valid_to": "2028-12-31"}]},
+    {"source_id": "inps.requisiti-2027-2028", "title": "INPS, Pensioni: requisiti aggiornati per il 2027 e il 2028", "authority": "Istituto Nazionale della Previdenza Sociale", "jurisdiction": "IT", "url": "https://www.inps.it/it/it/inps-comunica/notizie/dettaglio-news-page.news.2026.03.pensioni-requisiti-aggiornati-per-il-2027-e-il-2028.html", "retrieved_on": "2026-10-11", "reviewed_on": "2026-10-11", "next_review_due": "2027-01-09", "provisions": ["Circolare INPS 28/2026, allegato 2: adeguamento requisiti 2027 e 2028"], "provision_periods": [{"provision_id": "ordinary_age_adjustment_2027_2028", "valid_from": "2027-01-01", "valid_to": "2028-12-31"}]}
+  ],
+  "supported_scope": {"managements": ["FPLD", "AGO"], "employment_category": "employee", "ordinary_single_management_profile_required": true},
+  "requirements_by_year": {"2026": {"ordinary_age": {"years": 67, "months": 0}, "contributory_alternative_age": {"years": 71, "months": 0}}, "2027": {"ordinary_age": {"years": 67, "months": 1}, "contributory_alternative_age": {"years": 71, "months": 1}}, "2028": {"ordinary_age": {"years": 67, "months": 3}, "contributory_alternative_age": {"years": 71, "months": 3}}},
+  "paths": {"pre_1996": {"minimum_qualifying_contribution_years": 20}, "post_1996": {"minimum_qualifying_contribution_years": 20, "minimum_monthly_pension_threshold": "documented_applicable_monthly_social_allowance"}, "post_1996_alternative": {"minimum_effective_contribution_years": 5, "figurative_contribution_counts": false}},
+  "limitations": ["No pension amount calculation.", "No recognition, economic effective date, first payment date, pension stream, or work-exit conclusion.", "Feb-29 and month-end birth-date age semantics are unsupported and must fail closed.", "Foreign/EU aggregation, multiple managements, special or excluded profiles are outside scope."]
+}

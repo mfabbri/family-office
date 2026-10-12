@@ -37,8 +37,12 @@
     {
       "source_id": "eurlex.reg-883-2004.art52",
       "title": "Regulation (EC) No 883/2004 on the coordination of social security systems",
+      "authority": "European Parliament and Council of the European Union",
+      "jurisdiction": "EU",
       "url": "https://eur-lex.europa.eu/eli/reg/2004/883/oj/eng",
       "retrieved_on": "2026-07-24",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "Article 52"
       ]
@@ -46,8 +50,12 @@
     {
       "source_id": "seg-social.eu-reglamentos-comunitarios",
       "title": "Seguridad Social, Reglamentos Comunitarios, determinacion de la base reguladora",
+      "authority": "Instituto Nacional de la Seguridad Social / Seguridad Social",
+      "jurisdiction": "ES",
       "url": "https://www.seg-social.es/wps/portal/wss/internet/InformacionUtil/32078/966/1819/1823?changeLanguage=es",
       "retrieved_on": "2026-07-24",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "Determinacion de la base reguladora"
       ]
@@ -55,8 +63,12 @@
     {
       "source_id": "seg-social.jubilacion.cuantia",
       "title": "Seguridad Social, Prestaciones/Pensiones de Trabajadores, cuantia",
+      "authority": "Instituto Nacional de la Seguridad Social / Seguridad Social",
+      "jurisdiction": "ES",
       "url": "https://www.seg-social.es/wps/portal/wss/internet/Trabajadores/PrestacionesPensionesTrabajadores/10963/28393/28396/28475?changeLanguage=es",
       "retrieved_on": "2026-07-24",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "Base reguladora",
         "Actualizacion de bases de cotizacion",
@@ -66,8 +78,12 @@
     {
       "source_id": "boe.lgss.rdl-8-2015.consolidated-2026",
       "title": "Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social",
-      "url": "https://boe.es/buscar/act.php?id=BOE-A-2015-11724&p=20260204&tn=1",
-      "retrieved_on": "2026-07-24",
+      "authority": "Agencia Estatal Boletín Oficial del Estado",
+      "jurisdiction": "ES",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724&lang=es&p=20260731&tn=2",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
       "provisions": [
         "Articulo 209",
         "Articulo 210"

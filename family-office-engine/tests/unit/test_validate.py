@@ -854,10 +854,10 @@ class ValidateCliTest(unittest.TestCase):
 
             self.assertEqual(exit_code, 0)
             self.assertTrue(output_path.exists())
-            self.assertIn("tax: complete due=18440.00", stdout.getvalue())
+            self.assertIn("tax: complete due=18000.00", stdout.getvalue())
             written = json.loads(output_path.read_text(encoding="utf-8"))
             self.assertEqual(written["input"]["jurisdiction"], "IT")
-            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.irpef-national.2026.v1")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.irpef-national.2026.v2")
 
     def test_main_rita_optimize_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -2252,12 +2252,13 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(output_path.exists())
             self.assertIn(
-                "planning spanish-pension-net demo: complete 2/2 complete, net=24370.00, 0 gaps, 0 warnings",
+                "planning spanish-pension-net demo: complete 2/2 complete, net=24770.00, 0 gaps, 0 warnings",
                 stdout.getvalue(),
             )
             written = json.loads(output_path.read_text(encoding="utf-8"))
             self.assertEqual(written["schema_version"], "spanish-pension-net-it-resident/v1")
-            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.spanish-pension-net-it-resident.2026.v1")
+            self.assertEqual(written["rule_pack"]["rule_pack_id"], "it.spanish-pension-net-it-resident.2026.v2")
+            self.assertEqual(written["irpef_rule_pack"]["rule_pack_id"], "it.irpef-national.2026.v2")
 
     def test_main_planning_pension_scenario_demo_returns_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

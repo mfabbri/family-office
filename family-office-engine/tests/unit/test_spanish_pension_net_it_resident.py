@@ -18,6 +18,24 @@ SAMPLE_CLASSIFICATION = REPOSITORY_ROOT / "family-office-engine" / "examples" / 
 
 
 class SpanishPensionNetItResidentTest(unittest.TestCase):
+    def test_rejects_irpef_rule_pack_id_mismatch(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            rule_pack_path = root / "spanish-pension-net-rules.json"
+            data = json.loads(RULE_PACK.read_text(encoding="utf-8"))
+            data["rules"][0]["italian_irpef_rule_pack_id"] = "it.irpef-national.2026.v1"
+            rule_pack_path.write_text(json.dumps(data), encoding="utf-8")
+
+            with self.assertRaisesRegex(SpanishPensionNetItResidentError, "does not match.*expected.*got"):
+                build_spanish_pension_net_it_resident(
+                    SAMPLE_INPUT,
+                    SAMPLE_PENSION_INCOME,
+                    SAMPLE_CLASSIFICATION,
+                    rule_pack_path,
+                    IRPEF_RULE_PACK,
+                    root / "snapshot.json",
+                )
+
     def test_builds_net_private_spanish_pension_taxed_in_italy_without_spanish_withholding(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "spanish-pension-net.snapshot.json"
@@ -36,11 +54,11 @@ class SpanishPensionNetItResidentTest(unittest.TestCase):
             self.assertEqual(written["status"], "complete")
             stream = next(item for item in written["streams"] if item["stream_id"] == "spanish_public_pension")
             self.assertTrue(stream["italian_tax"]["taxable_in_italy"])
-            self.assertEqual(stream["italian_tax"]["gross_irpef_before_pension"], "7140.00")
-            self.assertEqual(stream["italian_tax"]["gross_irpef_after_pension"], "14570.00")
-            self.assertEqual(stream["italian_tax"]["incremental_tax_on_pension"], "7430.00")
+            self.assertEqual(stream["italian_tax"]["gross_irpef_before_pension"], "7100.00")
+            self.assertEqual(stream["italian_tax"]["gross_irpef_after_pension"], "14130.00")
+            self.assertEqual(stream["italian_tax"]["incremental_tax_on_pension"], "7030.00")
             self.assertEqual(stream["foreign_tax_credit"]["amount"], "0.00")
-            self.assertEqual(stream["net"]["annual_amount"], "13570.00")
+            self.assertEqual(stream["net"]["annual_amount"], "13970.00")
             self.assertEqual(
                 written["rule_pack"]["source_refs"][0]["source_id"],
                 "agenziaentrate.precompilata.lavoro-pensioni-esteri-2026",
@@ -88,7 +106,7 @@ class SpanishPensionNetItResidentTest(unittest.TestCase):
 
             self.assertEqual(stream["foreign_tax_credit"]["status"], "applied")
             self.assertEqual(stream["foreign_tax_credit"]["amount"], "1000.00")
-            self.assertEqual(stream["net"]["annual_amount"], "13570.00")
+            self.assertEqual(stream["net"]["annual_amount"], "13970.00")
 
     def test_limits_foreign_tax_credit_when_declared_capacity_is_lower(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -113,7 +131,7 @@ class SpanishPensionNetItResidentTest(unittest.TestCase):
             stream = next(item for item in result["streams"] if item["stream_id"] == "spanish_public_pension")
 
             self.assertEqual(stream["foreign_tax_credit"]["amount"], "3000.00")
-            self.assertEqual(stream["net"]["annual_amount"], "8570.00")
+            self.assertEqual(stream["net"]["annual_amount"], "8970.00")
 
     def test_blocks_credit_for_non_definitive_spanish_tax(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

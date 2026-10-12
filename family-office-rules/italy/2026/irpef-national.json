@@ -1,19 +1,20 @@
 {
   "schema_version": "tax-rule-pack/v1",
-  "rule_pack_id": "it.irpef-national.2026.v1",
+  "rule_pack_id": "it.irpef-national.2026.v2",
   "jurisdiction": "IT",
   "currency": "EUR",
-  "description": "Italian national IRPEF gross tax brackets for tax year 2026. Gross national tax only, on taxable income already determined.",
+  "description": "Italian national IRPEF gross tax brackets for tax year 2026 under Legge 199/2025 art. 1 comma 3. Gross national tax only, on taxable income already determined.",
   "status": "versioned_rule_not_advice",
   "knowledge_refs": [
     "family-office-knowledge/taxation/irpef.md"
   ],
   "source_refs": [
     {
-      "source_id": "gazzetta.legge-2024-207.art1-comma2",
-      "title": "Legge 30 dicembre 2024, n. 207, art. 1 comma 2",
-      "url": "https://www.gazzettaufficiale.it/eli/id/2024/12/31/24G00229/sg",
-      "published_on": "2024-12-31"
+      "source_id": "gazzetta.legge-2025-199.art1-comma3",
+      "title": "Legge 30 dicembre 2025, n. 199, art. 1 comma 3",
+      "url": "https://www.gazzettaufficiale.it/atto/serie_generale/caricaArticoloDefault/originario?atto.codiceRedazionale=25G00212&atto.dataPubblicazioneGazzetta=2025-12-30&atto.tipoProvvedimento=LEGGE",
+      "published_on": "2025-12-30",
+      "retrieved_on": "2026-10-11"
     }
   ],
   "limitations": [
@@ -23,7 +24,7 @@
   ],
   "rules": [
     {
-      "rule_id": "it.irpef-national.gross.2026",
+      "rule_id": "it.irpef-national.gross.2026.v2",
       "tax_type": "personal_income_tax_gross_national",
       "valid_from": "2026-01-01",
       "valid_to": "2026-12-31",
@@ -36,7 +37,7 @@
         {
           "from": "28000.00",
           "to": "50000.00",
-          "rate": "0.35"
+          "rate": "0.33"
         },
         {
           "from": "50000.00",

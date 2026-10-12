@@ -467,6 +467,104 @@ Esito: audit completato sul perimetro V6.6d-V6.9. Confini dei servizi, contratti
 
 Verifiche: 46 test mirati V6.6d-V6.9 e 15 test cadenza/CLI OK; regression completa engine, compilazione, pip check, smoke `fo backup --help`/`fo audit --help`, validazione planner, privacy/path review, `git diff --check` e `roadmap_audit.py` OK. V6.10 resta pianificato e non avviato.
 
-## Governance blocker after V6.14
+### V6.15 - Payroll to Work Transition source contract
 
-V6.14 è completato e non esiste nella roadmap attiva alcun incremento `planned`, `in_progress` o `blocked` selezionabile; V6.9a è già `done` nonostante la posizione finale nel file. L'impatto è che non si può determinare o implementare un ulteriore incremento senza inventare scope. Prerequisito: aggiungere un incremento pianificato nella roadmap V6 oppure aprire formalmente una roadmap successiva e il relativo gate nell'indice. La roadmap V6 resta `in_progress` per mantenere l'unica roadmap attiva richiesta dall'audit.
+**Stato:** `done`
+**Tipo:** `functional`
+
+Rendere il risultato di `fo payroll import` utilizzabile dal setup Work Transition quando i periodi del cedolino sono leggibili, senza inferire il membro del nucleo e senza introdurre calcoli.
+
+- Dipende da: V6.10b, V6.14.
+- Repository: `engine`, `bootstrap`.
+- Output: snapshot `payroll/v1` con `as_of_date`, `stream_start_date`, `stream_end_date` e `value_basis: net` derivati deterministicamente dai periodi estratti; binding esplicito tramite `fo planning work-transition sources setup --overwrite`.
+- Scope: periodo minimo/massimo osservato, data di osservazione deterministica, discovery compatibile, provenance e gap espliciti quando i periodi mancano.
+- Out of scope: assegnazione automatica a `primary` o `spouse`, calcolo fiscale/previdenziale/finanziario, normalizzazione dei PDF o scelta silenziosa della fonte.
+- Test: import payroll con periodi validi e mancanti; discovery/binding con bounds; CLI e readiness.
+- Done quando: lo snapshot prodotto dal comando non viene più scartato solo per metadata mancanti, il setup mostra la scelta esplicita e la readiness mantiene i gap realmente non risolti.
+
+Esito: completato. `payroll/v1` aggiunge `as_of_date`, `period`, `stream_start_date`, `stream_end_date` e `value_basis: net` solo quando derivabili dai periodi e dai netti estratti; periodi o netti mancanti restano gap. Il setup Work Transition rileva ora lo snapshot e mantiene il binding primary/spouse come scelta esplicita. Verifiche: 6 test payroll, 9 source binding, 16 readiness OK; suite engine 694 test con un errore ambientale intermittente del test API Windows ripetuto con successo in isolamento e 2 skip; audit roadmap, guardrail e `git diff --check` OK.
+
+### V6.15a - Work Transition source choice summary
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Rendere comprensibile la scelta delle fonti Work Transition direttamente dalla CLI, senza chiedere all'operatore di aprire o navigare file JSON.
+
+- Dipende da: V6.15.
+- Repository: `engine`, `bootstrap`.
+- Output: riepilogo locale non persistito del candidato con numero documenti/record, periodi, datori e totale netto quando disponibile; prompt esplicito per associare la fonte a `primary`, `spouse` o `nucleo`.
+- Vincoli: il riepilogo è letto solo dal workspace durante la sessione CLI; importi e dettagli non vengono copiati nel manifest, nei binding, nel planner o nei log.
+- Out of scope: inferenza automatica del membro, calcoli fiscali/previdenziali/finanziari, scelta automatica della fonte.
+- Test: discovery summary, prompt CLI, scelta `0`/numero, privacy del binding e regressione Work Transition.
+- Done quando: l'operatore può decidere dalla CLI se una fonte appartiene al membro richiesto senza aprire JSON e senza persistenza dei dettagli personali nel contratto.
+
+Esito: completato. La discovery prepara un riepilogo locale non persistito con documenti, record, periodi, datori e totale netto osservato; il prompt distingue `primary`, `spouse` e `nucleo`, spiega la scelta `0` e non assegna automaticamente il membro. Verifiche: 10 test source binding, 6 payroll, 16 readiness, smoke CLI reale, audit roadmap, guardrail e `git diff --check` OK.
+
+### V6.15b - Bank expense batch review
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Rendere praticabile la revisione di export bancari numerosi senza approvare automaticamente singleton, categorie `unknown` o gruppi ambigui.
+
+- Dipende da: V6.14, V6.15a.
+- Repository: `engine`, `bootstrap`.
+- Compatibilità: snapshot legacy privi di merchant fingerprint devono essere raggruppati con lo stesso normalizzatore deterministico V6.14; una nuova importazione resta comunque consigliata.
+- Import XLSX: ogni foglio viene normalizzato usando le proprie intestazioni, incluse le varianti `descrizione_operazione`, `causale_abi` e `data_contabile`, evitando righe artificialmente `unknown`.
+- UX: la CLI mostra per ogni categoria nota gruppi, movimenti, totale, periodo ed esempi; con `y` approva la categoria in blocco, mentre `n` mantiene la revisione dei gruppi. Per gli `unknown` offre una scelta aggregata esplicita (`o` default per mantenere il totale, `e`, `n`); anomalie e categorie rifiutate restano interattive.
+- Riepilogo UX: prima dei prompt la CLI separa chiaramente movimenti totali, movimenti con proposta, movimenti ancora da categorizzare e numero di gruppi; elenca anche i conteggi per categoria.
+- Classificazione deterministica: il rule pack riconosce segnali locali per prelievi, ristorazione, cinema, trasporti, utenze e salute e separa costi finanziari/tecnici non domestici; i casi senza evidenza restano `unknown` aggregabili, senza inferenza opaca.
+- Out of scope: approvare `unknown`, singleton, anomalie o categorie non omogenee; calcoli fiscali/finanziari; LLM obbligatorio.
+- Test: snapshot legacy, batch approval, eccezioni, lifecycle output e provenance.
+- Done quando: un export con migliaia di righe non richiede una decisione per ogni movimento, ma conserva revisione umana per le eccezioni.
+
+Esito: completato. La CLI ricostruisce fingerprint V6.14 per snapshot legacy e propone una conferma batch per categoria con riepilogo locale; il rule pack assegna solo categorie supportate da segnali deterministici e per gli `unknown` offre escludi tutto, `other` o dettaglio. L'import XLSX ora rispetta le intestazioni di ogni foglio. Sul workspace reale l'import aggiornato produce 4.280 transazioni e 2.624 possibili spese; gli esempi TOKI/CINEDREAM/prelievo sono classificati rispettivamente food/leisure/cash_withdrawal. Verifiche: 10 test bank-expenses, suite engine da rieseguire, audit roadmap, guardrail e `git diff --check`.
+
+### V6.15c - Precise ATM withdrawal classification
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Eliminare il falso positivo per cui pagamenti POS/Maestro/VPay contenenti la parola “prelievo” entrano in `cash_withdrawal`.
+
+- Dipende da: V6.15b.
+- Repository: `engine`, `bootstrap`.
+- Classificazione: usare segnali ATM espliciti; segnali POS/PagoBANCOMAT/Maestro/VPay prevalgono sulla parola generica se manca evidenza ATM.
+- UX: non chiedere di approvare o escludere l'intero gruppo contanti finché include pagamenti carta ambigui.
+- Test: ATM certo resta `cash_withdrawal`; pagamento POS VPay con “prelievo” non è cash; merchant non riconosciuto resta `unknown`.
+- Done quando: regressioni mirate e reimport reale mostrano solo prelievi ATM certi nel gruppo `cash_withdrawal`.
+
+Esito: completato. La classificazione richiede marker ATM espliciti (`prelievo/prelevamento ATM o bancomat`, `prel bancomat`, `bancomat ns`, `nostro bancomat`) e non considera ATM una causale con marker POS/PagoBANCOMAT/Maestro/VPay. Test engine: 698 OK, 2 skip; il test API Windows, fallito una volta per reset di connessione, passa sia isolato sia nella seconda suite completa. Reimport workspace: 182 movimenti cash in 181 gruppi e zero righe `cash_withdrawal` con marker POS/Maestro/VPay; il sample LUL/VPay resta `unknown`.
+
+### V6.15d - Bank expense classifier code audit
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Eseguire il code audit richiesto dopo V6.12, V6.13, V6.14 e V6.15c, verificando classificatore bancario, CLI review, test, privacy, contratti, data gaps, error handling e roadmap. Registrare follow-up sulle causali ricorrenti ancora non classificate prima di ampliare le regole.
+
+- Dipende da: V6.15c.
+- Repository: `engine`, `bootstrap`.
+- Done quando: review locale e suite completa concluse; findings e follow-up tracciati; audit cadence azzerata.
+
+Esito: suite engine 698 test OK, 2 skip; test API Windows passato isolatamente e nella seconda suite completa dopo un reset intermittente al primo run. Privacy, contratti e regressioni verificati. Follow-up: classificazione basata su regole token in `_propose_category` troppo ampia (casi già emersi: canone carta e acquisto titoli con token polizza); separare segnali merchant/operazione e lasciare ignoti ambigui come `unknown`. Reviewer delegato non ha restituito evidenze entro finestra bounded, quindi audit completato localmente sui confini indicati.
+
+### V6.15e - Deterministic transport patterns in bank expenses
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Ridurre le eccezioni bancarie solo per pattern trasporto espliciti emersi dalla review, senza classificare merchant ambigui.
+
+- Dipende da: V6.15d.
+- Segnali inclusi: distributore carburante AGIP e biglietteria LUL (`LUL ticket machine`).
+- Esclusioni: `locali parco` e altri merchant non riconoscibili restano `unknown`.
+- Test: fixture sintetiche AGIP/LUL e controllo unknown per descrizione ambigua.
+- Done quando: test mirati e reimport workspace confermano i due segnali e non allargano il matcher ad attività generiche.
+
+Esito: `AGIP` e `LUL ticket machine` assegnati a transport; Locali Parco resta unknown. Test bank expenses 10 OK; suite engine 698 OK, 2 skip. Reimport privato: 20 movimenti riconosciuti come transport e unknown ridotti a 1.242 movimenti in 1.175 gruppi su 2.542 spese possibili. Nessuna riga reale è stata copiata nella documentazione o nei test.
+
+### Governance note after V6.14
+
+Il precedente blocker di governance dopo V6.14 è rimosso aprendo V6.15, V6.15a, V6.15b, V6.15c e V6.15d nella roadmap V6. La roadmap V6 resta `in_progress` come unica roadmap attiva richiesta dall'audit. V6.15d ha azzerato la cadenza code-audit.

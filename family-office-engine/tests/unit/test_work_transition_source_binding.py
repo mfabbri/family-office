@@ -107,6 +107,68 @@ class WorkTransitionSourceBindingTests(unittest.TestCase):
             entry = bind_work_transition_source(liquidity_manifest_path, root, input_id="bridge", candidate=candidate)
             self.assertEqual("immediate", entry["liquidity_tier"])
 
+    def test_discovers_payroll_snapshot_metadata_for_work_transition(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            manifest = _manifest()
+            manifest["required_inputs"][0]["requires_stream_bounds"] = True
+            snapshots = root / "snapshots"
+            snapshots.mkdir()
+            (snapshots / "payroll.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "payroll/v1",
+                        "record_type": "PayrollSnapshot",
+                        "as_of_date": "2026-02-28",
+                        "stream_start_date": "2026-01-01",
+                        "stream_end_date": "2026-02-28",
+                        "value_basis": "net",
+                        "period": {"start_date": "2026-01-01", "end_date": "2026-02-28"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            manifest_path = root / "planning" / "readiness.json"
+            manifest_path.parent.mkdir()
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+            discovery = discover_work_transition_sources(root, manifest["required_inputs"])
+            candidate = discovery["candidates_by_input"]["employment"][0]
+            self.assertEqual("2026-01-01", candidate["metadata"]["stream_start_date"])
+            self.assertEqual("2026-02-28", candidate["metadata"]["stream_end_date"])
+            self.assertEqual([], candidate["metadata_gaps"])
+
+    def test_candidate_contains_local_summary_for_explicit_cli_choice(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            manifest = _manifest()
+            snapshots = root / "snapshots"
+            snapshots.mkdir()
+            (snapshots / "payroll.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "payroll/v1",
+                        "record_type": "PayrollSnapshot",
+                        "as_of_date": "2026-02-28",
+                        "stream_start_date": "2026-01-01",
+                        "stream_end_date": "2026-02-28",
+                        "summary": {"record_count": 2, "net_pay_total": "5000.00"},
+                        "documents": [{"filename": "jan.pdf"}, {"filename": "feb.pdf"}],
+                        "records": [
+                            {"period_label": "Gennaio 2026", "employer": "ACME SRL"},
+                            {"period_label": "Febbraio 2026", "employer": "ACME SRL"},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            discovery = discover_work_transition_sources(root, manifest["required_inputs"])
+            summary = discovery["candidates_by_input"]["employment"][0]["local_summary"]
+            self.assertEqual(2, summary["document_count"])
+            self.assertEqual(["Febbraio 2026", "Gennaio 2026"], summary["periods"])
+            self.assertEqual(["ACME SRL"], summary["employers"])
+            self.assertEqual("5000.00", summary["net_pay_total"])
+
     def test_reports_actionable_gap_when_required_snapshot_metadata_is_absent(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -173,6 +235,8 @@ class WorkTransitionSourceBindingTests(unittest.TestCase):
                 code = main(["planning", "work-transition", "sources", "setup", "--input", str(manifest_path), "--output", str(output_path)])
             self.assertEqual(0, code, stdout.getvalue())
             self.assertIn("scegli esplicitamente", stdout.getvalue())
+            self.assertIn("Scegli solo una fonte che appartiene alla persona", stdout.getvalue())
+            self.assertIn("Riepilogo locale: 0 documenti; 0 record.", stdout.getvalue())
             self.assertIn("planning work-transition sources setup: blocked", stdout.getvalue())
             self.assertEqual(1, len(json.loads(manifest_path.read_text(encoding="utf-8"))["sources"]))
 

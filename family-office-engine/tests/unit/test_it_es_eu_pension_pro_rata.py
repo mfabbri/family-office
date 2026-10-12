@@ -43,7 +43,7 @@ class ItEsEuPensionProRataTest(unittest.TestCase):
         self.assertTrue(result["spanish_entitlement"]["autonomous"]["eligible"])
         self.assertTrue(result["spanish_entitlement"]["totalized"]["eligible"])
 
-    def test_counts_overlapping_it_es_month_once_in_eu_denominator(self):
+    def test_blocks_pro_rata_for_unclassified_it_es_overlap(self):
         result = self._build(
             _input(
                 [
@@ -56,7 +56,77 @@ class ItEsEuPensionProRataTest(unittest.TestCase):
         self.assertEqual(result["periods"]["spain_months"], 72)
         self.assertEqual(result["periods"]["overlap_month_count"], 12)
         self.assertEqual(result["periods"]["total_eu_non_overlapping_months"], 240)
-        self.assertIn("overlapping_periods_removed_from_total", {warning["code"] for warning in result["warnings"]})
+        self.assertEqual(result["spanish_entitlement"]["status"], "not_eligible")
+        self.assertFalse(result["spanish_entitlement"]["totalized"]["eligible"])
+        self.assertEqual(result["spanish_pro_rata_pension"]["status"], "not_calculable")
+        self.assertIsNone(result["spanish_pro_rata_pension"]["amounts"])
+        self.assertIn("unclassified_it_es_period_overlap", {gap["code"] for gap in result["data_gaps"]})
+        self.assertIn(
+            "overlapping_periods_require_institutional_classification",
+            {warning["code"] for warning in result["warnings"]},
+        )
+
+    def test_under_one_year_spanish_period_requires_article_57_institutional_determination(self):
+        result = self._build(
+            _input(
+                [
+                    _period("IT", "2006-01-01", "2025-01-31"),
+                    _period("ES", "2025-02-01", "2025-12-31"),
+                ]
+            )
+        )
+
+        self.assertEqual(result["spanish_entitlement"]["status"], "eligible_by_totalization")
+        self.assertEqual(result["spanish_pro_rata_pension"]["status"], "not_calculable")
+        self.assertIn(
+            "article_57_under_one_year_institutional_determination_required",
+            {gap["code"] for gap in result["data_gaps"]},
+        )
+        article_57_gap = next(
+            gap for gap in result["data_gaps"] if gap["code"] == "article_57_under_one_year_institutional_determination_required"
+        )
+        self.assertEqual(article_57_gap["threshold_months"], 12)
+        self.assertEqual(article_57_gap["all_states_exempt_branch"], "institution_level_determination_required")
+        self.assertTrue(result["spanish_pro_rata_pension"]["method"]["article_57_under_one_year"]["both_conditions_required_for_exception"])
+
+    def test_twelve_month_spanish_period_remains_calculable_when_other_requirements_are_met(self):
+        result = self._build(
+            _input(
+                [
+                    _period("IT", "2006-01-01", "2024-12-31"),
+                    _period("ES", "2025-01-01", "2025-12-31"),
+                ]
+            )
+        )
+
+        self.assertEqual(result["spanish_entitlement"]["status"], "eligible_by_totalization")
+        self.assertEqual(result["spanish_pro_rata_pension"]["status"], "calculated")
+        self.assertEqual(result["spanish_pro_rata_pension"]["ratio"]["spain_months"], 12)
+
+    def test_requires_spanish_insured_or_equivalent_status_when_rule_pack_requires_it(self):
+        payload = _input([_period("IT", "2006-01-01", "2020-12-31"), _period("ES", "2021-01-01", "2025-12-31")])
+        payload.pop("spanish_insured_or_equivalent_status")
+
+        result = self._build(payload)
+
+        self.assertEqual(result["spanish_pro_rata_pension"]["status"], "not_calculable")
+        self.assertIn(
+            "missing_spanish_insured_or_equivalent_status",
+            {gap["code"] for gap in result["data_gaps"]},
+        )
+
+    def test_blocks_when_spanish_insured_or_equivalent_status_is_not_confirmed(self):
+        payload = _input([_period("IT", "2006-01-01", "2020-12-31"), _period("ES", "2021-01-01", "2025-12-31")])
+        payload["spanish_insured_or_equivalent_status"] = False
+
+        result = self._build(payload)
+
+        self.assertEqual(result["spanish_pro_rata_pension"]["status"], "not_calculable")
+        self.assertIsNone(result["spanish_pro_rata_pension"]["amounts"])
+        self.assertIn(
+            "spanish_insured_or_equivalent_status_not_confirmed",
+            {gap["code"] for gap in result["data_gaps"]},
+        )
 
     def test_blocks_when_recent_requirement_not_met_even_with_totalization(self):
         result = self._build(
@@ -197,6 +267,7 @@ def _input(periods: list[dict]) -> dict:
         "retirement_date": "2026-12",
         "date_of_birth": "1960-01-01",
         "recent_contribution_anchor_date": "2026-12-01",
+        "spanish_insured_or_equivalent_status": True,
         "inps_history_status": "complete_dated_history",
         "future_assumptions_status": "explicit",
         "sources": [{"source_id": "synthetic-case", "type": "synthetic_fixture"}],

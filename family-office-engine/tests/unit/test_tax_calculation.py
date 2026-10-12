@@ -11,6 +11,7 @@ from family_office_engine.services.tax_calculation import (
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 ITALY_2026_RULE_PACK = REPOSITORY_ROOT / "family-office-rules" / "italy" / "2026" / "irpef-national.json"
+ITALY_2025_RULE_PACK = REPOSITORY_ROOT / "family-office-rules" / "italy" / "2025" / "irpef-national.json"
 
 
 SYNTHETIC_RULE_PACK = {
@@ -44,16 +45,16 @@ class TaxCalculationTest(unittest.TestCase):
             written = json.loads(output_path.read_text(encoding="utf-8"))
 
             self.assertEqual(result["status"], "complete")
-            self.assertEqual(written["result"]["tax_due"], "18440.00")
+            self.assertEqual(written["result"]["tax_due"], "18000.00")
             self.assertEqual(written["result"]["tax_type"], "personal_income_tax_gross_national")
             self.assertEqual(
                 written["result"]["explainability"]["rule_id"],
-                "it.irpef-national.gross.2026",
+                "it.irpef-national.gross.2026.v2",
             )
             self.assertEqual(len(written["result"]["applied_brackets"]), 3)
             self.assertEqual(
                 written["rule_pack"]["source_refs"][0]["source_id"],
-                "gazzetta.legge-2024-207.art1-comma2",
+                "gazzetta.legge-2025-199.art1-comma3",
             )
             self.assertIn("national gross IRPEF", written["rule_pack"]["limitations"][0])
 
@@ -62,10 +63,21 @@ class TaxCalculationTest(unittest.TestCase):
             root = Path(tmp_dir)
 
             at_first_threshold = calculate_tax(ITALY_2026_RULE_PACK, 2026, "IT", "28000.00", root / "a.json")
+            above_first_threshold = calculate_tax(ITALY_2026_RULE_PACK, 2026, "IT", "28001.00", root / "a-plus.json")
             at_second_threshold = calculate_tax(ITALY_2026_RULE_PACK, 2026, "IT", "50000.00", root / "b.json")
+            above_second_threshold = calculate_tax(ITALY_2026_RULE_PACK, 2026, "IT", "50001.00", root / "b-plus.json")
 
             self.assertEqual(at_first_threshold["result"]["tax_due"], "6440.00")
-            self.assertEqual(at_second_threshold["result"]["tax_due"], "14140.00")
+            self.assertEqual(above_first_threshold["result"]["tax_due"], "6440.33")
+            self.assertEqual(at_second_threshold["result"]["tax_due"], "13700.00")
+            self.assertEqual(above_second_threshold["result"]["tax_due"], "13700.43")
+
+    def test_italy_2025_irpef_historical_brackets_remain_separate(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            result = calculate_tax(ITALY_2025_RULE_PACK, 2025, "IT", "50000.00", Path(tmp_dir) / "tax.json")
+
+            self.assertEqual(result["rule_pack"]["rule_pack_id"], "it.irpef-national.2025.v1")
+            self.assertEqual(result["result"]["tax_due"], "14140.00")
 
     def test_calculate_tax_applies_progressive_brackets(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

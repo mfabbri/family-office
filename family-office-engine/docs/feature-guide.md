@@ -17,11 +17,9 @@ Percorso question-first:
 
 ```text
 fo ask "Quando posso smettere di lavorare?"
-fo planning work-exit wizard
-fo planning work-exit build
 ```
 
-`fo ask` chiarisce la decisione e mostra fatti disponibili, assunzioni, `data_gaps`, limiti, provenienza e prossima azione. Il wizard raccoglie solo gli input dichiarati mancanti e salva progressivamente nel workspace. Il build produce una prima data sostenibile oppure un blocco spiegato; non sostituisce INPS, P1, una certificazione o una raccomandazione professionale. Se le fonti sono già negli snapshot, il percorso di collegamento Work Transition resta il prerequisito operativo successivo.
+`fo ask` chiarisce la decisione e mostra fatti disponibili, assunzioni, `data_gaps`, limiti, provenienza e prossima azione. L'optimizer che genera autonomamente la prima data sostenibile non è ancora disponibile. `fo planning work-exit wizard/build` è un percorso legacy diagnostico: il wizard richiede una data candidata e il build non rappresenta il piano plurifase completo. Non usarlo per rispondere alla domanda sulla prima data sostenibile. La capability completa è pianificata nella roadmap Work Transition.
 
 ## “Come proteggo il tenore di vita e il patrimonio?”
 

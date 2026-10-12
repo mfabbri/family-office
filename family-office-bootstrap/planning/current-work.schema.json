@@ -188,6 +188,10 @@
                 "compliance"
               ]
             },
+            "objective": {
+              "type": "string",
+              "minLength": 1
+            },
             "repositories": {
               "type": "array",
               "items": {

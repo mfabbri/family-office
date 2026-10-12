@@ -5,10 +5,15 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
 
+from family_office_engine.governance.pension_source_freshness import (
+    PensionSourceFreshnessError,
+    require_fresh_pension_rule_pack,
+)
+
 SCHEMA_VERSION = "it-es-eu-pension-pro-rata/v1"
 INPUT_SCHEMA_VERSION = "it-es-eu-pension-pro-rata-input/v1"
 RECORD_TYPE = "ItEsEuPensionProRataEstimate"
-RULE_PACK_SCHEMA_VERSION = "eu-pension-coordination-rule-pack/v1"
+RULE_PACK_SCHEMA_VERSION = "eu-pension-coordination-rule-pack/v2"
 
 
 class ItEsEuPensionProRataError(ValueError):
@@ -34,7 +39,14 @@ def build_it_es_eu_pension_pro_rata(
     recent_anchor = data.get("recent_contribution_anchor_date")
     periods_result = _normalize_periods(data.get("insurance_periods"))
     input_gaps = _input_readiness_gaps(data)
-    entitlement = _spanish_entitlement(periods_result, retirement_date, date_of_birth, recent_anchor, rule_pack)
+    entitlement = _spanish_entitlement(
+        periods_result,
+        retirement_date,
+        date_of_birth,
+        recent_anchor,
+        data.get("spanish_insured_or_equivalent_status"),
+        rule_pack,
+    )
     theoretical = _spanish_theoretical_amount(data.get("spanish_theoretical_pension"))
     pro_rata = _spanish_pro_rata(theoretical, periods_result, entitlement, rule_pack)
     data_gaps = []
@@ -71,8 +83,9 @@ def build_it_es_eu_pension_pro_rata(
         "data_gaps": data_gaps,
         "warnings": _warnings(periods_result),
         "notes": (
-            "EU periods are aggregated only for entitlement checks. Italian periods are not used as Spanish bases, "
-            "and this estimate is not an official P1 decision."
+            "EU coordination can aggregate periods for entitlement and theoretical/pro-rata calculation under the "
+            "rule pack. Italian periods are not transferred, merged, or used as Spanish contribution bases, and "
+            "this candidate-only estimate is not an official P1 decision, recognition, or payment determination."
         ),
     }
     return _write_snapshot(snapshot, output_path)
@@ -109,10 +122,24 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     if set(data["jurisdictions"]) != {"IT", "ES", "EU"}:
         raise ItEsEuPensionProRataError("EU pension coordination jurisdictions must be IT, ES and EU")
     _validate_source_refs(data["source_refs"])
+    try:
+        require_fresh_pension_rule_pack(rule_pack_path)
+    except PensionSourceFreshnessError as exc:
+        raise ItEsEuPensionProRataError(str(exc)) from exc
     if data["coordination_principles"].get("no_transfer_or_merger_of_contributions") is not True:
         raise ItEsEuPensionProRataError("Rule pack must forbid transfer or merger of contributions")
+    if data["coordination_principles"].get("aggregation_for_entitlement_and_theoretical_calculation") is not True:
+        raise ItEsEuPensionProRataError(
+            "Rule pack must explicitly allow aggregation for entitlement and theoretical calculation"
+        )
     if data["pro_rata_method"].get("no_foreign_bases_in_spanish_theoretical_amount") is not True:
         raise ItEsEuPensionProRataError("Rule pack must forbid foreign bases in Spanish theoretical amount")
+    article_57 = data["pro_rata_method"].get("article_57_under_one_year")
+    if not isinstance(article_57, dict):
+        raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.article_57_under_one_year")
+    overlap_policy = data["pro_rata_method"].get("overlap_policy")
+    if not isinstance(overlap_policy, dict):
+        raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.overlap_policy")
     return data
 
 
@@ -160,6 +187,17 @@ def _normalize_periods(periods: Any) -> dict[str, Any]:
 
     total_months = country_months["IT"] | country_months["ES"]
     overlapping = sorted(country_months["IT"] & country_months["ES"])
+    if overlapping:
+        data_gaps.append(
+            {
+                "code": "unclassified_it_es_period_overlap",
+                "message": (
+                    "Italy-Spain overlapping periods require type, order, and institutional classification under "
+                    "Regulation 987/2009 Article 12; monthly de-duplication alone is not sufficient."
+                ),
+                "overlap_month_count": len(overlapping),
+            }
+        )
     return {
         "summary": {
             "status": "normalized",
@@ -186,6 +224,7 @@ def _spanish_entitlement(
     retirement_date: str,
     date_of_birth: Any,
     recent_anchor: Any,
+    spanish_insured_or_equivalent_status: Any,
     rule_pack: dict[str, Any],
 ) -> dict[str, Any]:
     params = rule_pack["spanish_ordinary_entitlement"]
@@ -213,6 +252,29 @@ def _spanish_entitlement(
             {
                 "code": "missing_recent_contribution_anchor_date",
                 "message": "A declared anchor date is required for the Spanish recent-contribution lookback.",
+            }
+        )
+    if params.get("insured_or_equivalent_status_required") is True:
+        if spanish_insured_or_equivalent_status is None:
+            gaps.append(
+                {
+                    "code": "missing_spanish_insured_or_equivalent_status",
+                    "message": "Spanish insured-or-equivalent status is required for the encoded Article 205 specific-period check.",
+                }
+            )
+        elif spanish_insured_or_equivalent_status is not True:
+            gaps.append(
+                {
+                    "code": "spanish_insured_or_equivalent_status_not_confirmed",
+                    "message": "Spanish insured-or-equivalent status is not confirmed for the encoded Article 205 specific-period check.",
+                }
+            )
+    if periods_result["overlaps"]:
+        gaps.append(
+            {
+                "code": "unclassified_it_es_period_overlap",
+                "message": "Italy-Spain overlap requires Article 12 institutional classification before entitlement or pro-rata determination.",
+                "overlap_month_count": len(periods_result["overlaps"]),
             }
         )
     lookback_anchor = recent_anchor[:7] if isinstance(recent_anchor, str) else retirement_date
@@ -248,7 +310,7 @@ def _spanish_entitlement(
                 "eligible": totalized,
                 "total_eu_months": len(eu_months),
                 "recent_eu_months": eu_recent,
-                "aggregation_for_entitlement_only": True,
+                "aggregation_for_entitlement_and_theoretical_calculation": True,
             },
             "thresholds": {
                 "minimum_total_contribution_months": required_total,
@@ -367,20 +429,48 @@ def _spanish_pro_rata(
     theoretical_result = theoretical["result"]
     total = periods_result["summary"]["total_eu_non_overlapping_months"]
     es = periods_result["summary"]["spain_months"]
-    minimum_es = int(rule_pack["pro_rata_method"].get("minimum_spanish_period_months_for_pro_rata", 0))
+    article_57 = rule_pack["pro_rata_method"]["article_57_under_one_year"]
+    under_one_year_threshold = int(article_57["less_than_one_year_threshold_months"])
     if entitlement["result"]["status"] == "not_eligible":
         gaps.append({"code": "spanish_entitlement_required_for_pro_rata", "message": "Pro-rata is not calculated when Spanish entitlement is not reached."})
     if theoretical_result is None:
         gaps.append({"code": "missing_theoretical_amount_for_pro_rata", "message": "Cannot calculate pro-rata without a Spanish theoretical amount."})
-    if not total:
-        gaps.append({"code": "missing_periods_for_pro_rata", "message": "Cannot calculate pro-rata without non-overlapping EU periods."})
-    if es < minimum_es:
+    if any(
+        gap.get("code") in {
+            "missing_spanish_insured_or_equivalent_status",
+            "spanish_insured_or_equivalent_status_not_confirmed",
+            "unclassified_it_es_period_overlap",
+        }
+        for gap in entitlement["data_gaps"]
+    ):
         gaps.append(
             {
-                "code": "spanish_period_under_one_year",
-                "message": "Spanish period is below the encoded minimum for a separate pro-rata benefit.",
+                "code": "spanish_insured_or_equivalent_status_required_for_pro_rata",
+                "message": "Pro-rata is not calculated until the required Spanish insured-or-equivalent status is confirmed.",
+            }
+        )
+    if not total:
+        gaps.append({"code": "missing_periods_for_pro_rata", "message": "Cannot calculate pro-rata without non-overlapping EU periods."})
+    if periods_result["overlaps"]:
+        gaps.append(
+            {
+                "code": "unclassified_it_es_period_overlap",
+                "message": "Pro-rata is not calculable until Article 12 overlap classification is supplied by the competent institutions.",
+                "overlap_month_count": len(periods_result["overlaps"]),
+            }
+        )
+    if es < under_one_year_threshold and not entitlement["result"]["autonomous"]["eligible"]:
+        gaps.append(
+            {
+                "code": "article_57_under_one_year_institutional_determination_required",
+                "message": (
+                    "The Spanish period is under one year and an autonomous right is not established. The Article 57 "
+                    "exception requires the joint encoded conditions and an institutional determination; the period "
+                    "may remain relevant to another State's theoretical calculation but is not converted into a national contribution."
+                ),
                 "spanish_months": es,
-                "required_months": minimum_es,
+                "threshold_months": under_one_year_threshold,
+                "all_states_exempt_branch": article_57["all_states_exempt_branch"],
             }
         )
     if gaps:
@@ -442,8 +532,8 @@ def _warnings(periods_result: dict[str, Any]) -> list[dict[str, Any]]:
     if periods_result["overlaps"]:
         warnings.append(
             {
-                "code": "overlapping_periods_removed_from_total",
-                "message": "Overlapping Italy-Spain months are counted once in the EU denominator.",
+                "code": "overlapping_periods_require_institutional_classification",
+                "message": "Overlapping Italy-Spain months are not automatically de-duplicated for pro-rata calculation.",
                 "overlap_month_count": len(periods_result["overlaps"]),
             }
         )
@@ -542,7 +632,19 @@ def _date_in_rule_period(retirement_date: str, params: dict[str, Any]) -> bool:
 
 
 def _blocking_rule_gap(gaps: list[dict[str, Any]]) -> bool:
-    return any(gap["code"] in {"retirement_date_not_covered_by_rule_pack", "missing_date_of_birth", "missing_recent_contribution_anchor_date", "spanish_ordinary_age_not_reached"} for gap in gaps)
+    return any(
+        gap["code"]
+        in {
+            "retirement_date_not_covered_by_rule_pack",
+            "missing_date_of_birth",
+            "missing_recent_contribution_anchor_date",
+            "spanish_ordinary_age_not_reached",
+            "missing_spanish_insured_or_equivalent_status",
+            "spanish_insured_or_equivalent_status_not_confirmed",
+            "unclassified_it_es_period_overlap",
+        }
+        for gap in gaps
+    )
 
 
 def _month_index(date_value: Any, field: str) -> int:
@@ -595,7 +697,7 @@ def _empty_period_summary() -> dict[str, Any]:
 def _validate_source_refs(source_refs: Any) -> None:
     if not isinstance(source_refs, list) or not source_refs:
         raise ItEsEuPensionProRataError("EU pension coordination rule pack must contain source_refs")
-    allowed_prefixes = ("https://eur-lex.europa.eu/", "https://europa.eu/", "https://prestaciones.seg-social.es/", "https://www.seg-social.es/")
+    allowed_prefixes = ("https://eur-lex.europa.eu/", "https://europa.eu/", "https://prestaciones.seg-social.es/", "https://www.seg-social.es/", "https://www.boe.es/")
     for source_ref in source_refs:
         for field in ("source_id", "title", "url", "retrieved_on", "provisions"):
             if field not in source_ref:
