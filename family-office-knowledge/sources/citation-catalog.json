@@ -229,6 +229,7 @@
     {"document_id": "knowledge.international.eu-pension", "path": "international/eu-pension-coordination-it-es.md", "topics": ["pensions", "eu_coordination"], "jurisdictions": ["EU", "IT", "ES"], "citation_ids": ["eu.regulation.883-2004"]},
     {"document_id": "knowledge.international.spain-pension", "path": "international/spain-pension.md", "topics": ["pensions", "spain"], "jurisdictions": ["ES"], "citation_ids": []},
     {"document_id": "knowledge.international.spanish-net", "path": "international/spanish-pension-net-it-resident.md", "topics": ["pensions", "taxation", "cross_border"], "jurisdictions": ["IT", "ES"], "citation_ids": ["it.normattiva.tuir-art165", "it.law.207-2024.irpef"]},
+    {"document_id": "knowledge.pensions.timeline-events", "path": "pensions/pension-timeline-events-it-es-eu.md", "topics": ["pensions", "eu_coordination", "cross_border"], "jurisdictions": ["IT", "ES", "EU"], "citation_ids": []},
     {"document_id": "knowledge.succession", "path": "succession/README.md", "topics": ["succession", "estate_planning"], "jurisdictions": ["IT"], "citation_ids": ["it.normattiva.codice-civile", "it.normattiva.tus-346"]}
   ]
 }

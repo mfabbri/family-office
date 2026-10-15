@@ -81,19 +81,19 @@ class SecurityTest(unittest.TestCase):
             report = build_security_check(workspace, repository)
             self.assertIn("secret_detected", {item["code"] for item in report["findings"]})
 
-    def test_excessive_secret_store_permissions_are_finding(self):
-        if os.name == "nt":
-            self.skipTest("Windows ACLs are not represented by POSIX mode bits")
+    def test_secret_store_permissions_are_platform_aware(self):
         with tempfile.TemporaryDirectory() as folder:
             workspace = Path(folder)
-            report = build_security_check(workspace)
-            key = workspace / ".security" / "workspace.key"
-            try:
+            if os.name == "nt":
+                report = build_security_check(workspace)
+                self.assertEqual("acl-managed", report["secret_store"]["permissions"])
+                self.assertNotIn("secret_store_permissions", {item["code"] for item in report["findings"]})
+            else:
+                build_security_check(workspace)
+                key = workspace / ".security" / "workspace.key"
                 key.chmod(stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP)
                 report = build_security_check(workspace)
                 self.assertIn("secret_store_permissions", {item["code"] for item in report["findings"]})
-            except PermissionError:
-                self.skipTest("filesystem does not permit synthetic permission change")
 
 
 if __name__ == "__main__":

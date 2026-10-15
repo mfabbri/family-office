@@ -10,6 +10,14 @@
 
 Non eseguire ripetutamente l'intera suite durante modifiche locali se i test mirati forniscono feedback sufficiente.
 
+## Gate di completamento
+
+Al gate di incremento o release l'intera suite del repository deve terminare con esattamente 0 failure, 0 errori e 0 skipped. Un failure si corregge nel codice o, con evidenza del contratto, nel test; non si waiva come out-of-scope. Uno skip non è un pass: va sostituito da un test equivalente eseguibile sulle piattaforme supportate. Se la suite non può essere eseguita o passare integralmente, lo stato resta `in_progress` o `blocked`, mai `done`.
+
+### Windows e sandbox
+
+- Un errore di accesso ACL/temp imposto dal sandbox non è né un pass né una deroga al gate: la suite resta non verificata finché non viene eseguita. Se il comando è necessario e il blocco è attribuibile al sandbox, richiedere l'escalation/permesso previsto, poi eseguire la suite completa e registrare il conteggio reale. Non cambiare il percorso temporaneo o la semantica del test solo per aggirare il controllo; correggere invece il test quando la verifica equivalente multipiattaforma è parte del contratto.
+
 ## Review proportionality
 
 - T0–T1: self-review e test mirati.
@@ -19,7 +27,7 @@ Non eseguire ripetutamente l'intera suite durante modifiche locali se i test mir
 
 ## Gate operativo
 
-La review e' un gate, non un sostituto dell'implementazione. Il parent deve avere gia' un diff verificabile e test mirati prima di invocare il reviewer, salvo una review architetturale esplicitamente prerequisita. Le attese sul reviewer sono bounded: dopo un timeout si controlla il worktree e si prosegue localmente, si chiede una consegna sintetica oppure si registra un blocker; non si effettua polling indefinito. Un NO-GO deve produrre finding azionabili e un solo ciclo di correzione bounded. Se il finding non e' bounded o il ciclo fallisce, l'incremento resta `in_progress` e il planner registra evidenze, impatto e prerequisito.
+La review e' un gate, non un sostituto dell'implementazione. Il parent deve avere gia' un diff verificabile e test mirati prima di invocare il reviewer, salvo una review architetturale esplicitamente prerequisita. Le attese sul reviewer sono bounded: dopo un timeout si controlla il worktree e si prosegue localmente, si chiede una consegna sintetica oppure si registra un blocker; non si effettua polling indefinito. Un NO-GO deve produrre finding azionabili e un solo ciclo di correzione bounded. Se il finding non e' bounded o il ciclo fallisce, l'incremento resta `in_progress` e il planner registra evidenze, impatto e prerequisito. Per i gate normativi, il reviewer valuta una versione esatta del contratto: dopo una modifica sostanziale, il verdetto precedente non copre la nuova versione. Un ulteriore ciclo oltre il default richiede blocker documentato e decisione esplicita nel planner; autorizzazione e timebox valgono soltanto per quel tentativo.
 
 ## CLI UX checks
 
@@ -53,5 +61,6 @@ Riportare soltanto:
 - file modificati;
 - comportamento ottenuto;
 - test eseguiti e risultato;
+- risultato della suite completa al gate: failure/error/skip, tutti pari a 0;
 - rischi/gap residui;
 - stato roadmap, se applicabile.

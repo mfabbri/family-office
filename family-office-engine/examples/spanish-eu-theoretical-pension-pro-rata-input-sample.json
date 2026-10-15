@@ -4,6 +4,7 @@
   "retirement_date": "2026-12",
   "date_of_birth": "1960-01-01",
   "recent_contribution_anchor_date": "2026-12-01",
+  "spanish_insured_or_equivalent_status": true,
   "inps_history_status": "complete_dated_history",
   "future_assumptions_status": "explicit",
   "sources": [

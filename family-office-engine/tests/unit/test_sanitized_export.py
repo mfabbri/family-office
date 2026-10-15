@@ -1,5 +1,7 @@
 import hashlib
 import json
+import os
+import subprocess
 import tempfile
 import unittest
 import zipfile
@@ -110,13 +112,23 @@ class SanitizedExportTest(unittest.TestCase):
     def test_symlink_to_workspace_is_excluded(self):
         with tempfile.TemporaryDirectory() as folder:
             root, workspace = _layout(Path(folder))
-            private = workspace / "private.py"
-            _write(private, "private = True\n")
-            link = root / "family-office-engine/src/family_office_engine/private-link.py"
-            try:
-                link.symlink_to(private)
-            except (OSError, NotImplementedError):
-                self.skipTest("symlink creation unavailable")
+            link = root / "family-office-engine/src"
+            link.parent.mkdir(parents=True)
+            if os.name == "nt":
+                command = (
+                    "$ErrorActionPreference = 'Stop'; "
+                    f"New-Item -ItemType Junction -Path '{str(link).replace(chr(39), chr(39) * 2)}' "
+                    f"-Target '{str(workspace).replace(chr(39), chr(39) * 2)}' | Out-Null"
+                )
+                completed = subprocess.run(
+                    ["powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(0, completed.returncode, completed.stdout + completed.stderr)
+            else:
+                link.symlink_to(workspace, target_is_directory=True)
             result = build_sanitized_export(root, workspace, workspace / "exports/package.zip")
             self.assertEqual(1, result["counts"]["excluded_by_reason"]["symlink"])
 

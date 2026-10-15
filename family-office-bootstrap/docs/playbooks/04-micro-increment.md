@@ -16,9 +16,10 @@ Non leggere automaticamente long-term roadmap e decision log.
 3. Aggiornare `current-next-increment.md` solo se il piano cambia o inizia l'implementazione. Quando l'implementazione inizia, aggiornare nello stesso cambiamento anche lo stato del medesimo incremento nella roadmap attiva a `in_progress`: i due documenti devono restare allineati per l'audit.
 4. Implementare il minimo necessario.
 5. Eseguire test mirati.
-6. Eseguire regression appropriata al gate.
-7. Aggiornare contratto, roadmap e decision log solo se impattati.
-8. Marcare `done` solo con evidenze riproducibili.
+6. Eseguire la suite completa del repository al gate: il risultato accettabile è esattamente 0 failure, 0 errori e 0 skipped.
+7. Correggere ogni failure nel codice oppure, solo con evidenza del contratto, nel test. Sostituire ogni skip con un test equivalente eseguibile sulle piattaforme supportate; non trattare failure o skip come out-of-scope.
+8. Aggiornare contratto, roadmap e decision log solo se impattati.
+9. Marcare `done` solo con evidenze riproducibili della suite completa; se non può essere eseguita o passare integralmente, mantenere `in_progress` o `blocked`.
 
 ## CLI e wizard UX
 
@@ -40,6 +41,7 @@ Per incrementi esposti all'utente tramite CLI:
 
 - capacità osservabile disponibile;
 - test pertinenti verdi;
+- suite completa del repository con 0 failure, 0 errori e 0 skipped;
 - privacy e provenance verificate;
 - stato roadmap coerente;
 - nessun gap critico implicito.

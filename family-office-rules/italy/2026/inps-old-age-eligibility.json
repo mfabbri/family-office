@@ -1,16 +1,93 @@
 {
-  "schema_version": "inps-old-age-eligibility-rule-pack/v1",
-  "rule_pack_id": "it.inps-old-age-eligibility.2026-2028.v1",
+  "schema_version": "inps-old-age-eligibility-rule-pack/v2",
+  "rule_pack_id": "it.inps-old-age-eligibility.2026-2028.v2",
   "jurisdiction": "IT",
   "valid_from": "2026-01-01",
   "valid_to": "2028-12-31",
   "post_1996_cohort_start": "1996-01-01",
   "status": "deterministic_eligibility_screening_not_official_inps_decision",
+  "provenance_schema_version": "normative-source-provenance/v1",
+  "provenance_status": "source_bound_reviewed_limited",
+  "provenance_gaps": ["individual_entitlement_and_timeline_not_certified", "social_allowance_threshold_2027_2028_not_source_bound"],
+  "threshold_bindings": {
+    "post_1996_ordinary": {
+      "rule": "documented_monthly_pension_amount_gte_applicable_monthly_social_allowance",
+      "source_ids": ["normattiva.dl-201-2011.art24", "inps.pensione-vecchiaia", "inps.assegno-sociale-2026"],
+      "by_year": {
+        "2026": {"status": "supported", "monthly_amount": "546.24", "currency": "EUR", "payments_per_year": 13},
+        "2027": {"status": "gap", "reason": "annual social allowance amount is not source-bound in this pack"},
+        "2028": {"status": "gap", "reason": "annual social allowance amount is not source-bound in this pack"}
+      }
+    }
+  },
   "source_refs": [
-    {"source_id": "inps.pensione-vecchiaia", "title": "INPS, Pensione di vecchiaia", "authority": "Istituto Nazionale della Previdenza Sociale", "jurisdiction": "IT", "url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.pensione-di-vecchiaia.html", "retrieved_on": "2026-10-11", "reviewed_on": "2026-10-11", "next_review_due": "2027-01-09", "provisions": ["D.L. 201/2011, art. 24, comma 6 (requisito anagrafico ordinario)", "D.L. 201/2011, art. 24, comma 7 (limite minimo di importo e contribuzione effettiva; requisito applicabile nell'anno di decorrenza)", "pensione di vecchiaia ordinaria: requisito anagrafico e contributivo per le coorti anteriori/da 1 gennaio 1996", "alternativa contributiva: 71 anni e 5 anni effettivi, esclusa contribuzione figurativa"], "provision_periods": [{"provision_id": "ordinary_age_2026", "valid_from": "2026-01-01", "valid_to": "2026-12-31"}, {"provision_id": "contribution_threshold", "valid_from": "2026-01-01", "valid_to": "2028-12-31"}, {"provision_id": "post_1996_amount_threshold", "valid_from": "2026-01-01", "valid_to": "2028-12-31"}, {"provision_id": "post_1996_effective_contribution_alternative", "valid_from": "2026-01-01", "valid_to": "2028-12-31"}, {"provision_id": "employee_cessation", "valid_from": "2026-01-01", "valid_to": "2028-12-31"}]},
-    {"source_id": "inps.requisiti-2027-2028", "title": "INPS, Pensioni: requisiti aggiornati per il 2027 e il 2028", "authority": "Istituto Nazionale della Previdenza Sociale", "jurisdiction": "IT", "url": "https://www.inps.it/it/it/inps-comunica/notizie/dettaglio-news-page.news.2026.03.pensioni-requisiti-aggiornati-per-il-2027-e-il-2028.html", "retrieved_on": "2026-10-11", "reviewed_on": "2026-10-11", "next_review_due": "2027-01-09", "provisions": ["Circolare INPS 28/2026, allegato 2: adeguamento requisiti 2027 e 2028"], "provision_periods": [{"provision_id": "ordinary_age_adjustment_2027_2028", "valid_from": "2027-01-01", "valid_to": "2028-12-31"}]}
+    {
+      "source_id": "inps.pensione-vecchiaia",
+      "title": "INPS, Pensione di vecchiaia",
+      "authority": "Istituto Nazionale della Previdenza Sociale",
+      "jurisdiction": "IT",
+      "url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.pensione-di-vecchiaia.html",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
+      "legal_role": "administrative_guidance",
+      "provisions": [
+        "D.L. 201/2011, art. 24, comma 6 (requisito anagrafico ordinario)",
+        "D.L. 201/2011, art. 24, comma 7 (limite minimo di importo e contribuzione effettiva)",
+        "alternativa contributiva: 71 anni e 5 anni effettivi, esclusa contribuzione figurativa"
+      ],
+      "requirements_by_year": {
+        "2026": {
+          "ordinary_age": {"years": 67, "months": 0},
+          "contributory_alternative_age": {"years": 71, "months": 0}
+        }
+      },
+      "provision_periods": [
+        {"provision_id": "ordinary_age_2026", "legal_effective_from": null, "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2026-12-31"},
+        {"provision_id": "contribution_threshold", "legal_effective_from": null, "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"},
+        {"provision_id": "post_1996_amount_threshold", "legal_effective_from": null, "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"},
+        {"provision_id": "post_1996_effective_contribution_alternative", "legal_effective_from": null, "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"},
+        {"provision_id": "employee_cessation", "legal_effective_from": null, "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}
+      ]
+    },
+    {"source_id": "inps.assegno-sociale-2026", "title": "INPS, Assegno sociale", "authority": "Istituto Nazionale della Previdenza Sociale", "jurisdiction": "IT", "url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.assegno-sociale-50184.assegno-sociale.html", "retrieved_on": "2026-10-13", "reviewed_on": "2026-10-13", "next_review_due": "2027-01-11", "legal_role": "administrative_guidance", "provisions": ["Importo mensile assegno sociale 2026: 546,24 EUR per 13 mensilità"], "provision_periods": [{"provision_id": "social_allowance_amount_2026", "legal_effective_from": "2026-01-01", "legal_effective_to": "2026-12-31", "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2026-12-31"}]},
+    {"source_id": "inps.circolare-62-2018", "title": "INPS, Circolare 62 del 4 aprile 2018", "authority": "Istituto Nazionale della Previdenza Sociale", "jurisdiction": "IT", "url": "https://servizi2.inps.it/servizi/Bussola/VisualizzaDoc.aspx?iIDDalPortale=&iIDLink=-1&sVirtualURL=%2FCircolari%2FCircolare+numero+62+del+04-04-2018.htm", "retrieved_on": "2026-10-13", "reviewed_on": "2026-10-13", "next_review_due": "2027-01-11", "legal_role": "administrative_guidance", "provisions": ["Requisiti dal 1 gennaio 2019 dopo l'adeguamento disposto dal decreto 5 dicembre 2017"], "provision_periods": [{"provision_id": "historic_age_schedule_from_2019", "legal_effective_from": null, "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {
+      "source_id": "inps.requisiti-2027-2028",
+      "title": "INPS, Pensioni: requisiti aggiornati per il 2027 e il 2028",
+      "authority": "Istituto Nazionale della Previdenza Sociale",
+      "jurisdiction": "IT",
+      "url": "https://www.inps.it/it/it/inps-comunica/notizie/dettaglio-news-page.news.2026.03.pensioni-requisiti-aggiornati-per-il-2027-e-il-2028.html",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-11",
+      "next_review_due": "2027-01-09",
+      "legal_role": "administrative_guidance",
+      "provisions": ["Circolare INPS 28/2026, allegato 2"],
+      "requirements_by_year": {
+        "2027": {
+          "ordinary_age": {"years": 67, "months": 1},
+          "contributory_alternative_age": {"years": 71, "months": 1}
+        },
+        "2028": {
+          "ordinary_age": {"years": 67, "months": 3},
+          "contributory_alternative_age": {"years": 71, "months": 3}
+        }
+      },
+      "provision_periods": [
+        {"provision_id": "ordinary_age_adjustment_2027_2028", "legal_effective_from": null, "legal_effective_to": null, "pack_coverage_from": "2027-01-01", "pack_coverage_to": "2028-12-31"}
+      ]
+    },
+    {"source_id": "normattiva.dl-201-2011.art24", "title": "D.L. 6 dicembre 2011, n. 201, art. 24, commi 6-7", "authority": "Normattiva", "jurisdiction": "IT", "url": "https://www.normattiva.it/atto/caricaDettaglioAtto?atto.articolo.numero=24&atto.codiceRedazionale=011G0247&dataVigenza=09%2F09%2F2026", "retrieved_on": "2026-10-11", "reviewed_on": "2026-10-11", "next_review_due": "2027-01-09", "legal_role": "primary_legislation", "provisions": ["D.L. 201/2011, art. 24, commi 6-7: base ordinaria e alternativa contributiva soggetta agli adeguamenti alla speranza di vita"], "provision_periods": [{"provision_id": "ordinary_and_contributory_old_age_base", "legal_effective_from": "2011-12-06", "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {"source_id": "gazzetta.decreto-06-12-2011.11a16083", "title": "Decreto 6 dicembre 2011, adeguamento requisiti pensionistici", "authority": "Gazzetta Ufficiale", "jurisdiction": "IT", "url": "https://www.gazzettaufficiale.it/atto/vediMenuHTML?atto.codiceRedazionale=11A16083&atto.dataPubblicazioneGazzetta=2011-12-13&tipoSerie=serie_generale&tipoVigenza=originario", "retrieved_on": "2026-10-13", "reviewed_on": "2026-10-13", "next_review_due": "2027-01-11", "legal_role": "binding_implementing_act", "provisions": ["Incremento cumulativo di 3 mesi dal 1 gennaio 2013"], "provision_periods": [{"provision_id": "historic_adjustment_2013", "adjustment_months": 3, "legal_effective_from": "2013-01-01", "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {"source_id": "gazzetta.decreto-16-12-2014.14a09922", "title": "Decreto 16 dicembre 2014, adeguamento requisiti pensionistici", "authority": "Gazzetta Ufficiale", "jurisdiction": "IT", "url": "https://www.gazzettaufficiale.it/atto/vediMenuHTML?atto.codiceRedazionale=14A09922&atto.dataPubblicazioneGazzetta=2014-12-30&tipoSerie=serie_generale&tipoVigenza=originario", "retrieved_on": "2026-10-13", "reviewed_on": "2026-10-13", "next_review_due": "2027-01-11", "legal_role": "binding_implementing_act", "provisions": ["Ulteriore incremento cumulativo di 4 mesi dal 1 gennaio 2016"], "provision_periods": [{"provision_id": "historic_adjustment_2016", "adjustment_months": 4, "legal_effective_from": "2016-01-01", "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {"source_id": "gazzetta.decreto-05-12-2017.17a08386", "title": "Decreto 5 dicembre 2017, adeguamento requisiti pensionistici", "authority": "Gazzetta Ufficiale", "jurisdiction": "IT", "url": "https://www.gazzettaufficiale.it/eli/id/2017/12/12/17A08386/SG", "retrieved_on": "2026-10-13", "reviewed_on": "2026-10-13", "next_review_due": "2027-01-11", "legal_role": "binding_implementing_act", "provisions": ["Ulteriore incremento cumulativo di 5 mesi dal 1 gennaio 2019"], "provision_periods": [{"provision_id": "historic_adjustment_2019", "adjustment_months": 5, "legal_effective_from": "2019-01-01", "legal_effective_to": null, "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {"source_id": "gazzetta.decreto-05-11-2019.19a07047", "title": "Decreto 5 novembre 2019, adeguamento requisiti pensionistici", "authority": "Gazzetta Ufficiale", "jurisdiction": "IT", "url": "https://www.gazzettaufficiale.it/atto/vediMenuHTML?atto.codiceRedazionale=19A07047&atto.dataPubblicazioneGazzetta=2019-11-14&tipoSerie=serie_generale&tipoVigenza=originario", "retrieved_on": "2026-10-13", "reviewed_on": "2026-10-13", "next_review_due": "2027-01-11", "legal_role": "binding_implementing_act", "provisions": ["Nessun ulteriore incremento dal 1 gennaio 2021"], "provision_periods": [{"provision_id": "historic_pause_2021", "legal_effective_from": "2021-01-01", "legal_effective_to": "2022-12-31", "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {"source_id": "gazzetta.decreto-27-10-2021.21a06556", "title": "Decreto 27 ottobre 2021, adeguamento requisiti pensionistici", "authority": "Gazzetta Ufficiale", "jurisdiction": "IT", "url": "https://www.gazzettaufficiale.it/eli/id/2021/11/10/21A06556/sg", "retrieved_on": "2026-10-13", "reviewed_on": "2026-10-13", "next_review_due": "2027-01-11", "legal_role": "binding_implementing_act", "provisions": ["Nessun ulteriore incremento dal 1 gennaio 2023"], "provision_periods": [{"provision_id": "historic_pause_2023_2024", "legal_effective_from": "2023-01-01", "legal_effective_to": "2024-12-31", "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {"source_id": "gazzetta.decreto-18-07-2023.23a05661", "title": "Decreto 18 luglio 2023, adeguamento requisiti pensionistici", "authority": "Gazzetta Ufficiale", "jurisdiction": "IT", "url": "https://www.gazzettaufficiale.it/atto/vediMenuHTML?atto.codiceRedazionale=23A05661&atto.dataPubblicazioneGazzetta=2023-10-17&tipoSerie=serie_generale&tipoVigenza=originario", "retrieved_on": "2026-10-13", "reviewed_on": "2026-10-13", "next_review_due": "2027-01-11", "legal_role": "binding_implementing_act", "provisions": ["Nessun ulteriore incremento dal 1 gennaio 2025"], "provision_periods": [{"provision_id": "historic_pause_2025_2026", "legal_effective_from": "2025-01-01", "legal_effective_to": "2026-12-31", "pack_coverage_from": "2026-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {"source_id": "normattiva.l199-2025.art1.c185", "title": "Legge 30 dicembre 2025, n. 199, art. 1, comma 185", "authority": "Normattiva", "jurisdiction": "IT", "url": "https://www.normattiva.it/atto/caricaDettaglioAtto?atto.codiceRedazionale=25G00212&atto.dataPubblicazioneGazzetta=2025-12-30", "retrieved_on": "2026-10-11", "reviewed_on": "2026-10-11", "next_review_due": "2027-01-09", "legal_role": "primary_legislation", "provisions": ["L. 199/2025, art. 1, comma 185"], "provision_periods": [{"provision_id": "2027_adjustment_modulation", "legal_effective_from": "2025-12-30", "legal_effective_to": null, "pack_coverage_from": "2027-01-01", "pack_coverage_to": "2028-12-31"}]},
+    {"source_id": "gazzetta.decreto-19-12-2025.25a07010", "title": "Decreto 19 dicembre 2025, adeguamento dei requisiti pensionistici", "authority": "Gazzetta Ufficiale", "jurisdiction": "IT", "url": "https://www.gazzettaufficiale.it/atto/serie_generale/caricaDettaglioAtto/originario?atto.codiceRedazionale=25A07010&atto.dataPubblicazioneGazzetta=2025-12-30", "retrieved_on": "2026-10-11", "reviewed_on": "2026-10-11", "next_review_due": "2027-01-09", "legal_role": "binding_implementing_act", "provisions": ["Incremento di 3 mesi dal 1 gennaio 2027, modulato dalla L. 199/2025 per il 2027"], "provision_periods": [{"provision_id": "2027_2028_life_expectancy_adjustment", "legal_effective_from": "2027-01-01", "legal_effective_to": null, "pack_coverage_from": "2027-01-01", "pack_coverage_to": "2028-12-31"}]}
   ],
-  "supported_scope": {"managements": ["FPLD", "AGO"], "employment_category": "employee", "ordinary_single_management_profile_required": true},
+  "supported_scope": {"managements": ["FPLD"], "management_scope": "FPLD_employee_only", "excluded_management_categories": ["autonomous", "exclusive", "substitute", "special"], "employment_category": "employee", "ordinary_single_management_profile_required": true},
   "requirements_by_year": {"2026": {"ordinary_age": {"years": 67, "months": 0}, "contributory_alternative_age": {"years": 71, "months": 0}}, "2027": {"ordinary_age": {"years": 67, "months": 1}, "contributory_alternative_age": {"years": 71, "months": 1}}, "2028": {"ordinary_age": {"years": 67, "months": 3}, "contributory_alternative_age": {"years": 71, "months": 3}}},
   "paths": {"pre_1996": {"minimum_qualifying_contribution_years": 20}, "post_1996": {"minimum_qualifying_contribution_years": 20, "minimum_monthly_pension_threshold": "documented_applicable_monthly_social_allowance"}, "post_1996_alternative": {"minimum_effective_contribution_years": 5, "figurative_contribution_counts": false}},
   "limitations": ["No pension amount calculation.", "No recognition, economic effective date, first payment date, pension stream, or work-exit conclusion.", "Feb-29 and month-end birth-date age semantics are unsupported and must fail closed.", "Foreign/EU aggregation, multiple managements, special or excluded profiles are outside scope."]

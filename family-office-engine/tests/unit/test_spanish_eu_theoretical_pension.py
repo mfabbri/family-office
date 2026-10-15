@@ -140,7 +140,7 @@ class SpanishEuTheoreticalPensionTest(unittest.TestCase):
             path = Path(tmp_dir) / "rules.json"
             path.write_text(json.dumps(broken), encoding="utf-8")
 
-            with self.assertRaisesRegex(ValueError, "official EU, BOE or Seguridad Social URL"):
+            with self.assertRaisesRegex(ValueError, "freshness/provenance: normative_source_provenance_missing"):
                 load_spanish_eu_theoretical_rule_pack(path)
 
     def _build(self, payload: dict, reconciliation: dict, rule_pack_override: dict | None = None) -> dict:
@@ -169,6 +169,7 @@ def _pro_rata_input() -> dict:
         "retirement_date": "2026-12",
         "date_of_birth": "1960-01-01",
         "recent_contribution_anchor_date": "2026-12-01",
+        "spanish_insured_or_equivalent_status": True,
         "inps_history_status": "complete_dated_history",
         "future_assumptions_status": "explicit",
         "sources": [{"source_id": "synthetic-spanish-eu-theoretical", "type": "synthetic_fixture"}],

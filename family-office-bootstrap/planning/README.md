@@ -25,6 +25,8 @@ Il planner viene marcato `superseded` e ricalcolato.
 - un solo incremento attivo;
 - ogni incremento attivo registra il routing prima della delega;
 - deleghe, escalation e fallback aggiornano la routing trace;
+- `routing.trace` è circoscritta all'incremento attivo; gli esiti storici si conservano in `verification`/decision log, non accumulando deleghe concluse nel budget della sessione corrente;
+- chiudere una sessione non significa chiudere l'incremento: un gate o un'autorizzazione ancora pendenti mantengono lo stato `in_progress`/`blocked` e una `next_action` concreta;
 - nessun dato personale o risultato sensibile nel planner;
 - niente chain-of-thought;
 - percorsi relativi al repository;

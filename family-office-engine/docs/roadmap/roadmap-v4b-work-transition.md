@@ -213,15 +213,143 @@ Verificare il gap temporale italiano lasciato dalla versione Normattiva consulta
 
 ### V4.14f — Italian eligibility rule-pack legal provenance traceability
 
-**Stato:** `planned`
+**Stato:** `done`
 **Tipo:** `audit`
 
-Ricostruire e sottoporre a review la catena delle fonti legislative e degli atti attuativi che sostiene i requisiti annuali del rule pack `it.inps-old-age-eligibility.2026-2028.v1`, in particolare l'età base di 71 anni e gli adeguamenti fino al 2028. Se la catena è sufficientemente verificata, aggiornare Knowledge e provenance del pack senza alterare valori o scope non approvati; aggiungere regressioni sintetiche per validità temporale, versione del pack e input non classificati. Verificare fail-closed dei consumer, modificando Engine soltanto se emerge un difetto concreto.
+Ricostruire e sottoporre a review la catena delle fonti legislative e degli atti attuativi che sostiene i requisiti annuali del rule pack `it.inps-old-age-eligibility.2026-2028.v2`, in particolare l'età base di 71 anni e gli adeguamenti fino al 2028. Aggiornare Knowledge e provenance senza alterare valori o scope; aggiungere regressioni sintetiche per validità temporale e versione del pack. Verificare fail-closed dei consumer su fonti/periodi mancanti o duplicati.
 
 - Dipende da: V4.14b e V4.14e.
 - Repository: `knowledge`, `rules`, `engine` (solo se richiesto da regressioni fail-closed).
 - Stop: nessuna estensione a gestioni/profili speciali; nessun calcolo individuale o timeline; se la catena normativa non è documentabile, mantenere il pack non certificato e il gap.
 - Done quando: fonti ufficiali e atti/periodi sono revisionati indipendentemente; riferimenti source-bound del pack e regressioni sintetiche sono verificati; nessun esito positivo deriva da provenance mancante o profilo non classificato. V4.14 resta `blocked`.
+
+**Chiusura 2026-10-13 — GO limitato:** due review post-implementazione hanno restituito NO-GO circoscritti; i finding sono stati corretti. Nel terzo tentativo il reviewer ha verificato i binding schedule, gli incrementi cumulativi, i periodi aperti, il ruolo INPS, i mutation test e ha rettificato il finding parser dopo il riscontro del test `ItalianOldAgeEligibilityError`. La suite mirata passa 22/22; roadmap audit, planner schema, guardrail, compilazione e diff-check passano. Il GO riguarda esclusivamente provenance e screening ordinario IT FPLD/AGO a data candidata; V4.14 resta `blocked` e nessuna timeline/importo/data individuale è approvata.
+
+### V4.14g — Primo mese di eligibility path-specific (post-1995, 71 anni/5 effettivi)
+
+**Stato:** `done`
+**Esito review:** GO limitato post-implementazione, tentativo 3/3.
+**Tipo:** `functional`
+
+Il reviewer normativo ha dato GO limitato al contratto di ricerca del primo mese per il solo percorso contributivo alternativo post-1995: requisito d'età 71/71a1m/71a3m e cinque anni di contribuzione effettiva (figurativi esclusi), dipendenti FPLD/AGO, gestione singola confermata, anni 2026-2028. Il risultato non è la prima data complessiva, né una decorrenza o un pagamento.
+
+- Dipende da: V4.14b, V4.14e e V4.14f.
+- Repository: `knowledge`, `rules`, `engine` (implementazione solo dopo gate normativo positivo).
+- Review: gate pre-implementazione NO-GO per la prima data complessiva e GO limitato per il ramo path-specific; review post-implementazione ciclo 1/3 e 2/3 NO-GO corretti, 3/3 GO limitato.
+- Evidenza: storia mensile completa e source-bound degli accrediti, unità/tipo originali, data di nascita e coorte verificate, gestione/categoria/assenza eccezioni confermate, cessazione documentata. Non inferire accrediti successivi all'ultimo periodo osservato.
+- Output: primo mese supportato del solo percorso alternativo 71 anni/5 anni effettivi. Se input mensile non sostiene giorno esatto, non emettere data giornaliera.
+- Stop: periodi mancanti/sovrapposti, unità o contribuzione effettiva ambigue, cessazione non verificata, fonte scaduta, pack fuori validità o profilo non coperto producono `null` + `data_gaps`; nessuna estensione a prima data complessiva, ramo 20 anni/importi, ES/UE, riconoscimento, decorrenza o pagamento. V4.14 resta `blocked`.
+- Done quando: ricerca deterministica path-specific e regressioni fail-closed passano; il reviewer post-implementazione conferma il solo perimetro approvato. **Completato:** GO limitato al consumer mensile path-specific.
+- Esito 2026-10-13: i tentativi post-implementazione 1/3 e 2/3 hanno dato NO-GO limitati; i finding su cronologia coorte, unità duplicate, coverage profilo oltre la prova e date ISO malformate sono stati corretti. 19 test eligibility + 11 freshness passano. Tentativo 3/3: GO limitato, nessun blocker sul diff. Prima data complessiva, ramo 20 anni/importo, riconoscimento/decorrenza/pagamento e timeline V4.14 restano fuori scope; V4.14 resta `blocked`.
+
+### V4.14h — Italian post-1995 20-year contribution plus threshold eligibility path
+
+**Stato:** `done`
+**Tipo:** `functional`
+
+Micro-incremento abilitante indicato dal decision log dopo V4.14g. Deve valutare e, solo dopo un GO normativo indipendente, implementare il ramo post-1995 con 20 anni qualificanti e importo pensionistico mensile documentato almeno pari alla soglia applicabile. Il risultato sarà il primo mese supportato di questo solo ramo, non la prima data complessiva.
+
+- Dipende da: V4.14b, V4.14e, V4.14f e V4.14g.
+- Repository: `knowledge`, `rules`, `engine`.
+- Evidenze obbligatorie: coorte e gestione FPLD/AGO confermate, storia contributiva mensile completa e source-bound, importo pensionistico documentato da prova separata valida nel mese candidato, soglia annuale dal pack, cessazione verificata entro il mese candidato, pack fresco e nel periodo 2026-2028.
+- Fail-closed: storia incompleta, soglia/importo/coorte/gestione non provati, date malformate, freshness scaduta o profilo fuori scope producono `null` + `data_gaps`; nessuna proiezione futura.
+- Fuori scope: prima data complessiva, ramo 71/5, profili speciali, altre gestioni, ES/UE, importi calcolati, riconoscimento, decorrenza e pagamento. V4.14 resta `blocked`.
+- Gate implementazione: consumer path-specific e regressioni eligibility 26/26; GO normativo limitato pre e post-implementazione.
+- Gate completamento: **superato il 2026-10-14**; suite completa engine 762/762, 0 failure, 0 errori, 0 skip. La remediation ha mantenuto i guardrail fail-closed e non ha modificato soglie, formule o rule pack.
+- **Enabling slice completata:** GO normativo limitato del 2026-10-14 su binding annuale 2026, gap 2027-2028, scope FPLD e provenance separate.
+- **Gate pre-implementazione mensile:** GO limitato del 2026-10-14 dopo un NO-GO contrattuale risolto. Valutare i requisiti a fine mese; prova mensile source-bound separata per i 20 anni e per l'importo; fermarsi al primo candidato age+20 con soglia annuale non supportata, senza saltare 2027-2028. Nessuno sblocco della timeline V4.14.
+- **Verifica post-implementazione:** GO limitato per `search_first_post_1996_ordinary_threshold_eligibility_month`; 26 test eligibility passano, incluso il consumer esistente 71/5. V4.14, prima data complessiva e riconoscimento/decorrenza/pagamento restano fuori scope.
+- **Chiusura suite 2026-10-14:** 156 test mirati e l'intera suite 762/762 passano con 0/0/0; `jsonschema` 4.26.0 è installato nel venv e dichiarato nell'extra `test`. La review normativa ha dato GO limitato alle correzioni di fixture/aspettative ES/UE, senza cambi a regole o calcoli. V4.14h è `done`; V4.14 timeline resta `blocked`.
+
+### V4.14i — EU Article 57 under-one-year evidence and contract audit
+
+**Stato:** `done`
+**Esito:** GO limitato documentale.
+**Tipo:** `docs`
+
+Micro-incremento documentale abilitante derivato dal NO-GO della timeline V4.14. Verificare esclusivamente le fonti/versioni ufficiali e le condizioni del coordinamento UE per i periodi inferiori a un anno ai sensi dell'art. 57 del Reg. 883/2004; aggiornare la nota Knowledge/il contratto descrittivo solo quanto sostenuto dalle fonti e registrare review normativa indipendente GO/NO-GO limitata.
+
+**Esito finale 2026-10-15:** dopo due NO-GO circoscritti corretti nella nota Knowledge, la review normativa indipendente ha emesso GO limitato per le sole affermazioni documentali su art. 57(2)-(3), raccordo con art. 52 e regime transitorio art. 94(1). Il reviewer richiede di esplicitare art. 52(4)(i)-(ii), incluse condizioni anti-cumulo artt. 54-55 e l'eccezione art. 55(2), prima di qualsiasi uso eseguibile: registrato come gap futuro, non incluso nell'approvazione. Suite engine completa 762/762, 0 failure, 0 errori, 0 skip. V4.14i `completed` solo per questo audit; nessuna approvazione Rules/Engine, calcoli, date o timeline. V4.14 resta `blocked` e V4.14a non selezionabile.
+
+- Dipende da: V4.14b, V4.14c e V4.14d.
+- Repository: `family-office-knowledge`, `family-office-engine` (sola documentazione/roadmap).
+- Evidenze: giurisdizione, articoli e versioni applicabili di Reg. 883/2004 e Reg. 987/2009; condizioni, istituzione competente e dati/prove necessari per valutare i periodi inferiori a un anno; limiti temporali e fonti non consolidate.
+- Output: nota source-bound con perimetro supportato, casi non valutabili e `data_gaps`; esito di review indipendente limitato agli artefatti esaminati.
+- Fuori scope: modifica di rule pack, test/engine, calcolo di entitlement o pro-rata, confronto delle date IT/ES, prima data complessiva, riconoscimento, decorrenza economica e primo pagamento. V4.14 resta `blocked`.
+- Done quando: ogni affermazione è collegata alla fonte ufficiale e al periodo applicabile, i casi non coperti restano espliciti, il reviewer emette un GO/NO-GO limitato e passano i controlli documentali/governance. Un GO non autorizza implementazione; l'eventuale slice Rules → Tests → Engine richiede un successivo task envelope e routing normative/implementation.
+
+### V4.14j — Art. 52(4)(i)-(ii) conditions audit
+
+**Stato:** `done`
+**Tipo:** `docs`
+
+Slice documentale abilitante selezionata dopo il GO limitato V4.14i, perché il reviewer ha richiesto di esplicitare le condizioni dell'art. 52(4)(i)-(ii) prima di qualsiasi uso eseguibile del coordinamento UE.
+
+- Dipende da: V4.14i, V4.14b e V4.14c.
+- Repository: `family-office-knowledge`, `family-office-engine` (sola documentazione/roadmap), `family-office-bootstrap` (planner).
+- Piano: verificare il testo ufficiale applicabile del Reg. 883/2004 art. 52(4)(i)-(iii), artt. 54-55 e 57; distinguere la condizione di inclusione in Allegato VIII parte 1 dal test anti-cumulo e dall'eccezione art. 55(2); aggiornare la nota Knowledge solo quanto sostenuto; ottenere review normativa indipendente.
+- Fuori scope: modifica di rules/test/engine, calcoli o timeline pensionistica; importi e quote pro-rata individuali; dati del workspace.
+- Done quando: condizioni e fatti necessari sono documentati con fonte/versione/periodo, i casi non classificati restano `data_gaps`, il reviewer emette GO/NO-GO limitato e passano i controlli documentali/governance. Nessun GO abilita automaticamente il runtime: V4.14 resta `blocked` fino al gate completo.
+
+**Esito finale 2026-10-15:** reviewer normativo indipendente GO limitato al diff Knowledge. La nota riporta correttamente le condizioni cumulative dell'art. 52(4)(i)-(iii), il rinvio alle regole anti-cumulo degli artt. 54-55 e l'eccezione specifica dell'art. 55(2), distinguendo Allegato VIII parte 1 da parte 2 e collegando art. 57. Il riscontro su Italia/Spagna è limitato al consolidato 2019 e non sostituisce la classificazione di uno schema concreto né l'aggiornamento degli atti. La suite completa passa 762/762, 0 failure, 0 errori, 0 skip. Nessuna approvazione di Rules, Engine, calcoli o timeline; V4.14 resta `blocked`.
+
+### V4.14k — First overall pension month contract reassessment
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Micro-incremento abilitante successivo ai GO documentali V4.14i/j. Richiedere a reviewer normativo indipendente di riesaminare i precedenti NO-GO e valutare se un contratto source-bound per il primo mese complessivo di eligibility IT/ES/UE sia definibile sulle fonti primarie e versioni applicabili.
+
+- Dipende da: V4.14b, V4.14c, V4.14i e V4.14j.
+- Repository in lettura: `family-office-knowledge`, `family-office-rules`, `family-office-engine`; planner/governance in scrittura.
+- Verificare: soglie e percorsi nazionali IT/ES per il periodo coperto; totalizzazione e calcolo teorico/pro-rata secondo il coordinamento UE; condizioni dell'art. 52(4), anti-cumulo artt. 54-55 e art. 57; distinzione tra eligibility, riconoscimento, decorrenza economica e pagamento; freshness/validità dei rule pack e prove individuali richieste.
+- Output: GO/NO-GO indipendente limitato al contratto, requisiti/condizioni implementabili collegati a fonte e periodo, data_gaps e proposta del successivo slice Knowledge → Rules → Tests → Engine.
+- Fuori scope: calcolo su persone reali, accesso a `family-office-workspace/`, modifiche Rules/Tests/Engine, date individuali, riconoscimento, decorrenza o pagamento.
+- Done quando: il reviewer dà un esito esplicito supportato da fonti primarie correnti e il piano registra i gate successivi senza trasformare il GO in una data o in un'approvazione runtime. In caso di NO-GO, creare il più piccolo incremento abilitante e mantenere V4.14 `blocked`.
+
+**Esito 2026-10-15:** NO-GO per restituire il primo mese complessivo IT/ES/UE con i consumer attuali; GO limitato solo a pianificare un reducer fail-closed sopra ricerche nazionali indipendenti. Finding: manca una ricerca mensile ES con stato assicurativo/hecho causante/anchor 24-180 e RD 453/2022; manca la ricerca IT pre-1996 e la copertura dei percorsi totalizzati; il consumer UE usa una data singola e richiede un perimetro nazionale completo prima di aggregare. La regola eseguibile Art.57 usa invece soglia `12` mesi di calendario, incoerente con Knowledge e non sufficiente a provare durata assicurativa giuridica; l'output non separa l'obbligo di pagamento. Nessuna modifica runtime o dati personali. Fonti consultate: EUR-Lex Reg. 883/2004 e 987/2009; BOE LGSS consolidato al 2026-10-03 e RD 453/2022.
+
+### V4.14l — Art. 57 duration and payment-obligation contract audit
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Gate normativo abilitante per risolvere la divergenza tra la Knowledge approvata e il criterio eseguibile `less_than_one_year_threshold_months: 12`.
+
+- Dipende da: V4.14k, V4.14b, V4.14c e V4.14i/j.
+- Piano: stabilire da fonti primarie il test cumulativo dell'art. 57(1), la rappresentazione della durata/unità assicurativa, le conversioni applicabili ex Reg. 987/2009 artt. 12-13 e lo stato distinto di esonero/obbligo di pagamento ex art. 57(3); chiarire le interazioni con artt. 50-52 e 54-55 del Reg. 883/2004 e con gli Allegati VIII.
+- Output: contratto source-bound e testabile con unità, provenienza, periodi, condizioni, casi limite e `data_gaps`; esito indipendente GO/NO-GO limitato.
+- Fuori scope: modifiche Rules/Tests/Engine, eligibility individuale o prima data IT/ES/UE, riconoscimento, decorrenza e pagamento effettivo.
+- Stop condition: senza fonte/periodo che determini il criterio di durata e il trattamento dell'obbligo di pagamento, mantenere il consumer bloccato/non valutabile e non tradurre 12 mesi in una regola eseguibile.
+
+**Esito 2026-10-15:** GO limitato alla formulazione Knowledge; NO-GO per `less_than_one_year_threshold_months: 12` e qualunque calcolo Art.57 fondato direttamente sui mesi di calendario. Il test è cumulativo: durata dello specifico schema strettamente < un anno e nessun diritto autonomo considerando soltanto i periodi dello Stato. Reg. 987/2009 artt. 12-13 richiede unità nativa comunicata, overlap risolto, base giorni ove pertinente e conversione deterministica. I parr. 2-3 separano inclusione nell'importo teorico e obbligo di pagamento da eligibility e pro-rata. Nessun file o calcolo individuale modificato.
+
+### V4.14m — Art. 57 source-bound duration contract
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Definire e sottoporre a review normativa indipendente il contratto dati source-bound che sostituirà la soglia fissa di 12 mesi: schema/istituzione, periodi comunicati, unità nativa, base giorni (5/6/7), classificazione overlap ex art. 12 e conversione ex art. 13, durata legale strettamente inferiore a un anno, diritto autonomo sui soli periodi e status Allegato VIII parte 2. Valori ignoti, unità non classificata, overlap irrisolto o versione non provata devono produrre `article_57_not_assessed` con `data_gaps`. Tenere distinti eligibility nazionale, applicabilità dell'art. 57, inclusione nel teorico, pro-rata e obbligo di pagamento.
+
+- Dipende da: V4.14l, V4.14b e V4.14i/j.
+- Ordine dopo il GO pre-implementazione: Knowledge → Rules → Tests → Engine. Modifiche esclusivamente sintetiche e fail-closed; nessun calcolo individuale o sblocco di V4.14.
+- Regressioni: 11 mesi di calendario ma un anno convertito; esattamente un anno; unità giorni su base 5/6/7; overlap; ciascuna condizione Art.57 isolata; Allegato VIII parte 2; tutte le istituzioni esonerate; separazione eligibility/teorico/pro-rata/obbligo di pagamento.
+- Stop: se lo schema concreto o la conversione non sono provati, mantenere il consumer non valutabile; non sostituire il dato con una soglia calendario.
+
+**Esito review 2026-10-15:** NO-GO sul contratto proposto, senza modifiche runtime. La specifica deve includere Stato/prestazione/legislazione/versione/data del rischio e rilevanza dei periodi per il beneficio; conversione art. 13 vincolata a scopo e granularità, con frazioni/arrotondamento/massimo annuale e distinzione aggregato vs anno per anno; enumerazioni art. 12(2)-(6), presunzione per date imprecise e riferimento art. 43(1) Reg. 987/2009 per teorico/effettivo; verifica autonoma nazionale source-bound; orchestrazione inter-istituzionale art. 57(3); stati distinti e logica ternaria short-circuit. Condizioni false decisive non diventano gap; i campi condizionali non pertinenti usano `not_applicable`; solo input decisivi ignoti producono `article_57_not_assessed + data_gaps`. Serve nuova review pre-implementazione dopo l'aggiornamento della specifica.
+
+### V4.14n — Complete Art. 57 contract specification
+
+**Stato:** `in_progress`
+**Tipo:** `audit`
+
+Documentare un contratto source-bound completo secondo i finding V4.14m prima di qualsiasi modifica runtime.
+
+- Dipende da: V4.14m e V4.14l.
+- Review v0.2: NO-GO limitato, quattro correzioni finite recepite in v0.3. Review v0.3: NO-GO limitato; corretti in v0.4 matrice/enum art. 12 e identificatori. Review v0.4: NO-GO limitato; resta la rappresentazione di overlap parziali e overlap ex art. 12(2) non risolti dai parr. 3-4. La candidata v0.5 introduce `period_coordination_segments[]`, conserva i residui non coincidenti, applica 12(3)-(4) solo alla porzione coincidente e richiede conteggio singolo source-bound o `not_assessed` per gli altri overlap, con regressioni dedicate. Un quarto ciclo di review indipendente richiede nuova decisione dell'utente; nessun GO runtime.
+- Separare eligibility nazionale, eccezione art. 57, inclusione importo teorico, pro-rata e obbligo nazionale di pagamento. Usare stati ternari con short-circuit semantico e `not_applicable` per campi condizionali non pertinenti.
+- Output: specifica con fonti/versioni, JSON contract candidate v0.5, casi limite e `data_gaps`; nuovo gate normativo indipendente sulla versione esatta prima di qualsiasi implementazione.
+- Fuori scope: Rules/Tests/Engine, importi o date individuali e mese pensionistico complessivo. V4.14 resta `blocked`.
 
 ### V4.14a — Work-transition normative and contract audit
 

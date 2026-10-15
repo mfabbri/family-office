@@ -24,8 +24,10 @@ ACTIVE_PENSION_RULE_PACKS = (
 OFFICIAL_SOURCE_HOSTS = {
     "boe.es",
     "eur-lex.europa.eu",
+    "gazzettaufficiale.it",
     "inps.it",
     "lavoro.gov.it",
+    "normattiva.it",
     "seg-social.es",
 }
 

@@ -36,6 +36,12 @@ Verifica della fonte INPS: 2026-10-11. La scheda INPS sulla pensione di vecchiai
 Fonte primaria: [INPS, Pensione di vecchiaia](https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.pensione-di-vecchiaia.html).
 
 Queste informazioni restano assenti dal rule pack di stima contributiva e non autorizzano da sole il motore a produrre una data di entitlement: il distinto pack di eligibility ordinaria le usa soltanto nel perimetro FPLD/AGO 2026-2028 approvato. Occorre comunque identificare gestione/categoria, regime contributivo, periodi ammessi, eventuali soglie d'importo, deroghe e stato assicurativo. Fuori dal caso supportato, il risultato italiano di V4.14 deve restare `null` con `data_gaps`; la stima contributiva qui sopra rimane un importo interno separato, non una prova del diritto.
+## Binding aggiuntivo per V4.14h
+
+Per il ramo post-1995 con 20 anni, la soglia è un confronto tra due evidenze distinte: importo mensile della pensione documentato e importo mensile dell'assegno sociale applicabile documentato per lo stesso anno. La fonte INPS dell'assegno sociale riporta per il 2026 EUR 546,24 mensili per 13 mensilità ([INPS, Assegno sociale](https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.assegno-sociale-50184.assegno-sociale.html)). Nel pack corrente 2027 e 2028 restano `data_gaps` finché l'importo annuale non è aggiunto con fonte e periodo propri; non si proietta e non si riusa il valore 2026.
+
+Il perimetro abilitante è ristretto a lavoratore dipendente iscritto al FPLD nell'AGO, gestione singola ordinaria confermata. Gestioni autonome, esclusive, sostitutive, speciali, cumuli e aggregazioni estere/UE sono fuori scope e producono `null` + `data_gaps`.
+
 # Eligibility ordinaria FPLD/AGO dipendenti (micro-slice V4.14b)
 
 Verifica fonti: 2026-10-11. Giurisdizione: Italia. Periodo dei requisiti codificati: requisiti maturati dal 2026-01-01 al 2028-12-31. Il perimetro è soltanto quello ordinario di vecchiaia per dipendenti FPLD/AGO, con una sola gestione confermata; non è una certificazione INPS o una valutazione di altri regimi, totalizzazioni o cumuli.

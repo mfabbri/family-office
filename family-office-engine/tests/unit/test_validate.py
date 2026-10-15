@@ -3108,7 +3108,7 @@ def _synthetic_inps_pension_snapshot() -> dict:
         "record_type": "InpsPensionSnapshot",
         "extraction_status": "extracted",
         "projection": {
-            "retirement_date": "2039-05-01",
+            "retirement_date": "2026-12-01",
             "monthly_gross_pension": "3562.00",
             "prices_year": "2026",
         },
@@ -3125,7 +3125,7 @@ def _synthetic_spanish_statutory_pension_snapshot() -> dict:
         "schema_version": "spanish-statutory-pension/v1",
         "record_type": "SpanishStatutoryPensionEstimate",
         "status": "complete",
-        "retirement_date": "2039-05",
+        "retirement_date": "2026-12",
         "eligibility": {
             "contribution_months": 300,
             "status": "eligible_by_encoded_rules",

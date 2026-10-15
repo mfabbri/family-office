@@ -11,6 +11,8 @@ Questo file deve restare breve. È una mappa, non un manuale completo.
 - Non rendere la modifica manuale di JSON il percorso operativo normale: per ogni capability utente preferire CLI con wizard, import, generatori o `prepare`; un JSON diretto e' ammesso solo quando strettamente necessario e con motivazione, guida e validazione locale.
 - Progettare la UX utente a partire da una domanda o decisione familiare, non dalla sequenza di comandi o dagli snapshot: mostrare fatti disponibili, assunzioni, `data_gaps`, limiti e prossima azione; lasciare JSON e comandi tecnici come infrastruttura.
 - Aggiornare test e documentazione solo quando realmente impattati.
+- Un incremento o release è completo solo se l'intera suite del repository termina con esattamente 0 failure, 0 errori e 0 test skipped. I failure si correggono nel codice oppure, con evidenza contrattuale che l'aspettativa è errata, nel test; non si waivano come out-of-scope. Gli skip vanno sostituiti da test eseguibili equivalenti sulle piattaforme supportate.
+- Se la suite del repository non può essere eseguita o non raggiunge quel risultato, lo stato resta `in_progress` o `blocked`, mai `done`.
 - Non dichiarare completato un incremento senza verifiche riproducibili.
 - Non salvare chain-of-thought nel planner o nei log di routing.
 - La delega non sostituisce l'esecuzione: il parent deve mantenere attivo il percorso critico, limitare le attese a finestre bounded, evitare polling indefinito e dichiarare subito timeout, fallback o blocker con evidenze.

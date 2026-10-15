@@ -9,6 +9,8 @@ Aggiornare solo i documenti che cambiano semanticamente.
 
 Quando un incremento passa a `in_progress` o `done`, aggiornare nello stesso cambiamento entrambi i documenti. Lo stato e l'ID dell'incremento corrente devono coincidere: `roadmap_audit.py` considera la divergenza un errore di governance.
 
+La chiusura della sessione non implica il completamento dell'incremento: se review, autorizzazioni, suite o altri gate restano pendenti, conservare lo stato `in_progress`/`blocked`, annotare il blocker e una prossima azione concreta nel planner. Non usare `done` come stato di comodo per liberare la sessione.
+
 ## Solo se necessario
 
 - `decision-log.md`: decisione architetturale, governance o debito deliberato;

@@ -28,12 +28,19 @@ Il parent è un router/controller. La delega resta selettiva, ma è obbligatoria
 
 La delega non può trasformare il parent in un osservatore passivo. Prima di delegare il parent deve compiere il primo passo locale non bloccante: definire il piano, preparare il contratto o delimitare i file e i test. Dopo la delega deve mantenere il percorso critico attivo con lavoro non sovrapposto.
 
-- Usare al massimo una finestra di attesa bounded per richiesta; durante l'attesa eseguire verifiche locali o preparare l'integrazione.
-- Se la finestra scade, controllare subito worktree e stato dell'agent; non ripetere polling indefinito.
-- Dopo un timeout o un risultato incompleto, il parent deve scegliere esplicitamente una sola azione: continuare localmente un fix bounded, inviare una richiesta di stato/consegna, oppure dichiarare un blocker con evidenze.
+- Default: usare al massimo una finestra di attesa bounded per richiesta; durante l'attesa eseguire verifiche locali o preparare l'integrazione.
+- Eccezione esplicita: se l'utente autorizza un numero di tentativi e un timeout per tentativo, registrare nel planner budget, ruolo/modello, scope e stop condition prima di riprendere. Il budget dell'utente sostituisce il default per quella richiesta, non diventa una policy generale; fermarsi appena arriva un output utile o quando il budget autorizzato termina.
+- L'autorizzazione a una review aggiuntiva è specifica per tentativo, versione dell'artefatto, reviewer/ruolo, scope e timebox: non autorizza automaticamente il riesame di una versione corretta o ulteriori cicli. I checkpoint brevi condividono lo stesso budget complessivo e non lo azzerano.
+- Un tentativo è una singola richiesta al ruolo incaricato con il suo timebox complessivo. Suddividere il timebox in finestre brevi per mantenere aggiornato l'utente non moltiplica il numero di tentativi; dichiarare i timeout intermedi senza trattarli come esito.
+- Se la finestra scade, controllare worktree e stato dell'agent. Senza budget esplicito, non ripetere attese; con budget esplicito, continuare solo entro il limite e registrare ogni fallback prima di cambiare thread/route.
+- Timeout o mancata risposta non sono GO, NO-GO né completamento. Per gate normativi mantenere `review_pending`/`blocked` secondo il contratto; per review architetturali non attribuire al reviewer conclusioni non ricevute. Un fallback conserva ruolo, modello e scope salvo nuova autorizzazione.
+- Registrare `delegated` solo dopo che l'agent ha effettivamente accettato/ricevuto il task; un errore di spawn per thread capacity non è una delega. Se il task è stato avviato ma non consegna entro il timebox, registrare timeout/fallback, chiudere o chiedere una consegna una sola volta secondo il budget, e continuare il percorso critico localmente senza inferire un esito.
+- Dopo un timeout o un risultato incompleto, il parent deve scegliere esplicitamente una sola azione: continuare localmente un fix bounded, inviare una richiesta di stato/consegna, consumare il prossimo tentativo già autorizzato, oppure dichiarare un blocker con evidenze.
 - Non delegare review prima che l'implementazione abbia prodotto diff e test mirati, salvo un gate architetturale esplicitamente prerequisito.
 - Un reviewer può produrre NO-GO; il parent deve integrare o correggere direttamente i finding bounded, senza aprire una catena indefinita di deleghe.
 - Ogni incremento deve avere un limite operativo: massimo due subagent sostanziali, massimo un ciclo di implementazione e un ciclo di review; ulteriori cicli richiedono un blocker documentato e una decisione nel planner.
+- Se un NO-GO porta a una nuova versione contrattuale, mantenere il risultato legato alla versione esaminata e chiedere/registrare la decisione per il ciclo successivo prima di riusare il reviewer; non ereditare il GO o il budget della versione precedente.
+- `routing.trace` nel planner descrive il solo incremento attivo, così il guardrail sul budget non conta deleghe storiche di incrementi precedenti. Prima di compattare/rimuovere eventi storici, conservarne esito e motivazione in `verification.tests`/`notes` o nel decision log; non eliminare la traccia dell'incremento corrente.
 - Il completion report deve elencare separatamente codice runtime, test, documentazione e file preesistenti preservati; non basta dire “implementato” o “test verdi”.
 - Prima della chiusura eseguire `python planning/validate-execution-guardrails.py`; se fallisce, lo stato resta attivo o blocked e non si dichiara completato il lavoro.
 

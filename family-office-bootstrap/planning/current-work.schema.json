@@ -354,6 +354,7 @@
                   "selected",
                   "delegated",
                   "escalated",
+                  "reviewed",
                   "fallback"
                 ]
               },
@@ -376,7 +377,8 @@
                   "fo_architect",
                   "fo_normative_reviewer",
                   "fo_planner",
-                  "fo_financial_reviewer"
+                  "fo_financial_reviewer",
+                  "parent"
                 ]
               },
               "model": {

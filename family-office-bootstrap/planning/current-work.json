@@ -1,56 +1,80 @@
 {
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
-  "status": "completed",
-  "selected_at": "2026-10-12T19:42:24Z",
-  "updated_at": "2026-10-12T20:03:23Z",
+  "status": "in_progress",
+  "selected_at": "2026-10-15T19:54:05Z",
+  "updated_at": "2026-10-15T20:19:29Z",
   "roadmap_basis": [
     {
-      "path": "family-office-engine/docs/roadmap/roadmap-index.md",
-      "section": "Algoritmo di selezione",
-      "reason": "V4B viene riattivata come unica roadmap attiva per completare il gate deterministico Work Transition; V6 è differita fino a V4.20."
-    },
-    {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.14 — Entitlement-driven pension timeline IT/ES/EU; micro-incremento V4.14e",
-      "reason": "V4.14e ha verificato documentalmente fonti e limiti per il 2027-2028; i gap di tracciabilità del valore base 71 e della provenance pack sono esplicitati e instradati al pianificato V4.14f, senza calcoli individuali."
+      "section": "V4.14 — Entitlement-driven pension timeline IT/ES/EU",
+      "reason": "V4.14k returned NO-GO for the overall earliest IT/ES/EU month; V4.14l is the smallest prerequisite audit before any executable Art.57 correction."
     },
     {
       "path": "family-office-engine/docs/current-next-increment.md",
-      "section": "V4.14e — verifica del perimetro italiano 2026-2028",
-      "reason": "V4.14e documenta fonti legislative/attuative 2027-2028 e rende espliciti i gap del valore base 71 e della provenance pack; il prossimo micro-incremento pianificato è V4.14f."
+      "section": "V4.14n - Complete Art. 57 contract specification",
+      "reason": "V4.14m rejected the draft as incomplete; document the finite required fields and fail-closed semantics before requesting another pre-implementation review."
     }
   ],
   "increment": {
-    "id": "V4.14e",
-    "title": "Italian pension-law validity checkpoint for 2026-2028",
-    "objective": "Verificare con fonti legislative primarie e atti attuativi vincolanti italiani successivi al 2026-09-09 la validità documentale del solo perimetro ordinary old-age eligibility già approvato per dipendenti FPLD/AGO, senza ampliare regole o timeline.",
+    "id": "V4.14n-complete-art57-contract-specification",
+    "title": "Specifica completa del contratto Art. 57 source-bound",
+    "objective": "Formalizzare nel contratto documentale i finding V4.14m: beneficio/legislazione/data rischio, periodi pertinenti, artt. 12-13 e 43(1) Reg. 987/2009, diritto autonomo source-bound, orchestrazione multi-istituzione ex art. 57(3), output distinti e logica ternaria. Nessuna modifica runtime.",
     "scope": [
-      "verificare la L. 199/2025 art. 1 comma 185 come fonte legislativa primaria e il decreto direttoriale MEF-Lavoro 19-12-2025 come atto attuativo vincolante, con efficacia 2027-2028",
-      "confrontare l'età ordinaria e l'alternativa contributiva a 71 anni del pack FPLD/AGO con le disposizioni e istruzioni ufficiali vigenti, distinguendo legge, decreto e circolare INPS",
-      "registrare in Knowledge fonti, data di verifica, ambito, decorrenze ed eccezioni; annotare separatamente il limite della snapshot Normattiva al 2026-09-09",
-      "ottenere review normativa indipendente limitata alla validità e al perimetro già approvato; lasciare bloccate le categorie/eccezioni non coperte"
+      "identificare member_state, benefit_id/type, scheme_id, competent_institution, applicable_legislation_id/version, risk_materialization_date e assessment_date",
+      "per ciascun periodo comunicato registrare unità nativa, rilevanza per la specifica prestazione, categoria obbligatoria/volontaria/equivalente e classificazione art. 12(2)-(6), inclusa la presunzione per date imprecise",
+      "limitare la conversione art. 13 allo scopo pertinente, distinguendo aggregazione art. 6, calcolo art. 52 e not_applicable; specificare unità, direzione, granularità aggregate/yearly, frazioni, arrotondamenti e massimi annuali",
+      "specificare art. 43(1) Reg. 987/2009 per la gestione dei periodi nei calcoli teorico/effettivo e legare la verifica del diritto autonomo a rule pack, versione, validità, data rischio, periodi nazionali usati, condizioni ulteriori ed evidenze",
+      "definire l'orchestrazione di tutte le istituzioni e lo Stato residuale pagatore ex art. 57(3), mantenendo output distinti e logica ternaria short-circuit con not_applicable per campi condizionali",
+      "documentare le interazioni con art. 52(4)-(5), artt. 54-55 e Allegato VIII parte 1/2; preparare la proposta per un nuovo gate normativo pre-implementazione"
     ],
     "out_of_scope": [
-      "bridge, RITA, decumulo, simulazione e optimizer V4.15-V4.18",
-      "modifiche a rule pack o engine, calcolo di date/importi/stream, o dichiarazioni di entitlement individuale",
-      "estensione del GO limitato a profili gravosi/usuranti, comparti speciali, altre gestioni, cumulo o eccezioni individuali",
-      "approvazione della timeline V4.14 o riuso del GO limitato V4.14b per eventi diversi da eligibility",
-      "lettura o modifica di dati personali nel workspace",
-      "qualsiasi calcolo fiscale, previdenziale o finanziario affidato a LLM"
+      "modifiche a rule pack, test eseguibili o engine e qualsiasi calcolo/pro-rata individuale",
+      "prima data complessiva IT/ES/UE, riconoscimento, decorrenza economica o primo pagamento",
+      "accesso a dati personali o a family-office-workspace/"
     ],
     "candidate_files": [
+      "family-office-knowledge/international/eu-pension-coordination-it-es.md",
+      "family-office-knowledge/international/spain-pension.md",
       "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
-      "family-office-rules/italy/2026/inps-old-age-eligibility.json",
       "family-office-knowledge/pensions/inps-theoretical-pension-it.md",
-      "family-office-engine/docs/current-next-increment.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-engine/docs/decision-log.md"
+      "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/decision-log.md",
+      "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
+      "family-office-bootstrap/docs/playbooks/07-normative-change.md",
+      "family-office-bootstrap/docs/playbooks/08-testing-and-review.md",
+      "family-office-bootstrap/docs/playbooks/09-roadmap-maintenance.md",
+      "family-office-bootstrap/planning/README.md",
+      "family-office-bootstrap/planning/current-work.json"
     ],
-    "stop_condition": "Reviewer indipendente conferma la gerarchia e le sole affermazioni supportate, registrando i gap sulla catena storica del valore base 71 e sulla provenance del pack. Nessuna ricertificazione del rule pack, servizio, calcolo, estensione di scope o sblocco della timeline V4.14."
+    "stop_condition": "Questa slice produce solo la specifica documentale. Nessun Rules/Tests/Engine o calcolo finché la specifica non riceve un nuovo GO normativo pre-implementazione; condizioni e campi decisivi non source-bound restano not_assessed + data_gaps."
   },
   "verification": {
     "tests": [
+      "V4.14k selected 2026-10-15: V4.14j GO is documentation-only. Independent normative reassessment of the complete earliest-month contract is required before any calculation or runtime change.",
+      "V4.14k review delegated to fo_normative_reviewer; two bounded 30-second windows elapsed without a result. No GO/NO-GO inferred; increment remains in_progress and V4.14 blocked.",
+      "User explicitly authorized extending the same V4.14k normative review by up to five additional minutes on 2026-10-15; same reviewer/thread and read-only scope, no runtime or personal-data access.",
+      "V4.14k final review completed within the authorized extension: NO-GO for a non-null overall IT/ES/EU first month; limited GO only to plan a future fail-closed reducer after independent national-month searches. Blocking gaps include Spanish first-month search, Italian pre-1996 and totalized paths, single-date EU input, and Art.57's fixed 12-calendar-month threshold/payment-obligation semantics. No runtime changes or personal data accessed.",
+      "V4.14l normative reviewer 2026-10-15: GO limited to existing Knowledge wording; NO-GO for executable less_than_one_year_threshold_months=12/calendar-month trigger. Article 57(1) requires legal duration strictly under one year after native-unit evidence, overlap classification and Reg.987/2009 Arts.12-13 conversion, plus no autonomous right on only the state's periods. Arts.57(2)-(3) distinguish theoretical amount inclusion and payment obligation from eligibility/pro-rata. No files or personal data read/changed in workspace.",
+      "V4.14m exact-contract pre-implementation review delegated to fo_normative_reviewer at 2026-10-15T19:43Z; first bounded 60-second window timed out with no verdict. User explicitly authorized one additional window up to five minutes on 2026-10-15; same reviewer/thread and read-only scope. No GO inferred; no Rules/Tests/Engine changes.",
+      "V4.14m final review completed within user-authorized extension: NO-GO on exact contract as incomplete. Required additions include benefit/member state/legal version/risk date; period relevance; scoped Art.13 conversion granularity/fractions/rounding/annual cap; full Art.12(2)-(6) and Art.43(1); source-bound national autonomous-right assessment; multi-institution Art.57(3) payer orchestration; tri-state short-circuit and conditional not_applicable. No implementation or personal data access. V4.14n selected to document the corrected contract; another pre-implementation normative gate is required.",
+      "V4.14n contract candidate v0.2 drafted in current-next-increment.md from V4.14m findings and EUR-Lex Reg.987/2009 consolidated 2018-01-01 Arts.12-13/43: exact period classifications, day-conversion table and annual caps, yearly-vs-aggregate conversion, fraction/rounding rules, Art.12(6), source-bound autonomous right, multi-institution payer status and tri-state short-circuit. Documentation only; no runtime test applicable. Independent normative review remains the next gate.",
+      "V4.14n v0.2 independent normative review delegated to fo_normative_reviewer at 2026-10-15T19:58Z; first bounded 60-second window timed out without verdict. No GO inferred. No Rules/Tests/Engine changes; V4.14n remains in_progress pending authorization for an extended review window.",
+      "User explicitly authorized continuation of the same V4.14n v0.2 normative review for up to five additional minutes on 2026-10-15; same reviewer/thread, read-only scope, no runtime or personal-data access.",
+      "V4.14n v0.2 final review completed in the authorized window: limited NO-GO. Reviewer confirmed the core and required four finite fixes: split period kind/insurance nature and model multiple Art.12 relations plus Art.6 aggregation need; record numeric conversion result/legal duration/year comparator and clarify Art.13(1)(d)-(e); source-bind Annex VIII part 2 by version and concrete scheme; define deterministic propagation of Art.57(2)-(3) outputs/payment/payer and keep pro-rata downstream. Parent incorporated these as documentary candidate v0.3 in current-next, roadmap and decision log. New independent gate on exact v0.3 required before Rules/Tests/Engine. No personal data or runtime touched.",
+      "V4.14n v0.3 independent normative review completed within the user-authorized five-minute bounded window: limited NO-GO. Conversion/duration, Annex VIII part 2, and output propagation findings closed. Remaining requirements: binding operational Art.12(2)-(6) rule/resolution matrix and normalized per-period result; replace undefined duration identifier; canonicalize risk/autonomous-right fields; represent Annex VIII applicability as a record with .result. Parent incorporated these as documentary candidate v0.4 and checked EUR-Lex primary sources. New independent gate on exact v0.4 required before Rules/Tests/Engine. No runtime tests, personal data or individual calculation.",
+      "V4.14n v0.4 independent normative review completed within the user-authorized five-minute window: limited NO-GO. Matrix/enums/canonical identifiers/conversion/Art.57 logic confirmed; remaining blocker is deterministic treatment of partial overlaps and Art.12(2) overlaps not resolved by paragraphs 3-4. Parent incorporated segment-level source-bound representation and regression cases into documentary candidate v0.5, recorded in current-next, roadmap and decision log. No runtime tests, personal data or individual calculation. A fourth review cycle requires a new explicit user decision under the playbook.",
+      "V4.14n v0.4 document/governance checks: roadmap audit OK (current=V4.14b, audit_due=false); execution guardrails OK after scoping routing.trace to the active V4.14n increment (2 delegated events; prior V4.14m evidence remains in verification/decision log); planner JSON Schema OK; git diff --check OK with existing line-ending warnings. No runtime suite because executable code unchanged. User explicitly authorized a third bounded normative review cycle on exact v0.4, reusing Socrates, maximum five minutes; authorization is specific to this attempt and read-only.",
+      "Session close 2026-10-15: reread AGENTS, current planner/contract/active roadmap and relevant playbooks; captured reusable guidance in playbooks 03/07/08 on checkpoint budgets, exact-version/scope-bound verdicts, non-transfer of approval to corrected contracts, and planner blocker plus explicit user decision before further cycles. Latest v0.4 review NO-GO and v0.5 contract remain pending; no Rules/Tests/Engine changes or runtime suite. No individual data accessed.",
+      "User explicitly authorized a new normative review of the exact V4.14n v0.3 candidate on 2026-10-15, reusing fo_normative_reviewer with a maximum five-minute bounded window; read-only, no runtime or personal-data access.",
+      "V4.14n documentation/governance verification: roadmap_audit.py OK (current=V4.14b, audit_due=false); execution guardrails OK (in_progress); planner JSON Schema OK with repository venv jsonschema; git diff --check OK (line-ending warnings only). No runtime suite run because no executable code changed; increment remains in_progress and is not declared done.",
+      "V4.14j post-fix normative review: note updated from EUR-Lex Reg.883/2004 consolidated 2019-07-31 and Reg.988/2009; Art.52(4)(i)-(iii), Annex VIII parts 1/2, Arts.54-55 and Art.57 explicit. Final independent verdict pending.",
+      "V4.14i final independent normative review 2026-10-15: limited GO on the documented corrections to Art.57(2)-(3), Art.52 interplay and Art.94(1) transitional condition/safeguard. Reviewer notes that Art.52(4)(i)-(ii), including anti-cumulation conditions, must be made explicit before any executable use; recorded as a future gap, not a blocker for this documentary-only slice. GO excludes Rules, Engine, calculations, dates, timeline and V4.14. Engine full unit suite: 762 tests, 0 failures, 0 errors, 0 skips.",
+      "V4.14f baseline: 22 pension eligibility/freshness tests passed for primary-source roles, official-domain allowlist and 2027/2028 boundaries; historical chain and binding hardening added in resumed slice",
+      "V4.14f resumed implementation: 22 pension eligibility/freshness tests passed after versioning pack v2, binding the 2011-2025 historical chain plus 2027-2028 sources, separating legal-effective and pack-coverage periods, and rejecting missing/duplicate source/provision IDs. Independent post-implementation normative review pending.",
+      "V4.14f post-review corrections: normative attempt 1 returned scoped NO-GO on cumulative legal periods, missing required INPS page role and malformed/reversed period regressions. Corrected cumulative open-ended periods; required adjustment_months 3/4/5 and INPS administrative_guidance role; added ISO-date/reversed-period mutation regressions. Re-ran eligibility/freshness suite: 22 tests passed. Post-fix review attempt 2/3 pending.",
+      "V4.14f review attempt 2/3 returned NO-GO: malformed ISO ValueError was not wrapped as ItalianOldAgeEligibilityError; executable age schedule was not consumer-bound to official INPS source schedules. Parent fixed error wrapping, source-schedule equality binding for 2026 and 2027-2028, and added pack/source schedule mutation tests. Re-ran eligibility/freshness suite: 22 passed. Attempt 3/3 reviewer retracted the parser finding after verifying fail-closed behavior and returned GO limited for the listed V4.14f gate; this does not approve the V4.14 timeline.",
       "employment-income projection: 9 tests passed, FTE 100/60/40, annualization, extra pay, provenance/hash and workspace boundaries",
       "tax calculation regression: 6 tests passed",
       "work-transition plan/scenario/employment-projection focused suite: 15 tests passed; plan collects declared FTE phases and monthly bases, orchestrates the deterministic builders when readiness allows, preserves workspace-local drafts and blocking gaps, and never asks for pension or optimizer candidate dates",
@@ -80,53 +104,66 @@
       "V4.14d document review: official legal sources and administrative guidance mapped separately for five events across IT/ES/EU; initial normative NO-GO findings addressed; post-fix reviewer GO limited. No runtime tests applicable. Roadmap audit, planner JSON Schema (repository venv), execution guardrails, JSON parse and git diff --check pass.",
       "V4.14d initial normative matrix review: NO-GO limited to the document. Findings: separate binding legal sources from administrative guidance; add precise articles, consolidated versions and effective periods; limit cessation claim to employed profiles; leave individual decision and actual first-payment dates as evidence-only gaps. Parent corrected the matrix with official Normattiva/BOE/EUR-Lex acts and clarified procedures; no rule or calculation added.",
       "V4.14d post-fix normative review returned GO limited for the matrix only. Reviewer confirmed EU articles 6, 50-57 and 987/2009 articles 45-46/50, Spanish RD 453/2022 articles 2-4 and LGSS articles 165.1/205.1. Parent applied two non-blocking documentation corrections: separate Normattiva retrieval date from returned text validity date and cite Reg. 987/2009 art. 48 for notifying claimant of decisions. No calculations or runtime rules changed.",
-      "V4.14e: initial independent NO-GO on source hierarchy and provenance traceability; post-fix reviewer accepted limited documentary GO after clarifying statute/decreto direttoriale/INPS circular roles, explicitly retaining historic-71 and pack-provenance gaps, then correcting two remaining ambiguous Knowledge phrases. No rule-pack/code changes; no runtime tests applicable. Roadmap, planner validation, guardrails and diff-check passed."
+      "V4.14e: initial independent NO-GO on source hierarchy and provenance traceability; post-fix reviewer accepted limited documentary GO after clarifying statute/decreto direttoriale/INPS circular roles, explicitly retaining historic-71 and pack-provenance gaps, then correcting two remaining ambiguous Knowledge phrases. No rule-pack/code changes; no runtime tests applicable. Roadmap, planner validation, guardrails and diff-check passed.",
+      "V4.14g post-NO-GO fixes bind first-contribution evidence to candidate months, require source-dated cohort/cessation evidence and profile coverage across observed history, retain exactly one original contribution unit (years only; reject duplicates/mixed/unsupported units), require scope coverage not later than its evidence date, explicit as_of_date and human_review_required. Added malformed cohort-date regressions. Final run: 19 eligibility tests + 11 freshness tests passed; py_compile, roadmap audit, planner schema, guardrails and diff-check passed. Normative review cycle: attempts 1/3 and 2/3 NO-GO corrected; attempt 3/3 GO limited for this scoped consumer only. No GO for overall earliest date, 20-year amount path or full V4.14 timeline.",
+      "V4.14h monthly search: limited normative pre-implementation GO after contract NO-GO corrections; implemented separate ordinary post-1995 20-year + threshold month consumer without changing 71/5. Eligibility module 26/26; py_compile, roadmap audit, execution guardrails, routing coherence and scoped diff-check pass; post-implementation normative GO limited. Final remediation: Spanish/CLI/citation fixture and expectation corrections, platform-aware Windows permission test, junction-aware sanitized export, and stable unauthenticated API test. Normative reviewer limited GO. Related modules 156/156 and complete engine unit suite 762/762, 0 failures, 0 errors, 0 skips. V4.14h completed; V4.14 timeline remains blocked."
     ],
     "documentation_touchpoints": [
+      "family-office-knowledge/international/eu-pension-coordination-it-es.md",
       "family-office-engine/docs/current-next-increment.md",
-      "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
-      "family-office-engine/docs/employment-income-projection.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-engine/docs/roadmap/roadmap-index.md",
-      "family-office-engine/docs/roadmap/roadmap-v6-operations-compliance.md",
       "family-office-engine/docs/decision-log.md",
-      "family-office-engine/docs/roadmap/work-transition-implementation-plan.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
-    "result": "passed",
-    "notes": "V4.14e chiusa con GO limitato esclusivamente alla documentazione della gerarchia L.199/2025 (legge), decreto direttoriale 19-12-2025 (atto attuativo vincolante) e circolare INPS 28/2026 (guidance), nonché all'esplicitazione dei gap per la catena storica del valore base 71 e per la provenance INPS-only del pack. Reviewer indipendente post-fix ha indicato due correzioni editoriali finali, applicate; ha confermato che i gap sono adeguatamente registrati. Nessun pack/codice modificato, nessun GO operativo ulteriore, V4.14 resta blocked. Nessun dato personale letto.",
+    "result": "pending",
+    "notes": "V4.14k chiusa NO-GO sul primo mese complessivo. V4.14l: GO limitato alla Knowledge, NO-GO al trigger calendario. V4.14m chiusa con NO-GO sul draft incompleto. Review indipendenti v0.2, v0.3 e v0.4 di V4.14n: NO-GO limitati; i finding sono stati recepiti nelle candidate v0.3, v0.4 e v0.5. Reviewer v0.4 ha isolato il solo blocker di segmentazione degli overlap; v0.5 è documentata. L'utente ha autorizzato il terzo ciclo bounded su v0.4; un quarto ciclo richiede nuova decisione esplicita. Nessun runtime, suite eseguibile o calcolo individuale. V4.14 resta blocked.",
     "task_envelope": {
       "mode": "normative-change",
       "risk_domain": "pension",
-      "objective": "Verificare e sottoporre a review indipendente la base normativa italiana 2026-2028 del solo perimetro eligibility ordinaria già approvato, mantenendo eccezioni e gap fuori scope.",
-      "repositories": [
-        "family-office-engine",
-        "family-office-knowledge",
-        "family-office-bootstrap"
-      ],
+      "objective": "Definire con fonti primarie e review indipendente un contratto verificabile per art.57: durata assicurativa legalmente inferiore a un anno, assenza di diritto autonomo sui soli periodi interessati, conversioni e stato dell'obbligo di pagamento. Nessuna modifica runtime o calcolo.",
+      "repositories": ["family-office-knowledge", "family-office-engine", "family-office-bootstrap"],
       "read_set": [
-        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
-        "family-office-rules/italy/2026/inps-old-age-eligibility.json",
-        "Fonti ufficiali GU, Normattiva e INPS su requisiti pensionistici 2027-2028"
-      ],
-      "write_set": [
-        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+        "AGENTS.md",
+        "family-office-bootstrap/docs/playbooks/00-task-router.md",
+        "family-office-bootstrap/docs/playbooks/01-context-budget.md",
+        "family-office-bootstrap/docs/playbooks/07-normative-change.md",
+        "family-office-bootstrap/docs/playbooks/08-testing-and-review.md",
+        "family-office-knowledge/AGENTS.md",
+        "family-office-engine/AGENTS.md",
+        "family-office-engine/docs/roadmap/roadmap-index.md",
         "family-office-engine/docs/current-next-increment.md",
         "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+        "family-office-knowledge/international/eu-pension-coordination-it-es.md",
+        "family-office-knowledge/international/spain-pension.md",
+        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+        "family-office-knowledge/pensions/inps-theoretical-pension-it.md",
+        "family-office-rules/cross-border/eu-pension-coordination-it-es.json",
+        "family-office-engine/docs/decision-log.md",
+        "family-office-bootstrap/planning/current-work.json",
+        "family-office-bootstrap/planning/current-work.schema.json",
+        "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
+        "family-office-bootstrap/docs/playbooks/07-normative-change.md",
+        "family-office-bootstrap/docs/playbooks/08-testing-and-review.md"
+      ],
+      "write_set": [
+        "family-office-bootstrap/planning/current-work.json",
+        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+        "family-office-engine/docs/current-next-increment.md",
         "family-office-engine/docs/decision-log.md"
       ],
-      "test_command": "Review documentale contro fonti ufficiali; validazione JSON planner; roadmap audit; execution guardrails; git diff --check",
+      "test_command": "python family-office-engine/src/family_office_engine/governance/roadmap_audit.py; python family-office-bootstrap/planning/validate-execution-guardrails.py; planner JSON/schema validation; git diff --check (documentation/review only; no runtime tests)",
       "stop_conditions": [
-        "No rule pack, engine service, pension amount, entitlement decision, candidate date, economic stream or date inference",
-        "No extension beyond the existing ordinary FPLD/AGO eligibility scope and 2026-2028 period",
-        "No runtime or pack changes; a source-check does not approve recognition, effective date, first payment or the full timeline",
-        "Do not read or write family-office-workspace/",
-        "V4.14 stays blocked unless a separate normative gate approves a precisely scoped implementation"
+        "Senza fonti primarie e GO esplicito sul contratto Art.57, non modificare Rules/Tests/Engine ne calcolare date; registrare il gap minimo residuo",
+        "Nessuna modifica rules/tests/engine e nessun dato individuale in questa review documentale",
+        "Non leggere né scrivere family-office-workspace/"
       ]
     }
   },
-  "blockers": [],
+  "blockers": [
+    "Dopo i NO-GO limitati su v0.2, v0.3 e v0.4, la candidata documentale v0.5 recepisce il finding residuo sugli overlap. Il quarto ciclo di review supera il budget ordinario; il playbook richiede nuova decisione esplicita dell'utente prima di delegare ancora."
+  ],
     "session_notes": [
+    "Sessione 2026-10-14: definito V4.14i come audit documentale UE art. 57/periodi inferiori a un anno; nessuna nuova interpretazione o modifica Rules/Engine. Lezioni nei playbook: eligibility path-specific non equivale a decorrenza/pagamento; ACL sandbox non deroga al gate 0/0/0; spawn fallito per capacità non è delega. V4.14 resta blocked e V4.14a non selezionabile.",
     "User requires the optimizer to find the feasible date from capital and future pension streams; do not request a target retirement date.",
     "The architecture-review agent did not return; existing approved V4B architecture is the contract boundary.",
     "The implementer returned after bounded waits with the explicit data_gaps CLI wording and focused test coverage; the parent integrated the projection build command and final verification.",
@@ -147,11 +184,16 @@
     "Independent post-implementation reviewer returned NO-GO on four implementation gaps and stale inventory wording. Parent corrected cessation evidence, temporal binding, unknown five-year alternative handling, and pack-driven thresholds/cohort/scope; added legal source provision periods and refreshed current perimeter to five packs/seven consumers. Related suite: 77 tests pass; roadmap audit, planner schema, guardrails, diff check pass; pension freshness CLI reports 5/5 fresh without network. Reuse the reviewer for a bounded post-fix cycle before considering V4.14b closure.",
     "fo_docs_editor documented the normative GO and exclusions in current-next, active roadmap and decision log; only documentation changed in that sidecar.",
     "V4.14b implementation delivered; parent hardened unknown-scope flags, source-bound DOB/cohort/contribution/amount evidence, invalid age-threshold dates, and independent 71-year path handling. Expanded related suite passes 75 tests; roadmap audit, planner schema, compile and guardrails pass. Independent post-implementation normative review is pending; V4.14 timeline remains blocked.",
-    "Session retrospective (2026-10-12): added reusable guidance to playbook 07 on legal-source hierarchy, effective-date/source-version traceability, bounded review cycles, post-fix editorial closure conditions, and GO limits by artifact. V4.14e remains completed as documentary-only GO limited; V4.14f is planned. No family workspace data accessed."
+    "Session retrospective (2026-10-12): added reusable guidance to playbook 07 on legal-source hierarchy, effective-date/source-version traceability, bounded review cycles, post-fix editorial closure conditions, and GO limits by artifact. V4.14e remains completed as documentary-only GO limited; V4.14f is planned. No family workspace data accessed.",
+    "V4.14f was prematurely marked completed on 2026-10-13 despite a conditional GO; reopened after audit. Pack v2 records official acts 2011-2025, separate legal/coverage periods and fail-closed ID bindings. Earlier reviewer attempts returned no result (120 s and 180 s). User then authorized three extended attempts reusing the existing reviewer thread. Attempt 1 returned scoped NO-GO on cumulative period ends, missing INPS role binding and temporal mutation coverage; parent fixed these, source-bound months 3/4/5, and ran 22 eligibility/freshness tests successfully. Attempt 2 returned scoped NO-GO: invalid ISO dates propagated ValueError and consumer did not compare executable ages to INPS schedules. Parent wrapped parsing errors, added exact schedule equality binding and source/pack mutation cases; reran 22/22. Attempt 3/3 post-fix review is pending; do not infer GO or complete V4.14f. V4.14 stays blocked; no family workspace data accessed."
+    , "Esito finale (2026-10-13): il tentativo 3/3 ha verificato il fail-closed e ha emesso GO limitato per V4.14f; i finding dei primi due tentativi sono stati corretti. Verifiche finali: 22 test, roadmap audit, schema planner, guardrail completed e diff-check passano. V4.14 timeline resta blocked."
+    , "V4.14h-monthly-search selezionato il 2026-10-14. Reviewer normativo indipendente: NO-GO limitato sui dettagli del contratto, non sulla base normativa. Piano aggiornato con valutazione a fine mese, prove mensili source-bound separate per contribuzione/importo, vincolo di validita dell'importo e stop cronologico sul primo candidato con soglia annuale non supportata. Riusato lo stesso reviewer per il nuovo gate; nessuna modifica runtime né test di suite avviati. Fonti ufficiali INPS e Normattiva consultate; pack mantiene gap 2027-2028. Nessun accesso a family-office-workspace/.",
+    "Sessione 2026-10-15: tre review indipendenti Art. 57 sulle candidate v0.2, v0.3 e v0.4 hanno restituito NO-GO limitati; i finding sono stati corretti progressivamente fino alla documentazione v0.5, senza runtime. La v0.5 conserva le porzioni residue negli overlap parziali e richiede conteggio singolo source-bound o data gap per overlap non risolti. Per un quarto ciclo serve nuova autorizzazione; V4.14 resta blocked e il calcolo complessivo non è disponibile. Playbook 03/07/08 aggiornati; nessun dato personale consultato.",
+    "Retrospettiva di chiusura sessione 2026-10-15: routing.trace contiene solo gli eventi dell'incremento attivo per applicare correttamente il budget dei guardrail; gli esiti storici restano in verification/decision log. La chiusura della sessione non chiude l'incremento né rimuove gate e next_action. Regole consolidate in playbook 03, planning README e playbook 09; verifiche documentali/governance eseguite, nessun test runtime applicabile né dati personali consultati."
   ],
   "next_action": {
-      "mode": "recalculate",
-      "description": "Selezionare V4.14f pianificato: ricostruire la provenance normativa source-bound del rule pack eligibility IT e verificare regressioni sintetiche/fail-closed senza estendere lo scope o sbloccare V4.14."
+    "mode": "resume",
+    "description": "Richiedere una nuova decisione utente per un quarto ciclo bounded di review indipendente sulla candidata documentale V4.14n v0.5; mantenere Rules/Tests/Engine invariati e V4.14 blocked fino a GO."
   },
   "routing": {
     "policy_version": "3.1",
@@ -160,35 +202,134 @@
     "agent": "fo_normative_reviewer",
     "model": "gpt-5.6-sol",
     "reasoning_effort": "xhigh",
-    "rationale": "Il micro-incremento delimita affermazioni pensionistiche ad alto impatto e richiede gate indipendente; il reviewer verifica fonti, periodi, attori e non-derivabilità senza approvare calcoli.",
-      "trace": [
+    "rationale": "La suite include regressioni che possono modificare ammissibilitÃ  pensionistica italo-spagnola; prima di cambiare semantica serve review normativa. I fix tecnici restano separati e deterministici.",
+    "trace": [
       {
-          "at": "2026-10-12T19:42:24Z",
+        "at": "2026-10-15T19:07:09Z",
         "event": "selected",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-          "reason": "V4.14e è un checkpoint normativo T4 per la validità e il perimetro di regole pensionistiche ad alto impatto; review indipendente obbligatoria prima della chiusura."
-        },
-        {
-          "at": "2026-10-12T19:43:00Z",
-          "event": "delegated",
-          "tier": "critical",
-          "agent": "fo_normative_reviewer",
-          "model": "gpt-5.6-sol",
-          "reasoning_effort": "xhigh",
-          "reason": "Review normativa iniziale read-only V4.14e: NO-GO limitato per gerarchia delle fonti e tracciabilità del valore base 71/provenance pack."
-        },
-        {
-          "at": "2026-10-12T19:46:00Z",
-          "event": "delegated",
-          "tier": "critical",
-          "agent": "fo_normative_reviewer",
-          "model": "gpt-5.6-sol",
-          "reasoning_effort": "xhigh",
-          "reason": "Review indipendente post-fix V4.14e: confermare gerarchia legge/decreto attuativo/circolare e che gap sulla soglia 71 e sulla provenance del rule pack restino espliciti, senza attribuire GO normativo ulteriore."
+        "reason": "Nuovo incremento T4 V4.14j selezionato per rimuovere il gap documentale dell'art.52(4)(i)-(ii) indicato dal reviewer precedente; review normativa indipendente, scope solo Knowledge/documentazione."
+      },
+      {
+        "at": "2026-10-15T19:15:21Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Post-fix V4.14j: GO limitato alla nota documentale. Reviewer conferma art.52(4)(i)-(iii), artt.54-55, eccezione art.55(2), Annex VIII part 1/2 e fonti 883/2004, 988/2009, 2017/492. Nessuna approvazione Rules/Engine/calcolo/timeline; verifica concreta resta data_gap."
+      },
+      {
+        "at": "2026-10-15T19:24:04Z",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14k selezionato dopo il GO documentale V4.14j per riesame indipendente del contratto della prima mensilità complessiva IT/ES/UE; nessun calcolo o runtime prima di un GO esplicito."
+      },
+      {
+        "at": "2026-10-15T19:38:30Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14k review completed after user-authorized five-minute extension: NO-GO for overall first month; limited GO to planning a fail-closed reducer."
+      },
+      {
+        "at": "2026-10-15T19:38:34Z",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14l selected as a documentation-only normative gate on the Art.57 duration/payment-obligation mismatch, before Rules/Tests/Engine changes."
+      },
+      {
+        "at": "2026-10-15T19:43:14Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14l GO limitato alla Knowledge esistente, NO-GO al trigger eseguibile a 12 mesi calendario."
+      },
+      {
+        "at": "2026-10-15T19:43:34Z",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14m selected: independently review the exact source-bound Art.57 contract before any runtime changes."
+      },
+      {
+        "at": "2026-10-15T19:54:05Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14m final verdict NO-GO on proposed contract; reviewer gave finite source-bound additions required before a new pre-implementation gate."
+      },
+      {
+        "at": "2026-10-15T19:54:05Z",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14n selected as a docs-only contract-specification slice derived from V4.14m findings; no runtime authorization."
+      },
+      {
+        "at": "2026-10-15T19:58:06Z",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Independent bounded review of V4.14n Art.57 source-bound contract v0.2 against EUR-Lex Reg.883/2004/987/2009; scope is documentation/spec only, no runtime edits, workspace data or individual calculation."
+      },
+      {
+        "at": "2026-10-15T20:00:45Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14n v0.2 limited NO-GO after user-authorized extension; four precise contract corrections recorded and incorporated into documentary candidate v0.3. New review required before runtime."
+      },
+      {
+        "at": "2026-10-15T20:02:44Z",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "User authorized a new bounded independent review of the exact V4.14n v0.3 candidate; reuse Socrates, maximum five minutes, read-only, no runtime/personal data."
+      },
+      {
+        "at": "2026-10-15T20:08:43Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "V4.14n v0.3 limited NO-GO within user-authorized bounded window. Four earlier contract areas closed; operational Art.12(2)-(6) matrix and three identifier normalizations required; incorporated into documentary candidate v0.4."
+      },
+      {
+        "at": "2026-10-15T20:14:39Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Reused Socrates for user-authorized third bounded review of exact V4.14n v0.4; limited NO-GO on partial and unresolved Article 12(2) overlaps. Findings incorporated into documentary candidate v0.5; fourth review requires a new explicit user decision."
       }
-      ]
+    ]
   }
 }

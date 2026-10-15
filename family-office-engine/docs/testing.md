@@ -1,14 +1,19 @@
 # Testing
 
-`test_security.py` copre `security-check/v1`: round-trip di cifratura autenticata, chiave errata, confinamento dei path, segreto nel repository, file sensibile non cifrato, permessi POSIX e output CLI/log senza contenuti sensibili. Il test dei permessi POSIX e' saltato su Windows perche' i bit `chmod` non rappresentano gli ACL NTFS.
+`test_security.py` copre `security-check/v1`: round-trip di cifratura autenticata, chiave errata, confinamento dei path, segreto nel repository, file sensibile non cifrato, permessi POSIX e output CLI/log senza contenuti sensibili. La verifica dei permessi è platform-aware: controlla il finding POSIX sui bit `chmod` e, su Windows, il contratto `acl-managed` senza interpretare i bit POSIX come ACL NTFS. `test_sanitized_export.py` usa una symlink POSIX o una junction Windows verso il workspace e verifica che il consumer la escluda come reparse point; nessuna piattaforma supportata salta questi test.
 
 ## Unit Test
 
 Dal repository `family-office-engine`:
 
 ```text
-$env:PYTHONPATH='src'; python -m unittest discover -s tests/unit
+\.venv\Scripts\python.exe -m pip install -e ".[test]"
+$env:PYTHONPATH='src'; .\.venv\Scripts\python.exe -m unittest discover -s tests/unit
 ```
+
+L'extra `test` installa le dipendenze di validazione richieste dalla suite, incluso `jsonschema`; eseguire i test con lo stesso interprete del venv.
+
+Un incremento o release può essere dichiarato completo solo dopo l'intera suite del repository, con esattamente 0 failure, 0 errori e 0 skipped. I failure si correggono nel codice oppure, con evidenza contrattuale, nell'aspettativa del test; non vengono waivati come out-of-scope. Se la suite non può essere eseguita o passare integralmente, mantenere lo stato `in_progress` o `blocked`.
 
 ## Payroll
 

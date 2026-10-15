@@ -9,5 +9,10 @@ dependencies=[
   "cryptography>=42"
 ]
 
+[project.optional-dependencies]
+test = [
+  "jsonschema>=4.26,<5"
+]
+
 [project.scripts]
 fo="family_office_engine.cli.main:main"

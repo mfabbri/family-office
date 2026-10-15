@@ -9,5 +9,7 @@ Per bug o modifiche circoscritte leggere solo modulo, test e contratto coinvolti
 ## Verifica
 
 - Preferire test mirati prima della suite completa.
-- Eseguire la regression completa quando cambia un contratto condiviso, un calcolo, uno schema o prima di chiudere un incremento.
+- Eseguire la suite completa del repository quando cambia un contratto condiviso, un calcolo, uno schema o prima di chiudere un incremento/release; il gate richiede esattamente 0 failure, 0 errori e 0 skipped.
+- Un failure richiede una correzione nel codice o, con evidenza del contratto, nel test; non è mai un esito out-of-scope. Uno skip richiede un test equivalente eseguibile sulle piattaforme supportate; non è un pass.
+- Se la suite non può essere eseguita o non passa integralmente, mantenere l'incremento `in_progress` o `blocked`, mai `done`.
 - Non modificare rules o knowledge implicitamente dall'engine.

@@ -30,7 +30,7 @@ class LocalConversationApiTest(unittest.TestCase):
 
     def test_authentication_and_loopback_only_binding(self):
         with self.assertRaises(HTTPError) as caught:
-            self._request("POST", API_PREFIX, {"question_fingerprint": self._fingerprint("question")}, token=None)
+            self._request("POST", API_PREFIX, token=None)
         self.assertEqual(401, caught.exception.code)
 
         stdout = StringIO()

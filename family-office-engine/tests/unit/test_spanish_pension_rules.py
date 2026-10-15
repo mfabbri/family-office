@@ -32,7 +32,10 @@ class SpanishPensionRulesTest(unittest.TestCase):
             rule_pack_path = Path(tmp_dir) / "spanish-rules.json"
             rule_pack_path.write_text(json.dumps(broken), encoding="utf-8")
 
-            with self.assertRaisesRegex(SpanishPensionRulesError, "source_ref"):
+            with self.assertRaisesRegex(
+                SpanishPensionRulesError,
+                "freshness/provenance: normative_source_provenance_missing",
+            ):
                 load_rule_pack(rule_pack_path)
 
     def test_ordinary_retirement_age_uses_2026_transition(self):

@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+import stat
 import tempfile
 import zipfile
 from collections import Counter
@@ -77,13 +78,13 @@ def _collect_allowlisted_files(source: Path) -> tuple[list[tuple[str, bytes]], C
         if not root.is_dir():
             missing_roots.append(relative_root.as_posix())
             continue
-        if root.is_symlink():
+        if _is_symlink_or_junction(root):
             exclusions["symlink"] += 1
             continue
         for path in sorted(root.rglob("*")):
             if not path.is_file():
                 continue
-            if path.is_symlink():
+            if _is_symlink_or_junction(path):
                 exclusions["symlink"] += 1
                 continue
             relative = path.relative_to(source)
@@ -98,6 +99,17 @@ def _collect_allowlisted_files(source: Path) -> tuple[list[tuple[str, bytes]], C
                 continue
             included.append((relative.as_posix(), content))
     return sorted(included), exclusions, sorted(missing_roots)
+
+
+def _is_symlink_or_junction(path: Path) -> bool:
+    if path.is_symlink():
+        return True
+    is_junction = getattr(path, "is_junction", None)
+    if callable(is_junction) and is_junction():
+        return True
+    attributes = getattr(path.lstat(), "st_file_attributes", 0)
+    reparse_point = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    return bool(reparse_point and attributes & reparse_point)
 
 
 def _exclusion_reason(relative: Path, path: Path, source: Path, suffixes: frozenset[str]) -> str | None:
