@@ -1,374 +1,158 @@
 {
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
-  "status": "in_progress",
-  "selected_at": "2026-10-16T18:32:07Z",
-  "updated_at": "2026-10-17T06:29:37Z",
+  "status": "completed",
+  "selected_at": "2026-10-17T07:14:50Z",
+  "updated_at": "2026-10-17T08:21:16Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.14w — Source-bound Art. 57 duration in the EU pension consumer",
-      "reason": "V4.14v ha dato GO limitato pre-implementazione sulla specifica v0.17; il consumer runtime dipende ancora dal threshold fisso di 12 mesi. Scope minimo Knowledge → Rules → Tests → Engine, senza sbloccare l'intera timeline."
+      "section": "V4.14y — Annex VIII Part 2 versioned catalogue and temporal ledger",
+      "reason": "V4.14x evento 2 ha dato NO-GO limitato: la candidata non include tutte le entry/ledger temporali. V4.14y abilita un catalogo documentale completo senza modificare runtime o rules."
     }
   ],
   "increment": {
-    "id": "V4.14w-source-bound-art57-duration-eu-pension-consumer",
-    "title": "Source-bound Art. 57 duration in the EU pension consumer",
-    "objective": "Rimuovere ogni decisione Art. 57 basata su spain_months < 12 e implementare il contratto v0.17/c14n-v4 con input di durata/diritto autonomo/Annex source-bound e fail-closed deterministico, in ordine Knowledge → Rules → Tests → Engine.",
+    "id": "V4.14y-annex-viii-part2-versioned-catalogue",
+    "title": "Annex VIII Part 2 versioned catalogue and temporal ledger",
+    "objective": "Produrre e sottoporre a review una tabella completa delle entry testuali dell'Annex VIII Part 2 con ledger degli atti autentici, delta e intervalli di efficacia; mantenere fuori scope l'applicabilità territoriale non verificata.",
     "scope": [
-      "Knowledge: mantenere fonte/versione/giurisdizione e distinzione fra durata legale art. 57 e conversioni ex art. 13",
-      "Rules: sostituire la configurazione calendar-month con semantica v0.17 source-bound, versione e validità esplicite",
-      "Tests: casi sintetici per durata <, =, > un anno; condizioni true/false/unknown; Annex VIII, overlap/conversione, art. 57(3), mismatch e legacy v0.16/c14n-v3",
-      "Engine: consumare solo durata e predicati source-bound; dati decisivi assenti producono not_assessed + data_gaps; separare eligibility, teorico, pro-rata e payment obligation",
-      "Review normativa post-implementazione exact-version del diff; il GO pre-implementazione V4.14v non approva automaticamente il codice"
+      "Riconciliare le 23 entry/sub-entry testuali del consolidato EUR-Lex 02004R0883-20190731 con gli atti GUUE 988/2009, 1244/2010, 1224/2012, 517/2013, 1372/2013 e 2017/492.",
+      "Registrare per ogni delta CELEX, OJ, pagina/articolo, operation, effective date, entry key locale e valid_from/valid_to supportati.",
+      "Distinguere entry testuali da schemi nazionali; mantenere UK, SEE e Svizzera in ambito separato non valutato.",
+      "Registrare entrambi i nuovi Knowledge document nel citation catalog e aggiornare il test del conteggio corpus, senza waivare il gap di citazione atteso per altri documenti.",
+      "Sottoporre candidate source table e ledger a review normativa indipendente exact-version entro due eventi massimi."
     ],
     "out_of_scope": [
-      "Prima eligibility mensile spagnola, ricerca IT pre-1996 o reducer della prima data complessiva IT/ES/UE",
-      "Calcoli individuali, riconoscimento, decorrenza, pagamento, importi/pro-rata o prima data complessiva IT/ES/UE",
-      "CLI/workspace, dati personali, valori nazionali dedotti per analogia o threshold fallback a 12"
+      "Aggiornare rule pack o runtime, effettuare match su schemi individuali o usare dati personali.",
+      "Determinare l'applicabilità post-Brexit o l'estensione SEE/Svizzera.",
+      "Sbloccare V4.14w/V4.14a/V4.15 o la timeline pensionistica complessiva."
     ],
     "candidate_files": [
+      "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md",
+      "family-office-knowledge/international/eu-pension-art57-evidence-binding-audit-candidate-v0.18.md",
+      "family-office-knowledge/sources/citation-catalog.json",
+      "family-office-engine/tests/unit/test_citation_index.py",
       "family-office-engine/docs/current-next-increment.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
       "family-office-engine/docs/decision-log.md",
-      "family-office-knowledge/international/eu-pension-coordination-it-es.md",
-      "family-office-rules/cross-border/eu-pension-coordination-it-es.json",
-      "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
-      "family-office-engine/tests/unit/test_it_es_eu_pension_pro_rata.py",
-      "family-office-engine/src/family_office_engine/services/eu_pension_coordination.py",
-      "family-office-engine/tests/unit/test_eu_pension_coordination.py",
-      "family-office-engine/tests/unit/test_spanish_eu_theoretical_pension.py",
-      "family-office-engine/tests/unit/test_validate.py",
-      "family-office-engine/examples/spanish-eu-theoretical-pension-pro-rata-input-sample.json",
       "family-office-bootstrap/planning/current-work.json"
     ],
-    "stop_condition": "Il consumer non deve più derivare Art.57 da mesi di calendario. Unknown/invalid/source insufficiente = not_assessed + data_gaps. Fermarsi se l'interfaccia richiesta esce dal v0.17 o richiede interpretazione normativa nuova; non sbloccare la prima data complessiva. GO solo con suite 0/0/0 e review normativa post-implementazione."
+    "stop_condition": "Se un entry/delta o un intervallo di efficacia non è dimostrato da un atto autentico, registrarne il gap e non renderlo matchabile; nessuna modifica a Rules/Engine."
   },
   "verification": {
     "tests": [
-      "2026-10-17: nuovo 'procedi' autorizza un solo ciclo correttivo v0.17/c14n-v4: evento 10 fo_implementer, evento 11 fo_normative_reviewer read-only. Scope limitato ai finding del NO-GO evento 9; stop su interpretazione normativa nuova; nessun altro evento oltre 11.",
-      "2026-10-17: test CLI sample Art.57 1/1 OK; suite Engine completa 772 test, 0 failure, 0 errori, 0 skipped. Evento 8 reviewer errore quota senza verdetto; evento 9 fallback normativo NO-GO P0 grammar/transitorio e Art.57(3), P1 Annex. Governance: roadmap audit, schema planner, guardrails (9 eventi in_progress), git diff --check OK.",
-      "V4.14v review GO limitato pre-implementazione sulla sola specifica v0.17/c14n-v4; nessun runtime approvato.",
-      "Suite Engine completa: 762 test in 12.169s, OK, 0 failure/errori/skipped, fuori sandbox dopo ACL/temp failure nel sandbox.",
-      "V4.14w targeted: 21 test OK; suite Engine completa: 766 test, 3 failure, 5 errori. User autorizza 1 delega addizionale per correggere codice/test e regressioni dirette; nessun waiver. Review normativa esatta resta NO-GO e non ricertifica modifiche future.",
-      "Post-fix ciclo precedente: moduli mirati 37/37 OK; test CLI sample 1/1 OK; suite Engine 768/0/0/0. Review normativa exact-version conclusa NO-GO con finding P0/P1 registrati nei documenti di incremento.",
-      "Secondo ciclo correttivo: suite mirata 39/39 OK; suite completa 770/0/0/0; review normativa exact-version NO-GO, finding registrati.",
-      "Terzo ciclo: 41 test mirati OK fuori sandbox dopo adeguamento sintetico di root bindings e versione Annex al rule pack; import duplicato rimosso. Suite completa iniziale 772/1/0; il failure CLI derivava dal sample Art.57 non migrato. Sample aggiornato con bindings e versione Annex del rule pack; test CLI mirato 1/1 OK e suite completa 772/0/0/0 OK il 2026-10-17. Evento 8 reviewer terminato per quota, non è un esito normativo. È autorizzato un solo fallback reviewer indipendente; runtime resta non approvato in attesa di review esatta."
+      "Roadmap audit prima della selezione: OK, current=V4.14b, functional_since_audit=0, audit_due=false.",
+      "Verificare ledger e conteggio entry/sub-entry contro testo consolidato e singoli atti GUUE; review exact-version necessaria.",
+      "Test mirato citation index 6/6 dopo l'indicizzazione; conteggio documenti atteso aggiornato 16→18.",
+      "Suite Engine completa dopo aggiornamento documentale citation index: 774 test, 0 failure, 0 errori, 0 skipped.",
+      "Schema planner, roadmap audit, execution guardrails e git diff --check: tutti superati."
     ],
     "documentation_touchpoints": [
+      "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md",
+      "family-office-knowledge/sources/citation-catalog.json",
+      "family-office-engine/tests/unit/test_citation_index.py",
       "family-office-engine/docs/current-next-increment.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
       "family-office-engine/docs/decision-log.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
-    "result": "partial",
-    "notes": "V4.14v chiusa con GO limitato pre-implementazione v0.17/c14n-v4. La suite completa più recente è 772/0/0/0. Reviewer evento 9 NO-GO: grammar/transitorio, records istituzionali e Annex non pienamente source-bound. Il nuovo 'procedi' autorizza un solo ciclo: evento 10 implementer bounded e evento 11 reviewer normativo read-only max 5 minuti. Stop su nuova semantica; runtime non approvato.",
+    "result": "passed",
+    "notes": "V4.14w resta blocked dopo NO-GO evento 11. V4.14x resta blocked dopo NO-GO evento 2: v0.18 non contiene il catalogo e ledger completi. V4.14y è documentale/source-only. L'evento 2 ha dato NO-GO alla versione pre-fix ma ha esplicitamente autorizzato GO-after-fix limitato ai documenti applicando dieci correzioni finite; applicate senza ulteriore review. Rules/runtime restano non approvati. Il finding Art.1(27) vs Art.1(16) resta registrato, non corretto qui.",
     "task_envelope": {
       "mode": "normative-change",
       "risk_domain": "pension",
-      "objective": "Implementazione bounded del consumer Art. 57 secondo contratto v0.17/c14n-v4, con dati source-bound e comportamento fail-closed; review normativa post-implementazione exact-diff.",
-      "repositories": [
-        "family-office-engine",
-        "family-office-rules",
-        "family-office-knowledge",
-        "family-office-bootstrap"
-      ],
+      "objective": "Costruire un catalogo storico Annex VIII Part 2 documentale, completo e source-bound per l'approvazione futura.",
+      "repositories": ["family-office-knowledge", "family-office-engine", "family-office-bootstrap"],
       "read_set": [
-        "family-office-engine/docs/roadmap/roadmap-index.md",
-        "family-office-engine/docs/current-next-increment.md",
-        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-        "family-office-knowledge/international/eu-pension-coordination-it-es.md",
-        "family-office-rules/cross-border/eu-pension-coordination-it-es.json",
-        "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
-        "family-office-engine/tests/unit/test_it_es_eu_pension_pro_rata.py",
-      "family-office-engine/src/family_office_engine/services/eu_pension_coordination.py",
-      "family-office-engine/tests/unit/test_eu_pension_coordination.py",
-      "family-office-engine/tests/unit/test_spanish_eu_theoretical_pension.py",
-      "family-office-engine/tests/unit/test_validate.py",
-      "family-office-engine/examples/spanish-eu-theoretical-pension-pro-rata-input-sample.json",
-        "Fonti EUR-Lex Reg. 883/2004 art. 57 e Reg. 987/2009 artt. 12-13"
+        "EUR-Lex 02004R0883-20190731 Annex VIII Part 2",
+        "EUR-Lex/OJ acts 32009R0988, 32010R1244, 32012R1224, 32013R0517, 32013R1372, 32017R0492",
+        "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md",
+        "family-office-knowledge/sources/citation-catalog.json",
+        "family-office-engine/tests/unit/test_citation_index.py",
+        "family-office-rules/cross-border/eu-pension-coordination-it-es.json"
       ],
       "write_set": [
-        "family-office-knowledge/international/eu-pension-coordination-it-es.md",
-        "family-office-rules/cross-border/eu-pension-coordination-it-es.json",
-        "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
-        "family-office-engine/tests/unit/test_it_es_eu_pension_pro_rata.py",
-      "family-office-engine/src/family_office_engine/services/eu_pension_coordination.py",
-      "family-office-engine/tests/unit/test_eu_pension_coordination.py",
-      "family-office-engine/tests/unit/test_spanish_eu_theoretical_pension.py",
-      "family-office-engine/tests/unit/test_validate.py",
-      "family-office-engine/examples/spanish-eu-theoretical-pension-pro-rata-input-sample.json",
+        "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md",
+        "family-office-knowledge/sources/citation-catalog.json",
+        "family-office-engine/tests/unit/test_citation_index.py",
         "family-office-engine/docs/current-next-increment.md",
         "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
         "family-office-engine/docs/decision-log.md",
         "family-office-bootstrap/planning/current-work.json"
       ],
-      "test_command": "PYTHONPATH=src .venv/Scripts/python.exe -m unittest tests.unit.test_eu_pension_coordination tests.unit.test_it_es_eu_pension_pro_rata tests.unit.test_spanish_eu_theoretical_pension; PYTHONPATH=src .venv/Scripts/python.exe -m unittest discover -s tests/unit; python family-office-engine/src/family_office_engine/governance/roadmap_audit.py; family-office-engine/.venv/Scripts/python.exe -m jsonschema -i family-office-bootstrap/planning/current-work.json family-office-bootstrap/planning/current-work.schema.json; python family-office-bootstrap/planning/validate-execution-guardrails.py; git diff --check",
+      "test_command": "python family-office-engine/src/family_office_engine/governance/roadmap_audit.py; family-office-engine/.venv/Scripts/python.exe -m jsonschema -i family-office-bootstrap/planning/current-work.json family-office-bootstrap/planning/current-work.schema.json; python family-office-bootstrap/planning/validate-execution-guardrails.py; git diff --check",
       "stop_conditions": [
-      "Fix the 8 full-suite regressions; no test waivers, synthetic evidence only",
-      "Do not claim legal/runtime approval from previous NO-GO; stay fail-closed and do not mark done",
-      "No threshold fallback calendar-month; v0.17/c14n-v4 only",
-        "Nessun dato personale o accesso al workspace",
-        "Stop se occorre nuova interpretazione normativa oltre il GO limitato v0.17; richiedere autorizzazione esplicita",
-      "Nessun calcolo individuale, importo, prima data complessiva o accesso workspace",
-      "User 'procedi' on 2026-10-17 authorizes exactly one new bounded cycle: event 10 fo_implementer and event 11 fo_normative_reviewer, read-only and max 5 minutes. No further retry or delegation beyond event 11",
-      "If any blocker requires a new normative interpretation beyond the existing v0.17/c14n-v4 contract, stop and keep in_progress; no runtime approval before exact-version GO"
+        "No personal data, individual scheme classification, or rule-pack/runtime edits.",
+        "Do not infer legal applicability from a consolidated text alone; unresolved effective dates remain gaps.",
+        "Maximum two substantial events for this increment; no extra review without a new roadmap selection."
       ]
     }
   },
-  "blockers": [
-    "Evento 11/11 concluso con NO-GO P0/P1. Suite Engine 774/0/0/0 e gate governance passano, ma completezza istituzionale non fail-closed, binding Art.57(3) insufficiente e match Annex non provato; ulteriore semantica source-bound non definita. V4.14w in_progress, runtime non approvato; budget esaurito.",
-    "Review normativa finale NO-GO: il consumer valida solo una parte della grammar c14n-v4 e non verifica root bindings completi; payer Art.57(3) non prova completezza dell'insieme istituzionale; risk/applicability dates e versione Annex non validate contro il periodo; consumer esporta separate_payment_by_country=true senza assessment Art.57; coverage avversa insufficiente. Runtime non approvato.",
-    "Review exact-version NO-GO: consumer non valida grammar/root bindings c14n-v4 completi; completezza degli istituti Art.57(3) non provata; date rischio/applicabilità e versione Annex non validate; claim separate_payment_by_country senza assessment; coverage avversa insufficiente. Correggere solo tali punti entro v0.17 o fermarsi se occorre nuova interpretazione.",
-    "Evento 8 fo_normative_reviewer terminato per quota account, senza verdetto. Il successivo 'procedi' autorizza un solo evento 9 di fallback reviewer indipendente read-only, massimo 5 minuti; nessun ulteriore retry o delega."
-  ],
+  "blockers": [],
   "session_notes": [
-    "2026-10-17: evento 10 implementazione concluso; 127 test mirati OK e suite Engine completa 774 test, 0 failure, 0 errori, 0 skipped. Fixture transitori e sample aggiornati al formato esplicito.",
-    "2026-10-17: evento 11 Meitner fo_normative_reviewer NO-GO. P0 completezza istituzionale mancante/mismatch deve produrre not_assessed; prova Art.57(3) non lega i record allo stesso caso/beneficio/legislazione e non verifica la coerenza del record root; match Annex accetta entry arbitraria senza elenco versionato. P1 c14n-v4 con più parent/bound valida solo il primo. Reviewer conferma root/transitorio/autonomous date/consumer claim rimosso. Audit roadmap, planner schema, guardrail a 11 eventi e diff-check passano. Nessun ulteriore ciclo autorizzato.",
-    "2026-10-17: nuovo 'procedi' autorizza solo eventi 10/11: implementer sui finding evento 9 entro v0.17/c14n-v4 e review normativa finale read-only max 5 minuti. Nessuna estensione oltre evento 11; stop se richiede nuova semantica.",
-    "2026-10-17: suite completa 772/0/0/0 e gate governance passano; fallback reviewer evento 9 NO-GO su P0 grammar c14n-v4/transitorio e coerenza/completezza istituzionale Art.57(3), P1 Annex. Claim generale pagamento separato assente. Budget 9 esaurito; status in_progress, runtime non approvato; ulteriori modifiche richiedono consenso esplicito.",
-    "V4.14v: GO limitato pre-implementazione v0.17/c14n-v4; suite completa 762/0/0/0.",
-    "V4.14n: GO limitato v0.17 documentale; suite 762/0/0/0.",
-    "V4.14p: GO solo definitorio, NO-GO implementativo.",
-    "V4.14q: NO-GO documentale v2 su sei finding; suite 762/0/0/0, governance pass. V4.14 resta blocked.",
-    "2026-10-16: autorizzazione utente per il terzo evento di delega in V4.14w; solo ciclo bounded di correzione ai test/codice e consumer direttamente rotti, un implementer, nessun waiver o estensione a dati personali.",
-    "2026-10-16: suite Engine completa dopo fix 768/0/0/0. Utente autorizza un solo quarto evento: review normativa indipendente post-fix, fo_normative_reviewer, read-only, timebox massimo 5 minuti, scope Art. 57 v0.17/c14n-v4. Review conclusa NO-GO; runtime non approvato.",
-    "2026-10-16: l'utente risponde 'procedi' dopo la richiesta di autorizzazione a un nuovo ciclo successivo al NO-GO. Autorizzati solo eventi 7 (fo_implementer) e 8 (fo_normative_reviewer finale), nessun retry; scope esclusivo finding residui v0.17/c14n-v4."
+    "2026-10-17: V4.14x event 2/2 reviewer NO-GO limited; exact findings in decision log. Started V4.14y per roadmap; no runtime/rule/workspace edits.",
+    "2026-10-17: event 1/2 read-only source review completed. Candidate corrected for ledger fields, OJ locators, entry/applicability dates, historical AT-a/SE entries and exact HR legal references.",
+    "2026-10-17: event 2/2 completed with NO-GO pre-fix; reviewer explicitly authorized document-only GO-after-fix after ten listed row corrections, no further review. Applied only those changes; no runtime/rule approval.",
+    "2026-10-17: full suite initially exposed unindexed Knowledge docs; citation catalog and corpus test updated; targeted citation-index suite 6/6 passes. Final full suite 774/0/0/0 and governance gates passed; V4.14y closed as document-only GO-after-fix.",
+    "Prior V4.14w code commit 8009672 was pushed to origin/main before this documentation work."
   ],
   "next_action": {
-    "mode": "none",
-    "description": "Attendere nuova autorizzazione esplicita dell'utente: tutti gli 11 eventi sono esauriti e il reviewer finale ha dato NO-GO. Non modificare o approvare il runtime; eventuale ciclo richiede prima binding source-bound definiti per Art.57(3), Annex VIII versionato e fail-closed della completezza."
+    "mode": "recalculate",
+    "description": "V4.14y is closed as document-only GO-after-fix. Recalculate the next eligible roadmap increment; preserve V4.14w as blocked and do not infer runtime approval."
   },
   "routing": {
     "policy_version": "3.1",
     "tier": "critical",
     "task_class": "normative",
     "agent": "fo_normative_reviewer",
-    "model": "gpt-5.6-terra",
-    "reasoning_effort": "medium",
-    "rationale": "Evento 11/11 fo_normative_reviewer concluso con NO-GO exact-version v0.17/c14n-v4. Nessuna delega o ulteriore modifica autorizzata; attendere consenso esplicito dopo la definizione dei binding mancanti.",
-    "delegation_budget": {
-      "max_events": 11,
-      "authorization": "2026-10-17: dopo il NO-GO reviewer dell'evento 9, l'utente ha risposto 'procedi'. Autorizzati esattamente un ciclo: evento 10 fo_implementer e evento 11 fo_normative_reviewer read-only, max 5 minuti; nessun evento successivo.",
-      "scope": "Correggere solo finding P0 grammar c14n-v4/transitorio e record/completezza Art.57(3), e P1 binding Annex del NO-GO evento 9 entro la specifica v0.17/c14n-v4; mantenere unknown/missing fail-closed. Evento 11 esamina il diff esatto. Nessuna nuova interpretazione, nessun uso decisionale o dati personali.",
-      "blocker": "Se la specifica non definisce una forma di binding o prova, fermarsi e lasciare not_assessed + data_gaps; qualsiasi modifica semantica richiede nuovo gate. Stato resta in_progress fino a suite 0/0/0 e review GO."
-    },
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "rationale": "Catalogo pensionistico normativo versionato; ogni entry e validità devono essere provate contro atti GUUE, con review specialista e nessuna assunzione territoriale.",
     "trace": [
       {
-        "at": "2026-10-16T18:32:07Z",
-        "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Avvio V4.14w dopo GO limitato pre-implementazione V4.14v v0.17/c14n-v4; implementazione bounded Knowledge→Rules→Tests→Engine, poi review normativa sul diff."
-      },
-      {
-        "at": "2026-10-16T18:35:18Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Peirce accetta implementazione bounded nei quattro file Knowledge/Rules/Tests/Engine, secondo contratto v0.17/c14n-v4 e GO limitato V4.14v; test mirati richiesti, senza toccare planner/docs o workspace personale."
-      },
-      {
-        "at": "2026-10-16T18:44:41Z",
+        "at": "2026-10-17T07:14:50Z",
         "event": "selected",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-        "reason": "Review normativa post-implementazione richiesta dal micro-incremento V4.14w; verifica read-only del diff esatto v0.17/c14n-v4 e fonti primarie, timebox 5 minuti, nessun caso nazionale/individuale."
+        "reason": "V4.14y selezionato dopo il NO-GO della specifica v0.18; route critico per catalogo/versioning Annex VIII Part 2 e source ledger."
       },
       {
-        "at": "2026-10-16T18:45:18Z",
+        "at": "2026-10-17T07:17:19Z",
         "event": "delegated",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-        "reason": "James accetta review normativa read-only del diff esatto v0.17/c14n-v4 su 4 file Knowledge/Rules/Tests/Engine, fonti primarie EUR-Lex/DOUE, timebox massimo 5 minuti, nessun caso nazionale/individuale o follow-up gate."
+        "reason": "Event 1/2 read-only verification of each Annex VIII Part 2 amendment, OJ page/article, effective date, and exact catalogue entries; 5-minute bound; no edits."
       },
       {
-        "at": "2026-10-16T18:55:36Z",
-        "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Terzo e ultimo evento autorizzato dall'utente in V4.14w: fix bounded ai regressi di suite e al bug di confronto razionale, con test sintetici. Il NO-GO normativo precedente resta vincolante e le modifiche non ricevono approvazione implicita."
-      },
-      {
-        "at": "2026-10-16T18:56:28Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Russell ha accettato il terzo evento allora autorizzato: correggere regressioni suite e confronto razionali con fixture sintetiche."
-      },
-      {
-        "at": "2026-10-16T19:11:18Z",
-        "event": "selected",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Quarto e unico evento esplicitamente autorizzato: review normativa read-only del diff post-fix Art. 57 v0.17/c14n-v4, timebox massimo 5 minuti; suite completa verde 768/0/0/0, runtime non approvato in attesa dell'esito."
-      },
-      {
-        "at": "2026-10-16T19:11:18Z",
-        "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Aristotle ha accettato il quarto evento: review normativa indipendente, read-only, sul diff post-fix v0.17/c14n-v4, timebox massimo 5 minuti; nessuna modifica o follow-up delegation."
-      },
-      {
-        "at": "2026-10-16T19:20:11Z",
-        "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Quinto evento in un solo ciclo correttivo autorizzato dall'utente con 'procedi': implementare fix bounded a tutti i finding azionabili della review NO-GO, aggiornare regressioni sintetiche e fermarsi se serve nuova interpretazione normativa. Evento 6 riservato al reviewer finale."
-      },
-      {
-        "at": "2026-10-16T19:20:47Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Volta ha accettato l'evento 5: ciclo unico bounded sui finding P0/P1 e regressioni sintetiche, senza interpretazioni normative nuove; test mirati entro 10 minuti. Evento 6 riservato alla review normativa finale."
-      },
-      {
-        "at": "2026-10-16T19:25:26Z",
-        "event": "selected",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Sesto e ultimo evento del ciclo autorizzato: review normativa read-only del diff aggiornato v0.17/c14n-v4, entro 5 minuti; specifica, rule pack, consumer e test da verificare. Nessun nuovo parere/iterazione dopo questo evento senza autorizzazione."
-      },
-      {
-        "at": "2026-10-16T19:25:49Z",
-        "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Aquinas ha accettato l'evento 6: review normativa read-only exact-version, massimo 5 minuti, su tutti i finding P0/P1 e sul diff Knowledge/Rules/Tests/Engine. Nessun follow-up oltre il budget autorizzato."
-      },
-      {
-        "at": "2026-10-16T19:33:20Z",
-        "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Evento 7 del ciclo correttivo autorizzato dal nuovo 'procedi': chiudere solo i finding normativi residui senza cambiare il contratto v0.17; fermarsi per interpretazione/schema nuovo. Evento 8 finale reviewer."
-      },
-      {
-        "at": "2026-10-16T19:33:54Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Schrodinger ha accettato evento 7: correzione bounded dei soli finding residui v0.17/c14n-v4 con regressioni sintetiche, timebox 10 minuti; stop su interpretazione o contratto nuovo. Evento 8 finale reviewer."
-      },
-      {
-        "at": "2026-10-16T19:42:14Z",
-        "event": "selected",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Selezione per l'evento 8, ultimo autorizzato: review normativa read-only exact-version del diff aggiornato, timebox 5 minuti, Art.57 v0.17/c14n-v4 e finding precedenti. Nessun retry."
-      },
-      {
-        "at": "2026-10-16T19:42:43Z",
-        "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Bernoulli ha accettato evento 8: review normativa indipendente read-only exact-version del diff aggiornato, massimo 5 minuti, sui residui P0/P1; nessun follow-up o ulteriore delega."
-      },
-      {
-        "at": "2026-10-17T06:22:00Z",
-        "event": "fallback",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Evento 8 è terminato per limite di utilizzo, senza verdetto; suite 772/0/0/0. In base al successivo 'procedi', unico fallback bounded post-reset per review indipendente read-only exact-version v0.17/c14n-v4, massimo 5 minuti; nessun ulteriore tentativo."
-      },
-      {
-        "at": "2026-10-17T06:22:19Z",
-        "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Ampere accetta l'unico fallback autorizzato: review normativa indipendente read-only exact-version v0.17/c14n-v4, scope ristretto ai finding residui, max 5 minuti; nessuna modifica o follow-up."
-      },
-      {
-        "at": "2026-10-17T06:28:14Z",
-        "event": "fallback",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Cambio fase dal reviewer evento 9 al nuovo ciclo implementativo autorizzato dall'ultimo 'procedi'; scope esclusivo dei finding esistenti, stop su interpretazione normativa nuova."
-      },
-      {
-        "at": "2026-10-17T06:28:14Z",
-        "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Evento 10 del nuovo ciclo bounded: implementare fail-closed i finding Art.57 v0.17/c14n-v4 dell'evento 9. Evento 11 riservato al reviewer normativo finale."
-      },
-      {
-        "at": "2026-10-17T06:29:37Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Hilbert ha accettato l'evento 10: correzione bounded dei finding evento 9, regressioni sintetiche, nessuna semantica normativa nuova. Evento 11 resta riservato al reviewer indipendente."
-      },
-      {
-        "at": "2026-10-17T06:55:26Z",
-        "event": "selected",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Evento 11, ultimo autorizzato: review normativa read-only exact-version del diff V4.14w v0.17/c14n-v4 e finding P0/P1 evento 9; suite completa 774/0/0/0, timebox massimo 5 minuti, nessun follow-up."
-      },
-      {
-        "at": "2026-10-17T06:56:02Z",
-        "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Meitner ha accettato l'evento 11/11: review normativa indipendente read-only del diff Art.57 v0.17/c14n-v4 e fonti primarie, con timebox 5 minuti; nessuna modifica, delega o follow-up."
-      },
-      {
-        "at": "2026-10-17T07:00:13Z",
+        "at": "2026-10-17T07:20:46Z",
         "event": "reviewed",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-        "reason": "Meitner conclude NO-GO: P0 completezza istituzionale non fail-closed; set Art.57(3) non legato allo stesso caso coordinato/root; entry Annex non provata contro tabella versionata. P1 parser c14n-v4 valida solo il primo parent/bound. Confermati root/transitorio, data autonomous-right e rimozione del claim pagamento separato. Runtime non approvato, nessun ulteriore evento autorizzato."
+        "reason": "Event 1 confirmed amendment chain and dates; identified candidate corrections, all applied before final review."
+      },
+      {
+        "at": "2026-10-17T07:20:46Z",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Event 2/2 final read-only exact-version review of corrected Annex VIII candidate v0.1 and temporal ledger; maximum 5 minutes; no edits."
+      },
+      {
+        "at": "2026-10-17T07:30:15Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Event 2 completed NO-GO on reviewed version; reviewer explicitly allowed document-only GO-after-fix if ten listed entry descriptions/references are corrected literally. Parent applied only those fixes; no runtime/rule approval."
       }
     ]
   }

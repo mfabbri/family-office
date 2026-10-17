@@ -1,8 +1,33 @@
 # Current Next Increment
 
-## Incremento corrente — V4.14w — Source-bound Art. 57 duration in the EU pension consumer
+## Incremento corrente — V4.14y — Annex VIII Part 2 versioned catalogue and temporal ledger
 
-**Stato:** `in_progress` — suite Engine 774/0/0/0; review normativa finale evento 11 NO-GO; budget autorizzato esaurito, runtime non approvato
+**Stato:** `completed` — GO-after-fix esclusivamente documentale; V4.14w resta `blocked`, runtime non approvato
+**Tipo:** `audit`
+**Scope:** costruire e verificare un catalogo source-bound delle 23 entry/sub-entry testuali del consolidato Annex VIII Part 2, con ledger degli atti modificativi e confini di efficacia. Il catalogo è documentale e non eseguibile.
+
+### Piano
+
+1. Ricostruire per ogni entry testuale gli atti autentici GUUE di inserimento/modifica/sostituzione, gli identificativi CELEX/OJ e gli intervalli semiaperti; distinguere entry testuale da schema nazionale.
+2. Riconciliare 15 intestazioni/23 entry-sub-entry del consolidato 2019; conservare le versioni storiche di Austria (a) e Svezia e tenere UK/SEE/Svizzera fuori dall'applicabilità operativa non verificata.
+3. Review normativa evento 1/2 ha verificato catena/date e indicato correzioni puntuali; review exact-version evento 2/2 ha dato NO-GO pre-fix ma autorizzato esplicitamente GO-after-fix documentale dopo dieci correzioni finite, senza nuova review. Le dieci righe nominate sono state corrette.
+4. Registrati i due Knowledge document e le fonti nel citation catalog; aggiornato il test del corpus da 16 a 18 documenti, mantenendo il gap previsto per altri documenti senza fonti.
+5. Nessun match/no-match individuale o runtime; il catalogo resta candidato documentale, non regola eseguibile.
+
+**Fuori scope:** Rules/Engine/calcoli, dati personali o casi individuali, approvazione runtime, V4.14a/V4.15 e la timeline pensionistica complessiva.
+
+**Esito (2026-10-17):** GO-after-fix limitato al candidato documentale, secondo le correzioni finite autorizzate dal reviewer nell'evento 2/2; nessuna terza review. Citation index mirato 6/6 e suite completa Engine **774 test, 0 failure, 0 errori, 0 skipped**. Roadmap audit, schema planner, execution guardrails e `git diff --check` passano. Nessun runtime o rule pack è approvato; V4.14w resta `blocked`.
+
+## Incremento bloccato — V4.14x — Art. 57(3) evidence-binding and Annex VIII Part 2 source audit
+
+**Stato:** `blocked` — review evento 2 NO-GO limitato; la candidata v0.18 non contiene il catalogo completo né il ledger temporale entry-level.
+**Tipo:** `audit`
+
+La review conferma come corrette la sintesi di Art. 57 e Reg. 987/2009 art. 47, la catena degli atti identificata e il finding del rule pack (Reg. 988/2009 art. 1(16), non 1(27)). Restano da correggere nel futuro contratto: testo completo del §57(3), prova source-bound dell’ultimo Stato senza imporre algoritmo normativo, cardinalità c14n esattamente uno, distinzione tra 23 entry/sub-entry e schemi, e catalogo/ledger autentico. V4.14w resta bloccato.
+
+## Incremento bloccato — V4.14w — Source-bound Art. 57 duration in the EU pension consumer
+
+**Stato:** `blocked` — suite Engine 774/0/0/0; review normativa finale evento 11 NO-GO; budget di V4.14w esaurito, runtime non approvato
 **Tipo:** `functional`
 **Contratto normativo esatto:** Art. 57 `v0.17`, `fo-art57-c14n-v4`.
 
@@ -12,7 +37,7 @@ Il ciclo autorizzato ha usato l'evento 10 per la correzione e l'evento 11 per la
 
 Il reviewer finale dà **NO-GO**. P0: completezza istituzionale assente/null/mismatch non porta sempre `not_assessed + data_gaps`; i record Art. 57(3) non provano l'appartenenza allo stesso caso/beneficio coordinato né la coerenza del risultato root; `matched_scheme_entry` non è verificata contro un elenco versionato dell'Annex VIII. P1: la validazione c14n-v4 controlla solo il primo parent/bound e può ignorare bound successivi malformati. Il reviewer conferma invece root v0.17 e rifiuto di `schema_version`, grammatica transitoria completa/fail-closed, data del diritto autonomo legata al rischio root e rimozione del claim consumer di pagamento separato.
 
-Il contratto attuale non definisce sufficientemente alcuni binding probatori: non si deve inventare uguaglianza tra identificativi nazionali né materializzare un match Annex senza la tabella/versione primaria. Tutti gli 11 eventi autorizzati sono esauriti. V4.14w resta `in_progress`; runtime non approvato e ulteriori modifiche/review richiedono nuova autorizzazione esplicita.
+Il contratto attuale non definisce sufficientemente alcuni binding probatori: non si deve inventare uguaglianza tra identificativi nazionali né materializzare un match Annex senza la tabella/versione primaria. Tutti gli 11 eventi autorizzati a V4.14w sono esauriti. V4.14w resta `blocked`; runtime non approvato. Il nuovo micro-incremento V4.14x non lo sblocca.
 
 ### Riesecuzione e review fallback precedente (2026-10-17) — NO-GO
 

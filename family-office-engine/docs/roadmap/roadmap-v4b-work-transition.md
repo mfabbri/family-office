@@ -482,7 +482,7 @@ Valutare con review normativa indipendente se il contratto documentale Art. 57 `
 
 ### V4.14w — Source-bound Art. 57 duration in the EU pension consumer
 
-**Stato:** `in_progress`
+**Stato:** `blocked`
 **Esito corrente:** suite Engine 774/0/0/0; review normativa finale evento 11 conclusa con **NO-GO**; budget autorizzato esaurito. Runtime non approvato.
 **Tipo:** `functional`
 
@@ -498,7 +498,36 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
   - **Review normativa post-fix 2026-10-16 — NO-GO:** confermata la comparazione razionale corretta; restano blocker P0 su grammar/binding c14n-v4 e derivazione source-bound del pagatore Art. 57(3), oltre a ordering fail-closed, provenance Reg. 988/2009/Allegato VIII, affermazione di pagamento nel secondo consumer e test negativi/date insufficienti. Quarto evento esaurito; stato `in_progress`, runtime non approvato. Qualsiasi altro ciclo richiede nuova autorizzazione esplicita.
   - **Secondo ciclo correttivo, review finale 2026-10-16 — NO-GO:** 39 test mirati OK; suite completa **770/0/0/0**. Il reviewer conferma i fix duration-mode/razionali e la fonte 988/2009, ma rileva ancora grammar/root binding c14n-v4 incompleti, set istituzionale Art. 57(3) non provato completo, risk/applicability dates e versione Annex non validate, `separate_payment_by_country: true` incondizionato e regressioni avverse insufficienti. La suite è verde ma non sostituisce il gate normativo. Eventi 5 e 6 esauriti; `in_progress`, runtime non approvato; ulteriore ciclo solo con nuova autorizzazione utente.
   - **NO-GO fallback 2026-10-17 e nuova autorizzazione:** suite completa 772/0/0/0; review evento 9 rileva P0 su grammar/transitorio v0.17 e records/completeness Art.57(3), P1 sul match Annex; conferma che il claim generale di pagamento separato è assente. Il successivo `procedi` autorizza solo eventi 10 (implementazione) e 11 (review normativa read-only, massimo 5 minuti). Scope: aderire ai campi gia definiti da v0.17/c14n-v4, aggiungere regressioni sintetiche, fermarsi su semantica nuova. Runtime non approvato.
-  - **Ciclo eventi 10/11 concluso 2026-10-17 — NO-GO:** test mirati 127/127 e suite completa **774/0/0/0**; audit roadmap, schema planner, guardrail (11 eventi) e diff-check OK. Reviewer finale rileva P0: completezza istituzionale non fail-closed per record assente/null/mismatch; record Art.57(3) non legati probatoriamente allo stesso caso/beneficio coordinato né coerenti col root; `matched_scheme_entry` non verificata contro elenco Annex VIII versionato. P1: c14n-v4 valida solo il primo parent/bound. Confermati root/transitorio corretti, data autonomous-right legata al rischio e claim generale pagamento separato assente. Nessun ulteriore intervento autorizzato; incremento `in_progress`, runtime non approvato.
+  - **Ciclo eventi 10/11 concluso 2026-10-17 — NO-GO:** test mirati 127/127 e suite completa **774/0/0/0**; audit roadmap, schema planner, guardrail (11 eventi) e diff-check OK. Reviewer finale rileva P0: completezza istituzionale non fail-closed per record assente/null/mismatch; record Art.57(3) non legati probatoriamente allo stesso caso/beneficio coordinato né coerenti col root; `matched_scheme_entry` non verificata contro elenco Annex VIII versionato. P1: c14n-v4 valida solo il primo parent/bound. Confermati root/transitorio corretti, data autonomous-right legata al rischio e claim generale pagamento separato assente. V4.14w `blocked`, runtime non approvato.
+
+### V4.14x — Art. 57(3) evidence-binding and Annex VIII Part 2 source audit
+
+**Stato:** `blocked`
+**Tipo:** `audit`
+**Dipende da:** V4.14w (NO-GO, bloccato da binding non sufficientemente specificati).
+**Obiettivo:** audit indipendente delle fonti primarie e specifica candidata per i binding probatori necessari prima di ogni implementazione Art. 57.
+**Scope:** versione e catena degli atti EUR-Lex per art. 57 e Allegato VIII parte 2; prova completa di match/non-match contro elenco versionato; relazione dei record nazionali allo stesso caso coordinato senza uguaglianza automatica degli ID nazionali; consistenza del record root; verifica di tutti i parent/bound nel segmento c14n-v4.
+**Fuori scope:** modifiche al runtime, rule pack eseguibili o calcoli; casi individuali/dati personali; GO di V4.14w o sblocco di V4.14a/V4.15.
+**Done quando:** audit fonti/versioni/date e limiti registrato; candidato documentale esatto sottoposto a review normativa; ogni relazione non sostenuta resta `not_assessed + data_gaps`; planner e governance validati. L'esito di questo audit non approva il runtime.
+- **Avvio 2026-10-17:** selezionato dopo il nuovo "procedi" dell'utente in applicazione della regola per blocchi di `roadmap-index.md`. Budget ordinario di due eventi: review fonti/read-only, redazione candidata bounded, review normativa exact-version finale.
+- **Evento 1 — findings bounded (2026-10-17):** il reviewer è rientrato dopo timeout; nessun GO o file modificato. Confermati il limite testuale dell'Art.57(3) (nessun ID tecnico prescritto), il flusso art.47(4)-(7) Reg.987/2009 e la catena Annex VIII rilevata: Reg.988/2009, 1244/2010, 1224/2012, 517/2013, 1372/2013 e 2017/492. Consolidato 883/2004 al 31-07-2019: 15 Stati/23 voci Part 2. Finding per Rules successivo: riferimento art.1(27) invece di art.1(16) Reg.988/2009 e versione catalogo 2010 senza scadenza. Candidato e scope residuo in `family-office-knowledge/international/eu-pension-art57-evidence-binding-audit-candidate-v0.18.md`; gli atti autentici e le 23 voci restano da riconciliare prima di un catalogo eseguibile.
+- **Evento 2/2 (2026-10-17) — NO-GO limitato:** sintesi normativa e catena atti verificate; la candidata v0.18 non materializza le 23 entry/sub-entry e il ledger per entry con date di efficacia, non completa il testo del §57(3), tratta l'ultima istituzione come ordine temporale senza definire la prova istituzionale, e contraddice cardinalità c14n 1 con test multi-posizione. UK/SEE/Svizzera post-Brexit restano fuori scope. Il finding Art.1(16) vs (27) è confermato. V4.14x non approva il contratto/runtime; il catalogo è demandato al nuovo V4.14y.
+
+### V4.14y — Annex VIII Part 2 versioned catalogue and temporal ledger
+
+**Stato:** `done`
+**Tipo:** `audit`
+**Dipende da:** V4.14x (NO-GO sul candidato, requisiti di source completeness definiti).
+**Obiettivo:** produrre una tabella documentale completa delle 23 entry/sub-entry testuali nel consolidato EUR-Lex 31-07-2019 e un ledger entry-by-entry degli atti GUUE di inserimento/modifica/sostituzione, con efficacia temporale e provenance.
+**Scope:** Reg. 883/2004 Annex VIII Part 2; Reg. 988/2009, 1244/2010, 1224/2012, 517/2013, 1372/2013 e 2017/492; differenziare entry text e schema nazionale, fissare snapshot e intervalli, tenere UK/SEE/Svizzera fuori dall'applicabilità operativa non verificata.
+**Fuori scope:** classificazione di schemi individuali, attivazione del catalogo in Rules/Engine, record personali, binding Art.57(3) o c14n-v4, modifiche runtime.
+**Done quando:** ogni entry è reconciliata con gli atti autentici e l'intervallo supportato, i limiti non provati restano gaps e la versione esatta riceve review normativa GO limitato. Budget massimo due eventi per questo incremento.
+- **Avvio 2026-10-17:** creato candidato documentale `family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md`; nessuna regola eseguibile aggiornata.
+- **Review evento 1/2:** catena degli atti e date verificate; indicati interventi puntuali su ledger, locator OJ, efficacia e voci storiche.
+- **Review evento 2/2:** NO-GO alla versione pre-fix, con autorizzazione esplicita e circoscritta a un GO documentale dopo dieci correzioni letterali e finite, senza ulteriore review. Applicate le correzioni alle righe `CZ-1`, `DK-c`, `LV-1`, `AT-b/c/e/f/g`, `PT-1`, `UK-1`; non ne deriva approvazione dell'applicabilità territoriale UK/SEE/Svizzera o di un catalogo eseguibile.
+- **Verifiche finali:** citation index mirato 6/6; suite Engine 774 test, 0 failure, 0 errori, 0 skipped; roadmap audit, schema planner, execution guardrails e `git diff --check` superati. V4.14w e il runtime restano bloccati/non approvati.
+- **Limite dell'esito:** `completed` chiude solo il deliverable documentale V4.14y; non certifica Rules/Engine, classificazioni individuali o applicabilità UK/SEE/Svizzera.
+
 ### V4.15 — Retirement bridge income composer
 
 **Stato:** `planned`
