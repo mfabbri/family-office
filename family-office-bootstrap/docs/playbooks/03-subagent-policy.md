@@ -15,7 +15,7 @@ Il parent è un router/controller. La delega resta selettiva, ma è obbligatoria
 
 ## Vincoli
 
-- Massimo 2 subagent sostanziali per task salvo dipendenze realmente indipendenti; il runtime consente fino a 3 thread concorrenti.
+- Default: massimo 2 eventi di delega/escalation sostanziali per task; il runtime consente fino a 3 thread concorrenti. In via eccezionale, un'autorizzazione esplicita dell'utente può estendere il budget fino a 18 eventi per uno scope/versione nominati, registrando nel planner autorizzazione, ambito e blocker. L'estensione vale solo per quell'incremento e non modifica il default.
 - Profondità pratica: un solo livello di delega.
 - Nessun subagent se il task è risolvibile con una singola lettura e un singolo test e la policy non richiede uno specialista.
 - Non delegare la stessa domanda a due modelli per "votazione".

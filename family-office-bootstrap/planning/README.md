@@ -25,6 +25,7 @@ Il planner viene marcato `superseded` e ricalcolato.
 - un solo incremento attivo;
 - ogni incremento attivo registra il routing prima della delega;
 - deleghe, escalation e fallback aggiornano la routing trace;
+- il budget ordinario è due eventi sostanziali; un'estensione fino a diciotto richiede autorizzazione utente esplicita, scope/versione e blocker registrati in `routing.delegation_budget`;
 - `routing.trace` è circoscritta all'incremento attivo; gli esiti storici si conservano in `verification`/decision log, non accumulando deleghe concluse nel budget della sessione corrente;
 - chiudere una sessione non significa chiudere l'incremento: un gate o un'autorizzazione ancora pendenti mantengono lo stato `in_progress`/`blocked` e una `next_action` concreta;
 - nessun dato personale o risultato sensibile nel planner;
@@ -33,7 +34,7 @@ Il planner viene marcato `superseded` e ricalcolato.
 - date ISO 8601 UTC;
 - aggiornamenti piccoli e leggibili in diff.
 
-Prima di dichiarare completata una sessione eseguire `python planning/validate-execution-guardrails.py`. Il gate verifica che gli stati attivi abbiano una prossima azione concreta e che gli stati completati abbiano test, review quando richiesta, nessun blocker e non più di due eventi sostanziali di delega/escalation.
+Prima di dichiarare completata una sessione eseguire `python planning/validate-execution-guardrails.py`. Il gate verifica che gli stati attivi abbiano una prossima azione concreta e che gli stati completati abbiano test, review quando richiesta, nessun blocker e non più del budget sostanziale registrato (due di default, fino a diciotto con eccezione esplicita).
 
 Se `jsonschema` e' installato:
 

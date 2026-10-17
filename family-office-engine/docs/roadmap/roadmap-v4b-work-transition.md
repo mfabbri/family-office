@@ -340,15 +340,16 @@ Definire e sottoporre a review normativa indipendente il contratto dati source-b
 
 ### V4.14n — Complete Art. 57 contract specification
 
-**Stato:** `in_progress`
+**Stato:** `done`
+**Gate:** GO normativo limitato alla specifica documentale v0.17; nessun GO per Knowledge/Rules/Tests/Engine, calcoli o decisioni.
 **Tipo:** `audit`
 
 Documentare un contratto source-bound completo secondo i finding V4.14m prima di qualsiasi modifica runtime.
 
 - Dipende da: V4.14m e V4.14l.
-- Review v0.2: NO-GO limitato, quattro correzioni finite recepite in v0.3. Review v0.3: NO-GO limitato; corretti in v0.4 matrice/enum art. 12 e identificatori. Review v0.4: NO-GO limitato; resta la rappresentazione di overlap parziali e overlap ex art. 12(2) non risolti dai parr. 3-4. La candidata v0.5 introduce `period_coordination_segments[]`, conserva i residui non coincidenti, applica 12(3)-(4) solo alla porzione coincidente e richiede conteggio singolo source-bound o `not_assessed` per gli altri overlap, con regressioni dedicate. Un quarto ciclo di review indipendente richiede nuova decisione dell'utente; nessun GO runtime.
+- Review v0.2-v0.17: NO-GO limitati, finding recepiti progressivamente. La review finale indipendente ha dato GO limitato alla specifica documentale v0.17 dopo aver verificato hash c14n-v4, golden duration-mode razionale e `human_review_required: true` obbligatorio. Nessun GO per Knowledge/Rules/Tests/Engine, calcoli o decisioni; V4.14 resta `blocked`.
 - Separare eligibility nazionale, eccezione art. 57, inclusione importo teorico, pro-rata e obbligo nazionale di pagamento. Usare stati ternari con short-circuit semantico e `not_applicable` per campi condizionali non pertinenti.
-- Output: specifica con fonti/versioni, JSON contract candidate v0.5, casi limite e `data_gaps`; nuovo gate normativo indipendente sulla versione esatta prima di qualsiasi implementazione.
+- Output: specifica con fonti/versioni, JSON contract v0.17, casi limite, `data_gaps`, GO documentale limitato e verifiche concluse; ogni successiva implementazione richiede uno scope e gate distinti.
 - Fuori scope: Rules/Tests/Engine, importi o date individuali e mese pensionistico complessivo. V4.14 resta `blocked`.
 
 ### V4.14a — Work-transition normative and contract audit
@@ -363,6 +364,141 @@ Audit dovuto dopo V4.11-V4.14 prima di introdurre il decumulo integrato.
 - Checklist: `family-office-bootstrap/docs/code-audit-checklist.md` + `11-work-transition-retirement-bridge.md`.
 - Done quando: timeline, gross/net, contribuzione e entitlement sono coerenti, testati e senza blocker impliciti.
 
+### V4.14o — EU source-currentness audit for the Art. 57 contract
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+**Dipende da:** V4.14n.
+**Scope:** verifica documentale delle fonti autentiche UE richiamate dal contratto Art. 57: Reg. 883/2004 artt. 50-57 e Allegato VIII parti 1/2; Reg. 987/2009 artt. 12-13, 43, 46-47 e 93-94. Confrontare atti modificativi, rettifiche, date di efficacia/applicazione e ambito territoriale al 2026-10-16.
+**Fuori scope:** casi individuali, regole nazionali salvo dipendenza concreta, rule pack, test funzionali, Engine, calcoli e dati personali.
+**Chiusura 2026-10-16 — GO limitato alla documentazione:** EUR-Lex conferma consolidati correnti 883/2004 (31-07-2019) e 987/2009 (01-01-2018). Review indipendente verifica 2019/1149 (non modifica 883 artt. 50-57), 2017/492 (tocca Allegato VIII per Polonia/Svezia/Regno Unito, non Italia/Spagna; e modifica solo Allegati 1/3 di 987), rettifiche linguistiche successive e proposta COM(2026) 980 non vigente. Note Knowledge aggiornate con limiti e collegamenti ufficiali. Suite completa 762 test, 0 failure, 0 errori, 0 skipped; audit roadmap, schema planner, guardrails e diff-check passano. Nessuna modifica Rules/Tests/Engine o calcolo; V4.14 resta `blocked`.
+
+**Done quando:** matrice fonte-disposizione-versione-efficacia è verificata da reviewer normativo indipendente; note Knowledge e decision log sono aggiornati solo entro il GO ricevuto. Ogni incertezza resta un gap e V4.14 rimane `blocked`; nessuna autorizzazione alla timeline o al runtime.
+
+### V4.14p — Spanish national first-eligibility-month contract audit
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Definire e sottoporre a review normativa indipendente il contratto per cercare il primo mese supportato di eligibility della pensione contributiva ordinaria spagnola nel solo Regimen General, colmando il blocker individuato da V4.14k. Il consumer spagnolo corrente valuta un mese fornito e non effettua una ricerca temporale; il rule pack non codifica ancora il hecho causante né gli anchor differenziati della carencia específica.
+
+- Dipende da: V4.14b, V4.14c, V4.14k e V4.14o.
+- Fonti candidate: LGSS artt. 165/205 e DT 7, RD 453/2022 artt. 3-4, Seguridad Social ufficiale; Reg. 883/2004 artt. 6 e 50-52 e disposizioni applicative pertinenti del Reg. 987/2009.
+- Scope: pensione contributiva ordinaria nel Regimen General; determinazione del fatto causante per stato assicurativo; carenza generica e specifica, inclusa la finestra dalla cessazione dell'obbligo di cotizzare quando prevista; rilevanza dei periodi di altri Stati membri per acquisizione del diritto; precisione mese/giorno e distinzione dagli effetti economici.
+- Output: matrice source-bound delle condizioni e contratto temporale per una ricerca mensile ordinata, con input minimi/provenance, stop fail-closed al primo candidato materiale non valutabile e `null + data_gaps`; l'output non è riconoscimento, data di decorrenza, pagamento o prima data complessiva IT/ES/UE.
+- Regressioni da prescrivere per il successivo slice eseguibile: alta con obbligo contributivo, alta assimilada senza obbligo, non alta; anchor recente presente/assente; cambio d'anno nella soglia d'età; mesi incompleti e frazioni; periodi UE sovrapposti/non classificati; storia e fonti fuori copertura; candidato anteriore non valutabile.
+- Fuori scope: regimi diversi, pensionamento anticipato/parziale/flessibile, importi e pro-rata, riconoscimento amministrativo, decorrenza/pagamento, Rules/Tests/Engine, input personali.
+- **Esito review normativa indipendente (2026-10-16):** GO limitato alla definibilità documentale; NO-GO alla bozza esaminata come contratto implementabile. LGSS consolidata al 2026-10-03; RD 453/2022 efficace dal 2022-06-16 e artt. 3-4 senza modifiche successive rilevate; consolidati EUR-Lex 883/2004 (2019-07-31) e 987/2009 (2018-01-01), da non confondere con testi autentici. Finding: scansione per giorno e mese solo proiettato; distinguere fatto causante/domanda/percorso art. 3; status separato dall'obbligo e dalla cessazione dell'obbligo contributivo; validità non anteriore al 2022-06-16 senza pack storico; aggiungere 883/2004 artt. 1(t), 6, 50-52 e 51 e 987/2009 artt. 12-13; definire lower bound/materialità e gap per periodi UE non datati/unità/overlap ignoti; guidance amministrativa subordinata alla fonte primaria. Nessuna approvazione Knowledge/Rules/Tests/Engine, casi individuali, pro-rata/importi o timeline.
+- **Chiusura 2026-10-16:** review indipendente ha delimitato il contratto e reso espliciti i gap. Suite Engine 762/762, 0 failure, 0 errori, 0 skipped; roadmap audit, guardrails e diff-check passano. Nessuna modifica Knowledge/Rules/Tests/Engine; V4.14 resta `blocked`.
+
+### V4.14q — Spanish date-level eligibility contract remediation and review
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Recepire i finding di V4.14p in una nuova specifica documentale versionata e ottenere una nuova review normativa indipendente sulla versione esatta. Questo ciclo non eredita il GO limitato o il budget di review di V4.14p.
+
+- Dipende da: V4.14p, V4.14b, V4.14c, V4.14k e V4.14o.
+- Specificare la ricerca giornaliera e l'eventuale proiezione al mese; input per data candidata, fatto causante, domanda/ipotesi e percorso RD 453 art. 3; status al fatto causante, obbligo contributivo e cessazione dell'obbligo distinti.
+- Vincolare la validità del pack a 2022-06-16 o documentare rule pack storico; includere nel contratto UE Reg. 883/2004 artt. 1(t), 6, 50-52 e 51, Reg. 987/2009 artt. 12-13, con periodi comunicati e temporalmente localizzati.
+- Formalizzare lower bound e materialità: nessun candidato successivo se un giorno precedente potenzialmente qualificante non è valutabile; unità, overlap o date mancanti producono `null + data_gaps` salvo presunzioni normative provate.
+- Tenere fuori scope Knowledge/Rules/Tests/Engine, pro-rata/importi, riconoscimento, decorrenza, pagamento e timeline complessiva fino a un GO separato.
+- Test successivi: confini giornalieri in mese e anno, domanda entro ±3 mesi, tutte le vie dell'art. 3.2, anchor e cessazione obbligo, anzianità, transitorio 2022, periodi UE temporalmente classificati, candidato anteriore non valutabile, storia e fonti fuori validità.
+- **Contratto sottoposto a review:** `spanish-first-eligibility-contract/v2`, in `docs/current-next-increment.md`; ricerca day-level, campi candidati/fatto causante/domanda/percorso art. 3 distinti, status/obbligo/cessazione distinti, validità da 2022-06-16 o pack storico, overlay UE esplicito, lower bound/materialità e stop fail-closed.
+- **Autorizzazione:** il 2026-10-16 l'utente ha autorizzato un nuovo gate normativo read-only sulla versione v2 esatta, un tentativo e timebox complessivo di cinque minuti. La traccia e il budget V4.14p non sono riutilizzati.
+- **Stop:** timeout è fallback senza verdetto; NO-GO mantiene V4.14 `blocked` e richiede nuova autorizzazione prima di altro ciclo. GO, se concesso, resta limitato alla specifica documentale v2: nessun GO ereditato per Knowledge/Rules/Tests/Engine, timeline o calcolo.
+- **Esito (2026-10-16):** review normativa indipendente conclusa nel timebox autorizzato, NO-GO sulla versione v2 esatta. Sei gap registrati in `current-next-increment.md`: specifica dei path/domanda art. 3 RD 453 e transitorio; ancoraggio/versionamento dei requisiti LGSS; schema computazionale dell'overlay UE; semantica verificabile di lower bound/materialità e invalidità/gap; gate umano obbligatorio. Suite Engine 762/762, 0 failure, 0 errori, 0 skipped; audit roadmap, schema planner, guardrails e diff-check passano. Nessuna modifica a Knowledge/Rules/Tests/Engine o dati personali.
+
+### V4.14r — Spanish date-level contract v3 after normative NO-GO
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Recepire i quattro finding della review v2 in un contratto documentale v3 deterministico e source-bound. L'artefatto normativo sottoposto al gate è `spanish-first-eligibility-contract/v3` nella sezione storica V4.14r di `docs/current-next-increment.md`.
+
+- Dipende da: V4.14q, V4.14p, V4.14b, V4.14c, V4.14k e V4.14o.
+- Matrice articolo-per-percorso per RD 453/2022 art. 3.1, 3.2(a-e), 3.3; domanda nazionale/internazionale, applicabilità e transitorio combinano data domanda, HCD, path e versione pack.
+- Matrice LGSS 165.1, 205.1(a-b), 205.3 e DT 7 con 15 anni, 2/15 e anchor stato/obbligo/cessazione distinti; art. 205.3 non alta/multi-regime non si presume coperto.
+- Overlay UE per periodi qualificati istituzionalmente, autonomo vs totalizzato, art. 51, overlap/presunzione art. 12(6) e conversione 5/6/7 con regole/art. 13 e cap annuali.
+- Definire invalidità strutturale vs gap probatorio, logica ternaria per path, lower bound completo, materialità, output potenziale e `human_review_required: true`.
+- **Autorizzazione:** l'utente il 2026-10-16 ha chiesto di procedere e avviare una nuova review normativa. Un solo tentativo read-only sulla v3 esatta, timebox massimo totale 5 minuti; nessun retry o trasferimento del budget v2.
+- **Stop:** NO-GO/timeout non autorizzano Knowledge/Rules/Tests/Engine. GO, se concesso, vale solo per la specifica documentale v3. Nessun calcolo individuale, dato personale o timeline complessiva.
+- **Esito (2026-10-16):** il reviewer normativo indipendente dà NO-GO limitato alla v3 esatta. Quattro gap documentali registrati in current-next: input probatorio di volontà/strumento internazionale; scope preciso della regola anni/mesi completi; corretta separazione 883/2004 artt. 6, 50, 51(3), 52; limite superiore e truth table deterministica della scansione. Rami RD 453, transitorio, LGSS, unità/conversione art. 12/13, distinzione invalidità/gap e revisione umana sono stati confermati nel perimetro review. Suite Engine 762/762, 0 failure/errori/skipped; schema planner, guardrails, audit roadmap e diff-check passano. Nessuna modifica Knowledge/Rules/Tests/Engine o dato personale.
+
+### V4.14s — Spanish date-level contract v4 after normative NO-GO
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Preparare `spanish-first-eligibility-contract/v4` in `docs/current-next-increment.md`, correggendo i quattro gap della review v3: `applicant_intent` probatorio distinto dal path derivato e base internazionale con ambito personale/materiale/temporale; unità della fascia d'età distinta dalle carenze 15y e 2/15; semantica UE corretta per artt. 6, 50, 51(3), 52; dominio finito `search_lower_bound/search_upper_bound/as_of_date` con truth table fra path compatibili e `no_candidate_in_complete_range` solo a copertura completa.
+
+- **Autorizzazione:** il 2026-10-16 l'utente ha autorizzato un singolo ciclo e un solo gate normativo read-only sulla v4 esatta, con timeout massimo complessivo di 5 minuti. Nessun retry o ulteriore gate senza nuova autorizzazione.
+- **Stop:** timeout/NO-GO non autorizzano Knowledge/Rules/Tests/Engine o runtime; nessun calcolo individuale/dato personale. Suite completa deve chiudere con 0 failure, 0 errori e 0 skipped; altrimenti lo stato non è `done`.
+- **Test/verifiche richiesti:** review normativa exact-version; suite Engine completa; roadmap audit, schema planner, execution guardrails e diff check.
+- **Esito review (2026-10-16):** NO-GO limitato alla v4 esatta. Restano incompleti: rinvio diretto e predicati/fallback dell'art. 57 con art. 51(3); trattamento source-bound dei periodi frazionari per 205.1(b) 15y e 2/15; vincolo formale fra search bounds, `as_of_date` e cutoff probatorio. `applicant_intent`/base internazionale recepiti. Suite Engine 762 test, 0 failure/errori/skipped; roadmap audit, schema planner, guardrails e diff check passano. V4.14s si chiude come audit documentale, senza GO runtime; V4.14t richiede nuova autorizzazione per una review successiva.
+
+### V4.14t — Spanish date-level contract v5 after normative NO-GO
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Preparare `spanish-first-eligibility-contract/v5` in `docs/current-next-increment.md` per i tre finding v4: applicazione diretta Reg. 883/2004 artt. 51(3)/57 e fallback; soglie di carenza 5.475 e 730 giorni con provenienza normativa/amministrativa distinta e gap source-bound; vincoli formali fra lower/upper, as-of/evaluation date, evidence coverage e orizzonte ipotetico.
+
+- **Autorizzazione:** l'utente il 2026-10-16 ha richiesto il nuovo gate normativo; un singolo tentativo read-only sulla v5 esatta, bounded a 5 minuti.
+- **Stop:** timeout/NO-GO non autorizzano runtime o modifiche Knowledge/Rules/Tests/Engine; nessun calcolo individuale/dato personale. Nessun gate v6 senza nuova autorizzazione.
+- **Verifiche:** review exact-version, suite Engine 0/0/0, roadmap audit, planner schema, execution guardrails e diff check.
+- **Esito (2026-10-16):** GO limitato all'esatta v5; Reg. 883/2004 artt. 51(3)/57, unità LGSS carenze e dominio temporale/evidence sono confermati nel perimetro. Limiti: escludere art. 57(4)/Allegato VIII parte 2 quando applicabile; la modifica Reg. 988/2009 art. 51(3) è efficace dal 2010-05-01; 730 giorni è criterio amministrativo/giurisprudenziale e non si generalizza oltre la STS 607/2026. Suite Engine 762, 0 failure/errori/skipped; audit, schema, guardrail e diff check passano. Nessun GO runtime. V4.14u pianificata e ogni ulteriore gate richiede nuova autorizzazione.
+
+### V4.14u — Spanish eligibility temporal applicability and Annex VIII exclusions
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Formalizzare i limiti della review v5 in `spanish-first-eligibility-contract/v8`: applicabilità scheme-specific dell'art. 57(4)/Allegato VIII parte 2 e regime temporale/transitorio di Reg. 883/2004 artt. 87/91 e Reg. 988/2009/987/2009 attorno al 2010-05-01. Il modello distingue periodi, fatto causante, domanda/revisione, Stato e versione degli Allegati; dati insufficienti producono `not_assessed` + gap. Test regressivi contrattuali sintetici, senza modifiche a Knowledge/Rules/Tests/Engine.
+
+- **Autorizzazione:** con “procedi”, il 2026-10-16 l'utente ha autorizzato un singolo gate normativo read-only sulla v6 esatta, reviewer critico indipendente, massimo 5 minuti complessivi.
+- **Stop:** nessun retry su v7, nessuna modifica runtime o calcolo. Suite completa con 0 failure/errori/skipped e governance valida prima di `done`; altrimenti `in_progress`/`blocked`.
+- **Verifiche:** fonti ufficiali EUR-Lex/DOUE, review exact-version, suite Engine, roadmap audit, planner schema, guardrail e diff check.
+- **Esito review v6 (2026-10-16):** NO-GO limitato alla v6 esatta. Art. 57(4)/Allegato VIII parte 2 è approvato nel perimetro; la matrice transitoria non definiva gli effetti di Reg. 883/2004 art. 87(5)-(7) e Reg. 987/2009 artt. 93-94. Finding recepito nella v7; un nuovo gate v7 richiede autorizzazione separata. Suite completa Engine 762/762, 0 failure/errori/skipped; la v7 non è approvata né implementata.
+- **Nuova autorizzazione (2026-10-16):** l'utente ha autorizzato un singolo gate normativo read-only sulla v7 esatta, massimo 5 minuti totali. Nessun retry su v8 o approvazione runtime implicita.
+- **Esito review v7 (2026-10-16):** NO-GO limitato alla v7 esatta. Vengono richiesti tre chiarimenti bounded: congiunzione dei presupposti art. 94(1); distinzione fra revisione su richiesta ex art. 87(5) e riesame d'ufficio triggerato da una domanda qualificata ex art. 94(2); prova di diritto non decaduto/non prescritto per art. 87(7), altrimenti gap. Recepite nella candidata documentale v8. Nessun terzo gate autorizzato; default di due deleghe sostanziali raggiunto.
+- **Autorizzazione (2026-10-16):** l'utente autorizza esplicitamente il terzo evento per un solo gate normativo read-only sulla versione esatta `spanish-first-eligibility-contract/v8`, affidato a `fo_normative_reviewer`, timebox massimo 5 minuti. Nessun quarto evento, retry o v9; nessun GO runtime implicito.
+- **Esito review v8 (2026-10-16):** **GO limitato** sulla sola specifica documentale v8. Reviewer conferma artt. 94(1), 94(2), 87(5)-(7), art. 57(4)/Allegato VIII parte 2 e matrice transitoria; regressioni contrattuali v8 confermate. Non valutati schemi nazionali concreti, SEE/Svizzera, casi individuali, importi/effetti economici o runtime. Suite Engine completa 762 test, 0 failure/errori/skipped (ultima esecuzione completa); audit roadmap, schema planner, guardrail e diff check passano. Nessun GO a Knowledge/Rules/Tests/Engine o calcoli. V4.15 è il prossimo incremento pianificato.
+
+### V4.14v — Art. 57 source-bound duration implementation authorization gate
+
+**Stato:** `done`
+**Tipo:** `audit`
+
+Valutare con review normativa indipendente se il contratto documentale Art. 57 `v0.17` sia sufficiente come base pre-implementazione per rimuovere il threshold fisso di 12 mesi di calendario dal rule pack. La review riguarda durata legale source-bound, periodi pertinenti, unità/conversioni e overlap ex Reg. 987/2009 artt. 12-13, diritto autonomo, Allegato VIII parte 2, fallback art. 57(3) e separazione dell'obbligo di pagamento.
+
+- Dipende da: V4.14k, l, m, n, o e u (tutte `done`).
+- Review: un solo tentativo read-only sulla versione esatta v0.17, `fo_normative_reviewer`, massimo 5 minuti; fonti primarie EUR-Lex/DOUE. Il comando utente “procedi” autorizza questo gate soltanto.
+- Fuori scope: modifiche a Knowledge/Rules/Tests/Engine/CLI, runtime, calcoli individuali, importi/pro-rata, ricerca nazionale ES/IT o reducer complessivo.
+- Stop: NO-GO/timeout non autorizza implementazione; V4.14 resta `blocked` e V4.14a/V4.15 non sono selezionabili.
+- **Esito review (2026-10-16): GO limitato pre-implementazione** alla sola specifica v0.17/fo-art57-c14n-v4. Il reviewer conferma la struttura source-bound per durata <1 anno, unità/conversioni, Art. 57(1)-(4), Reg. 987/2009 artt. 12-13, separazione eligibility/teorico/pro-rata/payment obligation. N-06: test futuri rifiutano fixture legacy v0.16/c14n-v3. N-07: il pack/service/test dipendono ancora dal 12 fisso, blocker confermato e non approvato. Nessun GO runtime o alla prima data complessiva.
+- **Chiusura verificata:** suite Engine 762 test, 0 failure/errori/skipped; roadmap audit, planner schema, guardrail e diff check passano. V4.14v `done`; V4.14w avviato come slice deterministico separato.
+
+### V4.14w — Source-bound Art. 57 duration in the EU pension consumer
+
+**Stato:** `in_progress`
+**Esito corrente:** suite Engine 774/0/0/0; review normativa finale evento 11 conclusa con **NO-GO**; budget autorizzato esaurito. Runtime non approvato.
+**Tipo:** `functional`
+
+Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 57, eliminando il threshold fisso `spain_months < 12`. Ordine: Knowledge → Rules → Tests → Engine. Lo stato incompleto/ignoto resta `not_assessed + data_gaps`; separare eligibility, eccezione Art. 57, importo teorico, pro-rata e obbligo/pagatore. Mantenere `human_review_required: true`.
+
+- **Dipende da:** V4.14l/m/n (contratto v0.17 GO documentale); V4.14v (GO normativo limitato pre-implementazione).
+- **Repository:** `family-office-knowledge`, `family-office-rules`, `family-office-engine`.
+- **Test obbligatori:** confine durata legale `<`, `=`, `>` un anno; dati source-bound mancanti/unknown; diritto autonomo true/false/unknown; Allegato VIII parte 2; overlap e conversione; ramo inter-istituzionale art. 57(3); profilo legacy v0.16/c14n-v3 respinto.
+- **Fuori scope:** prima data mensile ES, ramo IT pre-1996, reducer complessivo IT/ES/UE, importi, pagatore individuale, decorrenza, riconoscimento o workspace personale.
+- **Done quando:** nessuna decisione dipende da mesi di calendario; input insufficiente è fail-closed con gap; suite completa 0/0/0; review normativa post-implementazione GO limitato al diff e governance passata. V4.14 resta `blocked` finché gli altri rami della prima data non sono coperti.
+- **Esito verifica 2026-10-16:** 21 test mirati OK (fuori sandbox); suite completa 766 test con 3 failure e 5 errori, quindi non soddisfa il gate. Review normativa indipendente exact-diff: **NO-GO** per confronto razionale, validazione/binding c14n-v4 incompleti, contesto legale/temporale non vincolato, aggregazione Art. 57(3) non derivata, short-circuit non conforme, provenienza Reg. 988/2009 mancante dal rule pack e copertura test insufficiente. Incremento mantenuto `in_progress`; non usare per decisioni pensionistiche. Correzioni/nuova review richiedono autorizzazione esplicita per estendere il perimetro.
+  - **Riesecuzione post-fix 2026-10-16:** migrato il consumer legacy al campo `article_57_source_bound`, corretta la comparazione razionale, aggiunte fixture sintetiche source-bound e digest corretto nel sample. Test mirati 37/37 e test CLI 1/1; suite Engine completa **768 test, 0 failure, 0 errori, 0 skipped**.
+  - **Review normativa post-fix 2026-10-16 — NO-GO:** confermata la comparazione razionale corretta; restano blocker P0 su grammar/binding c14n-v4 e derivazione source-bound del pagatore Art. 57(3), oltre a ordering fail-closed, provenance Reg. 988/2009/Allegato VIII, affermazione di pagamento nel secondo consumer e test negativi/date insufficienti. Quarto evento esaurito; stato `in_progress`, runtime non approvato. Qualsiasi altro ciclo richiede nuova autorizzazione esplicita.
+  - **Secondo ciclo correttivo, review finale 2026-10-16 — NO-GO:** 39 test mirati OK; suite completa **770/0/0/0**. Il reviewer conferma i fix duration-mode/razionali e la fonte 988/2009, ma rileva ancora grammar/root binding c14n-v4 incompleti, set istituzionale Art. 57(3) non provato completo, risk/applicability dates e versione Annex non validate, `separate_payment_by_country: true` incondizionato e regressioni avverse insufficienti. La suite è verde ma non sostituisce il gate normativo. Eventi 5 e 6 esauriti; `in_progress`, runtime non approvato; ulteriore ciclo solo con nuova autorizzazione utente.
+  - **NO-GO fallback 2026-10-17 e nuova autorizzazione:** suite completa 772/0/0/0; review evento 9 rileva P0 su grammar/transitorio v0.17 e records/completeness Art.57(3), P1 sul match Annex; conferma che il claim generale di pagamento separato è assente. Il successivo `procedi` autorizza solo eventi 10 (implementazione) e 11 (review normativa read-only, massimo 5 minuti). Scope: aderire ai campi gia definiti da v0.17/c14n-v4, aggiungere regressioni sintetiche, fermarsi su semantica nuova. Runtime non approvato.
+  - **Ciclo eventi 10/11 concluso 2026-10-17 — NO-GO:** test mirati 127/127 e suite completa **774/0/0/0**; audit roadmap, schema planner, guardrail (11 eventi) e diff-check OK. Reviewer finale rileva P0: completezza istituzionale non fail-closed per record assente/null/mismatch; record Art.57(3) non legati probatoriamente allo stesso caso/beneficio coordinato né coerenti col root; `matched_scheme_entry` non verificata contro elenco Annex VIII versionato. P1: c14n-v4 valida solo il primo parent/bound. Confermati root/transitorio corretti, data autonomous-right legata al rischio e claim generale pagamento separato assente. Nessun ulteriore intervento autorizzato; incremento `in_progress`, runtime non approvato.
 ### V4.15 — Retirement bridge income composer
 
 **Stato:** `planned`

@@ -327,6 +327,30 @@
           "type": "string",
           "minLength": 1
         },
+        "delegation_budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["max_events", "authorization", "scope", "blocker"],
+          "properties": {
+            "max_events": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 18
+            },
+            "authorization": {
+              "type": "string",
+              "minLength": 1
+            },
+            "scope": {
+              "type": "string",
+              "minLength": 1
+            },
+            "blocker": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
         "trace": {
           "type": "array",
           "minItems": 1,

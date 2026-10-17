@@ -13,6 +13,39 @@
       "type": "synthetic_fixture"
     }
   ],
+  "article_57_assessment": {
+    "contract_schema_version": "v0.17",
+    "canonicalization_profile": "fo-art57-c14n-v4",
+    "human_review_required": true,
+    "member_state": "ES",
+    "benefit_id": "synthetic-old-age",
+    "benefit_type": "old_age",
+    "scheme_id": "synthetic-es-scheme",
+    "competent_institution": "synthetic-es",
+    "applicable_legislation_id": "synthetic-legislation",
+    "applicable_legislation_version": "synthetic-v1",
+    "applicable_legislation_valid_from": "2020-01-01",
+    "applicable_legislation_valid_to": null,
+    "risk_materialization_date": "2026-12-01",
+    "assessment_date": "2026-12-01",
+    "transitional_applicability": {
+      "basic_regulation_883_87": {"member_state": "ES", "territorial_application_date": {"date": "2010-05-01", "legal_source_ref": "synthetic-883-87"}, "contingency_date": "2026-12-01", "pre_application_period_refs": [], "result": "not_applicable", "evidence_refs": ["synthetic-transitional-evidence"], "data_gaps": []},
+      "implementing_regulation_987_93": {"result": "not_applicable", "evidence_refs": ["synthetic-987-93"], "data_gaps": []},
+      "regulation_465_2012_883_87a": {"title_ii_change_caused_by_465_2012": null, "legislation_before_change": null, "legislation_after_change": null, "relevant_situation_unchanged": null, "within_ten_year_limit": null, "opt_out_request_date": null, "opt_out_effective_date": null, "result": "not_applicable", "evidence_refs": ["synthetic-465-87a"], "data_gaps": []},
+      "pension_transitional_987_94_1": {"benefits_due_for_pre_application_period": null, "contingency_pre_application": null, "claim_awarded_before_application_date": null, "prior_leg": null, "basic_regulation_leg": null, "comparison": "not_applicable", "preserved_result": "not_applicable", "result": "not_applicable", "data_gaps": []}
+    },
+    "legal_duration_for_article_57": {"value": {"numerator": 365, "denominator": 1}, "unit": "day", "source_segment_id": "sha256:9883eeccd2616814be0de411270ad01b12256116e010c749daa14250df126ec7"},
+    "one_year_comparator": {"value": {"numerator": 365, "denominator": 1}, "unit": "day", "legal_basis_refs": ["synthetic-art57-comparator"]},
+    "duration_basis": "synthetic source-bound duration",
+    "duration_assessment_evidence_refs": ["synthetic-duration-evidence"],
+    "duration_strictly_less_than_one_year": false,
+    "duration_source_segment": {"segment_id": "sha256:9883eeccd2616814be0de411270ad01b12256116e010c749daa14250df126ec7", "preimage": {"canonicalization_profile": "fo-art57-c14n-v4", "parent_period_refs": ["synthetic-period"], "schema_version": "v0.17", "source_bounds": [{"native_duration": {"precision": "exact", "unit": "day", "value": {"numerator": 365, "denominator": 1}}, "native_end": null, "native_start": null, "period_ref": "synthetic-period"}]}},
+    "autonomous_right_from_state_periods_only": {"result": false, "national_benefit_rule_pack_id": "synthetic-national-pack", "national_rule_version": "synthetic-v1", "risk_materialization_date": "2026-12-01", "evidence_refs": ["synthetic-autonomous-evidence"]},
+    "annex_viii_part_2_applicability": {"result": false, "annex_consolidation_version": "reg-988-2009-2010-05-01", "annex_validity_or_applicability_date": "2026-12-01", "matched_scheme_entry": "synthetic-es-scheme", "scheme_match_status": "not_matched", "annex_evidence_refs": ["synthetic-annex-evidence"]},
+    "concerned_institutions": [{"institution_id": "synthetic-es", "member_state": "ES", "benefit_id": "synthetic-old-age", "benefit_type": "old_age", "scheme_id": "synthetic-es-scheme", "competent_institution": "synthetic-es", "applicable_legislation_id": "synthetic-legislation", "applicable_legislation_version": "synthetic-v1", "applicable_legislation_valid_from": "2020-01-01", "applicable_legislation_valid_to": null, "risk_materialization_date": "2026-12-01", "assessment_date": "2026-12-01", "transitional_applicability": {"basic_regulation_883_87": {"member_state": "ES", "territorial_application_date": {"date": "2010-05-01", "legal_source_ref": "synthetic-883-87"}, "contingency_date": "2026-12-01", "pre_application_period_refs": [], "result": "not_applicable", "evidence_refs": ["synthetic-transitional-evidence"], "data_gaps": []}, "implementing_regulation_987_93": {"result": "not_applicable", "evidence_refs": ["synthetic-987-93"], "data_gaps": []}, "regulation_465_2012_883_87a": {"title_ii_change_caused_by_465_2012": null, "legislation_before_change": null, "legislation_after_change": null, "relevant_situation_unchanged": null, "within_ten_year_limit": null, "opt_out_request_date": null, "opt_out_effective_date": null, "result": "not_applicable", "evidence_refs": ["synthetic-465-87a"], "data_gaps": []}, "pension_transitional_987_94_1": {"benefits_due_for_pre_application_period": null, "contingency_pre_application": null, "claim_awarded_before_application_date": null, "prior_leg": null, "basic_regulation_leg": null, "comparison": "not_applicable", "preserved_result": "not_applicable", "result": "not_applicable", "data_gaps": []}}, "institution_order": 1, "institution_order_evidence_refs": ["synthetic-institution-order"], "article_57_1_relief_result": false, "evidence_refs": ["synthetic-institutional-art57"]}],
+    "concerned_institutions_complete": {"result": true, "institution_ids": ["synthetic-es"], "evidence_refs": ["synthetic-institutions-completeness"]},
+    "all_concerned_institutions_relieved": false
+  },
   "insurance_periods": [
     {
       "country": "IT",

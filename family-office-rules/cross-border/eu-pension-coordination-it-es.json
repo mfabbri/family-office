@@ -1,6 +1,6 @@
 {
   "schema_version": "eu-pension-coordination-rule-pack/v2",
-  "rule_pack_id": "eu.it-es.pension-coordination.2026.v3",
+  "rule_pack_id": "eu.it-es.pension-coordination.2026.v4",
   "jurisdictions": [
     "IT",
     "ES",
@@ -44,6 +44,20 @@
       ]
     },
     {
+      "source_id": "eurlex.reg-988-2009",
+      "title": "Regulation (EC) No 988/2009 amending Regulation (EC) No 883/2004 on the coordination of social security systems",
+      "authority": "European Parliament and Council of the European Union",
+      "jurisdiction": "EU",
+      "url": "https://eur-lex.europa.eu/eli/reg/2009/988/oj/eng",
+      "retrieved_on": "2026-10-16",
+      "reviewed_on": "2026-10-16",
+      "next_review_due": "2027-01-14",
+      "provisions": [
+        "Article 1(27)",
+        "Article 57(4)"
+      ]
+    },
+    {
       "source_id": "boe.lgss.rdl-8-2015.consolidated",
       "title": "BOE, Real Decreto Legislativo 8/2015, Ley General de la Seguridad Social",
       "authority": "Agencia Estatal Boletín Oficial del Estado",
@@ -78,7 +92,7 @@
     "aggregation_for_entitlement_and_theoretical_calculation": true,
     "no_transfer_or_merger_of_contributions": true,
     "compare_independent_and_pro_rata_when_calculable": true,
-    "separate_payment_by_country": true
+    "payment_obligation_not_assessed_without_article_57_evidence": true
   },
   "required_inputs": [
     "date_of_birth",
@@ -120,13 +134,47 @@
       "ratio_decimals": 6,
       "mode": "ROUND_HALF_UP"
     },
-    "article_57_under_one_year": {
-      "less_than_one_year_threshold_months": 12,
-      "no_autonomous_right_condition_required": true,
-      "both_conditions_required_for_exception": true,
+    "article_57_source_bound": {
+      "contract_schema_version": "v0.17",
+      "canonicalization_profile": "fo-art57-c14n-v4",
+      "human_review_required": true,
+      "legal_basis": [
+        "Regulation (EC) No 883/2004 Article 57",
+        "Regulation (EC) No 987/2009 Articles 12-13",
+        "Regulation (EC) No 988/2009 Article 1(27)"
+      ],
+      "legal_duration": {
+        "source_bound_required": true,
+        "requires_duration_basis": true,
+        "requires_duration_assessment_evidence": true,
+        "requires_one_year_comparator_with_legal_basis": true,
+        "calendar_months_are_not_a_substitute": true,
+        "conversion_is_not_inferred_from_article_13": true
+      },
+      "autonomous_right": {
+        "source_bound_required": true,
+        "requires_national_rule_pack_and_version": true,
+        "requires_risk_materialization_date": true,
+        "requires_evidence": true
+      },
+      "annex_viii_part_2": {
+        "source_bound_required": true,
+        "requires_applicable_annex_version_and_scheme_match": true,
+        "applicable_annex_part_2_version_source_ref": "eurlex.reg-988-2009",
+        "applicable_annex_part_2_version": "reg-988-2009-2010-05-01",
+        "applicable_annex_part_2_valid_from": "2010-05-01",
+        "applicable_annex_part_2_valid_to": null,
+        "true_excludes_article_57": true
+      },
+      "multi_institution": {
+        "fail_closed_when_institutions_or_last_state_evidence_are_missing": true,
+        "article_57_3_payer_requires_all_concerned_institutions_relieved": true,
+        "article_57_3_last_state_must_be_source_bound": true,
+        "article_57_3_requires_per_institution_relief_records": true,
+        "article_57_3_last_state_must_match_institutional_order": true
+      },
       "other_member_states_include_periods_in_theoretical_amount": true,
-      "all_states_exempt_branch": "institution_level_determination_required",
-      "unmodeled_branch_action": "blocking_data_gap"
+      "unmodeled_branch_action": "not_assessed_with_data_gaps"
     },
     "overlap_policy": {
       "legal_basis": "Regulation (EC) No 987/2009 Article 12",

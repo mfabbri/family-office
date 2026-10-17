@@ -25,6 +25,8 @@ class EuPensionCoordinationTest(unittest.TestCase):
         self.assertEqual([item["country"] for item in result["national_entitlements"]], ["IT", "ES"])
         self.assertTrue(result["coordination_principles"]["no_transfer_or_merger_of_contributions"])
         self.assertTrue(result["coordination_principles"]["aggregation_for_entitlement_and_theoretical_calculation"])
+        self.assertNotIn("separate_payment_by_country", result["coordination_principles"])
+        self.assertTrue(result["coordination_principles"]["payment_obligation_not_assessed_without_article_57_evidence"])
         self.assertEqual(result["rule_pack"]["schema_version"], "eu-pension-coordination-rule-pack/v2")
         self.assertEqual(result["pro_rata_diagnostics"]["countries"][0]["pro_rata_status"], "not_calculable")
         self.assertIn("entitlement and theoretical/pro-rata calculation", result["notes"])
@@ -92,6 +94,28 @@ class EuPensionCoordinationTest(unittest.TestCase):
 
             with self.assertRaisesRegex(EuPensionCoordinationError, "official EU or Spanish URL"):
                 load_rule_pack(path)
+
+    def test_rejects_removed_article_57_under_one_year_section(self):
+        broken = json.loads(RULE_PACK.read_text(encoding="utf-8"))
+        pro_rata_method = broken["pro_rata_method"]
+        pro_rata_method.pop("article_57_source_bound")
+        pro_rata_method["article_57_under_one_year"] = {"threshold_months": 12}
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "rules.json"
+            path.write_text(json.dumps(broken), encoding="utf-8")
+
+            with self.assertRaisesRegex(EuPensionCoordinationError, "article_57_source_bound"):
+                load_rule_pack(path)
+
+    def test_rejects_annex_version_or_date_missing_from_rule_pack(self):
+        for field, value in (("applicable_annex_part_2_version", ""), ("applicable_annex_part_2_valid_from", "2026-13-01")):
+            broken = json.loads(RULE_PACK.read_text(encoding="utf-8"))
+            broken["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"][field] = value
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                path = Path(tmp_dir) / "rules.json"
+                path.write_text(json.dumps(broken), encoding="utf-8")
+                with self.assertRaisesRegex(EuPensionCoordinationError, "Annex VIII"):
+                    load_rule_pack(path)
 
     def _coordinate(self, inps: dict, spanish: dict, italian_months: int | None) -> dict:
         with tempfile.TemporaryDirectory() as tmp_dir:

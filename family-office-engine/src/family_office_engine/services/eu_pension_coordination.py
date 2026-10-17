@@ -71,12 +71,12 @@ def coordinate_it_es_pensions(
         "data_gaps": data_gaps,
         "warnings": [
             "This is an internal coordination dossier, not an official P1 decision.",
-            "Italian and Spanish entitlements remain separate and are paid by their respective institutions.",
+            "This dossier does not assess any Article 57 payment obligation or payer without a source-bound Article 57 assessment and institutional records.",
         ],
         "notes": (
             "EU coordination aggregates periods for entitlement and theoretical/pro-rata calculation under the rule "
             "pack. It does not transfer, merge, or recalculate national contribution bases, and it does not determine "
-            "official recognition or payment."
+            "official recognition, payment obligation, or payer."
         ),
     }
     return _write_snapshot(snapshot, output_path)
@@ -116,8 +116,18 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     _validate_principles(data["coordination_principles"])
     if not isinstance(data.get("pro_rata_method"), dict):
         raise EuPensionCoordinationError("EU pension coordination rule pack must contain pro_rata_method")
-    if not isinstance(data["pro_rata_method"].get("article_57_under_one_year"), dict):
-        raise EuPensionCoordinationError("EU pension coordination rule pack must define article_57_under_one_year")
+    article_57 = data["pro_rata_method"].get("article_57_source_bound")
+    if not isinstance(article_57, dict):
+        raise EuPensionCoordinationError("EU pension coordination rule pack must define article_57_source_bound")
+    if article_57.get("contract_schema_version") != "v0.17" or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise EuPensionCoordinationError("EU pension coordination Article 57 contract must be v0.17/fo-art57-c14n-v4")
+    if article_57.get("human_review_required") is not True:
+        raise EuPensionCoordinationError("EU pension coordination Article 57 contract must require human review")
+    annex_policy = article_57.get("annex_viii_part_2")
+    if not isinstance(annex_policy, dict) or not isinstance(annex_policy.get("applicable_annex_part_2_version"), str) or not annex_policy.get("applicable_annex_part_2_version"):
+        raise EuPensionCoordinationError("EU pension coordination Article 57 Annex VIII applicability version is required")
+    if not _iso_date(annex_policy.get("applicable_annex_part_2_valid_from")) or (annex_policy.get("applicable_annex_part_2_valid_to") is not None and not _iso_date(annex_policy.get("applicable_annex_part_2_valid_to"))):
+        raise EuPensionCoordinationError("EU pension coordination Article 57 Annex VIII validity dates must be ISO dates")
     if not isinstance(data["pro_rata_method"].get("overlap_policy"), dict):
         raise EuPensionCoordinationError("EU pension coordination rule pack must define overlap_policy")
     if not isinstance(data["limitations"], list) or not data["limitations"]:
@@ -359,10 +369,19 @@ def _validate_principles(principles: dict[str, Any]) -> None:
         "aggregation_for_entitlement_and_theoretical_calculation",
         "no_transfer_or_merger_of_contributions",
         "compare_independent_and_pro_rata_when_calculable",
-        "separate_payment_by_country",
+        "payment_obligation_not_assessed_without_article_57_evidence",
     ):
         if principles.get(field) is not True:
             raise EuPensionCoordinationError(f"EU pension coordination principle must be true: {field}")
+
+
+def _iso_date(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        return date.fromisoformat(value).isoformat() == value
+    except ValueError:
+        return False
 
 
 def _validate_snapshot_schema(data: dict[str, Any], expected: str, label: str) -> None:

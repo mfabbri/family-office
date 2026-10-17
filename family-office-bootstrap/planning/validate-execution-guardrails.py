@@ -36,8 +36,18 @@ def main() -> int:
     if not isinstance(trace, list):
         fail("routing.trace must be an array")
     substantial_events = [item for item in trace if item.get("event") in {"delegated", "escalated"}]
-    if len(substantial_events) > 2:
-        fail("delegation budget exceeded: at most two delegated/escalated events")
+    budget = routing.get("delegation_budget")
+    max_events = 2
+    if budget is not None:
+        if not isinstance(budget, dict):
+            fail("routing.delegation_budget must be an object")
+        max_events = budget.get("max_events")
+        if not isinstance(max_events, int) or isinstance(max_events, bool) or not 3 <= max_events <= 18:
+            fail("delegation budget exception max_events must be between 3 and 18")
+        if not budget.get("authorization") or not budget.get("scope") or not budget.get("blocker"):
+            fail("delegation budget exception requires authorization, scope, and blocker")
+    if len(substantial_events) > max_events:
+        fail(f"delegation budget exceeded: at most {max_events} delegated/escalated events")
 
     if status in {"selected", "in_progress", "blocked"}:
         next_action = planner.get("next_action") or {}

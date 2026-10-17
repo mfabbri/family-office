@@ -1,4 +1,5 @@
 import json
+import hashlib
 import tempfile
 import unittest
 from decimal import Decimal, ROUND_HALF_UP
@@ -178,11 +179,50 @@ def _pro_rata_input() -> dict:
             _period("ES", "2021-01-01", "2021-12-31"),
             _period("IT", "2022-01-01", "2026-11-30"),
         ],
+        "article_57_assessment": _synthetic_article_57_assessment(),
     }
 
 
 def _period(country: str, start: str, end: str) -> dict:
     return {"country": country, "start_date": start, "end_date": end, "period_type": "compulsory", "source_document": f"synthetic-{country.lower()}-periods"}
+
+
+def _synthetic_article_57_assessment() -> dict:
+    preimage = {
+        "canonicalization_profile": "fo-art57-c14n-v4",
+        "parent_period_refs": ["synthetic-period"],
+        "schema_version": "v0.17",
+        "source_bounds": [{"native_duration": {"precision": "exact", "unit": "day", "value": {"numerator": 365, "denominator": 1}}, "native_end": None, "native_start": None, "period_ref": "synthetic-period"}],
+    }
+    segment_id = "sha256:" + hashlib.sha256(json.dumps(preimage, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")).hexdigest()
+    return {
+        "contract_schema_version": "v0.17", "canonicalization_profile": "fo-art57-c14n-v4", "human_review_required": True,
+        "member_state": "ES", "benefit_id": "synthetic-old-age", "benefit_type": "old_age", "scheme_id": "synthetic-es-scheme",
+        "competent_institution": "synthetic-es", "applicable_legislation_id": "synthetic-legislation", "applicable_legislation_version": "synthetic-v1",
+        "applicable_legislation_valid_from": "2020-01-01", "applicable_legislation_valid_to": None,
+        "risk_materialization_date": "2026-12-01", "assessment_date": "2026-12-01",
+        "transitional_applicability": _transitional("ES", "2026-12-01"),
+        "legal_duration_for_article_57": {"value": {"numerator": 365, "denominator": 1}, "unit": "day", "source_segment_id": segment_id},
+        "one_year_comparator": {"value": {"numerator": 365, "denominator": 1}, "unit": "day", "legal_basis_refs": ["synthetic-art57-comparator"]},
+        "duration_basis": "synthetic source-bound duration", "duration_assessment_evidence_refs": ["synthetic-duration-evidence"], "duration_strictly_less_than_one_year": False,
+        "duration_source_segment": {"segment_id": segment_id, "preimage": preimage},
+        "autonomous_right_from_state_periods_only": {"result": False, "national_benefit_rule_pack_id": "synthetic-national-pack", "national_rule_version": "synthetic-v1", "risk_materialization_date": "2026-12-01", "evidence_refs": ["synthetic-autonomous-evidence"]},
+        "annex_viii_part_2_applicability": {"result": False, "annex_consolidation_version": "reg-988-2009-2010-05-01", "annex_validity_or_applicability_date": "2026-12-01", "matched_scheme_entry": "synthetic-es-scheme", "scheme_match_status": "not_matched", "annex_evidence_refs": ["synthetic-annex-evidence"]},
+        "concerned_institutions": [{
+            "institution_id": "synthetic-es", "member_state": "ES", "benefit_id": "synthetic-old-age", "benefit_type": "old_age", "scheme_id": "synthetic-es-scheme", "competent_institution": "synthetic-es",
+            "applicable_legislation_id": "synthetic-legislation", "applicable_legislation_version": "synthetic-v1", "applicable_legislation_valid_from": "2020-01-01", "applicable_legislation_valid_to": None,
+            "risk_materialization_date": "2026-12-01", "assessment_date": "2026-12-01",
+            "transitional_applicability": _transitional("ES", "2026-12-01"),
+            "institution_order": 1, "institution_order_evidence_refs": ["synthetic-institution-order"],
+            "article_57_1_relief_result": False, "evidence_refs": ["synthetic-institutional-art57"],
+        }],
+        "concerned_institutions_complete": {"result": True, "institution_ids": ["synthetic-es"], "evidence_refs": ["synthetic-institutions-completeness"]},
+        "all_concerned_institutions_relieved": False,
+    }
+
+
+def _transitional(member_state: str, risk_date: str) -> dict:
+    return {"basic_regulation_883_87": {"member_state": member_state, "territorial_application_date": {"date": "2010-05-01", "legal_source_ref": "synthetic-883-87"}, "contingency_date": risk_date, "pre_application_period_refs": [], "result": "not_applicable", "evidence_refs": ["synthetic-transitional-evidence"], "data_gaps": []}, "implementing_regulation_987_93": {"result": "not_applicable", "evidence_refs": ["synthetic-987-93"], "data_gaps": []}, "regulation_465_2012_883_87a": {"title_ii_change_caused_by_465_2012": None, "legislation_before_change": None, "legislation_after_change": None, "relevant_situation_unchanged": None, "within_ten_year_limit": None, "opt_out_request_date": None, "opt_out_effective_date": None, "result": "not_applicable", "evidence_refs": ["synthetic-465-87a"], "data_gaps": []}, "pension_transitional_987_94_1": {"benefits_due_for_pre_application_period": None, "contingency_pre_application": None, "claim_awarded_before_application_date": None, "prior_leg": None, "basic_regulation_leg": None, "comparison": "not_applicable", "preserved_result": "not_applicable", "result": "not_applicable", "data_gaps": []}}
 
 
 def _reconciliation(months: list[dict]) -> dict:

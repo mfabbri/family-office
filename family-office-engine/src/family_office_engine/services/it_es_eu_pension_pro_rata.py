@@ -1,6 +1,9 @@
 import json
 import hashlib
 import calendar
+import math
+import unicodedata
+from datetime import date
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
@@ -48,7 +51,8 @@ def build_it_es_eu_pension_pro_rata(
         rule_pack,
     )
     theoretical = _spanish_theoretical_amount(data.get("spanish_theoretical_pension"))
-    pro_rata = _spanish_pro_rata(theoretical, periods_result, entitlement, rule_pack)
+    article_57 = _article_57_assessment(data.get("article_57_assessment"), rule_pack)
+    pro_rata = _spanish_pro_rata(theoretical, periods_result, entitlement, rule_pack, article_57)
     data_gaps = []
     data_gaps.extend(_declared_data_gaps(data, theoretical))
     data_gaps.extend(input_gaps)
@@ -56,6 +60,7 @@ def build_it_es_eu_pension_pro_rata(
     data_gaps.extend(_post_retirement_period_gaps(periods_result, retirement_date))
     data_gaps.extend(entitlement["data_gaps"])
     data_gaps.extend(theoretical["data_gaps"])
+    data_gaps.extend(article_57["data_gaps"])
     data_gaps.extend(pro_rata["data_gaps"])
 
     snapshot = {
@@ -78,6 +83,7 @@ def build_it_es_eu_pension_pro_rata(
         "periods": periods_result["summary"],
         "overlaps": periods_result["overlaps"],
         "spanish_entitlement": entitlement["result"],
+        "article_57": article_57["result"],
         "spanish_theoretical_pension": theoretical["result"],
         "spanish_pro_rata_pension": pro_rata["result"],
         "data_gaps": data_gaps,
@@ -134,9 +140,21 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
         )
     if data["pro_rata_method"].get("no_foreign_bases_in_spanish_theoretical_amount") is not True:
         raise ItEsEuPensionProRataError("Rule pack must forbid foreign bases in Spanish theoretical amount")
-    article_57 = data["pro_rata_method"].get("article_57_under_one_year")
+    article_57 = data["pro_rata_method"].get("article_57_source_bound")
     if not isinstance(article_57, dict):
-        raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.article_57_under_one_year")
+        raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.article_57_source_bound")
+    if article_57.get("contract_schema_version") != "v0.17" or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.17/fo-art57-c14n-v4")
+    if article_57.get("human_review_required") is not True:
+        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must require human review")
+    annex_policy = article_57.get("annex_viii_part_2")
+    if (
+        not isinstance(annex_policy, dict)
+        or not _canonical_string(annex_policy.get("applicable_annex_part_2_version"))
+        or not _iso_date(annex_policy.get("applicable_annex_part_2_valid_from"))
+        or (annex_policy.get("applicable_annex_part_2_valid_to") is not None and not _iso_date(annex_policy.get("applicable_annex_part_2_valid_to")))
+    ):
+        raise ItEsEuPensionProRataError("Rule pack Article 57 Annex VIII applicability version and ISO validity dates are required")
     overlap_policy = data["pro_rata_method"].get("overlap_policy")
     if not isinstance(overlap_policy, dict):
         raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.overlap_policy")
@@ -419,18 +437,413 @@ def _theoretical_from_snapshot(snapshot_path: Path) -> dict[str, Any]:
     }
 
 
+def _article_57_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, Any]:
+    policy = rule_pack["pro_rata_method"]["article_57_source_bound"]
+    base = {
+        "human_review_required": True,
+        "national_eligibility_status": "not_assessed",
+        "article_57_exception_status": "not_assessed",
+        "theoretical_amount_period_inclusion": "not_assessed",
+        "pro_rata_amount_status": "not_assessed",
+        "national_payment_obligation_status": "not_assessed",
+    }
+    if not isinstance(value, dict):
+        return _article_57_not_assessed(base, "missing_article_57_source_bound_assessment", "A v0.17 source-bound Article 57 assessment is required.")
+    _validate_article_57_contract(value, policy)
+    if _transitional_result(value["transitional_applicability"], value["member_state"], value["risk_materialization_date"]) is None:
+        return _article_57_not_assessed(base, "missing_article_57_transitional_applicability", "A decisive transitional applicability record is not assessed.")
+    duration_binding_gaps = _article_57_duration_binding_gaps(value)
+    duration = value.get("duration_strictly_less_than_one_year")
+    autonomous = _source_bound_result(value.get("autonomous_right_from_state_periods_only"), "autonomous_right_from_state_periods_only", policy, value)
+    annex = _source_bound_result(value.get("annex_viii_part_2_applicability"), "annex_viii_part_2_applicability", policy, value)
+    if duration_binding_gaps or annex["result"] is None:
+        gaps = list(duration_binding_gaps)
+        if annex["result"] is None:
+            gaps.append(_article_57_gap("missing_article_57_annex_viii_part_2_evidence", "Applicable Annex VIII part 2 evidence is required for Article 57."))
+        return {"result": base, "data_gaps": gaps}
+    if annex["result"] is True:
+        base.update({
+            "article_57_exception_status": "excluded_by_57_4",
+            "theoretical_amount_period_inclusion": "not_triggered",
+            "pro_rata_amount_status": "downstream_not_assessed",
+            "national_payment_obligation_status": "not_assessed",
+        })
+        return {"result": base, "data_gaps": []}
+    if duration is False or autonomous["result"] is True:
+        base.update({
+            "article_57_exception_status": "does_not_apply",
+            "theoretical_amount_period_inclusion": "not_triggered",
+            "pro_rata_amount_status": "downstream_not_assessed",
+            "national_payment_obligation_status": "ordinary_article_52",
+        })
+        return {"result": base, "data_gaps": []}
+    gaps = []
+    if duration is None:
+        gaps.append(_article_57_gap("missing_article_57_legal_duration", "Legal duration and comparator evidence do not establish the Article 57 result."))
+    if autonomous["result"] is None:
+        gaps.append(_article_57_gap("missing_article_57_autonomous_right_evidence", "Autonomous-right evidence is required for Article 57."))
+    if gaps:
+        return {"result": base, "data_gaps": gaps}
+    # At this point the three Art. 57(1) predicates are source-bound and true/false.
+    base.update({
+        "article_57_exception_status": "applies",
+        "theoretical_amount_period_inclusion": "required_by_57_2",
+        "pro_rata_amount_status": "downstream_not_assessed",
+        "national_payment_obligation_status": "relieved_under_57_1",
+    })
+    institutions = _article_57_institutional_records(value.get("concerned_institutions"), value)
+    if institutions is None:
+        base["national_payment_obligation_status"] = "not_assessed"
+        return {"result": base, "data_gaps": [_article_57_gap("missing_article_57_multi_institution_evidence", "Institutional Article 57(1) records are required for every concerned institution.")]}
+    completeness = value.get("concerned_institutions_complete")
+    institution_ids = sorted((record["institution_id"] for record in institutions), key=lambda item: item.encode("utf-8"))
+    if (
+        not isinstance(completeness, dict)
+        or set(completeness) != {"result", "institution_ids", "evidence_refs"}
+        or completeness.get("result") is not True
+        or completeness.get("institution_ids") != institution_ids
+        or not _nonempty_string_list(completeness.get("evidence_refs"))
+    ):
+        return {"result": base, "data_gaps": [_article_57_gap("missing_article_57_concerned_institutions_completeness", "Article 57(3) requires source-bound evidence that the institutional set is complete.")]}
+    if not all(record["article_57_1_relief_result"] for record in institutions):
+        return {"result": base, "data_gaps": []}
+    last_state = value.get("article_57_3_last_state")
+    last_state_order = value.get("article_57_3_last_state_order")
+    last_state_conditions = value.get("article_57_3_last_state_conditions_satisfied")
+    evidence = value.get("article_57_3_evidence_refs")
+    last_record = max(institutions, key=lambda record: record["institution_order"])
+    if (
+        not isinstance(last_state, str)
+        or last_state != last_record["member_state"]
+        or last_state_order != last_record["institution_order"]
+        or last_state_conditions is not True
+        or not _nonempty_string_list(evidence)
+    ):
+        base["national_payment_obligation_status"] = "not_assessed"
+        return {"result": base, "data_gaps": [_article_57_gap("missing_article_57_3_last_state_evidence", "Article 57(3) payer requires source-bound institutional last-state, order, and conditions evidence.")]}
+    base["national_payment_obligation_status"] = "payer_under_57_3"
+    base["article_57_3_last_state"] = last_state
+    return {"result": base, "data_gaps": []}
+
+
+def _validate_article_57_contract(value: dict[str, Any], policy: dict[str, Any]) -> None:
+    allowed = {
+        "contract_schema_version", "canonicalization_profile", "human_review_required", "member_state", "benefit_id", "benefit_type", "scheme_id", "competent_institution",
+        "applicable_legislation_id", "applicable_legislation_version", "applicable_legislation_valid_from", "applicable_legislation_valid_to", "risk_materialization_date", "assessment_date",
+        "transitional_applicability", "legal_duration_for_article_57", "one_year_comparator", "duration_basis", "duration_assessment_evidence_refs", "duration_strictly_less_than_one_year",
+        "duration_source_segment", "autonomous_right_from_state_periods_only", "annex_viii_part_2_applicability", "concerned_institutions", "concerned_institutions_complete",
+        "all_concerned_institutions_relieved", "article_57_3_last_state", "article_57_3_last_state_order", "article_57_3_last_state_conditions_satisfied", "article_57_3_evidence_refs",
+    }
+    if "schema_version" in value or set(value) - allowed:
+        raise ItEsEuPensionProRataError("Article 57 assessment has forbidden root schema_version or fields.")
+    if value.get("contract_schema_version") != policy["contract_schema_version"] or value.get("canonicalization_profile") != policy["canonicalization_profile"]:
+        raise ItEsEuPensionProRataError("Article 57 assessment must use v0.17/fo-art57-c14n-v4; legacy contracts are rejected.")
+    if value.get("human_review_required") is not True:
+        raise ItEsEuPensionProRataError("Article 57 assessment must require human review.")
+    required_root_strings = (
+        "member_state", "benefit_id", "benefit_type", "scheme_id", "competent_institution",
+        "applicable_legislation_id", "applicable_legislation_version",
+    )
+    if any(not _canonical_string(value.get(field)) for field in required_root_strings):
+        raise ItEsEuPensionProRataError("Article 57 assessment requires canonical root member-state, benefit, scheme, institution, and legislation bindings.")
+    for field in ("risk_materialization_date", "assessment_date", "applicable_legislation_valid_from"):
+        if not _iso_date(value.get(field)):
+            raise ItEsEuPensionProRataError(f"Article 57 assessment requires ISO {field}.")
+    valid_to = value.get("applicable_legislation_valid_to")
+    if valid_to is not None and not _iso_date(valid_to):
+        raise ItEsEuPensionProRataError("Article 57 assessment requires ISO applicable_legislation_valid_to or null.")
+    if not _date_in_range(value["risk_materialization_date"], value["applicable_legislation_valid_from"], valid_to):
+        raise ItEsEuPensionProRataError("Article 57 risk materialization date is outside the bound legislation validity period.")
+    if not isinstance(value.get("transitional_applicability"), dict):
+        raise ItEsEuPensionProRataError("Article 57 assessment requires a transitional applicability record.")
+    for field in ("legal_duration_for_article_57", "one_year_comparator"):
+        record = value.get(field)
+        if not isinstance(record, dict) or not record.get("unit") or "value" not in record:
+            raise ItEsEuPensionProRataError(f"Article 57 assessment missing source-bound {field}.")
+    if not isinstance(value.get("duration_basis"), str) or not isinstance(value.get("duration_assessment_evidence_refs"), list) or not value["duration_assessment_evidence_refs"]:
+        raise ItEsEuPensionProRataError("Article 57 assessment requires duration basis and evidence.")
+    if type(value.get("duration_strictly_less_than_one_year")) not in {bool, type(None)}:
+        raise ItEsEuPensionProRataError("Article 57 duration result must be true, false, or null.")
+
+
+def _article_57_duration_binding_gaps(value: dict[str, Any]) -> list[dict[str, Any]]:
+    duration = value["legal_duration_for_article_57"]
+    comparator = value["one_year_comparator"]
+    duration_value = _rational_value(duration.get("value"))
+    comparator_value = _rational_value(comparator.get("value"))
+    segment = value.get("duration_source_segment")
+    if duration_value is None or comparator_value is None or duration.get("unit") != comparator.get("unit"):
+        return [_article_57_gap("invalid_article_57_duration_comparator_binding", "Legal duration and one-year comparator must be canonical rationals in the same source-bound unit.")]
+    if not isinstance(comparator.get("legal_basis_refs"), list) or not comparator["legal_basis_refs"]:
+        return [_article_57_gap("missing_article_57_comparator_legal_basis", "The one-year comparator requires legal-basis references.")]
+    if not isinstance(segment, dict) or set(segment) != {"segment_id", "preimage"} or not isinstance(segment.get("segment_id"), str) or not isinstance(segment.get("preimage"), dict):
+        return [_article_57_gap("missing_article_57_duration_source_segment", "The legal duration requires a v0.17 canonical source-segment preimage and hash.")]
+    source_duration = _c14n_v4_duration_source_bound(segment["preimage"])
+    if source_duration is None:
+        return [_article_57_gap("invalid_article_57_duration_source_segment", "The Article 57 segment must satisfy the c14n-v4 duration grammar.")]
+    expected = "sha256:" + hashlib.sha256(
+        json.dumps(segment["preimage"], ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    ).hexdigest()
+    if segment["segment_id"] != expected or duration.get("source_segment_id") != expected or source_duration != (duration_value, duration.get("unit")):
+        return [_article_57_gap("invalid_article_57_duration_source_segment", "The legal duration must bind to the matching canonical v0.17 segment hash.")]
+    predicate = value["duration_strictly_less_than_one_year"]
+    comparison = _rational_less_than(duration_value, comparator_value)
+    if predicate is not None and predicate is not comparison:
+        return [_article_57_gap("inconsistent_article_57_duration_predicate", "The supplied ternary duration predicate conflicts with its source-bound duration and comparator.")]
+    return []
+
+
+def _rational_value(value: Any) -> tuple[int, int] | None:
+    if not isinstance(value, dict) or set(value) != {"numerator", "denominator"}:
+        return None
+    numerator, denominator = value["numerator"], value["denominator"]
+    if isinstance(numerator, bool) or isinstance(denominator, bool) or not isinstance(numerator, int) or not isinstance(denominator, int) or numerator < 0 or denominator <= 0:
+        return None
+    if numerator == 0:
+        return (0, 1) if denominator == 1 else None
+    if math.gcd(numerator, denominator) != 1:
+        return None
+    return numerator, denominator
+
+
+def _rational_less_than(left: tuple[int, int], right: tuple[int, int]) -> bool:
+    return left[0] * right[1] < right[0] * left[1]
+
+
+def _c14n_v4_duration_source_bound(preimage: dict[str, Any]) -> tuple[tuple[int, int], str] | None:
+    if set(preimage) != {"canonicalization_profile", "parent_period_refs", "schema_version", "source_bounds"}:
+        return None
+    if preimage.get("schema_version") != "v0.17" or preimage.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        return None
+    parent_refs = preimage.get("parent_period_refs")
+    bounds = preimage.get("source_bounds")
+    if not _canonical_string_list(parent_refs) or parent_refs != sorted(parent_refs, key=lambda item: item.encode("utf-8")) or not isinstance(bounds, list) or len(bounds) != len(parent_refs):
+        return None
+    bound = bounds[0]
+    if not isinstance(bound, dict) or set(bound) != {"native_duration", "native_end", "native_start", "period_ref"} or bound.get("period_ref") != parent_refs[0] or bound.get("native_start") is not None or bound.get("native_end") is not None:
+        return None
+    native_duration = bound.get("native_duration")
+    if not isinstance(native_duration, dict) or set(native_duration) != {"precision", "unit", "value"} or native_duration.get("precision") != "exact" or not _canonical_string(native_duration.get("unit")):
+        return None
+    rational = _rational_value(native_duration.get("value"))
+    return (rational, native_duration["unit"]) if rational is not None else None
+
+
+def _article_57_institutional_records(value: Any, root: dict[str, Any]) -> list[dict[str, Any]] | None:
+    if not isinstance(value, list) or not value:
+        return None
+    records: list[dict[str, Any]] = []
+    for record in value:
+        if not isinstance(record, dict) or set(record) != {"institution_id", "member_state", "benefit_id", "benefit_type", "scheme_id", "competent_institution", "applicable_legislation_id", "applicable_legislation_version", "applicable_legislation_valid_from", "applicable_legislation_valid_to", "risk_materialization_date", "assessment_date", "transitional_applicability", "institution_order", "institution_order_evidence_refs", "article_57_1_relief_result", "evidence_refs"}:
+            return None
+        if (
+            not _canonical_string(record["institution_id"])
+            or not _canonical_string(record["member_state"])
+            or any(not _canonical_string(record[field]) for field in ("benefit_id", "benefit_type", "scheme_id", "competent_institution", "applicable_legislation_id", "applicable_legislation_version"))
+            or not _iso_date(record["risk_materialization_date"])
+            or not _iso_date(record["assessment_date"])
+            or not _iso_date(record["applicable_legislation_valid_from"])
+            or (record["applicable_legislation_valid_to"] is not None and not _iso_date(record["applicable_legislation_valid_to"]))
+            or not _date_in_range(record["risk_materialization_date"], record["applicable_legislation_valid_from"], record["applicable_legislation_valid_to"])
+            or _transitional_result(record["transitional_applicability"], record["member_state"], record["risk_materialization_date"]) is None
+            or isinstance(record["institution_order"], bool)
+            or not isinstance(record["institution_order"], int)
+            or record["institution_order"] < 1
+            or type(record["article_57_1_relief_result"]) is not bool
+            or not _nonempty_string_list(record["institution_order_evidence_refs"])
+            or not _nonempty_string_list(record["evidence_refs"])
+        ):
+            return None
+        records.append(record)
+    if len({record["institution_id"] for record in records}) != len(records) or len({record["institution_order"] for record in records}) != len(records):
+        return None
+    return records
+
+
+def _nonempty_string_list(value: Any) -> bool:
+    return _canonical_string_list(value)
+
+
+def _canonical_string(value: Any) -> bool:
+    return isinstance(value, str) and bool(value) and value == unicodedata.normalize("NFC", value)
+
+
+def _canonical_string_list(value: Any) -> bool:
+    return isinstance(value, list) and bool(value) and len(set(value)) == len(value) and all(_canonical_string(item) for item in value)
+
+
+def _iso_date(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        return date.fromisoformat(value).isoformat() == value
+    except ValueError:
+        return False
+
+
+def _date_in_range(value: str, valid_from: str, valid_to: str | None) -> bool:
+    return value >= valid_from and (valid_to is None or value <= valid_to)
+
+
+def _source_bound_result(value: Any, label: str, policy: dict[str, Any] | None = None, root: dict[str, Any] | None = None) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {"result": None}
+    result = value.get("result")
+    if type(result) not in {bool, type(None)}:
+        raise ItEsEuPensionProRataError(f"{label}.result must be true, false, or null.")
+    if result is None:
+        return {"result": None}
+    required = ("evidence_refs",) if label == "autonomous_right_from_state_periods_only" else ()
+    if label == "autonomous_right_from_state_periods_only":
+        required += ("national_benefit_rule_pack_id", "national_rule_version", "risk_materialization_date")
+    else:
+        required += ("annex_consolidation_version", "annex_validity_or_applicability_date", "scheme_match_status", "matched_scheme_entry", "annex_evidence_refs")
+    if any(not value.get(field) for field in required):
+        return {"result": None}
+    if label == "autonomous_right_from_state_periods_only" and (not _iso_date(value["risk_materialization_date"]) or root is None or value["risk_materialization_date"] != root["risk_materialization_date"]):
+        return {"result": None}
+    if label == "annex_viii_part_2_applicability":
+        annex_policy = policy["annex_viii_part_2"] if policy else {}
+        annex_date = value["annex_validity_or_applicability_date"]
+        if (
+            not _iso_date(annex_date)
+            or value.get("annex_consolidation_version") != annex_policy.get("applicable_annex_part_2_version")
+            or annex_date != (root or {}).get("risk_materialization_date")
+            or not _date_in_range(annex_date, annex_policy.get("applicable_annex_part_2_valid_from", "9999-12-31"), annex_policy.get("applicable_annex_part_2_valid_to"))
+            or value.get("scheme_match_status") not in {"matched", "not_matched", "not_assessed"}
+            or not _canonical_string(value.get("matched_scheme_entry"))
+            or not _nonempty_string_list(value.get("annex_evidence_refs"))
+        ):
+            return {"result": None}
+        if (result is True and value["scheme_match_status"] != "matched") or (result is False and value["scheme_match_status"] != "not_matched") or (result is None and value["scheme_match_status"] != "not_assessed"):
+            return {"result": None}
+    return {"result": result}
+
+
+def _transitional_result(value: Any, member_state: str, risk_date: str) -> bool | None:
+    if not isinstance(value, dict) or set(value) != {"basic_regulation_883_87", "implementing_regulation_987_93", "regulation_465_2012_883_87a", "pension_transitional_987_94_1"}:
+        return None
+    basic = value["basic_regulation_883_87"]
+    if not isinstance(basic, dict) or set(basic) != {"member_state", "territorial_application_date", "contingency_date", "pre_application_period_refs", "result", "evidence_refs", "data_gaps"}:
+        return None
+    territorial = basic["territorial_application_date"]
+    if (
+        basic["member_state"] != member_state
+        or basic["contingency_date"] != risk_date
+        or basic["result"] not in {"applicable", "not_applicable", "not_assessed"}
+        or not isinstance(territorial, dict)
+        or set(territorial) != {"date", "legal_source_ref"}
+        or not _iso_date(territorial["date"])
+        or not _canonical_string(territorial["legal_source_ref"])
+        or not isinstance(basic["pre_application_period_refs"], list)
+        or any(not _canonical_string(ref) for ref in basic["pre_application_period_refs"])
+        or len(set(basic["pre_application_period_refs"])) != len(basic["pre_application_period_refs"])
+        or not _nonempty_string_list(basic["evidence_refs"])
+        or not isinstance(basic["data_gaps"], list)
+        or (basic["result"] == "not_assessed" and not basic["data_gaps"])
+    ):
+        return None
+
+    implementing = value["implementing_regulation_987_93"]
+    if (
+        not isinstance(implementing, dict)
+        or set(implementing) != {"result", "evidence_refs", "data_gaps"}
+        or implementing["result"] not in {"applicable", "not_applicable", "not_assessed"}
+        or not _nonempty_string_list(implementing["evidence_refs"])
+        or not isinstance(implementing["data_gaps"], list)
+        or (implementing["result"] == "not_assessed" and not implementing["data_gaps"])
+    ):
+        return None
+
+    title_ii = value["regulation_465_2012_883_87a"]
+    title_ii_fields = {
+        "title_ii_change_caused_by_465_2012", "legislation_before_change", "legislation_after_change",
+        "relevant_situation_unchanged", "within_ten_year_limit", "opt_out_request_date",
+        "opt_out_effective_date", "result", "evidence_refs", "data_gaps",
+    }
+    if (
+        not isinstance(title_ii, dict)
+        or set(title_ii) != title_ii_fields
+        or title_ii["result"] not in {"old_legislation_continues", "new_legislation_applies", "not_applicable", "not_assessed"}
+        or type(title_ii["title_ii_change_caused_by_465_2012"]) not in {bool, type(None)}
+        or type(title_ii["relevant_situation_unchanged"]) not in {bool, type(None)}
+        or type(title_ii["within_ten_year_limit"]) not in {bool, type(None)}
+        or any(title_ii[field] is not None and not _canonical_string(title_ii[field]) for field in ("legislation_before_change", "legislation_after_change"))
+        or any(title_ii[field] is not None and not _iso_date(title_ii[field]) for field in ("opt_out_request_date", "opt_out_effective_date"))
+        or not _nonempty_string_list(title_ii["evidence_refs"])
+        or not isinstance(title_ii["data_gaps"], list)
+        or (title_ii["result"] in {"old_legislation_continues", "new_legislation_applies"} and (
+            title_ii["title_ii_change_caused_by_465_2012"] is not True
+            or title_ii["relevant_situation_unchanged"] is None
+            or title_ii["within_ten_year_limit"] is None
+            or not _canonical_string(title_ii["legislation_before_change"])
+            or not _canonical_string(title_ii["legislation_after_change"])
+        ))
+        or (title_ii["result"] == "not_assessed" and not title_ii["data_gaps"])
+    ):
+        return None
+
+    pension = value["pension_transitional_987_94_1"]
+    pension_fields = {
+        "benefits_due_for_pre_application_period", "contingency_pre_application", "claim_awarded_before_application_date",
+        "prior_leg", "basic_regulation_leg", "comparison", "preserved_result", "result", "data_gaps",
+    }
+    if (
+        not isinstance(pension, dict)
+        or set(pension) != pension_fields
+        or pension["result"] not in {"both_legs_assessed", "not_applicable", "not_assessed"}
+        or any(type(pension[field]) not in {bool, type(None)} for field in ("benefits_due_for_pre_application_period", "contingency_pre_application", "claim_awarded_before_application_date"))
+        or pension["comparison"] not in {"prior_higher", "basic_higher", "equal", "not_assessed", "not_applicable"}
+        or pension["preserved_result"] not in {"prior_leg", "basic_regulation_leg", "not_assessed", "not_applicable"}
+        or not isinstance(pension["data_gaps"], list)
+    ):
+        return None
+    if pension["result"] == "both_legs_assessed":
+        leg_fields = {"legal_basis", "period", "amount_result_ref", "evidence_refs"}
+        for field in ("prior_leg", "basic_regulation_leg"):
+            leg = pension[field]
+            if (
+                not isinstance(leg, dict)
+                or set(leg) != leg_fields
+                or not _canonical_string(leg["legal_basis"])
+                or not _canonical_string(leg["amount_result_ref"])
+                or not _nonempty_string_list(leg["evidence_refs"])
+            ):
+                return None
+        if (
+            any(type(pension[field]) is not bool for field in ("benefits_due_for_pre_application_period", "contingency_pre_application", "claim_awarded_before_application_date"))
+            or pension["comparison"] not in {"prior_higher", "basic_higher", "equal"}
+            or pension["preserved_result"] != ("prior_leg" if pension["comparison"] == "prior_higher" else "basic_regulation_leg")
+        ):
+            return None
+    elif pension["result"] == "not_assessed" and not pension["data_gaps"]:
+        return None
+
+    if any(value[name]["result"] == "not_assessed" for name in value):
+        return None
+    return True
+
+
+def _article_57_not_assessed(base: dict[str, Any], code: str, message: str) -> dict[str, Any]:
+    return {"result": base, "data_gaps": [_article_57_gap(code, message)]}
+
+
+def _article_57_gap(code: str, message: str) -> dict[str, Any]:
+    return {"code": code, "message": message, "article_57_contract": "v0.17", "human_review_required": True}
+
+
 def _spanish_pro_rata(
     theoretical: dict[str, Any],
     periods_result: dict[str, Any],
     entitlement: dict[str, Any],
     rule_pack: dict[str, Any],
+    article_57: dict[str, Any],
 ) -> dict[str, Any]:
     gaps: list[dict[str, Any]] = []
     theoretical_result = theoretical["result"]
     total = periods_result["summary"]["total_eu_non_overlapping_months"]
     es = periods_result["summary"]["spain_months"]
-    article_57 = rule_pack["pro_rata_method"]["article_57_under_one_year"]
-    under_one_year_threshold = int(article_57["less_than_one_year_threshold_months"])
+    article_57_result = article_57["result"]
     if entitlement["result"]["status"] == "not_eligible":
         gaps.append({"code": "spanish_entitlement_required_for_pro_rata", "message": "Pro-rata is not calculated when Spanish entitlement is not reached."})
     if theoretical_result is None:
@@ -459,22 +872,11 @@ def _spanish_pro_rata(
                 "overlap_month_count": len(periods_result["overlaps"]),
             }
         )
-    if es < under_one_year_threshold and not entitlement["result"]["autonomous"]["eligible"]:
-        gaps.append(
-            {
-                "code": "article_57_under_one_year_institutional_determination_required",
-                "message": (
-                    "The Spanish period is under one year and an autonomous right is not established. The Article 57 "
-                    "exception requires the joint encoded conditions and an institutional determination; the period "
-                    "may remain relevant to another State's theoretical calculation but is not converted into a national contribution."
-                ),
-                "spanish_months": es,
-                "threshold_months": under_one_year_threshold,
-                "all_states_exempt_branch": article_57["all_states_exempt_branch"],
-            }
-        )
+    gaps.extend(article_57["data_gaps"])
+    if article_57_result["article_57_exception_status"] == "applies":
+        gaps.append(_article_57_gap("article_57_pro_rata_downstream_not_assessed", "Article 57 applies; theoretical inclusion and payment obligation are preserved separately, while pro-rata remains downstream not assessed."))
     if gaps:
-        return {"result": {"status": "not_calculable", "method": rule_pack["pro_rata_method"], "amounts": None}, "data_gaps": gaps}
+        return {"result": {"status": "not_calculable", "method": rule_pack["pro_rata_method"], "article_57": article_57_result, "amounts": None}, "data_gaps": gaps}
 
     ratio_decimals = int(rule_pack["pro_rata_method"]["rounding"]["ratio_decimals"])
     ratio = (Decimal(es) / Decimal(total)).quantize(Decimal("1").scaleb(-ratio_decimals))
@@ -484,6 +886,7 @@ def _spanish_pro_rata(
         "result": {
             "status": "calculated",
             "method": rule_pack["pro_rata_method"],
+            "article_57": article_57_result,
             "ratio": {
                 "spain_months": es,
                 "total_eu_non_overlapping_months": total,

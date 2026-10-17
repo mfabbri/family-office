@@ -135,7 +135,7 @@ class PensionSourceFreshnessTest(unittest.TestCase):
         repository_root = Path(__file__).resolve().parents[3]
         rules_root = repository_root / "family-office-rules"
 
-        report = audit_active_pension_rule_packs(rules_root, date(2026, 10, 13))
+        report = audit_active_pension_rule_packs(rules_root, date(2026, 10, 16))
 
         self.assertEqual(report["status"], "fresh", report["data_gaps"])
         self.assertFalse(report["network_checked"])
