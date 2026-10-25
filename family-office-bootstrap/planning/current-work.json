@@ -2,158 +2,231 @@
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
   "status": "completed",
-  "selected_at": "2026-10-17T07:14:50Z",
-  "updated_at": "2026-10-17T08:21:16Z",
+  "selected_at": "2026-10-25T00:05:00Z",
+  "updated_at": "2026-10-25T00:00:00Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.14y — Annex VIII Part 2 versioned catalogue and temporal ledger",
-      "reason": "V4.14x evento 2 ha dato NO-GO limitato: la candidata non include tutte le entry/ledger temporali. V4.14y abilita un catalogo documentale completo senza modificare runtime o rules."
+      "section": "V4.15c - Code audit after RITA fund-stream intake",
+      "reason": "V4.15a è done; l'algoritmo roadmap seleziona il minimo incremento abilitante richiesto dai blocchi RITA V2/V4.14 su autorizzazione 'procedi'."
     }
   ],
   "increment": {
-    "id": "V4.14y-annex-viii-part2-versioned-catalogue",
-    "title": "Annex VIII Part 2 versioned catalogue and temporal ledger",
-    "objective": "Produrre e sottoporre a review una tabella completa delle entry testuali dell'Annex VIII Part 2 con ledger degli atti autentici, delta e intervalli di efficacia; mantenere fuori scope l'applicabilità territoriale non verificata.",
+    "id": "V4.15c-code-audit-rita-fund-stream",
+    "title": "Code audit after RITA fund-stream intake",
+    "objective": "Realizzare un intake guidato e un validator deterministico per registrare nel workspace un flusso RITA documentato/accettato dal fondo secondo il contratto v0.1 già revisionato, senza eligibility o calcoli.",
     "scope": [
-      "Riconciliare le 23 entry/sub-entry testuali del consolidato EUR-Lex 02004R0883-20190731 con gli atti GUUE 988/2009, 1244/2010, 1224/2012, 517/2013, 1372/2013 e 2017/492.",
-      "Registrare per ogni delta CELEX, OJ, pagina/articolo, operation, effective date, entry key locale e valid_from/valid_to supportati.",
-      "Distinguere entry testuali da schemi nazionali; mantenere UK, SEE e Svizzera in ambito separato non valutato.",
-      "Registrare entrambi i nuovi Knowledge document nel citation catalog e aggiornare il test del conteggio corpus, senza waivare il gap di citazione atteso per altri documenti.",
-      "Sottoporre candidate source table e ledger a review normativa indipendente exact-version entro due eventi massimi."
+      "Definire il record rita-fund-stream/v1 sulla base della candidata source-bound RITA stream v0.1 già revisionata.",
+      "Fornire CLI question-first/workspace-local, validator e snapshot con provenance/data_gaps; nessun JSON manuale come percorso normale.",
+      "Fixture sintetiche e regressioni pubbliche per prove mancanti/confliggenti, date/schedule/pagamenti e importi/periodicità.",
+      "Due deleghe bounded: Terra/medium implementazione e Terra/high review tecnica indipendente; suite completa Engine obbligatoria."
     ],
     "out_of_scope": [
-      "Aggiornare rule pack o runtime, effettuare match su schemi individuali o usare dati personali.",
-      "Determinare l'applicabilità post-Brexit o l'estensione SEE/Svizzera.",
-      "Sbloccare V4.14w/V4.14a/V4.15 o la timeline pensionistica complessiva."
+      "Modifica a criteri di eligibility o soglie rita-rule-pack/v1.",
+      "Calcolo RITA, importi, netto, rendimenti, entitlement pensionistico o retirement-bridge timeline.",
+      "Inferenza di eligibility/accettazione/pagamento, nuova interpretazione normativa o sblocco V4.14/V4.15.",
+      "Accesso a dati personali fuori da family-office-workspace/; fixture soltanto sintetiche."
     ],
     "candidate_files": [
-      "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md",
-      "family-office-knowledge/international/eu-pension-art57-evidence-binding-audit-candidate-v0.18.md",
-      "family-office-knowledge/sources/citation-catalog.json",
-      "family-office-engine/tests/unit/test_citation_index.py",
-      "family-office-engine/docs/current-next-increment.md",
+      "family-office-knowledge/pensions/rita.md",
+      "family-office-rules/italy/current/rita.yaml",
+      "family-office-engine/src/family_office_engine/services/rita_fund_stream.py",
+      "family-office-engine/src/family_office_engine/cli/main.py",
+      "family-office-engine/tests/unit/test_rita_fund_stream.py",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-engine/docs/decision-log.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
-    "stop_condition": "Se un entry/delta o un intervallo di efficacia non è dimostrato da un atto autentico, registrarne il gap e non renderlo matchabile; nessuna modifica a Rules/Engine."
+    "stop_condition": "Concludere solo con review tecnica indipendente, test mirati e suite Engine completa a 0 failure/errori/skipped; se emerge semantica normativa nuova o la suite non è verde, mantenere in_progress/blocked. Il risultato non rimuove i prerequisiti V4.14/V4.15."
   },
   "verification": {
     "tests": [
-      "Roadmap audit prima della selezione: OK, current=V4.14b, functional_since_audit=0, audit_due=false.",
-      "Verificare ledger e conteggio entry/sub-entry contro testo consolidato e singoli atti GUUE; review exact-version necessaria.",
-      "Test mirato citation index 6/6 dopo l'indicizzazione; conteggio documenti atteso aggiornato 16→18.",
-      "Suite Engine completa dopo aggiornamento documentale citation index: 774 test, 0 failure, 0 errori, 0 skipped.",
-      "Schema planner, roadmap audit, execution guardrails e git diff --check: tutti superati."
+      "16 test mirati del validator rita-fund-stream/v1 passano con Python del venv",
+      "Suite completa Engine: 797 test, 0 failure, 0 errori, 0 skipped con Python del venv",
+      "Review tecnica indipendente, planner schema, roadmap audit, execution guardrails e git diff --check"
     ],
     "documentation_touchpoints": [
-      "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md",
-      "family-office-knowledge/sources/citation-catalog.json",
-      "family-office-engine/tests/unit/test_citation_index.py",
       "family-office-engine/docs/current-next-increment.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
       "family-office-engine/docs/decision-log.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
     "result": "passed",
-    "notes": "V4.14w resta blocked dopo NO-GO evento 11. V4.14x resta blocked dopo NO-GO evento 2: v0.18 non contiene il catalogo e ledger completi. V4.14y è documentale/source-only. L'evento 2 ha dato NO-GO alla versione pre-fix ma ha esplicitamente autorizzato GO-after-fix limitato ai documenti applicando dieci correzioni finite; applicate senza ulteriore review. Rules/runtime restano non approvati. Il finding Art.1(27) vs Art.1(16) resta registrato, non corretto qui.",
     "task_envelope": {
-      "mode": "normative-change",
+      "mode": "feature-slice",
       "risk_domain": "pension",
-      "objective": "Costruire un catalogo storico Annex VIII Part 2 documentale, completo e source-bound per l'approvazione futura.",
-      "repositories": ["family-office-knowledge", "family-office-engine", "family-office-bootstrap"],
+      "objective": "Implementare l'intake tecnico RITA source-bound sul contratto v0.1 già revisionato, senza determinazioni normative o calcoli.",
+      "repositories": [
+        "family-office-knowledge",
+        "family-office-rules",
+        "family-office-engine",
+        "family-office-bootstrap"
+      ],
       "read_set": [
-        "EUR-Lex 02004R0883-20190731 Annex VIII Part 2",
-        "EUR-Lex/OJ acts 32009R0988, 32010R1244, 32012R1224, 32013R0517, 32013R1372, 32017R0492",
-        "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md",
-        "family-office-knowledge/sources/citation-catalog.json",
-        "family-office-engine/tests/unit/test_citation_index.py",
-        "family-office-rules/cross-border/eu-pension-coordination-it-es.json"
+        "AGENTS.md",
+        "family-office-bootstrap/docs/playbooks/00-task-router.md",
+        "family-office-bootstrap/docs/playbooks/04-micro-increment.md",
+        "family-office-bootstrap/docs/playbooks/07-normative-change.md",
+        "family-office-engine/docs/roadmap/roadmap-index.md",
+        "family-office-engine/docs/current-next-increment.md#V4.15a,V4.15b",
+        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md#V4.15,V4.15a,V4.15b",
+        "family-office-knowledge/pensions/rita.md",
+        "family-office-rules/italy/current/rita.yaml",
+        "family-office-engine/src/family_office_engine/services/rita_fund_stream.py",
+        "family-office-engine/src/family_office_engine/services/decumulation_strategy.py",
+        "family-office-engine/src/family_office_engine/cli/main.py",
+        "family-office-engine/tests/unit/test_rita_fund_stream.py"
       ],
       "write_set": [
-        "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md",
-        "family-office-knowledge/sources/citation-catalog.json",
-        "family-office-engine/tests/unit/test_citation_index.py",
+        "family-office-knowledge/pensions/rita.md",
+        "family-office-engine/src/family_office_engine/services/rita_fund_stream.py",
+        "family-office-engine/src/family_office_engine/cli/main.py",
+        "family-office-engine/tests/unit/test_rita_fund_stream.py",
         "family-office-engine/docs/current-next-increment.md",
         "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
         "family-office-engine/docs/decision-log.md",
         "family-office-bootstrap/planning/current-work.json"
       ],
-      "test_command": "python family-office-engine/src/family_office_engine/governance/roadmap_audit.py; family-office-engine/.venv/Scripts/python.exe -m jsonschema -i family-office-bootstrap/planning/current-work.json family-office-bootstrap/planning/current-work.schema.json; python family-office-bootstrap/planning/validate-execution-guardrails.py; git diff --check",
+      "test_command": "Run targeted RITA intake/validator tests, then the full Engine suite with exactly 0 failures/errors/skips.",
       "stop_conditions": [
-        "No personal data, individual scheme classification, or rule-pack/runtime edits.",
-        "Do not infer legal applicability from a consolidated text alone; unresolved effective dates remain gaps.",
-        "Maximum two substantial events for this increment; no extra review without a new roadmap selection."
+        "Nessun dato personale fuori dal workspace privato; fixture soltanto sintetiche.",
+        "Non modificare criteri o soglie RITA né determinare eligibility/diritto individuale.",
+        "Non inferire accettazione o pagamenti da richiesta, cessazione o schedule non attestato.",
+        "Se emerge nuova semantica normativa, fermarsi per review Sol/xhigh; il workstream non sblocca V4.14/V4.15."
       ]
-    }
+    },
+    "notes": "Re-review tecnica indipendente exact-version NO-GO con residui P1 (digest acquisito troppo tardi in resume dopo mutazione fonte; timeline parziali con date non adiacenti contraddittorie non rilevate) e P2 (benefit_type=other resta promosso come fatto). Parent ha riprodotto 14 test mirati e suite Engine 795/0/0/0; planner schema, roadmap audit, execution guardrails e diff-check passano. Incremento bloccato per il gate tecnico, non per i test; V4.15 resta ulteriormente bloccata dai prerequisiti V4.14."
   },
-  "blockers": [],
-  "session_notes": [
-    "2026-10-17: V4.14x event 2/2 reviewer NO-GO limited; exact findings in decision log. Started V4.14y per roadmap; no runtime/rule/workspace edits.",
-    "2026-10-17: event 1/2 read-only source review completed. Candidate corrected for ledger fields, OJ locators, entry/applicability dates, historical AT-a/SE entries and exact HR legal references.",
-    "2026-10-17: event 2/2 completed with NO-GO pre-fix; reviewer explicitly authorized document-only GO-after-fix after ten listed row corrections, no further review. Applied only those changes; no runtime/rule approval.",
-    "2026-10-17: full suite initially exposed unindexed Knowledge docs; citation catalog and corpus test updated; targeted citation-index suite 6/6 passes. Final full suite 774/0/0/0 and governance gates passed; V4.14y closed as document-only GO-after-fix.",
-    "Prior V4.14w code commit 8009672 was pushed to origin/main before this documentation work."
+  "blockers": [
+    "Re-review V4.15b NO-GO: digest della trascrizione acquisito solo dopo i prompt e vulnerabile a mutazione fonte durante resume; conflitti cronologici tra date non adiacenti non rilevati quando manca un campo intermedio; benefit_type=other resta promosso. Un ulteriore corrective pass richiede nuova autorizzazione.",
+    "V4.15 retirement bridge resta bloccata da V4.14 e da RITA V2; V4.15b non rimuove tali prerequisiti."
   ],
-  "next_action": {
-    "mode": "recalculate",
-    "description": "V4.14y is closed as document-only GO-after-fix. Recalculate the next eligible roadmap increment; preserve V4.14w as blocked and do not infer runtime approval."
+  "session_notes": [
+    "2026-10-18: roadmap audit OK; selezionato il minimo slice runtime per i finding V4.14w dopo GO documentale limitato v0.2.2, su richiesta esplicita dell'utente di sbloccare V4.14.",
+    "2026-10-18: mantiene fail-closed Annex VIII; la correzione non equivale a sblocco di V4.14 o V4.15.",
+    "2026-10-18: l'utente autorizza un micro-incremento separato per implementare i finding del NO-GO; nuova trace limitata al fix e al suo gate normativo, senza trasferire l'esito v0.18.",
+    "2026-10-18: fallback parent dopo checkpoint bounded implementatore; patch condivise preservate, Knowledge v0.19/citation catalog e test completati dal parent.",
+    "2026-10-18: reviewer normativo Sol/xhigh ha emesso NO-GO exact-version v0.19/c14n-v4 entro 5 minuti; autorizzata e usata directory temporanea, nessuna modifica del reviewer. Ulteriori implementazioni/review non sono comprese nell'autorizzazione al rerun.",
+    "2026-10-20: retry singolo autorizzato dall'utente con finestra massima 5 minuti; reviewer Sol/xhigh ha emesso NO-GO limitato v0.20/c14n-v4. Finding P1: duplicati registry sovrascritti, digest solo prefissato e non legato al contenuto, issuer non riconciliato col manifest e coverage senza intervallo temporale. Relief Art.57(1), non-relief, c14n sample, Annex VIII fail-closed e non-inferenza payer confermati. Il retry non approva il runtime; nuovo fix richiede nuovo micro-incremento.",
+    "2026-10-20: avviato V4.14w-d/v0.21 su richiesta 'procedi'; contratto tecnico registrato in Knowledge e implementazione Terra/medium delegata dopo il contratto. Gate Sol/xhigh indipendente previsto dopo regressioni e suite Engine completa.",
+    "2026-10-20: reviewer Sol/xhigh ha emesso NO-GO exact-version v0.21/c14n-v4: registry bypass nei rami non-relief/Annex e mismatch root/per-istituzione Art.57(1). Suite 779/0/0/0; nessun GO runtime. Budget del ciclo corrente esaurito; stato blocked in attesa di autorizzazione per v0.22.",
+    "2026-10-20: l'utente autorizza v0.23 con 'procediamo' dopo il NO-GO v0.22; scope P1 public-builder/output regressions e P2 citation assertion esplicito.",
+    "2026-10-20: parent verifica 140 test mirati e suite Engine 781/0/0/0; reviewer Sol/xhigh dà GO limitato allo slice test/citation v0.23, non runtime.",
+    "2026-10-20: utente autorizza un distinto gate read-only runtime v0.22/c14n-v4 con regressioni v0.23; nessun codice o regole da modificare; delega normativa Sol/xhigh bounded.",
+    "2026-10-20: reviewer Sol/xhigh emette GO senza finding bloccanti per il pacchetto combinato v0.22/c14n-v4 + regressioni/citation v0.23. V4.14w-e e V4.14w-g chiuse limitatamente ai controlli valutati; Annex VIII production, sufficienza normativa nazionale, casi individuali e sblocco complessivo V4.14w/V4.14 restano esclusi.",
+    "2026-10-20: l'utente autorizza 'procedi'; roadmap audit OK e V4.15a risulta done. Selezionato V4.15b come minimo incremento abilitante RITA source-bound, con limiti e blocchi V4.14/V4.15 preservati.",
+    "2026-10-20: primo candidato tecnico V4.15b test mirati 10/0 e suite venv Engine 791/0/0/0 verdi; review Terra/high NO-GO limitato (3 P1, 1 P2). Un corrective pass autorizzato e completato.",
+    "2026-10-20: re-review exact-version dopo fix: NO-GO residuo (2 P1, 1 P2); test mirati 14/0/0, suite Engine 795/0/0/0 e governance verdi. Budget del corrective/review esaurito; V4.15b bloccata finché l'utente non autorizza un nuovo micro-ciclo."
+  ],
+    "next_action": {
+        "mode": "recalculate",
+        "description": "V4.15b chiusa con GO tecnico; mantenere V4.15/V4.14 bloccate dai prerequisiti e ricalcolare il prossimo incremento solo dopo i gate roadmap previsti."
   },
   "routing": {
     "policy_version": "3.1",
-    "tier": "critical",
-    "task_class": "normative",
-    "agent": "fo_normative_reviewer",
-    "model": "gpt-5.6-sol",
-    "reasoning_effort": "xhigh",
-    "rationale": "Catalogo pensionistico normativo versionato; ogni entry e validità devono essere provate contro atti GUUE, con review specialista e nessuna assunzione territoriale.",
+    "tier": "low",
+    "task_class": "quality",
+    "agent": "fo_docs_editor",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "medium",
+    "rationale": "Re-review tecnica indipendente exact-version dei quattro finding già corretti, con suite completa parent verde; nessuna interpretazione normativa.",
+    "delegation_budget": {
+      "max_events": 18,
+      "authorization": "Richiesta esplicita del 2026-10-25 di completare autonomamente il prossimo incremento; scope esatto V4.15b corrective pass + una review tecnica exact-version.",
+      "scope": "Due eventi massimi: corrective implementation Terra/medium e review tecnica Terra/high. Solo intake RITA source-bound, nessuna eligibility/calcolo, fixtures sintetiche, nessun dato personale fuori dal workspace.",
+      "blocker": "Se la correzione richiede semantica normativa nuova o la review resta NO-GO, lasciare blocked; non rimuovere i prerequisiti V4.14/V4.15 e non avviare ulteriori retry."
+    },
     "trace": [
       {
-        "at": "2026-10-17T07:14:50Z",
+        "at": "2026-10-25T00:05:00Z",
         "event": "selected",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "V4.14y selezionato dopo il NO-GO della specifica v0.18; route critico per catalogo/versioning Annex VIII Part 2 e source ledger."
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Nuova autorizzazione per un solo corrective pass tecnico sui tre finding residui V4.15b; contratto e perimetro già definiti."
       },
       {
-        "at": "2026-10-17T07:17:19Z",
+        "at": "2026-10-25T00:05:30Z",
         "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Event 1/2 read-only verification of each Annex VIII Part 2 amendment, OJ page/article, effective date, and exact catalogue entries; 5-minute bound; no edits."
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Delegata implementazione bounded su servizio e test RITA; nessuna modifica a rules, knowledge o semantica normativa."
       },
       {
-        "at": "2026-10-17T07:20:46Z",
-        "event": "reviewed",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Event 1 confirmed amendment chain and dates; identified candidate corrections, all applied before final review."
-      },
-      {
-        "at": "2026-10-17T07:20:46Z",
+        "at": "2026-10-25T00:25:00Z",
         "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Event 2/2 final read-only exact-version review of corrected Annex VIII candidate v0.1 and temporal ledger; maximum 5 minutes; no edits."
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "high",
+        "reason": "Review tecnica indipendente exact-version dopo corrective pass; test mirati 16/0 e suite Engine 797/0/0/0 verdi."
       },
       {
-        "at": "2026-10-17T07:30:15Z",
+        "at": "2026-10-25T00:45:00Z",
         "event": "reviewed",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Event 2 completed NO-GO on reviewed version; reviewer explicitly allowed document-only GO-after-fix if ten listed entry descriptions/references are corrected literally. Parent applied only those fixes; no runtime/rule approval."
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "high",
+        "reason": "GO exact-version senza finding bloccanti sui tre finding residui; gap non bloccante sul timing del chiamante CLI."
+      },
+      {
+        "at": "2026-10-20T19:46:05Z",
+        "event": "selected",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Selezionato intake/validator RITA workspace-local delimitato dal contratto v0.1 già revisionato."
+      },
+      {
+        "at": "2026-10-20T19:46:05Z",
+        "event": "delegated",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Delegata implementazione tecnica V4.15b con write-set bounded e nessuna semantica normativa nuova."
+      },
+      {
+        "at": "2026-10-20T19:54:30Z",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "high",
+        "reason": "Review indipendente ha dato NO-GO: correggere solo quattro finding circoscritti (binding digest, gating benefit_type, date conflicts sovrapposti, resume di as_of invalida)."
+      },
+      {
+        "at": "2026-10-20T19:57:30Z",
+        "event": "delegated",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Unico corrective pass per i quattro finding technical-review NO-GO; regressioni sintetiche, perimetro RITA v0.1 invariato."
+      },
+      {
+        "at": "2026-10-20T19:59:43Z",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "high",
+        "reason": "Re-review read-only exact-version del candidato corretto, inclusi digest, gating benefit type, conflitti temporali e ripresa draft; parent ha riprodotto 14 test mirati e suite Engine 795/0/0/0."
+      },
+      {
+        "at": "2026-10-20T20:02:10Z",
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "high",
+        "reason": "NO-GO exact-version dopo un solo corrective pass: due P1 e un P2 residui; bloccare V4.15b e richiedere autorizzazione per il ciclo successivo."
       }
     ]
-  }
+  },
+  "blockers": []
 }

@@ -1,5 +1,233 @@
 # Current Next Increment
 
+## Chiusura verificata V4.15b (2026-10-25)
+
+V4.15b è `done` nel perimetro del corrective pass tecnico: digest vincolato allo snapshot byte e fail-closed su mutazione, conflitti cronologici globali anche con date intermedie mancanti, `benefit_type=other` non promosso. Test mirati 16/0/0, suite Engine 797/0/0/0, review tecnica indipendente exact-version GO. V4.14/V4.15 restano bloccate dai prerequisiti separati.
+
+**Stato corrente dell'incremento:** `done`
+**Stato:** `done`
+
+## Incremento corrente — V4.15b — Source-bound RITA fund-stream intake and validation
+**Stato:** `done`
+
+## Incremento corrente — V4.15b — Source-bound RITA fund-stream intake and validation
+
+**Stato:** `blocked` — re-review tecnica exact-version NO-GO residua; nuovo corrective pass richiede autorizzazione esplicita.
+**Tipo:** `functional`
+**Obiettivo:** intake CLI guidato, workspace-local e validazione deterministica del flusso RITA esplicitamente documentato/accettato dal fondo, secondo il contratto source-bound RITA stream v0.1 già revisionato.
+**Contratto candidato:** `rita-fund-stream/v1`; conservare separati eligibility solo se attestata, richiesta, accettazione, schedule, pagamenti attestati, importo lordo/periodicità, stato fiscale, fondo/issuer, currency, coverage/as-of e source refs. Ogni campo non provato è `unknown`/`null` con `data_gaps`.
+**Fuori scope:** cambiare eligibility o soglie di `rita-rule-pack/v1`; calcolare RITA, importi, netto, rendimento o diritto pensionistico; inferire accettazione/pagamento da richiesta o cessazione; comporre `retirement-bridge-timeline/v1`; accedere a dati personali fuori dal workspace; sbloccare V4.14/V4.15.
+**Verifica:** test sintetici per campi/prove mancanti, conflitti tra date, schedule e pagamenti, importi/periodicità; percorso question-first senza JSON manuale ordinario; test mirati e suite Engine completa con 0 failure/errori/skipped; review tecnica indipendente Terra/high; planner schema, roadmap audit, execution guardrails e diff-check.
+**Stop:** se per implementare occorre stabilire eligibility, decorrenza legale, diritto o semantica normativa non contenuta nel contratto v0.1, lasciare `blocked` e richiedere gate Sol/xhigh. Il completamento di V4.15b non rimuove i blocker V4.14 né abilita il composer V4.15.
+
+**Checkpoint (2026-10-20):** 10 test mirati e suite Engine completa 791/0/0/0 passano sul primo candidato (suite eseguita con `.venv`, dove è presente `jsonschema`). La review tecnica indipendente ha dato NO-GO limitato con tre P1: digest non fissato al momento della trascrizione; fatti promossi senza `benefit_type=rita` attestato; conflitti cronologici sovrapposti non aggregati. P2: bozza con `as_of` invalida non riprendibile. Un solo corrective pass bounded e re-review sono in corso; i risultati precedenti non chiudono il candidato corretto.
+
+**Post-fix checkpoint (2026-10-20):** corretti i quattro finding con binding SHA-256 alla trascrizione, gating stretto su `benefit_type=rita`, valutazione indipendente dei conflitti e ripresa della bozza con data invalida. Parent: test mirati 14/0/0/0 e suite Engine completa 795/0/0/0; roadmap audit, planner schema, execution guardrails e diff-check passano. Re-review tecnica exact-version del candidato corretto ancora pendente; incremento resta `in_progress`.
+
+**Esito re-review (2026-10-20):** NO-GO exact-version, limitato al candidato tecnico V4.15b. Finding residui: P1 la ripresa di una trascrizione interrotta può acquisire l'hash dopo una mutazione della fonte e legare il vecchio valore ai nuovi byte; P1 le date non adiacenti restano promosse in timeline parziali senza gap (es. request dopo scheduled_end se acceptance/start mancano); P2 `benefit_type=other` resta valorizzato come fatto, nonostante l'esclusione del resto. Il test, la suite 795/0/0/0 e i gate di governance restano verdi ma non superano il NO-GO. V4.15b è `blocked`; un ulteriore correttivo/review richiede nuova autorizzazione esplicita.
+
+## Incremento precedente — V4.15a — RITA V2 source and retirement-bridge readiness audit
+
+**Stato:** `done` — GO documentale limitato alla RITA stream v0.1; nessun GO runtime o rimozione dei blocker V4.14/V4.15.
+
+## Incremento precedente - V4.14w-d - Art. 57 v0.21 registry content and coverage binding
+
+**Stato:** `blocked` — review normativa exact-version v0.21/c14n-v4 conclusa con NO-GO limitato. V4.14w-c/v0.20 resta a sua volta `blocked` e non approvata.
+**Tipo:** `functional`
+**Obiettivo:** chiudere esclusivamente i finding P1 del NO-GO v0.20: unicità di ID e riferimenti, digest SHA-256 verificato sul contenuto, issuer coerente col manifest e copertura temporale verificata.
+**Scope:** Knowledge v0.21 → Rule Pack → test sintetici → Engine; controlli fail-closed, senza nuova semantica legale, inferenza payer o match Annex VIII. Contenuti reali restano in `family-office-workspace/`.
+**Gate:** test mirati 138/0/0/0 e suite Engine completa 779/0/0/0; roadmap audit, execution guardrails, schema planner e diff-check passano. Reviewer Sol/xhigh: NO-GO P1. (1) Registry bypassato in rami non-relief/Annex prima dei controlli di integrità; (2) valutazione root Art.57(1) non riconciliata con quella per istituzione. Il reviewer ha confermato validatore isolato, c14n-v4, Annex VIII fail-closed e non-inferenza payer.
+**Stop condition:** runtime v0.21 non approvato. Correzione richiede micro-incremento v0.22 con regressioni end-to-end e una nuova review exact-version; il budget di delega autorizzato per questo ciclo è esaurito.
+
+## Incremento precedente - V4.14w-f - Art. 57 v0.23 public-boundary regressions
+
+**Stato:** `done` — GO normativo limitato alla candidata v0.23/c14n-v4 per regressioni al public builder/output e citation coverage.
+**Verifica:** test mirati 140/0/0/0; suite Engine completa 781/0/0/0; roadmap audit, schema planner, execution guardrails e diff-check passano. I regressori attraversano `build_it_es_eu_pension_pro_rata`, verificano snapshot restituito/scritto, fail-closed su registry corrotto per Annex matched e non-relief, mismatch root/istituzione in entrambe le direzioni, nessun pro-rata o payer inference; citation v0.23 esplicito.
+**Limite:** questo GO, preso isolatamente, non approvava il runtime v0.22; il successivo gate combinato V4.14w-g ha valutato runtime e regressioni insieme.
+
+## Ultimo incremento runtime - V4.14w-e - Art. 57 v0.22 end-to-end fail-closed reconciliation
+
+**Stato:** `done` per il controllo runtime esaminato nel gate combinato V4.14w-g; il precedente NO-GO exact-version v0.22 resta registrato come esito storico del pacchetto allora esaminato. v0.21 resta non approvata.
+**Tipo:** `functional`, micro-incremento abilitante ai due P1 del NO-GO v0.21.
+**Obiettivo:** validare registry e manifest prima di ogni esito (anche non-relief e Annex VIII); riconciliare durata, comparator, legislazione, autonomous-right e relief tra root e record della stessa istituzione.
+**Scope:** Knowledge v0.22 → Rules → test sintetici end-to-end → Engine; mismatch o registry invalido producono `not_assessed + data_gaps`. Preservare hash/content/issuer/coverage v0.21, c14n-v4, Annex VIII fail-closed e non-inferenza payer.
+**Gate:** test mirati 139/0/0/0; suite Engine completa 780/0/0/0. La review iniziale Sol/xhigh aveva dato NO-GO: regressioni non pubbliche e citation v0.22 non asserita. V4.14w-f ha aggiunto le regressioni richieste e la citation v0.23; il gate combinato esatto V4.14w-g ha poi dato GO limitato ai controlli runtime v0.22/c14n-v4 insieme alle regressioni pubbliche/citation v0.23. L'esito non cancella i verdetti storici v0.21/v0.22 né si estende oltre il pacchetto valutato.
+**Fuori scope:** interpretazioni legali nuove, calcolo payer, sblocco di V4.14w/V4.14, accesso a dati reali. Contenuti reali restano in `family-office-workspace/`.
+
+## Incremento corrente - V4.14w-g - Art. 57 runtime v0.22 exact-version gate
+
+**Stato:** `done` — reviewer indipendente Sol/xhigh: GO limitato al pacchetto combinato runtime Rule Pack v0.22/c14n-v4 con regressioni e citation v0.23; nessun finding bloccante.
+**Tipo:** `functional`, gate abilitante; nessuna modifica runtime prevista.
+**Obiettivo:** ottenere un verdetto indipendente sull'esatto Rule Pack/runtime v0.22/c14n-v4 insieme alle regressioni pubbliche e citation v0.23, che non erano incluse nel precedente NO-GO.
+**Scope:** review normativa Sol/xhigh di Knowledge v0.22/v0.23, Rule Pack e servizio runtime v0.22, test pubblici v0.23 e citation coverage; valutare fail-closed registry Annex/non-relief, cross-binding root/istituzione, output snapshot, pro-rata/payer non inferiti e coerenza c14n-v4. Suite parent 140/0/0/0 e 781/0/0/0 già riprodotta.
+**Fuori scope:** modifiche a codice/regole/contratti, interpretazioni normative ulteriori, Annex production, dati personali o sblocco complessivo V4.14w/V4.14. GO/NO-GO si applica esclusivamente al pacchetto runtime/test esaminato.
+
+**Verifica e limite:** parent 140 test mirati e suite Engine completa 781/0/0/0; audit roadmap, schema planner, execution guardrails e diff-check passano. Confermati fail-closed registry e binding root/istituzione, snapshot pubblico/data_gaps e assenza di pro-rata/payer inference. Restano fuori approvazione il catalogo Annex VIII production, conclusioni su diritto/payer individuali e lo sblocco complessivo V4.14w/V4.14 per gap ulteriori.
+
+
+## Incremento corrente — V4.14w-b — Source-bound Art. 57 institutional evidence completion
+
+**Stato:** `blocked` — implementazione v0.19 verificata meccanicamente, ma review normativa exact-version `NO-GO` limitata; nessun runtime approvato.
+**Tipo:** `functional`
+**Obiettivo:** rendere source-bound e fail-closed la prova di scope istituzionale, i presupposti Art. 57(1) di ciascun istituto, la comparabilità dell'evento dell'ultimo Stato e la provenance procedurale Art. 47 nel Rule Pack.
+**Scope:** nuova candidata runtime v0.19 mantenendo c14n-v4; in Knowledge documentare campi/limiti tecnici già previsti da v0.2.2; in Rules richiedere provenance esplicita degli artt. 46-48 Reg. 987/2009; in Tests/Engine rifiutare attestazioni auto-dichiarate o prove mancanti/discordanti con `not_assessed + data_gaps`; nessun confronto automatico di condizioni legali tra Stati senza attestazioni source-bound comparabili.
+**Fuori scope:** sblocco complessivo V4.14/V4.15, catalogo eseguibile Annex VIII, payer o istituzione competente inferiti, nuove regole nazionali, dati/casi personali, importi o date individuali.
+**Gate:** regressioni sintetiche per scope, record per istituto, last-State comparabile, Art. 47 e fail-closed; suite Engine completa 0/0/0; roadmap audit, schema planner, execution guardrails e diff-check; review normativa exact-version Sol/xhigh.
+**Routing:** fo_implementer Terra/medium per il contratto tecnico già definito; fo_normative_reviewer Sol/xhigh come gate finale indipendente.
+
+**Esito gate (2026-10-18):** reviewer `fo_normative_reviewer` Sol/xhigh concluso entro 5 minuti, read-only, dopo autorizzazione della directory temporanea `C:\Users\info\AppData\Local\Temp\fo-art57-v019-review`. NO-GO limitato a v0.19/c14n-v4. Finding P1: `resolved_source_refs` e le etichette di verifica accettano riferimenti arbitrari senza risoluzione contro un registry/evidenza con issuer, digest, contenuto e copertura; `article_57_1_relief_result` è un booleano non riconciliato con periodi/comparatore/diritto autonomo e non rappresenta correttamente gli esiti non-relief. Finding P2: il sample ha `legal_duration_for_article_57.source_segment_id` discordante dal digest/segmento source, generando un gap c14n spurio. Superati: traceability Reg. 987/2009 art. 47(4)-(7), c14n-v4, Annex VIII fail-closed, nessuna inferenza payer e review umana obbligatoria. Suite Engine 776/0/0/0; i conteggi non coprono i rilievi semantici. Per un nuovo ciclo correttivo serve autorizzazione distinta; V4.14w-b, V4.14 e V4.15 restano bloccate.
+
+## Incremento precedente — V4.14w-a — Art. 57 evidence-binding runtime fail-closed slice
+
+**Stato:** `blocked` — implementazione verificata, review normativa exact-version `NO-GO` limitata alla candidata runtime v0.18/c14n-v4; nessun GO runtime o sblocco complessivo V4.14
+**Tipo:** `functional`
+**Obiettivo verificabile:** correggere i rilievi runtime NO-GO di V4.14w sul binding del caso/beneficio coordinato, la coerenza dei record istituzionali e la validazione completa c14n-v4; mantenere Annex VIII `not_assessed + data_gaps` finché non esista un catalogo eseguibile completo e versionato.
+**Scope:** contratto tecnico versionato derivato dal GO documentale limitato v0.2.2; prove e riferimenti di coordinamento espliciti, senza uguagliare identificativi nazionali; perimetro istituzionale distinto e fail-closed; Art. 57(3) coerente con i record e senza inferire l'istituto pagatore; verifica di tutti i parent/bound c14n-v4; fixture sintetiche; suite Engine completa e review normativa exact-version.
+**Fuori scope:** catalogo Annex VIII eseguibile; nuovi esiti o interpretazioni normative; date/importi individuali; accesso o modifica a `family-office-workspace/`; completamento/sblocco complessivo V4.14 e V4.15.
+**Dipendenza:** la specifica documentale V4.14z-c v0.2.2 ha GO limitato; tale GO non si trasferisce al runtime. V4.14w resta bloccata fino a implementazione e gate indipendente. Il catalogo Annex VIII disponibile resta documentale e non è usabile per match positivi o negativi.
+**Gate:** suite mirata e completa Engine con esattamente 0 failure, 0 errori, 0 skipped; schema planner, roadmap audit, execution guardrails, diff-check; GO limitato della review normativa sulla precisa versione runtime. Un esito pending/NO-GO lascia il task in progress/blocked.
+**Contratto runtime candidato esatto:** Art. 57 `v0.18`/`fo-art57-c14n-v4`. La root include riferimento all'istituzione locale e claim/benefit namespaced source-bound; `coordination_manifest` lega manifest/caso/beneficio/data; i record delle istituzioni ripetono i binding coordinati e mantengono distinti riferimenti nazionali. `institution_scope_evidence` è separata dall'elenco dei record e deve corrispondere al manifest e alla copertura procedurale. L'attestazione dell'ultimo Stato registra evento/data e prove, senza inferire pagatore. c14n-v4 valida esattamente un parent/bound. In assenza di catalogo machine-readable Annex VIII, match e non-match restano `not_assessed + data_gaps`.
+**Stato gate (2026-10-18):** suite completa Engine 775 test, 0 failure/errori/skipped prima della review; il retry exact-version entro 5 minuti ha restituito `NO-GO` limitato. Finding: completezza ridotta a self-attestation/lista/evidenze generiche senza prova esplicita e verificata del perimetro, issuer e copertura; record per istituzione privi di periodi/durata/assenza di diritto autonomo con binding probatorio; last-State privo di condizioni/legislazione e prova comparativa della temporalità; Rule Pack senza traceability al Reg. 987/2009 art. 47. Restano confermati fail-closed Annex VIII, nessuna inferenza del payer e controlli c14n-v4. Un rerun mirato del reviewer non ha raggiunto le asserzioni perché la sandbox ha negato la scrittura nella directory temporanea. Nessun runtime approvato; V4.14 e V4.15 restano bloccate. Fix e nuovo gate richiedono nuova autorizzazione.
+
+**Retry review exact-version (2026-10-18):** il reviewer conferma il `NO-GO` su `v0.18 / fo-art57-c14n-v4` nonostante il test mirato 28/28 passato dopo concessione dell'accesso temporaneo. Restano i finding su perimetro istituzionale source-bound, prove per ogni record Art. 57(1), comparabilità dell'ultimo Stato e traceability all'Art. 47 Reg. 987/2009. Nessuna modifica runtime; la suite completa 775/0/0/0 non è stata rilanciata in questo retry.
+
+## Incremento completato — V4.15a — RITA V2 source and retirement-bridge readiness audit
+
+## Dettaglio storico — V4.15a — RITA V2 source and retirement-bridge readiness audit
+
+**Stato:** `done` — GO limitato alla specifica documentale RITA stream v0.1; nessun GO per Rules/Engine o V4.15
+**Tipo:** `audit`
+**Obiettivo verificabile:** stabilire, con fonte vigente e specifica esatta revisionata, se il servizio RITA V1 possa alimentare `retirement-bridge-timeline/v1` e definire il minimo contratto source-bound senza inferire eleggibilità, accettazione, pagamento o netto.
+**Scope:** confronto tra Normattiva vigente, Knowledge RITA, Rule Pack `rita-rule-pack/v1`, servizio `rita-options/v1` e dipendenza V4.15; specifica dello stream come input già provato/accettato, con date, schedule, base lorda e gap fiscali/di fondo.
+**Fuori scope:** runtime, Rule Pack eseguibile, fixture, eligibility o importi individuali, dati/workspace personale, sblocco di V4.14w/V4.14 o avvio del calcolo pensionistico complessivo.
+**Dipendenze bloccanti per V4.15:** prerequisiti della timeline V4.14 non chiusi e RITA V2 non definita come contratto/versione eseguibile. V4.15 non parte finché tali prerequisiti non sono rivalutati dopo questo audit.
+**Done quando:** candidata source-bound exact-version; review normativa indipendente con esito documentale; roadmap audit, schema planner, execution guardrails e `git diff --check` passano. Se la fonte o la procedura del fondo non supportano il contratto, registrare il gap/NO-GO e lasciare V4.15 bloccata.
+
+### Candidate contract RITA stream v0.1
+
+Il bridge consuma esclusivamente una RITA esplicitamente richiesta e accettata/documentata: non decide l'eleggibilità sulla base del solo snapshot RITA V1 e non assume che cessazione lavoro o domanda equivalgano ad accettazione. La fonte normativa vigente indica che la RITA decorre dall'accettazione della richiesta; la data di pagamento effettivo e la cadenza/importo dipendono dalle evidenze e procedure del fondo. La finestra va quindi associata a prova di accettazione, schedule/quote e montante oggetto della richiesta; il testo legale non fornisce al software uno schedule individuale.
+
+Il record del bridge deve mantenere separati: `eligibility_status` (solo esito source-bound o `unknown`), `request_date`, `acceptance_date`, `scheduled_start/end`, date/importi effettivamente attestati, `gross_amount`/periodicità, `tax_status` e `net_amount` (solo se calcolati da regole fiscali indipendenti e dati adeguati), fondo/issuer, currency, source refs, coverage/as-of e data gaps. Il risultato di `rita-options/v1` è un'opzione lorda teorica, non una decisione del fondo né prova di pagamento; non è direttamente una RITA disponibile. Mancata prova di accettazione/schedule, conflitti o importi soltanto stimati mantengono il flusso non disponibile o non valutabile con `data_gaps`.
+
+Fonte primaria verificata dal parent il 2026-10-18: D.Lgs. 252/2005, art. 11, Normattiva, testo in vigore dal 28-06-2026 al 31-12-2026, commi 4, 4-bis, 4-ter, 4-quater e 4-quinquies. La RITA decorre per legge dall'accettazione della richiesta e consiste nell'erogazione frazionata del montante richiesto fino all'età di vecchiaia; i commi 4-bis e 4-ter disciplinano il percorso per inoccupazione >24 mesi e il trattamento fiscale. Le modifiche della L. 199/2025 con decorrenze 2026 riguardano anche le nuove prestazioni del comma 3-bis, distinte dalla RITA. Fonte ufficiale: https://www.normattiva.it/atto/caricaDettaglioAtto?atto.articolo.numero=11&atto.codiceRedazionale=005G0278&atto.dataPubblicazioneGazzetta=2005-12-13&bloccoAggiornamentoBreadCrumb=true&classica=true&dataVigenza=09%2F09%2F2026&generaTabId=true&tipoDettaglio=singolavigenza&title=lbl.dettaglioAtto. La consultazione del parent non sostituisce la review indipendente. Nessun claim di certificazione/beneficio individuale.
+
+**Esito review normativa exact-version (2026-10-18): GO limitato** alla sola specifica documentale RITA stream v0.1, Italia, D.Lgs. 252/2005 art. 11 nel periodo 28-06-2026–31-12-2026. Il reviewer indipendente conferma che richiesta e accettazione restano eventi distinti; `acceptance_date`, start programmato e primo pagamento attestato non vanno conflati. Requisiti, decorrenza e importo riferito al montante richiesto derivano dai commi 4–4-quinquies; prova, rate/calendario operativo e accredito individuale richiedono evidenze/procedure del fondo. I campi, provenance e `data_gaps` sono controlli software, non formati prescritti dalla legge. Il comma 3-bis disciplina prestazioni diverse, con proprie decorrenze transitorie (in generale 01-07-2026; l'erogazione frazionata quinquennale dal 31-10-2026). Nessun GO per eleggibilità individuale, Rule Pack, servizio, fiscalità/netto, fixture, runtime o avvio di V4.15. Regressioni da esigere nel futuro incremento eseguibile: snapshot completo senza accettazione; domanda/cessazione senza accettazione; accettazione senza schedule/montante; schedule confliggente o anteriore; RITA parziale/importi stimati; start distinto dal primo accredito; dati fiscali mancanti; esclusione del comma 3-bis. Fonte: D.Lgs. 252/2005 art. 11, Normattiva (link sopra).
+
+## Incremento completato — V4.14z-c — Evidence-bound Art. 57 v0.2 contract clarification
+
+**Stato:** `done`
+**Tipo:** `audit`
+**Obiettivo verificabile:** formulare la versione documentale v0.2 del contratto probatorio Art. 57 incorporando i finding exact-version sulla v0.1 e ottenere un nuovo gate normativo prima di qualsiasi fixture o runtime.
+**Scope:** chiarire oggetto del coordinamento, base probatoria e criterio fail-closed per la completezza istituzionale, condizioni Art. 57(1)/(3), e determinazione distinta dell'istituzione pagatrice; fonti ufficiali e review esatta.
+**Fuori scope:** modifiche a Knowledge/Rules/Engine eseguibili, calcoli, date o fixture; dati personali/workspace; classificazione di schemi reali Annex VIII; sblocco di V4.14w/14.
+**Done quando:** v0.2.2 tratta gli identificativi e gli stati interni come controlli tecnici, distingue i diritti nazionali, specifica prove e gap senza attribuire formati alla legge, riceve review normativa exact-version e la suite completa Engine termina con 0 failure, errori e skipped. In caso di NO-GO o suite non valida, non si chiude.
+**Esito review v0.2.1 (2026-10-18):** NO-GO limitato: `supported_complete` non basta a dimostrare che il set rappresenti tutte le istituzioni interessate ex art. 57(3). La correzione è stata applicata come candidata v0.2.2 e sottoposta a gate exact-version.
+
+### Proposta architetturale candidata v0.1 — NO-GO probatorio
+
+L'architetto raccomanda un manifest di coordinamento incorporato in uno schema root nuovo e versionato (es. contratto v0.18), evitando un evidence graph generalizzato. Questa è una scelta tecnica candidata, non un requisito attribuito alla normativa.
+
+- **Manifest:** `manifest_ref`, `case_ref`, `coordinated_benefit_ref`, `contingency_date`, `issuer_institution_ref`, `as_of_date`, `completeness_status` (`attested_complete`/`not_assessed`), `institution_bindings[]`, `evidence_refs[]`.
+- **Binding locale per istituzione:** `institution_ref`, `local_claim_ref` e `local_benefit_ref` con issuer/namespace/value e `binding_evidence_refs[]`. Gli ID nazionali possono differire; i record devono riferire lo stesso manifest e i propri riferimenti istituzionali. Root e record devono concordare su manifest, beneficio coordinato e data; gli schemi e le legislazioni nazionali restano distinti.
+- **Completezza:** attestazione legata a caso, beneficio e data, con issuer e riferimenti probatori risolti; insieme canonico degli `institution_ref` identico ai record, senza duplicati, mancanti o extra. Cardinalità e booleani soli non provano la completezza; mismatch → `not_assessed + data_gaps`.
+- **Art. 57(3):** rimpiazzare l'ordine numerico come scelta semantica con `last_state_attestation` contenente manifest, istituzione/Stato selezionati, condizioni soddisfatte (ternario) e prove separate di selezione/condizioni. Niente `max()`, indice-array o ordinamento lessicografico. Non derivare pagatore dall'attestazione senza gate normativo esplicito.
+- **c14n-v4:** conservarne la versione; cardinalità esattamente 1 parent/1 bound e validazione integrale di chiavi, NFC, unicità, `period_ref`, unità, precisione, razionale ridotto non negativo, start/end nullable, digest e binding con segment/durata. Multi-bound futuro richiederebbe c14n-v5, non estensione silenziosa.
+- **Annex VIII:** match solo con catalogo legato a ID/versione/digest/intervallo/copertura/evidenze e identità esatta dello schema; `not_matched` solo su catalogo completo nel periodo. Catalogo obsoleto/incompleto, validità o schema incerti → `not_assessed`; l'attuale snapshot documentale non prova match/non-match per il 2026.
+- **Fixture sintetiche minime:** ID nazionali diversi con legame valido; ID coincidenti senza binding; record di altro caso/beneficio; istituzione mancante/extra/duplicata e attestazione su altra data; permutazione input invariata; last-state fuori set/prove mancanti; parent/bound aggiuntivo o incoerente e digest semantico invalido; catalogo Annex stale/incompleto, entry o intervallo errati e non-match senza completezza.
+- **Gate normativo esatto richiesto prima dell'implementazione:** valutare prova del medesimo caso/beneficio, sufficienza dell'attestazione di completezza, ultimo Stato e suo eventuale rapporto col pagatore, semantica match/non-match e intervalli Annex. Nessuna prescrizione legale di ID tecnico viene presunta.
+
+### Esito della review normativa exact-version
+
+- **Claim coordinato — GO con chiarimento:** `coordinated_benefit_ref` deve indicare l'oggetto comune di coordinamento, non identità tra pretese/prestazioni nazionali; ciascuna istituzione applica la propria legislazione.
+- **Completezza istituzionale — NO-GO:** la sola attestazione tecnica e la concordanza degli insiemi non provano esaustività. Definire un criterio verificabile basato, ad esempio, sul fascicolo e sulla distribuzione della contact institution, riscontri di trasmissione, risposte/periodi e riconciliazione con le informazioni del claimant; irrisolti possibili istituti o periodi mantengono `not_assessed + data_gaps`. È un controllo di evidenza del design, non un formato prescritto dal regolamento.
+- **Art. 57(3) — NO-GO nella formulazione corrente:** attestare separatamente lo Stato le cui condizioni risultano soddisfatte per ultime, le condizioni nazionali rilevanti per ogni istituto e l'effetto di sollievo di tutti gli istituti. La scelta dello Stato non seleziona automaticamente l'istituto pagatore: serve determinazione separata e provata.
+- **Annex VIII e c14n-v4 — GO solo come controlli tecnici:** nessun matching eseguibile senza catalogo completo/applicabile al periodo; cardinalità, canonicalizzazione e digest non sono obblighi normativi.
+- **Limite comune:** `attested_complete` e `last_state_attestation` sono record interni; la loro presenza da sola non equivale a prova legale sufficiente né a una forma di attestazione richiesta dal diritto UE.
+- **Esito del ciclo precedente:** V4.14z-b/v0.1 resta NO-GO nel suo ambito; il budget non si trasferisce a v0.2. Il nuovo incremento è autorizzato separatamente e mantiene un solo gate normativo pianificato.
+
+### Contratto v0.2.2 — gate documentale concluso
+
+`coordinated_benefit_ref` identifica soltanto l'oggetto comune della procedura di coordinamento pensionistico (persona/caso, rischio vecchiaia, finestra/data di riferimento e insieme di legislazioni da coordinare). Non asserisce identità di domanda nazionale, diritto, prestazione o importo: ogni istituzione decide secondo la legislazione che applica. I riferimenti locali rimangono namespaced per istituzione e collegati al manifest tramite evidenze della pratica e del flusso documentale.
+
+La completezza non è un booleano auto-attestato. `completeness_assessment` è uno stato interno (`supported_complete` / `not_assessed`) con fonte, emittente, ambito, data, periodo di copertura e riferimenti risolvibili. Per poter usare `supported_complete`, la valutazione deve riconciliare almeno: (a) informazioni e istituti disponibili dichiarati dal claimant; (b) fascicolo/lista di distribuzione della contact institution che identifichi, per quel caso e ambito, l'insieme degli istituti coinvolti; (c) invii e riscontri di consegna agli istituti; (d) risposte degli istituti sui periodi rilevanti e, quando disponibili, decisioni/riepilogo; (e) istituti o periodi aggiunti da qualsiasi risposta successiva. Gli identificativi nazionali non si confrontano per uguaglianza: la risoluzione delle identità deve essere supportata da corrispondenza documentata. Set discordanti, fonti mancanti/materialmente non coperte o possibili istituti/periodi irrisolti implicano `not_assessed + data_gaps`. `supported_complete` significa solo che la copertura del caso risulta supportata dalle fonti esplicitamente esaminate alla data di valutazione; non prova una completezza assoluta né, da solo, che ricorrano i presupposti legali di “tutte le istituzioni interessate”. La base documentale e il criterio sono controlli prudenziali del software, non un fascicolo, certificato o standard imposto dal diritto UE.
+
+Per la condizione “tutte le istituzioni interessate” di Art. 57(3) è richiesto un controllo separato `institution_scope_established`, con riferimento a una fonte probatoria del caso che dichiari esplicitamente il perimetro completo delle istituzioni considerate, la sua copertura temporale/procedurale e l'oggetto coordinato. Una lista di distribuzione, le sole risposte ricevute, o `supported_complete` non sostituiscono da soli tale prova. Il software non formula l'attestazione: un operatore deve verificare che la fonte sostenga davvero il perimetro dichiarato. Se la fonte non esplicita il perimetro completo, è in conflitto o non copre il caso/data, `institution_scope_established` resta `unknown` e il ramo 57(3) è `not_assessed + data_gaps`, anche se tutti i record presenti risultano riconciliati. Questo è un ulteriore guardrail prudenziale, non una certificazione né un formato stabilito dalla normativa; la valutazione resta limitata alle prove source-bound disponibili.
+
+Per ogni istituto, il record Art. 57(1) mantiene la data di materializzazione del rischio, fonte e legislazione/schema applicati, periodi pertinenti e durata complessiva (da verificare inferiore a un anno), nonché l'esito distinto della verifica che considerando soltanto tali periodi non si acquisisce diritto secondo la legislazione nazionale. Il ramo Art. 57(3) richiede prima che sia supportato per il caso l'insieme degli istituti interessati e che le prove mostrino, per ciascuno, i presupposti del par. 1 e il conseguente sollievo; `supported_complete` da solo non autorizza un esito positivo ex 57(3). Se la copertura di tutti gli istituti interessati non è stabilita per il caso, il ramo è `not_assessed + data_gaps`. Il record dell'ultimo Stato conserva la legislazione e le condizioni nazionali applicabili e la prova dell'evento/data in cui tali condizioni sono risultate soddisfatte per ultime; non usa la data di decisione come surrogato della data di soddisfacimento, né l'indice/ordine dei record. Qualunque condizione ignota, conflitto o assenza di prova mantiene `not_assessed + data_gaps`.
+
+La determinazione dell'istituzione competente segue separatamente i criteri applicabili, inclusa la definizione dell'art. 1(q), con evidenze riferite al caso. L'art. 57(3) indica la legislazione dello Stato membro pertinente, ma non seleziona da solo l'istituzione competente né identifica il soggetto materialmente esecutore del pagamento; quest'ultimo non è inferito dal campo relativo all'ultimo Stato.
+
+Gli stati `supported_complete` e `last_state_assessment` sono etichette/record interni, non attestazioni legali o prova sufficiente per l'autorità. Il testo regolamentare richiede informazioni disponibili e disciplina il coordinamento tra contact institution e istituzioni interessate, ma non prescrive questi campi né il nostro specifico criterio documentale. I guardrail c14n-v4 e Annex VIII candidati restano controlli tecnici; nessun match eseguibile Annex VIII è introdotto da questa specifica.
+
+**Prossimo slice condizionato al GO:** fixture sintetica del contratto, con fonte e identità simulate, istituzione mancante/extra e copertura incompleta; ramo 57(1) ignoto per un istituto; mancato sollievo di una sola istituzione; ultimo Stato senza prova della data di soddisfacimento; distinzione Stato, istituzione competente e soggetto pagatore; permutazione dell'ordine invariata. In caso di GO, implementazione separata e deterministica, poi suite completa Engine (0 failure/error/skip) e gate specialistici; nessun risultato individuale.
+
+**Gate v0.2.2:** GO limitato alla specifica documentale, reviewer Sol/xhigh. Il reviewer conferma il controllo separato `institution_scope_established` con evidenza source-bound e fail-closed, oltre alla distinzione tra coordinamento UE e diritti nazionali, presupposti Art. 57(1)/(3) e soggetto pagatore. Chiarimento redazionale non bloccante: esplicitare la confrontabilità temporale tra Stati candidati per motivare quale soddisfa per ultimo le condizioni. Suite completa Engine: **775 test, 0 failure, 0 errori, 0 skipped**. Roadmap audit, schema planner, execution guardrails e `git diff --check` superati. Nessuna fixture, modifica runtime o approvazione di calcoli; V4.14w/V4.14 restano bloccate.
+
+## Incremento completato — V4.14z-a — Art. 57 Regulation 988/2009 source-citation correction
+
+**Stato:** `done`
+**Tipo:** `functional`
+**Obiettivo verificabile:** correggere il riferimento al Reg. 988/2009 che introduce l'art. 57(4), prima in Knowledge e poi nel Rule Pack, aggiungendo una regressione sul consumer. Nessun cambio di semantica o di risultati del calcolo.
+**Scope:** addendum Knowledge versionato con fonte autentica; correggere i due riferimenti del Rule Pack da art. 1(27) ad art. 1(16); test sintetico sul caricamento/metadata del pack; verifica d'integrazione Engine.
+**Fuori scope:** validità temporale completa Annex VIII, ordine delle istituzioni, match schemi, binding root, dati personali, calcolo di casi reali e sblocco di V4.14w/V4.14/V4.15.
+**Test/verifiche:** test mirato 1/1 e suite Engine completa 775 test, 0 failure/errori/skipped; review normativa exact-version GO; roadmap audit, schema planner, guardrail e diff check passano.
+**Stop:** se l'atto autentico non supporta la citazione, o il test richiede una modifica semantica, fermarsi e lasciare V4.14w blocked.
+**Esito gate:** il reviewer ha dato GO alla versione esatta post-fix: frase Knowledge esplicitamente storica, due citazioni Rule Pack corrette ad art. 1(16), test regressione adeguato sul pack reale. Nessuna modifica semantica o ai calcoli. L'esito non sblocca V4.14w, che resta bloccata dai binding/prove del caso.
+
+## Incremento storico — V4.14z — Art. 57(3) evidence-binding and root consistency contract audit
+
+**Stato:** `completed`
+**Tipo:** `audit`
+**Obiettivo verificabile:** stabilire quali evidenze ufficiali sostengono il legame tra claim coordinato, beneficio/legislazione, istituzioni e record Art. 57(1)-(3); identificare ciò che le norme non prescrivono e mantenere i casi non dimostrabili come gap.
+
+### Piano
+
+1. Verificare sui testi EUR-Lex ufficiali Reg. 883/2004 artt. 1(p)-(q), 52, 57 e Reg. 987/2009 artt. 45-48, in particolare 46(1) e 47(4)-(7); distinguere testo autentico, consolidato e prassi amministrativa.
+2. Riconciliare il processo claim/contact institution e le comunicazioni concorrenti con il bisogno tecnico di correlare le decisioni, senza inventare ID condivisi, uguaglianza tra identificativi nazionali, algoritmi root o ordinamenti non prescritti.
+3. Valutare quali fonti dimostrano l'insieme completo delle istituzioni interessate, i singoli test Art. 57(1), l'effetto di esonero per tutte le istituzioni ex 57(3), e quale Stato soddisfa per ultimo le condizioni.
+4. Usare il catalogo Annex VIII Part 2 V4.14y come snapshot documentale; non trasformarlo in match automatico senza identificazione source-bound dello schema concreto, versione applicabile e gate umano.
+5. Sottoporre la specifica esatta a review normativa indipendente; se resta solo una scelta architetturale, formulare il trade-off preciso prima di coinvolgere l'architetto.
+
+**Fuori scope:** modifiche a Rules/Engine/CLI, calcoli individuali, match di schemi reali, approvazione runtime e accesso al workspace.
+**Test/verifiche:** review exact-version; audit roadmap; schema planner; execution guardrails; `git diff --check`. Suite completa Engine solo se il cambiamento tocca contratti o test.
+**Stop:** ogni relazione o prova non prescritta/non disponibile resta `not_assessed + data_gaps`; V4.14w e la timeline restano bloccate.
+
+### Risultato source-bound e review indipendente (2026-10-18)
+
+- Reg. 883/2004 artt. 1(p)-(q), 52 e 57 identifica istituzioni/istituzioni competenti e disciplina i presupposti e l'effetto di coordinamento; non prescrive un identificativo software condiviso, l'uguaglianza degli ID nazionali, né un algoritmo di root/canonicalizzazione.
+- Review indipendente al secondo tentativo con finestra estesa: **GO limitato** per il percorso probatorio amministrativo dello stesso claim tramite domanda/documenti inoltrati alle istituzioni, comunicazioni di periodi e decisioni, notifiche ex art. 47(7) e riepilogo dell'istituzione di contatto ex art. 48(1). La review distingue il caso speciale dell'art. 44(3).
+- **NO-GO** a inferire dal percorso un ID software comune, uguaglianza tra ID nazionali, prova da sola della completezza globale delle istituzioni, algoritmo di coerenza root o ordinamento tecnico. Il set va corroborato col record claim/distribuzione dell'istituzione di contatto e riconciliato con le comunicazioni di periodi e decisioni; altrimenti resta un gap.
+- Per Art. 57(3) restano necessarie prove source-bound del perimetro delle istituzioni interessate, dell'esito Art. 57(1) per ciascuna e dell'esonero di tutte; l'identificazione dello Stato le cui condizioni risultano soddisfatte per ultime non può derivare dall'ordine dei record in input.
+- Reg. 988/2009, art. 1(16), conferma l'esclusione dell'art. 57 per gli schemi elencati in Annex VIII Part 2. Il catalogo V4.14y è solo documentale: senza identità dello schema/beneficio, legislazione, periodo e versione applicabile non è autorizzato un match eseguibile.
+- Per ogni istituzione occorre provare legislazione e schema/beneficio applicabili, data di rischio, periodi pertinenti e durata inferiore a un anno, oltre all'esito nazionale considerando quei soli periodi (art. 57(1)). Art. 57(3) richiede che l'applicazione esoneri tutte le istituzioni e la prova dello Stato le cui condizioni sono soddisfatte per ultimo. L'ordine dei record non sostituisce la prova; se la sequenza non è dimostrabile, valutazione umana e gap esplicito.
+- Finding sul Rule Pack: il riferimento a Reg. 988/2009 art. 1(27) è errato; l'inserimento autentico dell'art. 57(4) è art. 1(16). Correzione da pianificare seguendo Knowledge → Rules → Tests → Engine; nessuna modifica normativa implementata in questo audit.
+- Review exact-version: nessuna approvazione di match automatico Annex VIII o runtime. I dati del caso reale rimangono `not_assessed + data_gaps`. Nessun trade-off architetturale emerso: intervento dell'architetto non richiesto.
+- **Verifica finale:** suite Engine completa **774 test, 0 failure, 0 errori, 0 skipped**; roadmap audit, schema planner, execution guardrails e `git diff --check` superati. V4.14z chiude soltanto il proprio deliverable documentale; V4.14w/V4.14 restano bloccati.
+
+Fonti primarie: [Reg. 883/2004 consolidato, artt. 1, 52 e 57](https://eur-lex.europa.eu/eli/reg/2004/883/2019-07-31/eng); [Reg. 987/2009 consolidato, artt. 45-48](https://eur-lex.europa.eu/eli/reg/2009/987/2018-01-01/eng); [Reg. 988/2009, art. 1(16)](https://eur-lex.europa.eu/eli/reg/2009/988/oj/eng).
+
+## Incremento storico — V4.14a — Work-transition normative and contract audit
+
+**Stato:** `blocked` — il diagnostico è stato eseguito, ma il criterio abilitante non è soddisfatto; V4.14 e V4.15 restano bloccate/non selezionabili
+**Tipo:** `audit`
+**Obiettivo:** verificare la coerenza source-bound della pipeline Work Transition e del retirement bridge prima di V4.15, senza modificare runtime, Rules o Knowledge.
+
+### Verifiche e risultato (2026-10-18)
+
+- Readiness e scenario rispettano lineage, provenance, basis gross/net, timeline mensile e fail-closed; le date di cessazione, entitlement e pagamento restano separate.
+- Il percorso employment net/contributions non è completo: netto payroll, contributi dipendente, TFR/Fon.Te e precisione INPS restano `null + data_gaps` dove non supportati.
+- V4.14 resta `blocked` dopo il NO-GO Art. 57; V4.15 non è selezionabile perché dipende da V4.14a/V4.14 e RITA V2 non è verificabile nel perimetro corrente.
+- I tre rule pack contributivo/fiscali esclusi dal freshness gate non governano ancora un bridge gross/net end-to-end.
+- Lo stream affitti non ha ancora un contratto source-bound per distinguere uso personale, locazione privata/occasionale, attività abituale-organizzata e impresa; eventuale AML/CRS/DAC deve restare `not_applicable` provato o `data_gap`.
+- Review indipendente: **NO-GO limitato** alla chiusura abilitante e alla selezione di V4.15. Non è una conclusione individuale e non autorizza Rules/Engine.
+- Test mirati: 61/61. Suite Engine completa fuori sandbox: **774 test, 0 failure, 0 errori, 0 skipped**. Roadmap audit, planner schema, execution guardrails e `git diff --check` sono gate di chiusura.
+
+### Follow-up obbligatori
+
+1. Mantenere V4.14w/V4.14 blocked e non emettere date o pagamenti dal bridge.
+2. Definire e versionare i contratti mancanti per entitlement/payment, gross/net, RITA V2, rental classification e applicabilità AML/CRS/DAC.
+3. Ripetere una review normativa/umana solo dopo che i gap sono stati trasformati in evidenze source-bound; quindi ricalcolare la selezione, senza saltare V4.15.
+
 ## Incremento corrente — V4.14y — Annex VIII Part 2 versioned catalogue and temporal ledger
 
 **Stato:** `completed` — GO-after-fix esclusivamente documentale; V4.14w resta `blocked`, runtime non approvato
@@ -976,17 +1204,31 @@ La matrice verificata con limiti/gap è in `family-office-knowledge/pensions/pen
 
 ---
 
-## Storico ultimo incremento chiuso — V4.14b
+## Stato operativo increment corrente
+
+## ID e titolo legacy
+
+V4.15b — Source-bound RITA fund-stream intake and validation.
+
+## Stato legacy
+
+`done`
 
 ## ID e titolo
 
-V4.14b — Pension normative remediation and source freshness gate.
+V4.15c - Code audit after RITA fund-stream intake.
 
 ## Stato
 
 `done`
 
-### GO normativo limitato: eligibility ordinaria solo
+### Piano V4.15b
+
+1. Primo candidato e corrective pass completati; 14 test mirati e suite Engine 795/0/0/0 riprodotti.
+2. Review tecnica exact-version post-fix NO-GO: vedi finding sopra e decision log.
+3. Non effettuare ulteriori fix/retry finché l'utente non autorizza un nuovo ciclo; mantenere V4.15 bloccata finché V4.14 e gli altri prerequisiti del composer non risultano soddisfatti.
+
+### Storico — V4.14b eligibility ordinaria
 
 Il GO riguarda soltanto una regola deterministica di sola eligibility per il percorso ordinario di vecchiaia di dipendenti FPLD/AGO, con una sola gestione/ambito confermato e requisiti soddisfatti nel 2026-2028. Per la coorte con prima contribuzione anteriore al 1996: eta 67 / 67a1m / 67a3m e 20 anni qualificanti. Per la prima contribuzione dal 1996: le stesse eta e 20 anni qualificanti piu pensione mensile documentata almeno pari all'assegno sociale mensile applicabile documentato, oppure eta 71 / 71a1m / 71a3m e 5 anni di contribuzione effettiva, esclusa quella figurativa.
 
