@@ -2,104 +2,91 @@
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
   "status": "completed",
-  "selected_at": "2026-10-25T00:05:00Z",
-  "updated_at": "2026-10-25T00:00:00Z",
+  "selected_at": "2026-10-25T20:40:00Z",
+  "updated_at": "2026-10-25T20:44:57Z",
   "roadmap_basis": [
     {
-      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.15c - Code audit after RITA fund-stream intake",
-      "reason": "V4.15a è done; l'algoritmo roadmap seleziona il minimo incremento abilitante richiesto dai blocchi RITA V2/V4.14 su autorizzazione 'procedi'."
+      "path": "family-office-engine/docs/roadmap/roadmap-index.md",
+      "section": "Algorithm of selection — predecessor sequence gate",
+      "reason": "Governance/docs correction requested after detecting an invalid downstream V4.15 selection while V4.14 remained blocked."
     }
   ],
   "increment": {
-    "id": "V4.15c-code-audit-rita-fund-stream",
-    "title": "Code audit after RITA fund-stream intake",
-    "objective": "Realizzare un intake guidato e un validator deterministico per registrare nel workspace un flusso RITA documentato/accettato dal fondo secondo il contratto v0.1 già revisionato, senza eligibility o calcoli.",
+    "id": "governance-roadmap-predecessor-gate",
+    "title": "Enforce roadmap predecessor order",
+    "objective": "Make selection of a downstream roadmap increment impossible while any earlier unfinished predecessor remains unresolved, and document the remaining V4.14 blockers accurately.",
     "scope": [
-      "Definire il record rita-fund-stream/v1 sulla base della candidata source-bound RITA stream v0.1 già revisionata.",
-      "Fornire CLI question-first/workspace-local, validator e snapshot con provenance/data_gaps; nessun JSON manuale come percorso normale.",
-      "Fixture sintetiche e regressioni pubbliche per prove mancanti/confliggenti, date/schedule/pagamenti e importi/periodicità.",
-      "Due deleghe bounded: Terra/medium implementazione e Terra/high review tecnica indipendente; suite completa Engine obbligatoria."
+      "State the no-skip invariant in AGENTS.md, roadmap selection algorithm, and planner operating rules.",
+      "Add deterministic sequencing validation and regression tests for selecting a downstream increment past an unfinished predecessor.",
+      "Reconcile the V4.14 inventory into confirmed scope gaps versus stale/inconsistent roadmap statuses."
     ],
     "out_of_scope": [
-      "Modifica a criteri di eligibility o soglie rita-rule-pack/v1.",
-      "Calcolo RITA, importi, netto, rendimenti, entitlement pensionistico o retirement-bridge timeline.",
-      "Inferenza di eligibility/accettazione/pagamento, nuova interpretazione normativa o sblocco V4.14/V4.15.",
-      "Accesso a dati personali fuori da family-office-workspace/; fixture soltanto sintetiche."
+      "Do not implement pension rules, calculate individual benefits, or claim V4.14/V4.15 are unblocked.",
+      "Do not edit personal data or unrelated dirty worktree files."
     ],
     "candidate_files": [
-      "family-office-knowledge/pensions/rita.md",
-      "family-office-rules/italy/current/rita.yaml",
-      "family-office-engine/src/family_office_engine/services/rita_fund_stream.py",
-      "family-office-engine/src/family_office_engine/cli/main.py",
-      "family-office-engine/tests/unit/test_rita_fund_stream.py",
+      "AGENTS.md",
+      "family-office-engine/docs/roadmap/roadmap-index.md",
+      "family-office-engine/src/family_office_engine/governance/roadmap_audit.py",
+      "family-office-engine/tests/unit/test_roadmap_audit_cadence.py",
+      "family-office-bootstrap/planning/README.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
-    "stop_condition": "Concludere solo con review tecnica indipendente, test mirati e suite Engine completa a 0 failure/errori/skipped; se emerge semantica normativa nuova o la suite non è verde, mantenere in_progress/blocked. Il risultato non rimuove i prerequisiti V4.14/V4.15."
+    "stop_condition": "Close only when the sequencing validator regression passes, governance docs agree, planner schema and guardrails pass, and the V4.14 remaining-work inventory distinguishes capability gaps from status inconsistencies. Do not start pension implementation."
   },
   "verification": {
     "tests": [
-      "16 test mirati del validator rita-fund-stream/v1 passano con Python del venv",
-      "Suite completa Engine: 797 test, 0 failure, 0 errori, 0 skipped con Python del venv",
-      "Review tecnica indipendente, planner schema, roadmap audit, execution guardrails e git diff --check"
+      "Roadmap sequencing targeted tests: 19 passed.",
+      "Full Engine suite: 803 tests, 0 failures, 0 errors, 0 skipped.",
+      "Roadmap audit, planner JSON schema, execution guardrails, and scoped git diff --check passed."
     ],
     "documentation_touchpoints": [
-      "family-office-engine/docs/current-next-increment.md",
+      "AGENTS.md",
+      "family-office-engine/docs/roadmap/roadmap-index.md",
+      "family-office-bootstrap/planning/README.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-engine/docs/decision-log.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
     "result": "passed",
     "task_envelope": {
-      "mode": "feature-slice",
-      "risk_domain": "pension",
-      "objective": "Implementare l'intake tecnico RITA source-bound sul contratto v0.1 già revisionato, senza determinazioni normative o calcoli.",
+      "mode": "docs-edit",
+      "risk_domain": "general",
+      "objective": "Codify and test a hard roadmap predecessor gate; inventory V4.14 without changing pension semantics.",
       "repositories": [
-        "family-office-knowledge",
-        "family-office-rules",
         "family-office-engine",
         "family-office-bootstrap"
       ],
       "read_set": [
         "AGENTS.md",
         "family-office-bootstrap/docs/playbooks/00-task-router.md",
-        "family-office-bootstrap/docs/playbooks/04-micro-increment.md",
-        "family-office-bootstrap/docs/playbooks/07-normative-change.md",
+        "family-office-bootstrap/planning/README.md",
         "family-office-engine/docs/roadmap/roadmap-index.md",
-        "family-office-engine/docs/current-next-increment.md#V4.15a,V4.15b",
-        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md#V4.15,V4.15a,V4.15b",
-        "family-office-knowledge/pensions/rita.md",
-        "family-office-rules/italy/current/rita.yaml",
-        "family-office-engine/src/family_office_engine/services/rita_fund_stream.py",
-        "family-office-engine/src/family_office_engine/services/decumulation_strategy.py",
-        "family-office-engine/src/family_office_engine/cli/main.py",
-        "family-office-engine/tests/unit/test_rita_fund_stream.py"
+        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md#V4.14",
+        "family-office-engine/src/family_office_engine/governance/roadmap_audit.py",
+        "family-office-engine/tests/unit/test_roadmap_audit_cadence.py"
       ],
       "write_set": [
-        "family-office-knowledge/pensions/rita.md",
-        "family-office-engine/src/family_office_engine/services/rita_fund_stream.py",
-        "family-office-engine/src/family_office_engine/cli/main.py",
-        "family-office-engine/tests/unit/test_rita_fund_stream.py",
-        "family-office-engine/docs/current-next-increment.md",
+        "AGENTS.md",
+        "family-office-bootstrap/planning/README.md",
+        "family-office-engine/src/family_office_engine/governance/roadmap_audit.py",
+        "family-office-engine/tests/unit/test_roadmap_audit_cadence.py",
+        "family-office-engine/docs/roadmap/roadmap-index.md",
         "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
         "family-office-engine/docs/decision-log.md",
         "family-office-bootstrap/planning/current-work.json"
       ],
-      "test_command": "Run targeted RITA intake/validator tests, then the full Engine suite with exactly 0 failures/errors/skips.",
+      "test_command": "cd family-office-engine; .venv\\Scripts\\python.exe -m unittest discover -s tests/unit -p \"test*.py\"; .venv\\Scripts\\python.exe src\\family_office_engine\\governance\\roadmap_audit.py; cd ..; python family-office-bootstrap/planning/validate-execution-guardrails.py",
       "stop_conditions": [
         "Nessun dato personale fuori dal workspace privato; fixture soltanto sintetiche.",
-        "Non modificare criteri o soglie RITA né determinare eligibility/diritto individuale.",
-        "Non inferire accettazione o pagamenti da richiesta, cessazione o schedule non attestato.",
-        "Se emerge nuova semantica normativa, fermarsi per review Sol/xhigh; il workstream non sblocca V4.14/V4.15."
+        "No pension or financial semantics; no individual benefits or personal workspace access.",
+        "Do not start an increment downstream of an unfinished predecessor.",
+        "Keep unrelated pre-existing worktree changes untouched."
       ]
     },
-    "notes": "Re-review tecnica indipendente exact-version NO-GO con residui P1 (digest acquisito troppo tardi in resume dopo mutazione fonte; timeline parziali con date non adiacenti contraddittorie non rilevate) e P2 (benefit_type=other resta promosso come fatto). Parent ha riprodotto 14 test mirati e suite Engine 795/0/0/0; planner schema, roadmap audit, execution guardrails e diff-check passano. Incremento bloccato per il gate tecnico, non per i test; V4.15 resta ulteriormente bloccata dai prerequisiti V4.14."
+    "notes": "The no-skip rule is now explicit in AGENTS, roadmap-index, and planner operations, with deterministic validator regressions. V4.14 remains blocked: the overall IT/ES/EU entitlement timeline and distinct recognition/economic-start/first-payment events are not completed; only narrow Italian eligibility paths and document-only Spanish/Art.57 audits have limited GO. Art.57 runtime v0.22 has a scoped GO, not production Annex VIII coverage or V4.14 closure. Roadmap statuses still conflict (V4.14w parent and w-a..d remain blocked while later w-e..g are done; V4.14x and z-b blocked while later document audits are done). Audit still reports audit_due=true because V4.15c is physically at the beginning of the active roadmap; do not select downstream functional work until the V4.14 order/statuses and audit placement are reconciled."
   },
-  "blockers": [
-    "Re-review V4.15b NO-GO: digest della trascrizione acquisito solo dopo i prompt e vulnerabile a mutazione fonte durante resume; conflitti cronologici tra date non adiacenti non rilevati quando manca un campo intermedio; benefit_type=other resta promosso. Un ulteriore corrective pass richiede nuova autorizzazione.",
-    "V4.15 retirement bridge resta bloccata da V4.14 e da RITA V2; V4.15b non rimuove tali prerequisiti."
-  ],
+  "blockers": [],
   "session_notes": [
     "2026-10-18: roadmap audit OK; selezionato il minimo slice runtime per i finding V4.14w dopo GO documentale limitato v0.2.2, su richiesta esplicita dell'utente di sbloccare V4.14.",
     "2026-10-18: mantiene fail-closed Annex VIII; la correzione non equivale a sblocco di V4.14 o V4.15.",
@@ -115,118 +102,31 @@
     "2026-10-20: reviewer Sol/xhigh emette GO senza finding bloccanti per il pacchetto combinato v0.22/c14n-v4 + regressioni/citation v0.23. V4.14w-e e V4.14w-g chiuse limitatamente ai controlli valutati; Annex VIII production, sufficienza normativa nazionale, casi individuali e sblocco complessivo V4.14w/V4.14 restano esclusi.",
     "2026-10-20: l'utente autorizza 'procedi'; roadmap audit OK e V4.15a risulta done. Selezionato V4.15b come minimo incremento abilitante RITA source-bound, con limiti e blocchi V4.14/V4.15 preservati.",
     "2026-10-20: primo candidato tecnico V4.15b test mirati 10/0 e suite venv Engine 791/0/0/0 verdi; review Terra/high NO-GO limitato (3 P1, 1 P2). Un corrective pass autorizzato e completato.",
-    "2026-10-20: re-review exact-version dopo fix: NO-GO residuo (2 P1, 1 P2); test mirati 14/0/0, suite Engine 795/0/0/0 e governance verdi. Budget del corrective/review esaurito; V4.15b bloccata finché l'utente non autorizza un nuovo micro-ciclo."
+    "2026-10-20: re-review exact-version dopo fix: NO-GO residuo (2 P1, 1 P2); test mirati 14/0/0, suite Engine 795/0/0/0 e governance verdi. Budget del corrective/review esaurito; V4.15b bloccata finché l'utente non autorizza un nuovo micro-ciclo.",
+    "2026-10-25: user identified invalid progression from V4.14 to V4.15. This task codifies a hard predecessor gate and inventories V4.14; no pension implementation is authorized."
   ],
     "next_action": {
         "mode": "recalculate",
-        "description": "V4.15b chiusa con GO tecnico; mantenere V4.15/V4.14 bloccate dai prerequisiti e ricalcolare il prossimo incremento solo dopo i gate roadmap previsti."
+        "description": "Before selecting functional work, reconcile the V4.14 Art. 57 predecessor statuses and place V4.15c at its correct roadmap position; then select only the earliest eligible V4.14 unblocker."
   },
   "routing": {
     "policy_version": "3.1",
     "tier": "low",
-    "task_class": "quality",
+    "task_class": "documentation",
     "agent": "fo_docs_editor",
-    "model": "gpt-5.6-terra",
+    "model": "gpt-5.6-luna",
     "reasoning_effort": "medium",
-    "rationale": "Re-review tecnica indipendente exact-version dei quattro finding già corretti, con suite completa parent verde; nessuna interpretazione normativa.",
-    "delegation_budget": {
-      "max_events": 18,
-      "authorization": "Richiesta esplicita del 2026-10-25 di completare autonomamente il prossimo incremento; scope esatto V4.15b corrective pass + una review tecnica exact-version.",
-      "scope": "Due eventi massimi: corrective implementation Terra/medium e review tecnica Terra/high. Solo intake RITA source-bound, nessuna eligibility/calcolo, fixtures sintetiche, nessun dato personale fuori dal workspace.",
-      "blocker": "Se la correzione richiede semantica normativa nuova o la review resta NO-GO, lasciare blocked; non rimuovere i prerequisiti V4.14/V4.15 e non avviare ulteriori retry."
-    },
+    "rationale": "Governance/documentation change only: enforce predecessor order and add deterministic regression coverage; no financial or pension behavior change.",
     "trace": [
       {
-        "at": "2026-10-25T00:05:00Z",
+        "at": "2026-10-25T20:40:00Z",
         "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
+        "tier": "low",
+        "agent": "fo_docs_editor",
+        "model": "gpt-5.6-luna",
         "reasoning_effort": "medium",
-        "reason": "Nuova autorizzazione per un solo corrective pass tecnico sui tre finding residui V4.15b; contratto e perimetro già definiti."
-      },
-      {
-        "at": "2026-10-25T00:05:30Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Delegata implementazione bounded su servizio e test RITA; nessuna modifica a rules, knowledge o semantica normativa."
-      },
-      {
-        "at": "2026-10-25T00:25:00Z",
-        "event": "delegated",
-        "tier": "review",
-        "agent": "fo_reviewer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "high",
-        "reason": "Review tecnica indipendente exact-version dopo corrective pass; test mirati 16/0 e suite Engine 797/0/0/0 verdi."
-      },
-      {
-        "at": "2026-10-25T00:45:00Z",
-        "event": "reviewed",
-        "tier": "review",
-        "agent": "fo_reviewer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "high",
-        "reason": "GO exact-version senza finding bloccanti sui tre finding residui; gap non bloccante sul timing del chiamante CLI."
-      },
-      {
-        "at": "2026-10-20T19:46:05Z",
-        "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Selezionato intake/validator RITA workspace-local delimitato dal contratto v0.1 già revisionato."
-      },
-      {
-        "at": "2026-10-20T19:46:05Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Delegata implementazione tecnica V4.15b con write-set bounded e nessuna semantica normativa nuova."
-      },
-      {
-        "at": "2026-10-20T19:54:30Z",
-        "event": "delegated",
-        "tier": "review",
-        "agent": "fo_reviewer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "high",
-        "reason": "Review indipendente ha dato NO-GO: correggere solo quattro finding circoscritti (binding digest, gating benefit_type, date conflicts sovrapposti, resume di as_of invalida)."
-      },
-      {
-        "at": "2026-10-20T19:57:30Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Unico corrective pass per i quattro finding technical-review NO-GO; regressioni sintetiche, perimetro RITA v0.1 invariato."
-      },
-      {
-        "at": "2026-10-20T19:59:43Z",
-        "event": "delegated",
-        "tier": "review",
-        "agent": "fo_reviewer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "high",
-        "reason": "Re-review read-only exact-version del candidato corretto, inclusi digest, gating benefit type, conflitti temporali e ripresa draft; parent ha riprodotto 14 test mirati e suite Engine 795/0/0/0."
-      },
-      {
-        "at": "2026-10-20T20:02:10Z",
-        "event": "reviewed",
-        "tier": "review",
-        "agent": "fo_reviewer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "high",
-        "reason": "NO-GO exact-version dopo un solo corrective pass: due P1 e un P2 residui; bloccare V4.15b e richiedere autorizzazione per il ciclo successivo."
+        "reason": "Codify a governance-only predecessor gate and test it; no pension semantics or product feature work."
       }
     ]
-  },
-  "blockers": []
+  }
 }

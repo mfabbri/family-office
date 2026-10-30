@@ -128,6 +128,7 @@ def validate_audit_cadence(
             f"Current increment {current.increment_id} has status {current.status!r} "
             f"in {current_increment_path} and {roadmap_current.status!r} in the roadmap."
         )
+    validate_predecessor_order(increments, roadmap_current)
 
     last_audit_index: int | None = None
     for index, increment in enumerate(increments):
@@ -165,6 +166,65 @@ def validate_audit_cadence(
             else None
         ),
     )
+
+
+def validate_predecessor_order(
+    increments: list[RoadmapIncrement], current: RoadmapIncrement
+) -> None:
+    """Reject selecting functional/audit work past an unfinished predecessor.
+
+    Docs/governance work may repair the roadmap itself. A blocked item remains
+    the active blocker; downstream functional and audit slices cannot bypass it.
+    """
+    if current.status not in {"planned", "in_progress"}:
+        return
+    if current.kind not in {"functional", "audit"}:
+        return
+
+    current_release, current_suffix = _increment_order_key(current.increment_id)
+    current_root_id = "V" + ".".join(str(part) for part in current_release)
+    current_slice_parent_id = current.increment_id.rpartition("-")[0]
+    predecessors = []
+    for increment in increments:
+        if increment is current:
+            continue
+        release, suffix = _increment_order_key(increment.increment_id)
+        is_earlier = (release, suffix) < (current_release, current_suffix)
+        # A suffixed remediation slice may address its own blocked parent; it
+        # may not skip an earlier sibling in that same release.
+        is_own_blocked_parent = current.kind == "functional" and increment.increment_id in {
+            current_root_id,
+            current_slice_parent_id,
+        }
+        if is_earlier and not is_own_blocked_parent:
+            if increment.status not in {"done", "deferred"}:
+                predecessors.append(increment)
+
+    predecessors.sort(
+        key=lambda item: (
+            _increment_order_key(item.increment_id),
+        )
+    )
+    for predecessor in predecessors:
+        raise RoadmapAuditCadenceError(
+            f"Cannot select {current.increment_id}: predecessor "
+            f"{predecessor.increment_id} is {predecessor.status!r}; "
+            "resolve the earliest unfinished predecessor first."
+        )
+
+
+def _increment_order_key(increment_id: str) -> tuple[tuple[int, ...], tuple[str, ...]]:
+    match = re.fullmatch(
+        r"V(?P<release>\d+(?:\.\d+)*)(?P<suffix>(?:[a-z](?:-[a-z])*)?)",
+        increment_id,
+    )
+    if match is None:
+        raise RoadmapAuditCadenceError(
+            f"Unsupported increment identifier for sequencing: {increment_id!r}."
+        )
+    release = tuple(int(part) for part in match.group("release").split("."))
+    suffix = match.group("suffix")
+    return release, tuple(suffix.split("-")) if suffix else ()
 
 
 def _audit_requirement_allows_current(

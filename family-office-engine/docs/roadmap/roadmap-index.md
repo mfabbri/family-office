@@ -44,18 +44,21 @@ Ogni incremento deve inoltre dichiarare `**Tipo:**` con uno dei valori:
 
 1. Leggere `family-office-engine/docs/current-next-increment.md`.
 2. Eseguire `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py` dalla root del progetto. Un errore blocca la selezione di un incremento funzionale.
-3. Se contiene uno stato `planned` o `in_progress`, continuare quell'incremento.
-4. Se lo stato è `blocked`, creare come incremento corrente il più piccolo lavoro necessario a rimuovere il blocco. Non saltare a una roadmap successiva.
-5. Se l'incremento corrente è `done`, aprire la prima roadmap non completata nell'ordine della tabella.
-6. Prima di selezionare il prossimo incremento funzionale, verificare la cadenza di code audit: dopo 4 incrementi funzionali completati senza audit, selezionare il micro-incremento di audit nella roadmap attiva. Il quarto incremento può essere marcato `done` e il validator deve riportare `audit_due=true`; da quel momento rifiuta un incremento funzionale successivo finché l'audit non è `done`, ma non blocca lavoro `docs` o `governance`. Se manca, crearlo con suffisso alfabetico senza rinumerare gli incrementi già tracciati.
-7. Selezionare il primo incremento con stato `planned` le cui dipendenze risultano `done` o `deferred` con motivazione compatibile.
-8. Salvare il piano concreto in `current-next-increment.md` prima di modificare codice, regole, knowledge o workspace.
-9. Al completamento, aggiornare nello stesso cambiamento:
+3. Prima di scegliere un candidato, controllare in ordine **tutti** gli incrementi precedenti della roadmap attiva e la chiusura delle dipendenze dichiarate, non soltanto il blocco o il ramo candidato.
+4. Se esiste un predecessore `planned`, `in_progress` o `blocked`, nessun incremento funzionale o audit successivo è eleggibile. Riprendere il più antico predecessore incompleto; se è `blocked`, creare e registrare il micro-incremento minimo che rimuove proprio quel blocco. Non interpretare una capability separabile, un GO limitato o un incremento figlio come autorizzazione a saltare il predecessore/parent.
+5. Se `current-next-increment.md` punta a valle di un predecessore incompleto, non continuarlo: correggere prima il piano/planner e selezionare il lavoro che affronta il predecessore più antico.
+6. Se contiene uno stato `planned` o `in_progress` e nessun gate precedente lo invalida, continuare quell'incremento.
+7. Se lo stato è `blocked`, creare come incremento corrente il più piccolo lavoro necessario a rimuovere il blocco. Non saltare a una roadmap successiva.
+8. Se l'incremento corrente è `done`, aprire la prima roadmap non completata nell'ordine della tabella, sempre applicando il gate dei predecessori.
+9. Prima di selezionare il prossimo incremento funzionale, verificare la cadenza di code audit: dopo 4 incrementi funzionali completati senza audit, selezionare il micro-incremento di audit nella roadmap attiva. Il quarto incremento può essere marcato `done` e il validator deve riportare `audit_due=true`; da quel momento rifiuta un incremento funzionale successivo finché l'audit non è `done`, ma non blocca lavoro `docs` o `governance`. Se manca, crearlo con suffisso alfabetico senza rinumerare gli incrementi già tracciati. L'audit di cadenza non autorizza a saltare predecessori incompleti.
+10. Selezionare il primo incremento con stato `planned` le cui dipendenze risultano `done` o `deferred` con motivazione compatibile e nessun predecessore incompleto.
+11. Salvare il piano concreto in `current-next-increment.md` prima di modificare codice, regole, knowledge o workspace.
+12. Al completamento, aggiornare nello stesso cambiamento:
    - stato dell'incremento nella roadmap;
    - `current-next-increment.md`;
    - test e contratti impattati;
    - `decision-log.md`.
-10. Se il completamento chiude l'ultimo incremento della roadmap attiva, non lasciare l'indice senza roadmap `in_progress`: nello stesso aggiornamento mantenere temporaneamente la roadmap corrente attiva oppure aprire formalmente la roadmap successiva.
+13. Prima di chiudere, ripetere il controllo predecessori: ogni predecessore richiesto deve essere `done` oppure `deferred` con motivazione compatibile; un esito locale non cambia implicitamente lo stato del parent. Se il completamento chiude l'ultimo incremento della roadmap attiva, non lasciare l'indice senza roadmap `in_progress`: nello stesso aggiornamento mantenere temporaneamente la roadmap corrente attiva oppure aprire formalmente la roadmap successiva.
 
 ## Regola per i blocchi
 

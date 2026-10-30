@@ -23,6 +23,7 @@ Il planner viene marcato `superseded` e ricalcolato.
 ## Regole
 
 - un solo incremento attivo;
+- prima di selezionare **o chiudere** un incremento, verificare tutti i predecessori nell'ordine della roadmap attiva e tutte le dipendenze dichiarate. Se un predecessore resta `planned`, `in_progress` o `blocked`, non proseguire con un incremento funzionale/audit a valle: riprendere il predecessore più antico oppure selezionare il minimo micro-incremento per sbloccarlo. Un GO limitato a un figlio non completa il parent;
 - ogni incremento attivo registra il routing prima della delega;
 - deleghe, escalation e fallback aggiornano la routing trace;
 - il budget ordinario è due eventi sostanziali; un'estensione fino a diciotto richiede autorizzazione utente esplicita, scope/versione e blocker registrati in `routing.delegation_budget`;

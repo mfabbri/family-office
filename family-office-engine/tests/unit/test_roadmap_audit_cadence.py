@@ -174,6 +174,80 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
         with self.assertRaisesRegex(RoadmapAuditCadenceError, "V4.2 is absent"):
             self._validate(entries, "V4.2", "planned")
 
+    def test_downstream_functional_increment_cannot_skip_blocked_predecessor(self) -> None:
+        entries = [
+            ("V4.1", "functional", "done"),
+            ("V4.2", "functional", "blocked"),
+            ("V4.3", "functional", "planned"),
+        ]
+
+        with self.assertRaisesRegex(
+            RoadmapAuditCadenceError,
+            "predecessor V4.2 is 'blocked'; resolve the earliest unfinished predecessor first",
+        ):
+            self._validate(entries, "V4.3", "planned")
+
+    def test_later_release_cannot_skip_blocked_predecessor_even_if_listed_first(self) -> None:
+        entries = [
+            ("V4.15c", "audit", "planned"),
+            ("V4.14", "functional", "blocked"),
+        ]
+
+        with self.assertRaisesRegex(
+            RoadmapAuditCadenceError,
+            "Cannot select V4.15c: predecessor V4.14 is 'blocked'",
+        ):
+            self._validate(entries, "V4.15c", "planned")
+
+    def test_downstream_audit_cannot_skip_in_progress_predecessor(self) -> None:
+        entries = [
+            ("V4.1", "functional", "done"),
+            ("V4.2", "functional", "in_progress"),
+            ("V4.2a", "audit", "planned"),
+        ]
+
+        with self.assertRaisesRegex(
+            RoadmapAuditCadenceError,
+            "predecessor V4.2 is 'in_progress'",
+        ):
+            self._validate(entries, "V4.2a", "planned")
+
+    def test_minimum_functional_slice_can_unblock_its_parent_without_skipping_older_siblings(
+        self,
+    ) -> None:
+        entries = [
+            ("V4.14w-a", "functional", "planned"),
+            ("V4.14", "functional", "blocked"),
+            ("V4.14w", "functional", "blocked"),
+            ("V4.14x", "audit", "blocked"),
+        ]
+
+        report = self._validate(entries, "V4.14w-a", "planned")
+
+        self.assertEqual("V4.14w-a", report.current_increment_id)
+
+    def test_functional_slice_cannot_skip_earlier_sibling_in_its_release(self) -> None:
+        entries = [
+            ("V4.14w-b", "functional", "planned"),
+            ("V4.14w-a", "functional", "blocked"),
+        ]
+
+        with self.assertRaisesRegex(
+            RoadmapAuditCadenceError,
+            "predecessor V4.14w-a is 'blocked'",
+        ):
+            self._validate(entries, "V4.14w-b", "planned")
+
+    def test_governance_work_can_reconcile_roadmap_without_skipping(self) -> None:
+        entries = [
+            ("V4.1", "functional", "blocked"),
+            ("V4.1a", "governance", "in_progress"),
+        ]
+
+        report = self._validate(entries, "V4.1a", "in_progress")
+
+        self.assertEqual("V4.1a", report.current_increment_id)
+
     def _validate(
         self,
         entries: list[tuple[str, str, str]],

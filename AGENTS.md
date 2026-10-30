@@ -14,6 +14,7 @@ Questo file deve restare breve. È una mappa, non un manuale completo.
 - Un incremento o release è completo solo se l'intera suite del repository termina con esattamente 0 failure, 0 errori e 0 test skipped. I failure si correggono nel codice oppure, con evidenza contrattuale che l'aspettativa è errata, nel test; non si waivano come out-of-scope. Gli skip vanno sostituiti da test eseguibili equivalenti sulle piattaforme supportate.
 - Se la suite del repository non può essere eseguita o non raggiunge quel risultato, lo stato resta `in_progress` o `blocked`, mai `done`.
 - Non dichiarare completato un incremento senza verifiche riproducibili.
+- Non saltare predecessori: prima di selezionare o chiudere un incremento, verificare l'intera sequenza precedente della roadmap attiva e le sue dipendenze. Se un predecessore è `planned`, `in_progress` o `blocked`, il lavoro funzionale/audit a valle non è eleggibile; selezionare il predecessore più antico incompleto o il micro-incremento minimo che ne rimuove il blocco, registrando la dipendenza. Un GO limitato di uno slice successivo non chiude né sblocca il parent.
 - Non salvare chain-of-thought nel planner o nei log di routing.
 - La delega non sostituisce l'esecuzione: il parent deve mantenere attivo il percorso critico, limitare le attese a finestre bounded, evitare polling indefinito e dichiarare subito timeout, fallback o blocker con evidenze.
 
@@ -22,6 +23,7 @@ Questo file deve restare breve. È una mappa, non un manuale completo.
 1. Leggere `family-office-bootstrap/docs/playbooks/00-task-router.md`.
 2. Leggere `family-office-bootstrap/planning/current-work.json`.
 3. Se il planner contiene un incremento `selected` o `in_progress`, verificare che sia ancora coerente con roadmap e repository; altrimenti ricalcolare il prossimo incremento con `roadmap-index.md`.
+   Non avanzare oltre un predecessore incompleto, anche se il task a valle appare separabile o ha un GO locale.
 4. Classificare il task da T0 a T5 e produrre il task envelope previsto dai playbook.
 5. Applicare la skill `$family-office-model-router` e registrare nel planner tier, agent, modello, reasoning e motivazione prima della delega.
 6. Il parent `gpt-5.6-luna` / `medium` è un router/controller: task medium/review/high/critical vanno delegati al custom agent previsto, non assorbiti silenziosamente dal parent.
