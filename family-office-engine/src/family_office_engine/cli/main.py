@@ -8,6 +8,8 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any, Mapping
 
+from family_office_engine.services.rita_fund_stream import FIELDS as RITA_STREAM_FIELDS, build_rita_fund_stream
+
 from family_office_engine.ingestion.manual_assumptions import (
     AssumptionsImportError,
     import_assumptions,
@@ -3920,9 +3922,121 @@ def _is_unedited_planning_goals_draft(input_path: Path) -> bool:
     return any(isinstance(gap, dict) and gap.get("code") == "draft_not_completed" for gap in gaps)
 
 
+def run_rita_stream_wizard(workspace_root: Path, revise: bool = False) -> int:
+    """Question-first transcription; every answer is saved in the private workspace."""
+    root = workspace_root.resolve()
+    draft = root / "planning" / "rita-fund-stream.draft.json"
+    output = root / "snapshots" / "rita-fund-stream.snapshot.json"
+    for path in (draft, output):
+        if not path.resolve().is_relative_to(root):
+            raise ValueError("Il percorso deve restare nel workspace")
+    if draft.exists():
+        data = json.loads(draft.read_text(encoding="utf-8"))
+        if not isinstance(data, dict) or data.get("schema_version") != "rita-fund-stream-input/v1":
+            raise ValueError("Bozza RITA non valida")
+    else:
+        data = {"schema_version": "rita-fund-stream-input/v1", "as_of": None, "observations": [], "pending": {}}
+
+    def save():
+        _write_wizard_json(draft, data, True, ValueError, "RITA draft")
+
+    def ask(key, label, container):
+        old = container.get(key)
+        answer = input(f"{label} [{old or '-'}; Invio mantiene]: ").strip()
+        if answer:
+            container[key] = answer
+            save()
+        return container.get(key)
+
+    print("Quale flusso RITA ha confermato il fondo?")
+    print("Solo trascrizioni documentate: nessuna eligibility, accettazione, pagamento o imposta viene dedotta.")
+    def valid_as_of(value):
+        try:
+            return isinstance(value, str) and date.fromisoformat(value).isoformat() == value
+        except ValueError:
+            return False
+
+    if valid_as_of(data.get("as_of")):
+        current = build_rita_fund_stream(data, root)
+        print("Fatti disponibili:", current["facts"])
+        print("Data gaps:", current["data_gaps"])
+    else:
+        print("Fatti disponibili: nessuno nella bozza. Data gaps: fonti e dati da verificare.")
+    while not valid_as_of(ask("as_of", "Data di riferimento YYYY-MM-DD", data)):
+        print("Data non valida: inserire una data ISO YYYY-MM-DD per continuare.")
+    # Validate the reference date before recording observations.
+    build_rita_fund_stream(data, root)
+    recorded = {item.get("field") for item in data.get("observations", []) if isinstance(item, dict)}
+    known = build_rita_fund_stream(data, root)["facts"]
+    for field in RITA_STREAM_FIELDS:
+        if field in recorded:
+            if known[field] is not None and not revise:
+                continue
+            if input(f"{field}: sostituire le trascrizioni per questo dato? [s/N]: ").strip().lower() != "s":
+                continue
+        pending = data.setdefault("pending", {}).setdefault(field, {})
+        print(f"\nDato {field}: lascia vuoto se non documentato.")
+        if field == "actual_payments":
+            while True:
+                payment_date = ask("payment_date", "Data accredito effettivo YYYY-MM-DD (Invio termina)", pending)
+                if not payment_date:
+                    break
+                amount = ask("payment_gross", "Importo lordo dell'accredito", pending)
+                if not amount:
+                    break
+                pending.setdefault("payments", []).append({"date": payment_date, "gross_amount": amount})
+                pending.pop("payment_date", None)
+                pending.pop("payment_gross", None)
+                save()
+            value = pending.get("payments")
+            if not value:
+                continue
+        else:
+            if field == "benefit_type":
+                print("Tipo attestato: rita oppure other (prestazioni diverse restano escluse).")
+            if field == "frequency":
+                print("Periodicita': monthly, quarterly, semiannual, annual oppure other.")
+            if field == "currency":
+                print("Valuta: codice di tre lettere maiuscole, ad esempio EUR.")
+            value = ask("value", "Valore attestato (date YYYY-MM-DD; importi decimali)", pending)
+            if not value:
+                continue
+        for key, label in (("source_ref", "File di evidenza relativo al workspace"),
+                           ("issuer", "Issuer della fonte"),
+                           ("coverage_start", "Copertura dal YYYY-MM-DD"),
+                           ("coverage_end", "Copertura al YYYY-MM-DD"),
+                           ("basis", "Scrivi attested se il valore e' attestato; estimated se stimato")):
+            ask(key, label, pending)
+        observation = {"field": field, "value": value, **{key: pending.get(key) for key in
+                       ("source_ref", "issuer", "coverage_start", "coverage_end", "basis")}}
+        ref = observation["source_ref"]
+        if isinstance(ref, str) and ref:
+            try:
+                source = (root / ref).resolve()
+                if not Path(ref).is_absolute() and source.is_relative_to(root) and source.is_file():
+                    observation["sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+            except (OSError, ValueError):
+                pass
+        if field in recorded:
+            data["observations"] = [item for item in data["observations"] if item.get("field") != field]
+        data["observations"].append(observation)
+        del data["pending"][field]
+        save()
+    result = build_rita_fund_stream(data, root)
+    _write_wizard_json(output, result, True, ValueError, "RITA snapshot")
+    print("Fatti documentati:", result["facts"])
+    print("Provenienza:", result["provenance"])
+    print("Data gaps:", result["data_gaps"])
+    print("Limiti:", "; ".join(result["limits"]))
+    print("Prossima azione: verificare le trascrizioni e chiedere al fondo le prove mancanti o confliggenti.")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="fo", description="Family Office engine CLI")
     subparsers = parser.add_subparsers(dest="command")
+    rita_stream_parser = subparsers.add_parser("rita-stream", help="Quale flusso RITA ha confermato il fondo? Registra le evidenze nel workspace")
+    rita_stream_parser.add_argument("--revise", action="store_true", help="Rivedi anche i dati gia' registrati")
     subparsers.add_parser("validate", help="Verify the expected multi-repository layout")
     assumptions = subparsers.add_parser("assumptions", help="Manage manual assumptions")
     assumptions_subparsers = assumptions.add_subparsers(dest="assumptions_command")
@@ -6671,6 +6785,16 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "rita-stream":
+        try:
+            return run_rita_stream_wizard(resolve_repo("workspace"), revise=args.revise)
+        except (ValueError, OSError) as exc:
+            print(f"RITA: errore ({exc}). Verifica le fonti nel workspace e riprova con fo rita-stream.")
+            return 1
+        except (KeyboardInterrupt, EOFError):
+            print("RITA: interrotto; le risposte sono salvate. Riprendi con fo rita-stream.")
+            return 1
 
     if args.command == "validate":
         status = validate()

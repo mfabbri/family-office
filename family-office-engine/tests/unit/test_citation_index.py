@@ -33,7 +33,7 @@ class CitationIndexTest(unittest.TestCase):
         self.assertEqual(first["schema_version"], "citation-index/v1")
         self.assertEqual(first["status"], "complete_with_gaps")
         self.assertGreaterEqual(first["summary"]["citation_count"], 10)
-        self.assertEqual(first["summary"]["knowledge_document_count"], 18)
+        self.assertEqual(first["summary"]["knowledge_document_count"], 25)
         self.assertGreaterEqual(first["summary"]["contract_count"], 15)
         self.assertEqual(
             first["reproducibility"]["content_hash"],
@@ -45,6 +45,13 @@ class CitationIndexTest(unittest.TestCase):
         self.assertIn("eu.aml.regulation.2024-1624", {item["citation_id"] for item in first["citations"]})
         document_ids = {item["document_id"] for item in first["knowledge_documents"]}
         self.assertIn("knowledge.international.eu-pension-art57-evidence-audit", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.19", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.20", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.21", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.22", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.24", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.25", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-public-boundary-regressions-v0.23", document_ids)
         self.assertIn("knowledge.international.eu-annex-viii-part2-catalogue-candidate", document_ids)
 
     def test_temporal_search_excludes_abrogated_source_but_supports_historical_query(self):

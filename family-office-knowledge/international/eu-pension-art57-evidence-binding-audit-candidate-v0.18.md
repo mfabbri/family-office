@@ -20,7 +20,11 @@ L’art. 47 del Reg. 987/2009 disciplina la trasmissione concorrente delle doman
 
 Nel consolidato 883/2004 al 31-07-2019, la Parte 2 è intestata ai casi in cui si applica l’art. 52(5) e contiene 15 sezioni-Stato/23 voci di schema. La cronologia di modifica individuata per la Parte 2 dopo la sostituzione introdotta dal Reg. 988/2009 comprende i Reg. 1244/2010, 1224/2012, 517/2013, 1372/2013 e 2017/492. Il consolidato non ha efficacia autentica: ciascuna voce e il proprio intervallo temporale devono essere riconciliati agli atti GUUE prima di alimentare un catalogo eseguibile.
 
-Il controllo del rule pack locale ha inoltre rilevato un riferimento da verificare/correggere: il pack cita il Reg. 988/2009, art. 1(27), mentre l’inserimento dell’art. 57(4) risulta all’art. 1(16). Il pack dichiara per Annex VIII una versione iniziale 2010-05-01 senza fine validità, che non incorpora gli aggiornamenti successivi sopra elencati. È un finding documentale per il successivo micro-incremento Knowledge → Rules → Tests → Engine, non una modifica autorizzata in questo audit.
+Il controllo iniziale del rule pack locale (prima della correzione documentata nell’addendum seguente) aveva rilevato un riferimento errato: il pack citava il Reg. 988/2009, art. 1(27), invece dell’art. 1(16), che inserisce l’art. 57(4). La citazione è stata corretta nel micro-incremento V4.14z-a. Resta separato il problema temporale: il pack dichiara per Annex VIII una versione iniziale 2010-05-01 senza fine validità e non incorpora gli aggiornamenti successivi elencati sopra; quel gap resta aperto.
+
+## Addendum — 2026-10-18
+
+L’atto autentico Reg. (CE) 988/2009, art. 1(16), inserisce l’art. 57(4) nel Reg. (CE) 883/2004; il precedente rinvio all’art. 1(27) era errato. Fonte GUUE/EUR-Lex: https://eur-lex.europa.eu/eli/reg/2009/988/oj/eng. La correzione è limitata alla citazione nelle fonti e nel Rule Pack: non modifica runtime, calcoli, condizioni di applicabilità o i `data_gaps`; V4.14w resta bloccato.
 
 ## Requisiti candidati per una futura specifica tecnica
 
@@ -31,6 +35,19 @@ Il controllo del rule pack locale ha inoltre rilevato un riferimento da verifica
 5. Il contratto v0.17 descrive un parent e un bound per il ramo durata: fino a una nuova versione, validare cardinalità esattamente 1. La grammatica c14n-v4 resta un contratto tecnico autonomo da definire e validare integralmente: ogni parent e ogni source-bound devono rispettare schema, cardinalità, riferimenti e vincoli di canonicalizzazione; hash corretto da solo non dimostra conformità strutturale o semantica. Testare anche un bound non valido in ciascuna posizione, non solo il primo.
 
 I punti 1–5 sono requisiti tecnici candidati derivati per fail-closed e tracciabilità, non formule o identificatori prescritti dalla normativa. Il modo concreto di attestare completezza, legame al caso e ordine istituzionale resta `not_assessed` finché una specifica esatta non è approvata indipendentemente.
+
+## Profilo tecnico candidato runtime Art. 57 v0.18 — gate pendente
+
+Questa candidata tecnica attua i controlli prudenziali documentati e revisionati in v0.2.2; non introduce nuovi requisiti attribuiti alla normativa e non è ancora approvata per runtime.
+
+- La root nazionale dichiara `root_institution_ref` e riferimenti source-bound namespaced per claim e beneficio. Il record nazionale corrispondente deve concordare con la root su istituzione, Stato, schema/tipo di prestazione, legislazione/versione e periodo applicabile; gli identificativi locali non vengono confrontati tra istituzioni diverse.
+- `coordination_manifest` lega tramite riferimenti opachi `manifest_ref`, `case_ref`, `coordinated_benefit_ref`, data dell'evento/rischio, emittente, data di valutazione e prove. Ogni record istituzionale ripete i binding condivisi e contiene i propri riferimenti locali con issuer/namespace/evidenze; mismatch o assenza non producono un risultato Art. 57(3).
+- `institution_scope_evidence` è distinto dalla presenza dei record: deve riferirsi al medesimo manifest/caso/beneficio/data, all'ambito procedurale coperto e alla lista esatta delle istituzioni. Assenza, conflitto o mismatch mantengono `not_assessed + data_gaps`.
+- L'attestazione dello Stato le cui condizioni risultano soddisfatte per ultime include l'evento/data, evidenze di selezione e delle condizioni, e riferimenti risolvibili al record dello stesso manifest. Non deriva dall'ordine degli input e non identifica l'istituzione competente o il soggetto pagatore.
+- c14n-v4 conserva esattamente un parent e un bound; ogni chiave, riferimento, canonicalizzazione, cardinalità, razionale e digest è verificato. L'hash non sostituisce la verifica strutturale e semantica.
+- Il rule pack corrente non contiene un catalogo machine-readable completo e versionato dell'Annex VIII Part 2. Perciò il ramo resta `not_assessed + data_gaps`; nessun `matched`/`not_matched` o risultato Art. 57 dipendente dal catalogo viene asserito. La candidata documentale/catalogo 2019 non è un indice eseguibile.
+
+Tutti i campi e i controlli sopra sono una rappresentazione tecnica interna soggetta a review indipendente exact-version; non sono forme di attestazione, chiavi o automatismi imposti dal diritto UE. Un GO eventuale è limitato a questo profilo runtime e non sblocca la timeline completa V4.14.
 
 ## Data gaps e limiti dell’audit
 

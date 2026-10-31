@@ -2421,7 +2421,7 @@ class ValidateCliTest(unittest.TestCase):
             self.assertEqual(pro_rata_exit, 0)
             self.assertTrue(output_path.exists())
             self.assertIn(
-                "planning it-es-eu-pension: complete entitlement=eligible_by_totalization, pro-rata=calculated, 0 gaps",
+                "planning it-es-eu-pension: blocked_missing_inputs entitlement=eligible_by_totalization, pro-rata=not_calculable, 2 gaps",
                 stdout.getvalue(),
             )
 

@@ -37,11 +37,11 @@ Output leggibile: prima data di uscita dal full-time sostenibile, alternativa ra
 
 ## Prossimi passi operativi
 
-Stato di partenza verificato: V4.11 readiness e V4.12 contratto mensile FTE sono `done`; V4.13 è `in_progress`; il comando `plan` esegue per ora manifest/readiness e binding delle fonti. Procedere in quest'ordine:
+Stato di partenza verificato il 2026-10-18: V4.11 readiness e V4.12 contratto mensile FTE sono `done`; V4.13 è limitata ai componenti supportati e V4.14a è chiusa come audit diagnostico NO-GO. Il comando `plan` esegue manifest/readiness e binding delle fonti; V4.14 e V4.15 restano bloccate finché i gap source-bound non sono risolti.
 
 1. **V4.13 — integrare il journey question-first.** Estendere `plan` per raccogliere gli input supportati dai contratti, collegando readiness, scenario mensile FTE ed employment projection. Le domande riguardano fatti e assunzioni; non chiedono una data pensionistica né una candidate di cessazione, che il motore genererà da V4.17.
 2. **V4.13 — chiudere il gate deterministico e normativo.** Per ogni componente da calcolare, completare Knowledge → Rules → Tests → Engine con fonte, validità, base, precisione e reviewer appropriati. Componenti non supportate restano `null` con blocker e non alimentano l'optimizer; non introdurre aliquote o basi presunte.
-3. **Solo dopo l'uscita V4.13: V4.14, poi V4.14a.** Implementare la timeline IT/ES/UE e del coniuge scenario-dependent, separando cessazione, diritto e pagamento; effettuare l'audit normativo/contrattuale prima di iniziare il bridge.
+3. **V4.14 resta il gate bloccato.** Risolvere i binding Art. 57/Annex VIII e gli altri percorsi nazionali secondo Knowledge → Rules → Tests → Engine; mantenere `null + data_gaps` per entitlement/payment non provati. V4.14a è già stato auditato e non sblocca il runtime.
 4. **V4.15 → V4.16.** Comporre il bridge mensile con liquidità/provenienza e trattamento lordo/netto espliciti, poi aggiungere baseline deterministica e stress stocastico riproducibile. I gap materiali bloccano le metriche che possono alterare.
 5. **V4.17 → V4.18.** Ottenere review finanziaria sui constraint e sul ranking; generare candidate controllate e valutarle. Il wizard raccoglie i vincoli familiari dichiarati nei contratti approvati, mentre le date di uscita sono output del motore. Non emettere date se un gap materiale può cambiarle.
 6. **V4.18a → V4.19.** Eseguire audit indipendente su simulazione/optimizer; poi inventariare i consumer legacy, migrare o deprecare con adapter/test compatibili e rimuovere solo funzioni effettivamente sostituite.

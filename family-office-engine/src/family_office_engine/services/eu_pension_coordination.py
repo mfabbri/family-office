@@ -119,8 +119,8 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     article_57 = data["pro_rata_method"].get("article_57_source_bound")
     if not isinstance(article_57, dict):
         raise EuPensionCoordinationError("EU pension coordination rule pack must define article_57_source_bound")
-    if article_57.get("contract_schema_version") != "v0.17" or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
-        raise EuPensionCoordinationError("EU pension coordination Article 57 contract must be v0.17/fo-art57-c14n-v4")
+    if article_57.get("contract_schema_version") != "v0.25" or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise EuPensionCoordinationError("EU pension coordination Article 57 contract must be v0.25/fo-art57-c14n-v4")
     if article_57.get("human_review_required") is not True:
         raise EuPensionCoordinationError("EU pension coordination Article 57 contract must require human review")
     annex_policy = article_57.get("annex_viii_part_2")

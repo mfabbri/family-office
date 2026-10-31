@@ -40,7 +40,9 @@
       "provisions": [
         "Article 12",
         "Article 13",
-        "Article 43"
+        "Article 43",
+        "Articles 45-48",
+        "Article 47(4)-(7)"
       ]
     },
     {
@@ -53,7 +55,7 @@
       "reviewed_on": "2026-10-16",
       "next_review_due": "2027-01-14",
       "provisions": [
-        "Article 1(27)",
+        "Article 1(16)",
         "Article 57(4)"
       ]
     },
@@ -135,13 +137,13 @@
       "mode": "ROUND_HALF_UP"
     },
     "article_57_source_bound": {
-      "contract_schema_version": "v0.17",
+      "contract_schema_version": "v0.25",
       "canonicalization_profile": "fo-art57-c14n-v4",
       "human_review_required": true,
       "legal_basis": [
         "Regulation (EC) No 883/2004 Article 57",
-        "Regulation (EC) No 987/2009 Articles 12-13",
-        "Regulation (EC) No 988/2009 Article 1(27)"
+        "Regulation (EC) No 987/2009 Articles 12-13 and 47(4)-(7)",
+        "Regulation (EC) No 988/2009 Article 1(16)"
       ],
       "legal_duration": {
         "source_bound_required": true,
@@ -157,8 +159,37 @@
         "requires_risk_materialization_date": true,
         "requires_evidence": true
       },
+      "evidence_registry": {
+        "manifest_perimeter_and_registry_required_before_every_assessment_result": true,
+        "requires_unique_evidence_ids": true,
+        "requires_unique_resolved_source_refs": true,
+        "requires_sha256_of_utf8_content": true,
+        "content_digest_format": "sha256-lowercase-hex-64",
+        "digest_proves_integrity_only": true,
+        "requires_issuer_match_to_manifest": true,
+        "requires_registry_coverage_of_declared_temporal_interval": true,
+        "requires_per_institution_article_57_1_refs_to_resolve": true,
+        "requires_per_institution_article_57_1_ref_uniqueness": true,
+        "fail_closed_on_missing_duplicate_or_mismatch": true
+      },
+      "last_state_attestation": {
+        "malformed_input_action": "not_assessed_with_data_gaps",
+        "registry_binding_required": true,
+        "does_not_emit_legal_last_state_output": true,
+        "required_evidence_categories": [
+          "selection",
+          "conditions",
+          "comparability",
+          "event",
+          "applicable_legislation",
+          "institutional_records"
+        ],
+        "registry_controls_are_internal_provenance_not_legal_presumptions": true
+      },
       "annex_viii_part_2": {
         "source_bound_required": true,
+        "requires_machine_readable_validity_catalogue": true,
+        "machine_readable_validity_catalogue_status": "unavailable",
         "requires_applicable_annex_version_and_scheme_match": true,
         "applicable_annex_part_2_version_source_ref": "eurlex.reg-988-2009",
         "applicable_annex_part_2_version": "reg-988-2009-2010-05-01",
@@ -167,11 +198,17 @@
         "true_excludes_article_57": true
       },
       "multi_institution": {
+        "root_institution_predicates_must_reconcile_in_both_directions": true,
         "fail_closed_when_institutions_or_last_state_evidence_are_missing": true,
         "article_57_3_payer_requires_all_concerned_institutions_relieved": true,
+        "requires_separate_institution_scope_evidence": true,
+        "institution_scope_requires_operator_verified_source_bound_full_perimeter": true,
+        "per_institution_article_57_1_requires_pertinent_periods_duration_comparator_legislation_and_autonomous_right_evidence": true,
         "article_57_3_last_state_must_be_source_bound": true,
+        "article_57_3_last_state_requires_comparable_candidate_state_conditions": true,
+        "article_57_3_last_state_is_not_inferred_from_date_ordering": true,
         "article_57_3_requires_per_institution_relief_records": true,
-        "article_57_3_last_state_must_match_institutional_order": true
+        "article_57_3_does_not_determine_payment_institution": true
       },
       "other_member_states_include_periods_in_theoretical_amount": true,
       "unmodeled_branch_action": "not_assessed_with_data_gaps"

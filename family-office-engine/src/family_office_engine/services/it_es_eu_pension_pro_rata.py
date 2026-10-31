@@ -2,6 +2,7 @@ import json
 import hashlib
 import calendar
 import math
+import re
 import unicodedata
 from datetime import date
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -143,10 +144,20 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     article_57 = data["pro_rata_method"].get("article_57_source_bound")
     if not isinstance(article_57, dict):
         raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.article_57_source_bound")
-    if article_57.get("contract_schema_version") != "v0.17" or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
-        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.17/fo-art57-c14n-v4")
+    if article_57.get("contract_schema_version") != "v0.25" or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.25/fo-art57-c14n-v4")
     if article_57.get("human_review_required") is not True:
         raise ItEsEuPensionProRataError("Rule pack Article 57 contract must require human review")
+    last_state_policy = article_57.get("last_state_attestation")
+    if (
+        not isinstance(last_state_policy, dict)
+        or last_state_policy.get("malformed_input_action") != "not_assessed_with_data_gaps"
+        or last_state_policy.get("registry_binding_required") is not True
+        or last_state_policy.get("does_not_emit_legal_last_state_output") is not True
+        or last_state_policy.get("registry_controls_are_internal_provenance_not_legal_presumptions") is not True
+        or last_state_policy.get("required_evidence_categories") != ["selection", "conditions", "comparability", "event", "applicable_legislation", "institutional_records"]
+    ):
+        raise ItEsEuPensionProRataError("Rule pack Article 57 last-State fail-closed registry policy is required")
     annex_policy = article_57.get("annex_viii_part_2")
     if (
         not isinstance(annex_policy, dict)
@@ -448,19 +459,41 @@ def _article_57_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, A
         "national_payment_obligation_status": "not_assessed",
     }
     if not isinstance(value, dict):
-        return _article_57_not_assessed(base, "missing_article_57_source_bound_assessment", "A v0.17 source-bound Article 57 assessment is required.")
+        return _article_57_not_assessed(base, "missing_article_57_source_bound_assessment", "A v0.25/fo-art57-c14n-v4 source-bound Article 57 assessment is required.")
     _validate_article_57_contract(value, policy)
+    manifest = _article_57_coordination_manifest(value.get("coordination_manifest"))
+    institutions = _article_57_institutional_records(value.get("concerned_institutions"), manifest)
+    if manifest is None or institutions is None:
+        gaps = _article_57_duration_binding_gaps(value)
+        gaps.append(_article_57_gap("missing_article_57_multi_institution_evidence", "A valid manifest and institutional Article 57(1) records are required."))
+        return {"result": base, "data_gaps": gaps}
+    if manifest["contingency_date"] != value["risk_materialization_date"] or manifest["as_of_date"] != value["assessment_date"]:
+        return _article_57_not_assessed(base, "inconsistent_article_57_coordination_manifest", "The manifest must bind the root dates.")
+    institution_refs = sorted((record["institution_ref"] for record in institutions), key=lambda item: item.encode("utf-8"))
+    perimeter_gap = _article_57_full_perimeter_scope_gap(value.get("institution_scope_evidence"), manifest, institution_refs, value.get("evidence_registry"))
+    if perimeter_gap is not None:
+        return {"result": base, "data_gaps": [perimeter_gap]}
+    institutional_registry_gap = _article_57_institutional_registry_binding_gap(
+        institutions, manifest, institution_refs, value.get("evidence_registry")
+    )
+    if institutional_registry_gap is not None:
+        return {"result": base, "data_gaps": [institutional_registry_gap]}
     if _transitional_result(value["transitional_applicability"], value["member_state"], value["risk_materialization_date"]) is None:
         return _article_57_not_assessed(base, "missing_article_57_transitional_applicability", "A decisive transitional applicability record is not assessed.")
     duration_binding_gaps = _article_57_duration_binding_gaps(value)
     duration = value.get("duration_strictly_less_than_one_year")
+    if duration is None:
+        duration_binding_gaps.append(_article_57_gap("missing_article_57_legal_duration", "Legal duration and comparator evidence do not establish the Article 57 result."))
     autonomous = _source_bound_result(value.get("autonomous_right_from_state_periods_only"), "autonomous_right_from_state_periods_only", policy, value)
     annex = _source_bound_result(value.get("annex_viii_part_2_applicability"), "annex_viii_part_2_applicability", policy, value)
     if duration_binding_gaps or annex["result"] is None:
         gaps = list(duration_binding_gaps)
         if annex["result"] is None:
-            gaps.append(_article_57_gap("missing_article_57_annex_viii_part_2_evidence", "Applicable Annex VIII part 2 evidence is required for Article 57."))
+            gaps.append(_article_57_gap("missing_article_57_annex_viii_part_2_catalogue", "A complete, applicable, machine-readable Annex VIII part 2 validity catalogue is required; no match or non-match is inferred."))
         return {"result": base, "data_gaps": gaps}
+    root_record = next((record for record in institutions if record["institution_ref"] == value["root_institution_ref"]), None)
+    if root_record is None or not _article_57_root_reconciles(value, root_record, autonomous["result"]):
+        return _article_57_not_assessed(base, "inconsistent_article_57_root_institution_binding", "Root predicates must match the source-bound institution record.")
     if annex["result"] is True:
         base.update({
             "article_57_exception_status": "excluded_by_57_4",
@@ -489,63 +522,48 @@ def _article_57_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, A
         "article_57_exception_status": "applies",
         "theoretical_amount_period_inclusion": "required_by_57_2",
         "pro_rata_amount_status": "downstream_not_assessed",
-        "national_payment_obligation_status": "relieved_under_57_1",
+        "national_payment_obligation_status": "not_assessed",
     })
-    institutions = _article_57_institutional_records(value.get("concerned_institutions"), value)
-    if institutions is None:
-        base["national_payment_obligation_status"] = "not_assessed"
-        return {"result": base, "data_gaps": [_article_57_gap("missing_article_57_multi_institution_evidence", "Institutional Article 57(1) records are required for every concerned institution.")]}
-    completeness = value.get("concerned_institutions_complete")
-    institution_ids = sorted((record["institution_id"] for record in institutions), key=lambda item: item.encode("utf-8"))
-    if (
-        not isinstance(completeness, dict)
-        or set(completeness) != {"result", "institution_ids", "evidence_refs"}
-        or completeness.get("result") is not True
-        or completeness.get("institution_ids") != institution_ids
-        or not _nonempty_string_list(completeness.get("evidence_refs"))
-    ):
-        return {"result": base, "data_gaps": [_article_57_gap("missing_article_57_concerned_institutions_completeness", "Article 57(3) requires source-bound evidence that the institutional set is complete.")]}
     if not all(record["article_57_1_relief_result"] for record in institutions):
         return {"result": base, "data_gaps": []}
-    last_state = value.get("article_57_3_last_state")
-    last_state_order = value.get("article_57_3_last_state_order")
-    last_state_conditions = value.get("article_57_3_last_state_conditions_satisfied")
-    evidence = value.get("article_57_3_evidence_refs")
-    last_record = max(institutions, key=lambda record: record["institution_order"])
-    if (
-        not isinstance(last_state, str)
-        or last_state != last_record["member_state"]
-        or last_state_order != last_record["institution_order"]
-        or last_state_conditions is not True
-        or not _nonempty_string_list(evidence)
-    ):
-        base["national_payment_obligation_status"] = "not_assessed"
-        return {"result": base, "data_gaps": [_article_57_gap("missing_article_57_3_last_state_evidence", "Article 57(3) payer requires source-bound institutional last-state, order, and conditions evidence.")]}
-    base["national_payment_obligation_status"] = "payer_under_57_3"
-    base["article_57_3_last_state"] = last_state
+    last_state = value.get("last_state_attestation")
+    last_state_gap = _article_57_last_state_registry_binding_gap(
+        last_state, manifest, institutions, institution_refs, value["assessment_date"], value.get("evidence_registry")
+    )
+    if last_state_gap is not None:
+        base.update({
+            "article_57_exception_status": "not_assessed",
+            "theoretical_amount_period_inclusion": "not_assessed",
+            "pro_rata_amount_status": "not_assessed",
+            "national_payment_obligation_status": "not_assessed",
+        })
+        return {"result": base, "data_gaps": [last_state_gap]}
+    base["national_payment_obligation_status"] = "not_assessed"
     return {"result": base, "data_gaps": []}
 
 
 def _validate_article_57_contract(value: dict[str, Any], policy: dict[str, Any]) -> None:
     allowed = {
-        "contract_schema_version", "canonicalization_profile", "human_review_required", "member_state", "benefit_id", "benefit_type", "scheme_id", "competent_institution",
+        "contract_schema_version", "canonicalization_profile", "human_review_required", "member_state", "benefit_id", "benefit_type", "scheme_id", "competent_institution", "root_institution_ref", "root_local_claim_ref", "root_local_benefit_ref",
         "applicable_legislation_id", "applicable_legislation_version", "applicable_legislation_valid_from", "applicable_legislation_valid_to", "risk_materialization_date", "assessment_date",
         "transitional_applicability", "legal_duration_for_article_57", "one_year_comparator", "duration_basis", "duration_assessment_evidence_refs", "duration_strictly_less_than_one_year",
-        "duration_source_segment", "autonomous_right_from_state_periods_only", "annex_viii_part_2_applicability", "concerned_institutions", "concerned_institutions_complete",
-        "all_concerned_institutions_relieved", "article_57_3_last_state", "article_57_3_last_state_order", "article_57_3_last_state_conditions_satisfied", "article_57_3_evidence_refs",
+        "duration_source_segment", "autonomous_right_from_state_periods_only", "annex_viii_part_2_applicability", "coordination_manifest", "concerned_institutions", "institution_scope_evidence",
+        "last_state_attestation", "evidence_registry",
     }
     if "schema_version" in value or set(value) - allowed:
         raise ItEsEuPensionProRataError("Article 57 assessment has forbidden root schema_version or fields.")
     if value.get("contract_schema_version") != policy["contract_schema_version"] or value.get("canonicalization_profile") != policy["canonicalization_profile"]:
-        raise ItEsEuPensionProRataError("Article 57 assessment must use v0.17/fo-art57-c14n-v4; legacy contracts are rejected.")
+        raise ItEsEuPensionProRataError("Article 57 assessment must use v0.25/fo-art57-c14n-v4; legacy contracts are rejected.")
     if value.get("human_review_required") is not True:
         raise ItEsEuPensionProRataError("Article 57 assessment must require human review.")
     required_root_strings = (
-        "member_state", "benefit_id", "benefit_type", "scheme_id", "competent_institution",
+        "member_state", "benefit_id", "benefit_type", "scheme_id", "competent_institution", "root_institution_ref",
         "applicable_legislation_id", "applicable_legislation_version",
     )
     if any(not _canonical_string(value.get(field)) for field in required_root_strings):
         raise ItEsEuPensionProRataError("Article 57 assessment requires canonical root member-state, benefit, scheme, institution, and legislation bindings.")
+    if not _article_57_local_reference(value.get("root_local_claim_ref"), value["root_institution_ref"]) or not _article_57_local_reference(value.get("root_local_benefit_ref"), value["root_institution_ref"]):
+        raise ItEsEuPensionProRataError("Article 57 assessment requires source-bound root local claim and benefit references.")
     for field in ("risk_materialization_date", "assessment_date", "applicable_legislation_valid_from"):
         if not _iso_date(value.get(field)):
             raise ItEsEuPensionProRataError(f"Article 57 assessment requires ISO {field}.")
@@ -577,7 +595,7 @@ def _article_57_duration_binding_gaps(value: dict[str, Any]) -> list[dict[str, A
     if not isinstance(comparator.get("legal_basis_refs"), list) or not comparator["legal_basis_refs"]:
         return [_article_57_gap("missing_article_57_comparator_legal_basis", "The one-year comparator requires legal-basis references.")]
     if not isinstance(segment, dict) or set(segment) != {"segment_id", "preimage"} or not isinstance(segment.get("segment_id"), str) or not isinstance(segment.get("preimage"), dict):
-        return [_article_57_gap("missing_article_57_duration_source_segment", "The legal duration requires a v0.17 canonical source-segment preimage and hash.")]
+        return [_article_57_gap("missing_article_57_duration_source_segment", "The legal duration requires a v0.20 canonical source-segment preimage and hash.")]
     source_duration = _c14n_v4_duration_source_bound(segment["preimage"])
     if source_duration is None:
         return [_article_57_gap("invalid_article_57_duration_source_segment", "The Article 57 segment must satisfy the c14n-v4 duration grammar.")]
@@ -585,7 +603,7 @@ def _article_57_duration_binding_gaps(value: dict[str, Any]) -> list[dict[str, A
         json.dumps(segment["preimage"], ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
     ).hexdigest()
     if segment["segment_id"] != expected or duration.get("source_segment_id") != expected or source_duration != (duration_value, duration.get("unit")):
-        return [_article_57_gap("invalid_article_57_duration_source_segment", "The legal duration must bind to the matching canonical v0.17 segment hash.")]
+        return [_article_57_gap("invalid_article_57_duration_source_segment", "The legal duration must bind to the matching canonical v0.20 segment hash.")]
     predicate = value["duration_strictly_less_than_one_year"]
     comparison = _rational_less_than(duration_value, comparator_value)
     if predicate is not None and predicate is not comparison:
@@ -613,11 +631,11 @@ def _rational_less_than(left: tuple[int, int], right: tuple[int, int]) -> bool:
 def _c14n_v4_duration_source_bound(preimage: dict[str, Any]) -> tuple[tuple[int, int], str] | None:
     if set(preimage) != {"canonicalization_profile", "parent_period_refs", "schema_version", "source_bounds"}:
         return None
-    if preimage.get("schema_version") != "v0.17" or preimage.get("canonicalization_profile") != "fo-art57-c14n-v4":
+    if preimage.get("schema_version") != "v0.19" or preimage.get("canonicalization_profile") != "fo-art57-c14n-v4":
         return None
     parent_refs = preimage.get("parent_period_refs")
     bounds = preimage.get("source_bounds")
-    if not _canonical_string_list(parent_refs) or parent_refs != sorted(parent_refs, key=lambda item: item.encode("utf-8")) or not isinstance(bounds, list) or len(bounds) != len(parent_refs):
+    if not _canonical_string_list(parent_refs) or len(parent_refs) != 1 or parent_refs != sorted(parent_refs, key=lambda item: item.encode("utf-8")) or not isinstance(bounds, list) or len(bounds) != 1:
         return None
     bound = bounds[0]
     if not isinstance(bound, dict) or set(bound) != {"native_duration", "native_end", "native_start", "period_ref"} or bound.get("period_ref") != parent_refs[0] or bound.get("native_start") is not None or bound.get("native_end") is not None:
@@ -629,33 +647,290 @@ def _c14n_v4_duration_source_bound(preimage: dict[str, Any]) -> tuple[tuple[int,
     return (rational, native_duration["unit"]) if rational is not None else None
 
 
-def _article_57_institutional_records(value: Any, root: dict[str, Any]) -> list[dict[str, Any]] | None:
+def _article_57_coordination_manifest(value: Any) -> dict[str, Any] | None:
+    required = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "issuer_institution_ref", "as_of_date", "evidence_refs"}
+    if not isinstance(value, dict) or set(value) != required:
+        return None
+    if any(not _canonical_string(value[field]) for field in ("manifest_ref", "case_ref", "coordinated_benefit_ref", "issuer_institution_ref")):
+        return None
+    if not _iso_date(value["contingency_date"]) or not _iso_date(value["as_of_date"]) or not _nonempty_string_list(value["evidence_refs"]):
+        return None
+    return value
+
+
+def _article_57_local_reference(value: Any, institution_ref: str) -> bool:
+    return isinstance(value, dict) and set(value) == {"issuer_institution_ref", "namespace", "value", "evidence_refs"} and value["issuer_institution_ref"] == institution_ref and all(_canonical_string(value[field]) for field in ("issuer_institution_ref", "namespace", "value")) and _nonempty_string_list(value["evidence_refs"])
+
+
+def _article_57_full_perimeter_scope(value: Any, manifest: dict[str, Any], institution_refs: list[str], registry: Any) -> bool:
+    return _article_57_full_perimeter_scope_gap(value, manifest, institution_refs, registry) is None
+
+
+def _article_57_full_perimeter_scope_gap(value: Any, manifest: dict[str, Any], institution_refs: list[str], registry: Any) -> dict[str, Any] | None:
+    required = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "issuer_institution_ref", "as_of_date", "temporal_coverage_from", "temporal_coverage_to", "procedural_coverage_ref", "institution_refs", "full_perimeter_status", "operator_verification_status", "resolved_source_refs"}
+    if not isinstance(value, dict) or set(value) != required or value.get("manifest_ref") != manifest["manifest_ref"] or value.get("case_ref") != manifest["case_ref"] or value.get("coordinated_benefit_ref") != manifest["coordinated_benefit_ref"] or value.get("contingency_date") != manifest["contingency_date"] or value.get("as_of_date") != manifest["as_of_date"]:
+        return _article_57_gap("missing_article_57_verified_institution_scope", "A verified full-perimeter scope bound to the coordination manifest is required.")
+    if not _canonical_string(value.get("issuer_institution_ref")) or value.get("issuer_institution_ref") != manifest["issuer_institution_ref"] or value.get("institution_refs") != institution_refs or value.get("full_perimeter_status") != "source_bound_full_perimeter" or value.get("operator_verification_status") != "verified" or not _nonempty_string_list(value.get("resolved_source_refs")):
+        return _article_57_gap("missing_article_57_verified_institution_scope", "A verified full-perimeter scope must bind its issuer and every concerned institution.")
+    if len(set(value["resolved_source_refs"])) != len(value["resolved_source_refs"]):
+        return _article_57_gap("inconsistent_article_57_3_registry_binding", "Full-perimeter registry references must be unique.")
+    if not _iso_date(value.get("temporal_coverage_from")) or not _iso_date(value.get("temporal_coverage_to")) or value["temporal_coverage_from"] > manifest["contingency_date"] or value["temporal_coverage_to"] < manifest["contingency_date"] or not _canonical_string(value.get("procedural_coverage_ref")):
+        return _article_57_gap("missing_article_57_verified_institution_scope", "A verified full-perimeter scope must cover the contingency date and procedural scope.")
+    if not isinstance(registry, list) or not registry:
+        return _article_57_gap("missing_article_57_3_registry_evidence", "The evidence registry required by the full-perimeter scope is missing or empty.")
+    entries: dict[str, dict[str, Any]] = {}
+    for entry in registry:
+        if not isinstance(entry, dict) or set(entry) != {"evidence_id", "issuer_institution_ref", "content_utf8", "content_digest", "coverage", "verified"}:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry entries must use the canonical integrity shape.")
+        evidence_id = entry.get("evidence_id")
+        if not _canonical_string(evidence_id) or evidence_id in entries:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry identifiers must be canonical and unique.")
+        if not _canonical_string(entry.get("issuer_institution_ref")) or not isinstance(entry.get("content_utf8"), str) or not isinstance(entry.get("content_digest"), str) or re.fullmatch(r"sha256:[0-9a-f]{64}", entry["content_digest"]) is None:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry content requires a canonical issuer and strict lowercase SHA-256 digest.")
+        try:
+            digest = "sha256:" + hashlib.sha256(entry["content_utf8"].encode("utf-8")).hexdigest()
+        except UnicodeEncodeError:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry content must be UTF-8 encodable.")
+        if entry["content_digest"] != digest:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry digest does not match its UTF-8 content.")
+        if not isinstance(entry, dict) or entry.get("issuer_institution_ref") != value.get("issuer_institution_ref") or entry.get("verified") is not True:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry issuer or verification status does not match the manifest-bound scope.")
+        coverage = entry.get("coverage")
+        coverage_fields = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "as_of_date", "temporal_coverage_from", "temporal_coverage_to", "procedural_coverage_ref", "institution_refs"}
+        legislation_coverage_fields = {"applicable_legislation_valid_from", "applicable_legislation_valid_to"}
+        if not isinstance(coverage, dict) or (set(coverage) != coverage_fields and set(coverage) != coverage_fields | legislation_coverage_fields) or any(coverage.get(key) != value.get(key) for key in ("manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "as_of_date", "procedural_coverage_ref", "institution_refs")):
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry coverage does not match the coordinated manifest, institution set or procedure.")
+        if not _iso_date(coverage.get("temporal_coverage_from")) or not _iso_date(coverage.get("temporal_coverage_to")) or coverage["temporal_coverage_from"] > value["temporal_coverage_from"] or coverage["temporal_coverage_to"] < value["temporal_coverage_to"]:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry coverage does not contain the declared full-perimeter interval.")
+        if set(coverage) == coverage_fields | legislation_coverage_fields:
+            valid_from = coverage.get("applicable_legislation_valid_from")
+            valid_to = coverage.get("applicable_legislation_valid_to")
+            if not _iso_date(valid_from) or (valid_to is not None and (not _iso_date(valid_to) or valid_to < valid_from)):
+                return _article_57_gap("inconsistent_article_57_3_registry_binding", "Evidence registry applicable-legislation coverage dates are invalid.")
+        entries[evidence_id] = entry
+    if not set(value["resolved_source_refs"]).issubset(entries):
+        return _article_57_gap("missing_article_57_3_registry_evidence", "A full-perimeter evidence reference does not resolve to a registry entry.")
+    return None
+
+
+def _article_57_per_institution_evidence(value: Any, record: dict[str, Any]) -> bool:
+    required = {"pertinent_period_refs", "total_duration", "one_year_comparator", "applicable_legislation", "autonomous_right_determination", "source_evidence_refs"}
+    if not isinstance(value, dict) or set(value) != required or not _nonempty_string_list(value.get("pertinent_period_refs")) or not _nonempty_canonical_string_list(value.get("source_evidence_refs")):
+        return False
+    duration, comparator, legislation, autonomous = (value[name] for name in ("total_duration", "one_year_comparator", "applicable_legislation", "autonomous_right_determination"))
+    if (
+        not isinstance(duration, dict) or set(duration) != {"value", "unit", "legal_basis_refs"}
+        or _rational_value(duration.get("value")) is None or not _canonical_string(duration.get("unit")) or not _nonempty_string_list(duration.get("legal_basis_refs"))
+        or not isinstance(comparator, dict) or set(comparator) != {"value", "unit", "legal_basis_refs"}
+        or _rational_value(comparator.get("value")) is None or comparator.get("unit") != duration.get("unit") or not _nonempty_string_list(comparator.get("legal_basis_refs"))
+        or not isinstance(legislation, dict) or set(legislation) != {"id", "version", "valid_from", "valid_to", "source_refs"}
+        or legislation.get("id") != record["applicable_legislation_id"] or legislation.get("version") != record["applicable_legislation_version"] or legislation.get("valid_from") != record["applicable_legislation_valid_from"] or legislation.get("valid_to") != record["applicable_legislation_valid_to"] or not _nonempty_string_list(legislation.get("source_refs"))
+        or not isinstance(autonomous, dict) or set(autonomous) != {"result", "national_rule_pack_id", "national_rule_version", "risk_materialization_date", "evidence_refs"}
+        or type(autonomous.get("result")) is not bool or not _canonical_string(autonomous.get("national_rule_pack_id")) or not _canonical_string(autonomous.get("national_rule_version")) or autonomous.get("risk_materialization_date") != record["risk_materialization_date"] or not _nonempty_string_list(autonomous.get("evidence_refs"))
+    ):
+        return False
+    relief = _rational_less_than(_rational_value(duration["value"]), _rational_value(comparator["value"])) and not autonomous["result"]
+    return record["article_57_1_relief_result"] is relief
+
+
+def _article_57_institutional_registry_binding_gap(
+    institutions: list[dict[str, Any]],
+    manifest: dict[str, Any],
+    institution_refs: list[str],
+    registry: Any,
+) -> dict[str, Any] | None:
+    """Bind technical Art. 57(1) record references without deciding legal entitlement."""
+    if not isinstance(registry, list) or not registry:
+        return _article_57_gap("missing_article_57_3_registry_evidence", "Institutional Article 57(1) evidence references require a verified registry.")
+    entries: dict[str, dict[str, Any]] = {}
+    for entry in registry:
+        if not isinstance(entry, dict) or set(entry) != {"evidence_id", "issuer_institution_ref", "content_utf8", "content_digest", "coverage", "verified"}:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Institutional Article 57(1) registry entries must use the canonical integrity shape.")
+        evidence_id = entry.get("evidence_id")
+        if not _canonical_string(evidence_id) or evidence_id in entries:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Institutional Article 57(1) registry identifiers must be canonical and unique.")
+        entries[evidence_id] = entry
+    for record in institutions:
+        evidence = record["article_57_1_evidence"]
+        for references in (evidence["source_evidence_refs"], record["evidence_refs"]):
+            if not _nonempty_canonical_string_list(references) or len(set(references)) != len(references):
+                return _article_57_gap("inconsistent_article_57_3_registry_binding", "Institutional Article 57(1) evidence-reference identifiers must be unique within each list.")
+            if any(reference not in entries for reference in references):
+                return _article_57_gap("missing_article_57_3_registry_evidence", "Each institutional Article 57(1) evidence reference must resolve to one verified registry entry.")
+            for reference in references:
+                entry = entries[reference]
+                content = entry.get("content_utf8")
+                try:
+                    expected_digest = "sha256:" + hashlib.sha256(content.encode("utf-8")).hexdigest() if isinstance(content, str) else None
+                except UnicodeEncodeError:
+                    return _article_57_gap("inconsistent_article_57_3_registry_binding", "Institutional Article 57(1) registry content must be UTF-8 encodable.")
+                if (
+                    entry.get("issuer_institution_ref") != manifest["issuer_institution_ref"]
+                    or entry.get("verified") is not True
+                    or not isinstance(entry.get("content_utf8"), str)
+                    or not isinstance(entry.get("content_digest"), str)
+                    or re.fullmatch(r"sha256:[0-9a-f]{64}", entry["content_digest"]) is None
+                    or entry["content_digest"] != expected_digest
+                ):
+                    return _article_57_gap("inconsistent_article_57_3_registry_binding", "Institutional Article 57(1) registry content, digest, verification and issuer must match the coordination manifest.")
+                coverage = entry.get("coverage")
+                required_coverage = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "as_of_date", "temporal_coverage_from", "temporal_coverage_to", "procedural_coverage_ref", "institution_refs", "applicable_legislation_valid_from", "applicable_legislation_valid_to"}
+                if not isinstance(coverage, dict) or set(coverage) != required_coverage:
+                    return _article_57_gap("inconsistent_article_57_3_registry_binding", "Institutional Article 57(1) registry coverage must bind the manifest, institutions, dates and applicable legislation.")
+                if (
+                    any(coverage[key] != manifest[key] for key in ("manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "as_of_date"))
+                    or coverage.get("institution_refs") != institution_refs
+                    or coverage.get("applicable_legislation_valid_from") != record["applicable_legislation_valid_from"]
+                    or coverage.get("applicable_legislation_valid_to") != record["applicable_legislation_valid_to"]
+                    or not _iso_date(coverage.get("temporal_coverage_from"))
+                    or not _iso_date(coverage.get("temporal_coverage_to"))
+                    or coverage["temporal_coverage_from"] > min(record["contingency_date"], record["risk_materialization_date"], record["assessment_date"])
+                    or coverage["temporal_coverage_to"] < max(record["contingency_date"], record["risk_materialization_date"], record["assessment_date"])
+                ):
+                    return _article_57_gap("inconsistent_article_57_3_registry_binding", "Institutional Article 57(1) registry coverage does not match the coordinated case, benefit, institution set, legislation or dates.")
+    return None
+
+
+def _article_57_root_reconciles(root: dict[str, Any], record: dict[str, Any], autonomous: bool | None) -> bool:
+    evidence = record["article_57_1_evidence"]
+    if any(record[field] != root[field] for field in ("member_state", "benefit_type", "scheme_id", "competent_institution", "applicable_legislation_id", "applicable_legislation_version", "applicable_legislation_valid_from", "applicable_legislation_valid_to", "risk_materialization_date", "assessment_date")):
+        return False
+    if record["local_claim_ref"] != root["root_local_claim_ref"] or record["local_benefit_ref"] != root["root_local_benefit_ref"]:
+        return False
+    for root_key, evidence_key in (("legal_duration_for_article_57", "total_duration"), ("one_year_comparator", "one_year_comparator")):
+        left, right = root[root_key], evidence[evidence_key]
+        if left.get("unit") != right["unit"] or _rational_value(left.get("value")) != _rational_value(right["value"]):
+            return False
+    determination = evidence["autonomous_right_determination"]
+    source = root.get("autonomous_right_from_state_periods_only")
+    if autonomous is None or not isinstance(source, dict) or autonomous != determination["result"] or any(source.get(a) != determination[b] for a, b in (("national_benefit_rule_pack_id", "national_rule_pack_id"), ("national_rule_version", "national_rule_version"), ("risk_materialization_date", "risk_materialization_date"))):
+        return False
+    duration = root.get("duration_strictly_less_than_one_year")
+    return type(duration) is bool and record["article_57_1_relief_result"] is (duration and not autonomous)
+
+
+def _article_57_last_state_registry_binding_gap(
+    value: Any,
+    manifest: dict[str, Any],
+    institutions: list[dict[str, Any]],
+    institution_refs: list[str],
+    assessment_date: str,
+    registry: Any,
+) -> dict[str, Any] | None:
+    # This type check is deliberately before every mapping access: public input may be a truthy scalar or list.
+    if not isinstance(value, dict):
+        return _article_57_gap("invalid_article_57_3_last_state_attestation", "Article 57(3) last-State attestation must be a canonical object; no legal last State or payer is inferred.")
+    required = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "institution_ref", "member_state", "applicable_legislation", "conditions_satisfied", "conditions_satisfied_on", "conditions_event_ref", "candidate_institution_refs", "candidate_conditions_comparability_status", "last_state_selection_status", "selection_evidence_refs", "conditions_evidence_refs", "comparability_evidence_refs", "institutional_record_evidence_refs"}
+    if set(value) != required:
+        return _article_57_gap("invalid_article_57_3_last_state_attestation", "Article 57(3) last-State attestation must use the canonical object shape.")
+    reference_fields = ("selection_evidence_refs", "conditions_evidence_refs", "comparability_evidence_refs", "institutional_record_evidence_refs")
+    legislation = value.get("applicable_legislation")
+    if (
+        any(not isinstance(value.get(field), list) or not value[field] or any(not _canonical_string(item) for item in value[field]) for field in reference_fields)
+        or not _canonical_string(value.get("conditions_event_ref"))
+        or not isinstance(legislation, dict)
+        or not isinstance(legislation.get("source_refs"), list)
+        or not legislation["source_refs"]
+        or any(not _canonical_string(item) for item in legislation["source_refs"])
+    ):
+        return _article_57_gap("missing_article_57_3_registry_evidence", "Each Article 57(3) selection, conditions, comparability, event, legislation and institutional-record category requires non-empty evidence references.")
+    if any(len(set(value[field])) != len(value[field]) for field in reference_fields) or len(set(legislation["source_refs"])) != len(legislation["source_refs"]):
+        return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) evidence-reference identifiers must be unique within each category.")
+    record = next((item for item in institutions if item["institution_ref"] == value.get("institution_ref")), None)
+    if record is None or not _article_57_last_state_evidence(value, manifest, record, institution_refs, assessment_date):
+        return _article_57_gap("invalid_article_57_3_last_state_attestation", "Article 57(3) last-State attestation must bind the manifest, selected record, conditions, event and comparability without determining a payer.")
+    references = [
+        *value["selection_evidence_refs"],
+        *value["conditions_evidence_refs"],
+        *value["comparability_evidence_refs"],
+        value["conditions_event_ref"],
+        *value["applicable_legislation"]["source_refs"],
+        *value["institutional_record_evidence_refs"],
+    ]
+    if not isinstance(registry, list) or not registry:
+        return _article_57_gap("missing_article_57_3_registry_evidence", "Each Article 57(3) selection, conditions, comparability, event, legislation and institutional-record reference requires a registry entry.")
+    if len(set(references)) != len(references):
+        return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) evidence-reference identifiers must be distinct across categories.")
+    entries: dict[str, dict[str, Any]] = {}
+    for entry in registry:
+        if not isinstance(entry, dict) or set(entry) != {"evidence_id", "issuer_institution_ref", "content_utf8", "content_digest", "coverage", "verified"}:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) evidence registry entries must use the canonical integrity shape.")
+        evidence_id = entry.get("evidence_id")
+        if not _canonical_string(evidence_id) or evidence_id in entries:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) evidence registry identifiers must be unique.")
+        if not isinstance(entry.get("content_utf8"), str) or not isinstance(entry.get("content_digest"), str) or re.fullmatch(r"sha256:[0-9a-f]{64}", entry["content_digest"]) is None:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) evidence registry content requires a strict SHA-256 UTF-8 digest.")
+        try:
+            digest = "sha256:" + hashlib.sha256(entry["content_utf8"].encode("utf-8")).hexdigest()
+        except UnicodeEncodeError:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) evidence registry content must be UTF-8 encodable.")
+        if entry["content_digest"] != digest or entry.get("verified") is not True or entry.get("issuer_institution_ref") != manifest["issuer_institution_ref"]:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) registry content, verification and issuer must match the coordination manifest.")
+        entries[evidence_id] = entry
+    if any(reference not in entries for reference in references):
+        return _article_57_gap("missing_article_57_3_registry_evidence", "Each Article 57(3) evidence reference must resolve to one verified registry entry.")
+    legislation = value["applicable_legislation"]
+    for reference in references:
+        coverage = entries[reference].get("coverage")
+        required = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "as_of_date", "temporal_coverage_from", "temporal_coverage_to", "procedural_coverage_ref", "institution_refs", "applicable_legislation_valid_from", "applicable_legislation_valid_to"}
+        if not isinstance(coverage, dict) or set(coverage) != required:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) registry coverage must bind manifest, institutions, dates and applicable legislation.")
+        if any(coverage[key] != manifest[key] for key in ("manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "as_of_date")) or coverage.get("institution_refs") != institution_refs or coverage.get("applicable_legislation_valid_from") != legislation["valid_from"] or coverage.get("applicable_legislation_valid_to") != legislation["valid_to"]:
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) registry coverage does not match the coordinated case, benefit, institution set or applicable legislation.")
+        if not _iso_date(coverage.get("temporal_coverage_from")) or not _iso_date(coverage.get("temporal_coverage_to")) or coverage["temporal_coverage_from"] > min(manifest["contingency_date"], assessment_date, value["conditions_satisfied_on"]) or coverage["temporal_coverage_to"] < max(manifest["contingency_date"], assessment_date, value["conditions_satisfied_on"]):
+            return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) registry coverage must include the contingency, event and assessment dates.")
+    return None
+
+
+def _article_57_last_state_evidence(value: dict[str, Any], manifest: dict[str, Any], record: dict[str, Any], institution_refs: list[str], assessment_date: str) -> bool:
+    required = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "institution_ref", "member_state", "applicable_legislation", "conditions_satisfied", "conditions_satisfied_on", "conditions_event_ref", "candidate_institution_refs", "candidate_conditions_comparability_status", "last_state_selection_status", "selection_evidence_refs", "conditions_evidence_refs", "comparability_evidence_refs", "institutional_record_evidence_refs"}
+    if not isinstance(value, dict) or set(value) != required:
+        return False
+    legislation = value.get("applicable_legislation")
+    return (
+        all(value.get(field) == manifest[field] for field in ("manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date"))
+        and value.get("institution_ref") == record["institution_ref"] and value.get("member_state") == record["member_state"]
+        and isinstance(legislation, dict) and set(legislation) == {"id", "version", "valid_from", "valid_to", "source_refs"}
+        and all(legislation.get(key) == record[f"applicable_legislation_{key}"] for key in ("id", "version", "valid_from", "valid_to")) and _nonempty_string_list(legislation.get("source_refs"))
+        and value.get("conditions_satisfied") is True and _iso_date(value.get("conditions_satisfied_on")) and value["conditions_satisfied_on"] <= assessment_date and _date_in_range(value["conditions_satisfied_on"], legislation["valid_from"], legislation["valid_to"]) and _canonical_string(value.get("conditions_event_ref"))
+        and value.get("candidate_institution_refs") == institution_refs
+        and value.get("candidate_conditions_comparability_status") == "verified_comparable"
+        and value.get("last_state_selection_status") == "operator_verified_unique_last_state"
+        and all(_nonempty_string_list(value.get(field)) for field in ("selection_evidence_refs", "conditions_evidence_refs", "comparability_evidence_refs", "institutional_record_evidence_refs"))
+        and set(value["institutional_record_evidence_refs"]).issubset(set(record["evidence_refs"]))
+    )
+
+
+def _article_57_institutional_records(value: Any, manifest: dict[str, Any] | None) -> list[dict[str, Any]] | None:
     if not isinstance(value, list) or not value:
         return None
     records: list[dict[str, Any]] = []
     for record in value:
-        if not isinstance(record, dict) or set(record) != {"institution_id", "member_state", "benefit_id", "benefit_type", "scheme_id", "competent_institution", "applicable_legislation_id", "applicable_legislation_version", "applicable_legislation_valid_from", "applicable_legislation_valid_to", "risk_materialization_date", "assessment_date", "transitional_applicability", "institution_order", "institution_order_evidence_refs", "article_57_1_relief_result", "evidence_refs"}:
+        if not isinstance(record, dict) or set(record) != {"institution_ref", "member_state", "coordination_manifest_ref", "coordination_case_ref", "coordinated_benefit_ref", "contingency_date", "local_claim_ref", "local_benefit_ref", "benefit_type", "scheme_id", "competent_institution", "applicable_legislation_id", "applicable_legislation_version", "applicable_legislation_valid_from", "applicable_legislation_valid_to", "risk_materialization_date", "assessment_date", "transitional_applicability", "article_57_1_relief_result", "article_57_1_evidence", "evidence_refs"}:
             return None
         if (
-            not _canonical_string(record["institution_id"])
+            manifest is None
+            or not _canonical_string(record["institution_ref"])
             or not _canonical_string(record["member_state"])
-            or any(not _canonical_string(record[field]) for field in ("benefit_id", "benefit_type", "scheme_id", "competent_institution", "applicable_legislation_id", "applicable_legislation_version"))
+            or any(record[field] != manifest[manifest_field] for field, manifest_field in (("coordination_manifest_ref", "manifest_ref"), ("coordination_case_ref", "case_ref"), ("coordinated_benefit_ref", "coordinated_benefit_ref"), ("contingency_date", "contingency_date")))
+            or not _article_57_local_reference(record["local_claim_ref"], record["institution_ref"])
+            or not _article_57_local_reference(record["local_benefit_ref"], record["institution_ref"])
+            or any(not _canonical_string(record[field]) for field in ("benefit_type", "scheme_id", "competent_institution", "applicable_legislation_id", "applicable_legislation_version"))
             or not _iso_date(record["risk_materialization_date"])
             or not _iso_date(record["assessment_date"])
             or not _iso_date(record["applicable_legislation_valid_from"])
             or (record["applicable_legislation_valid_to"] is not None and not _iso_date(record["applicable_legislation_valid_to"]))
             or not _date_in_range(record["risk_materialization_date"], record["applicable_legislation_valid_from"], record["applicable_legislation_valid_to"])
             or _transitional_result(record["transitional_applicability"], record["member_state"], record["risk_materialization_date"]) is None
-            or isinstance(record["institution_order"], bool)
-            or not isinstance(record["institution_order"], int)
-            or record["institution_order"] < 1
+            or record["risk_materialization_date"] != manifest["contingency_date"]
+            or record["assessment_date"] != manifest["as_of_date"]
             or type(record["article_57_1_relief_result"]) is not bool
-            or not _nonempty_string_list(record["institution_order_evidence_refs"])
-            or not _nonempty_string_list(record["evidence_refs"])
+            or not _article_57_per_institution_evidence(record["article_57_1_evidence"], record)
+            or not _nonempty_canonical_string_list(record["evidence_refs"])
         ):
             return None
         records.append(record)
-    if len({record["institution_id"] for record in records}) != len(records) or len({record["institution_order"] for record in records}) != len(records):
+    if len({record["institution_ref"] for record in records}) != len(records):
         return None
     return records
 
@@ -664,12 +939,16 @@ def _nonempty_string_list(value: Any) -> bool:
     return _canonical_string_list(value)
 
 
+def _nonempty_canonical_string_list(value: Any) -> bool:
+    return isinstance(value, list) and bool(value) and all(_canonical_string(item) for item in value)
+
+
 def _canonical_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value) and value == unicodedata.normalize("NFC", value)
 
 
 def _canonical_string_list(value: Any) -> bool:
-    return isinstance(value, list) and bool(value) and len(set(value)) == len(value) and all(_canonical_string(item) for item in value)
+    return isinstance(value, list) and bool(value) and all(_canonical_string(item) for item in value) and len(set(value)) == len(value)
 
 
 def _iso_date(value: Any) -> bool:
@@ -697,23 +976,38 @@ def _source_bound_result(value: Any, label: str, policy: dict[str, Any] | None =
     if label == "autonomous_right_from_state_periods_only":
         required += ("national_benefit_rule_pack_id", "national_rule_version", "risk_materialization_date")
     else:
-        required += ("annex_consolidation_version", "annex_validity_or_applicability_date", "scheme_match_status", "matched_scheme_entry", "annex_evidence_refs")
-    if any(not value.get(field) for field in required):
+        required += ("catalogue_id", "catalogue_schema_version", "catalogue_digest", "catalogue_valid_from", "annex_consolidation_version", "annex_validity_or_applicability_date", "scheme_match_status", "annex_evidence_refs")
+    if any(field not in value or value.get(field) is None for field in required) or (label == "annex_viii_part_2_applicability" and "catalogue_valid_to" not in value):
         return {"result": None}
     if label == "autonomous_right_from_state_periods_only" and (not _iso_date(value["risk_materialization_date"]) or root is None or value["risk_materialization_date"] != root["risk_materialization_date"]):
         return {"result": None}
     if label == "annex_viii_part_2_applicability":
         annex_policy = policy["annex_viii_part_2"] if policy else {}
+        catalogue_entries = annex_policy.get("catalogue_entry_ids")
+        if (
+            annex_policy.get("machine_readable_validity_catalogue_status") != "available"
+            or not _canonical_string_list(catalogue_entries)
+            or not _iso_date(value.get("catalogue_valid_from"))
+            or (value.get("catalogue_valid_to") is not None and not _iso_date(value.get("catalogue_valid_to")))
+        ):
+            return {"result": None}
         annex_date = value["annex_validity_or_applicability_date"]
         if (
             not _iso_date(annex_date)
             or value.get("annex_consolidation_version") != annex_policy.get("applicable_annex_part_2_version")
             or annex_date != (root or {}).get("risk_materialization_date")
             or not _date_in_range(annex_date, annex_policy.get("applicable_annex_part_2_valid_from", "9999-12-31"), annex_policy.get("applicable_annex_part_2_valid_to"))
+            or any(value.get(field) != annex_policy.get(field) for field in ("catalogue_id", "catalogue_schema_version", "catalogue_digest", "catalogue_valid_from", "catalogue_valid_to"))
             or value.get("scheme_match_status") not in {"matched", "not_matched", "not_assessed"}
-            or not _canonical_string(value.get("matched_scheme_entry"))
             or not _nonempty_string_list(value.get("annex_evidence_refs"))
         ):
+            return {"result": None}
+        if value["scheme_match_status"] == "matched" and (
+            not _canonical_string(value.get("matched_scheme_entry"))
+            or value["matched_scheme_entry"] not in catalogue_entries
+        ):
+            return {"result": None}
+        if value["scheme_match_status"] in {"not_matched", "not_assessed"} and value.get("matched_scheme_entry") is not None:
             return {"result": None}
         if (result is True and value["scheme_match_status"] != "matched") or (result is False and value["scheme_match_status"] != "not_matched") or (result is None and value["scheme_match_status"] != "not_assessed"):
             return {"result": None}
@@ -829,7 +1123,7 @@ def _article_57_not_assessed(base: dict[str, Any], code: str, message: str) -> d
 
 
 def _article_57_gap(code: str, message: str) -> dict[str, Any]:
-    return {"code": code, "message": message, "article_57_contract": "v0.17", "human_review_required": True}
+    return {"code": code, "message": message, "article_57_contract": "v0.25/fo-art57-c14n-v4", "human_review_required": True}
 
 
 def _spanish_pro_rata(

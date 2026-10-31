@@ -2,89 +2,107 @@
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
   "status": "completed",
-  "selected_at": "2026-10-25T20:40:00Z",
-  "updated_at": "2026-10-25T20:44:57Z",
+  "selected_at": "2026-10-31T11:21:00Z",
+  "updated_at": "2026-10-31T12:01:43Z",
   "roadmap_basis": [
     {
-      "path": "family-office-engine/docs/roadmap/roadmap-index.md",
-      "section": "Algorithm of selection — predecessor sequence gate",
-      "reason": "Governance/docs correction requested after detecting an invalid downstream V4.15 selection while V4.14 remained blocked."
+      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "section": "V4.14w-d — Art. 57 v0.21 registry content and coverage binding",
+      "reason": "w-b and w-c are done. Post-w-c roadmap audit passed; w-d is the third user-authorized increment and its v0.21 findings are explicitly marked resolved by the exact reviewed v0.22/v0.23 package, pending its own scoped state reconciliation."
     }
   ],
   "increment": {
-    "id": "governance-roadmap-predecessor-gate",
-    "title": "Enforce roadmap predecessor order",
-    "objective": "Make selection of a downstream roadmap increment impossible while any earlier unfinished predecessor remains unresolved, and document the remaining V4.14 blockers accurately.",
+    "id": "V4.14w-d-art57-v021-registry-content-coverage-binding",
+    "title": "Art. 57 v0.21 registry content and coverage binding — exact successor reconciliation",
+    "objective": "After w-c closes and roadmap audit passes, reconcile only w-d using exact evidence that the v0.21 registry-integrity findings were fixed in the implemented and independently GO-reviewed v0.22/c14n-v4 runtime with v0.23 public regressions; do not alter legal semantics or parent status.",
     "scope": [
-      "State the no-skip invariant in AGENTS.md, roadmap selection algorithm, and planner operating rules.",
-      "Add deterministic sequencing validation and regression tests for selecting a downstream increment past an unfinished predecessor.",
-      "Reconcile the V4.14 inventory into confirmed scope gaps versus stale/inconsistent roadmap statuses."
+      "Verify each w-d v0.21 finding (unique IDs/refs, content-bound SHA-256, issuer/manifest equality, full temporal coverage) against exact v0.22 runtime and v0.23 public-regression artifacts, tests, Sol/xhigh GO in w-g, and w-h's explicit reconciliation.",
+      "Use the already reproduced current full Engine suite 809/0/0/0, covering the unchanged v0.22/v0.23 controls and w-b sample correction.",
+      "Update only w-d roadmap/current-next/decision-log/planner status and its dependency link. No product code or new legal interpretation; do not close V4.14w/V4.14."
     ],
     "out_of_scope": [
-      "Do not implement pension rules, calculate individual benefits, or claim V4.14/V4.15 are unblocked.",
-      "Do not edit personal data or unrelated dirty worktree files."
+      "No personal data, individual eligibility/payment conclusions, production Annex VIII match, or payer/competent-institution/payment inference.",
+      "Do not overwrite unrelated existing worktree changes; modify only this increment's exact candidate files.",
+      "Do not create new legal semantics; source evidence validates technical consistency only and does not establish the legally competent or last State.",
+      "Do not mark V4.14w or V4.14 complete from a scoped GO; no increment beyond the user's w-b/w-c/w-d authorization."
     ],
     "candidate_files": [
-      "AGENTS.md",
-      "family-office-engine/docs/roadmap/roadmap-index.md",
-      "family-office-engine/src/family_office_engine/governance/roadmap_audit.py",
-      "family-office-engine/tests/unit/test_roadmap_audit_cadence.py",
-      "family-office-bootstrap/planning/README.md",
+      "family-office-knowledge/international/eu-pension-art57-evidence-binding-audit-candidate-v0.22.md",
+      "family-office-knowledge/international/eu-pension-art57-public-boundary-regressions-candidate-v0.23.md",
+      "family-office-rules/cross-border/eu-pension-coordination-it-es.json",
+      "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
+      "family-office-engine/tests/unit/test_it_es_eu_pension_pro_rata.py",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/decision-log.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
-    "stop_condition": "Close only when the sequencing validator regression passes, governance docs agree, planner schema and guardrails pass, and the V4.14 remaining-work inventory distinguishes capability gaps from status inconsistencies. Do not start pension implementation."
+    "stop_condition": "Close w-d only if its four v0.21 registry-integrity findings are explicitly covered by exact v0.22/c14n-v4 runtime tests and the independent w-g GO, w-h audit explicitly corroborates w-d resolution, current full Engine suite is 0/0/0, and governance passes. Otherwise keep w-d blocked; no parent closure is implied."
   },
   "verification": {
     "tests": [
-      "Roadmap sequencing targeted tests: 19 passed.",
-      "Full Engine suite: 803 tests, 0 failures, 0 errors, 0 skipped.",
-      "Roadmap audit, planner JSON schema, execution guardrails, and scoped git diff --check passed."
+      "Predecessor sequence checked: V4.14w-a done with exact v0.24/c14n-v4 limited GO; V4.14w-b is the oldest remaining incomplete increment and its declared dependencies w-a and V4.14z-c are done. Parent V4.14w/V4.14 remain blocked.",
+      "Roadmap audit passed before selection: current=V4.14w-a, functional_since_audit=0, audit_due=false.",
+      "Terra/medium implementation audit found all four historical w-b findings already covered in the current candidate; no product files changed. Evidence registry, relief/non-relief, sample digest and Art.47 traceability reviewed.",
+      "Focused Engine tests: 58 passed, 0 failures/errors/skips across Art.57 service, theoretical pension, EU coordination and citation index.",
+      "Full Engine unit suite: Ran 805 tests in 21.063s; OK (0 failures, 0 errors, 0 skipped). Initial discovery at tests/ found 0 tests; rerun at tests/unit executed the full suite.",
+      "Independent exact-hash Sol/xhigh review: NO-GO limited to w-b. P1: per-institution article_57_1_evidence.source_evidence_refs and record evidence_refs are only checked non-empty, not all resolved against the verified registry. Relief/non-relief, sample c14n digest and Art.47 traceability pass. Reviewer focused test run was blocked by Windows temp ACL; no test pass inferred from it. No files changed.",
+      "2026-10-31 user explicitly authorized a further bounded corrective cycle and three roadmap increments in strict sequence: w-b, w-c, w-d. Each increment gets a fresh default budget of one Terra implementation and one Sol/xhigh review; do not proceed past an incomplete predecessor.",
+      "Terra/medium implemented the w-b P1 as v0.25/c14n-v4; v0.24 baseline hash remains 677673C03014A040DE50830749EC6A6D7B0D5B1EE9E2251CE1872644D3C87198. Exact candidate hash 6EC547809D39DF0FEFAB7FFF9466847708DEA12DFF566192F545DCF03C06A781; Rule Pack hash 79DB4CA34217C9A4F454E13EB80ABD457C099B8F1E205974E1246FBB93AC673B. First full-suite run found three test-fixture incompatibilities with the new contract; synthetic/example fixtures were corrected. Rerun: Engine suite Ran 808 tests; OK, 0 failures/errors/skips. Roadmap audit and git diff --check pass.",
+      "Sol/xhigh exact-version review: all 11 supplied hashes, including v0.24 baseline, match. The parent's initial expected hash typo was corrected in the same review thread and is not a repository finding. Review returned NO-GO: public sample references synthetic-institutional-art57 in both institutional evidence lists, but evidence_registry includes only synthetic-institutions-completeness. Runtime P1 binding is present, but example and v0.25 contract are inconsistent; w-b cannot close.",
+      "2026-10-31 user authorizes another bounded corrective cycle and three increments. Reopened only w-b for the public sample registry mismatch and a public-builder regression; w-c and w-d remain unselected pending sequential gates.",
+      "Terra/medium corrected only the public synthetic sample and its regression. Added `synthetic-institutional-art57` with verified issuer, exact SHA-256 `sha256:119278f6814974917f15c14cefa4aefc838894f1fd43cd4a239ebecfc86e2e16`, and v0.25 coverage. v0.24 baseline remains unchanged. Parent ran the focused Art.57 module: 39 tests OK; full Engine suite: 809 tests OK, 0 failures/errors/skips.",
+      "Sol/xhigh returned GO limited to exact v0.25/c14n-v4 after all 11 hashes matched. Reviewer independently assessed the sample in memory and observed only the Annex VIII catalogue gap with Article 57/payment obligation not_assessed; it could not execute the public-builder test due Windows temp ACL, but parent reproduced the 39-test focused module and 809-test full Engine suite. The v0.24 baseline is unchanged.",
+      "w-c selection followed w-b closure and roadmap audit. Its three v0.20 findings are superseded by the exact v0.22/v0.23 tests (140 targeted, Engine 781) and Sol/xhigh GO in w-g; w-h explicitly states w-c/w-d resolved in the inspected package. Parent reran current full Engine suite outside sandbox: Ran 809 tests, OK (0 failures/errors/skips). Roadmap audit, planner schema, execution guardrails, and diff-check pass. No product-code changes or fresh normative interpretation.",
+      "w-d selected only after w-c was marked done and the post-w-c roadmap audit passed. The four v0.21 registry-integrity findings are covered by the exact v0.22/c14n-v4 runtime and v0.23 public/citation regressions (w-g exact GO); w-h explicitly says w-d resolved. Current full Engine suite already reproduced 809/0/0/0 on unchanged code.",
+      "w-d reconciliation passed: full Engine suite outside sandbox with default system temp Ran 809 tests, OK (0 failures/errors/skips); post-w-c/post-w-d roadmap audit is OK with current=V4.14w-d; planner schema, execution guardrails, and diff-check pass. w-b/w-c/w-d are the three authorized increments; parent V4.14w/V4.14 remain blocked for other findings."
     ],
     "documentation_touchpoints": [
-      "AGENTS.md",
-      "family-office-engine/docs/roadmap/roadmap-index.md",
-      "family-office-bootstrap/planning/README.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "family-office-engine/docs/current-next-increment.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
     "result": "passed",
     "task_envelope": {
       "mode": "docs-edit",
       "risk_domain": "general",
-      "objective": "Codify and test a hard roadmap predecessor gate; inventory V4.14 without changing pension semantics.",
+      "objective": "Reconcile w-d only from exact existing v0.22/v0.23 functional test and independent review evidence, after w-c closes and the post-w-c roadmap audit passes; no code or legal semantics change.",
       "repositories": [
+        "family-office-knowledge",
+        "family-office-rules",
         "family-office-engine",
         "family-office-bootstrap"
       ],
       "read_set": [
-        "AGENTS.md",
         "family-office-bootstrap/docs/playbooks/00-task-router.md",
-        "family-office-bootstrap/planning/README.md",
+        "family-office-bootstrap/docs/playbooks/07-normative-change.md",
+        "family-office-bootstrap/docs/playbooks/02-model-routing.md",
+        "family-office-bootstrap/planning/current-work.json",
         "family-office-engine/docs/roadmap/roadmap-index.md",
-        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md#V4.14",
-        "family-office-engine/src/family_office_engine/governance/roadmap_audit.py",
-        "family-office-engine/tests/unit/test_roadmap_audit_cadence.py"
+        "family-office-engine/docs/current-next-increment.md",
+        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md#V4.14w-d,V4.14w-e..h",
+        "family-office-knowledge/international/eu-pension-art57-evidence-binding-audit-candidate-v0.22.md",
+        "family-office-knowledge/international/eu-pension-art57-evidence-binding-audit-candidate-v0.24.md (read-only baseline; do not alter the reviewed w-a candidate)",
+        "family-office-knowledge/international/eu-pension-art57-public-boundary-regressions-candidate-v0.23.md",
+        "family-office-rules/cross-border/eu-pension-coordination-it-es.json",
+        "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
+        "family-office-engine/tests/unit/test_it_es_eu_pension_pro_rata.py"
       ],
       "write_set": [
-        "AGENTS.md",
-        "family-office-bootstrap/planning/README.md",
-        "family-office-engine/src/family_office_engine/governance/roadmap_audit.py",
-        "family-office-engine/tests/unit/test_roadmap_audit_cadence.py",
-        "family-office-engine/docs/roadmap/roadmap-index.md",
         "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+        "family-office-engine/docs/current-next-increment.md",
         "family-office-engine/docs/decision-log.md",
         "family-office-bootstrap/planning/current-work.json"
       ],
-      "test_command": "cd family-office-engine; .venv\\Scripts\\python.exe -m unittest discover -s tests/unit -p \"test*.py\"; .venv\\Scripts\\python.exe src\\family_office_engine\\governance\\roadmap_audit.py; cd ..; python family-office-bootstrap/planning/validate-execution-guardrails.py",
-      "stop_conditions": [
-        "Nessun dato personale fuori dal workspace privato; fixture soltanto sintetiche.",
-        "No pension or financial semantics; no individual benefits or personal workspace access.",
-        "Do not start an increment downstream of an unfinished predecessor.",
-        "Keep unrelated pre-existing worktree changes untouched."
+      "test_command": "Verify exact v0.22/v0.23 tests and Sol/xhigh GO cover all w-d findings; current full Engine suite (809 tests, 0 failures/errors/skips); roadmap audit, planner schema, execution guardrails, git diff --check.",
+    "stop_conditions": [
+        "Reviewer is read-only; no personal documents, individual outcome, or payer conclusion.",
+        "No new legal interpretation. Reconcile only w-d from exact superseding gate evidence; if any w-d finding is not covered, keep w-d blocked. Do not select any downstream increment.",
+        "Preserve pre-existing dirty artifacts and modify only listed candidate files.",
+        "Only synthetic evidence; no user workspace access."
       ]
     },
-    "notes": "The no-skip rule is now explicit in AGENTS, roadmap-index, and planner operations, with deterministic validator regressions. V4.14 remains blocked: the overall IT/ES/EU entitlement timeline and distinct recognition/economic-start/first-payment events are not completed; only narrow Italian eligibility paths and document-only Spanish/Art.57 audits have limited GO. Art.57 runtime v0.22 has a scoped GO, not production Annex VIII coverage or V4.14 closure. Roadmap statuses still conflict (V4.14w parent and w-a..d remain blocked while later w-e..g are done; V4.14x and z-b blocked while later document audits are done). Audit still reports audit_due=true because V4.15c is physically at the beginning of the active roadmap; do not select downstream functional work until the V4.14 order/statuses and audit placement are reconciled."
+    "notes": "On 2026-10-31 the user authorized one corrective cycle and three increments in order w-b, w-c, w-d. w-b and w-c are done; this third step reconciles w-d from exact w-g/w-h evidence after the post-w-c roadmap audit. Preserve unrelated dirty worktree changes and never access family-office-workspace."
   },
   "blockers": [],
   "session_notes": [
@@ -103,29 +121,36 @@
     "2026-10-20: l'utente autorizza 'procedi'; roadmap audit OK e V4.15a risulta done. Selezionato V4.15b come minimo incremento abilitante RITA source-bound, con limiti e blocchi V4.14/V4.15 preservati.",
     "2026-10-20: primo candidato tecnico V4.15b test mirati 10/0 e suite venv Engine 791/0/0/0 verdi; review Terra/high NO-GO limitato (3 P1, 1 P2). Un corrective pass autorizzato e completato.",
     "2026-10-20: re-review exact-version dopo fix: NO-GO residuo (2 P1, 1 P2); test mirati 14/0/0, suite Engine 795/0/0/0 e governance verdi. Budget del corrective/review esaurito; V4.15b bloccata finché l'utente non autorizza un nuovo micro-ciclo.",
-    "2026-10-25: user identified invalid progression from V4.14 to V4.15. This task codifies a hard predecessor gate and inventories V4.14; no pension implementation is authorized."
+    "2026-10-25: user identified invalid progression from V4.14 to V4.15. This task codifies a hard predecessor gate and inventories V4.14; no pension implementation is authorized.",
+    "2026-10-30: V4.14w-h exact-version Sol/xhigh review returned technical/provenance NO-GO and was closed as a governance audit; V4.14w/V4.14 remain blocked. User authorized up to two consecutive increments. First reopened the earliest blocked V4.14w-a to resolve Last-State registry binding and malformed-input handling; second is conditional on full gates and predecessor audit.",
+    "2026-10-30: pre-implementation Sol/xhigh review gives limited GO for a v0.24 technical provenance/fail-closed correction only. Legal basis remains Reg. 883/2004 Art.57(3) and Reg.987/2009 Art.47(4)-(7); registry/digest/issuer/coverage are internal integrity controls, not statutory forms or proof of legal last-State/payer. Mandatory public-builder fail-closed behavior and synthetic matrix recorded in the review.",
+    "2026-10-30: first exact v0.24 review NO-GO with four technical findings; corrective pass fixed them and preserved whole-registry integrity. Re-review GO after duplicate-reference taxonomy and cross-category public-builder regression; scope limited to V4.14w-a, no parent V4.14w/V4.14 closure. Full Engine 805/0/0/0.",
+    "2026-10-30: after w-a closure and successful audit, predecessor sequence confirms V4.14w-b is the oldest remaining incomplete increment; selected as the second and final increment authorized by the user. w-b has a historical v0.19 NO-GO; no GO transfers from w-a.",
+    "2026-10-31: exact-version Sol/xhigh review first hit temporary account quota; after the stated reset, the same reviewer and scope resumed and returned NO-GO. P1 remains on per-institution source refs not fully registry-resolved; no code changed. Reviewer tests were blocked by temp ACL, while parent full Engine suite is 805/0/0/0.",
+    "2026-10-31: user authorizes one bounded corrective cycle for w-b and up to three increments, strictly w-b then w-c then w-d. Current work remains w-b; no downstream increment is selected until all w-b gates pass. New corrective-cycle trace is separated from historical events, which remain documented in verification/session notes.",
+    "2026-10-31: corrective candidate v0.25 exact hashes verified; full Engine suite 808/0/0/0. Sol/xhigh review initially stopped on an incorrect expected digest supplied by parent; corrected within the same review thread, then returned NO-GO because the sample registry omits synthetic-institutional-art57. No reviewer edits. User now authorizes another bounded corrective cycle and three increments w-b/w-c/w-d in strict order."
   ],
     "next_action": {
-        "mode": "recalculate",
-        "description": "Before selecting functional work, reconcile the V4.14 Art. 57 predecessor statuses and place V4.15c at its correct roadmap position; then select only the earliest eligible V4.14 unblocker."
+    "mode": "resume",
+    "description": "Three authorized increments w-b/w-c/w-d are closed. Report pension-simulation readiness and blockers; do not select downstream work without a separate user authorization."
   },
   "routing": {
     "policy_version": "3.1",
     "tier": "low",
-    "task_class": "documentation",
-    "agent": "fo_docs_editor",
+    "task_class": "planning",
+    "agent": "fo_planner",
     "model": "gpt-5.6-luna",
     "reasoning_effort": "medium",
-    "rationale": "Governance/documentation change only: enforce predecessor order and add deterministic regression coverage; no financial or pension behavior change.",
+    "rationale": "w-d required no new code or legal interpretation: it was reconciled against the existing exact-version Sol/xhigh GO, explicit w-h audit finding, and reproducible current full-suite result. No downstream increment was selected under this authorization.",
     "trace": [
       {
-        "at": "2026-10-25T20:40:00Z",
+        "at": "2026-10-31T11:21:00Z",
         "event": "selected",
         "tier": "low",
-        "agent": "fo_docs_editor",
+        "agent": "fo_planner",
         "model": "gpt-5.6-luna",
         "reasoning_effort": "medium",
-        "reason": "Codify a governance-only predecessor gate and test it; no pension semantics or product feature work."
+        "reason": "Select w-d only for governance reconciliation against existing exact v0.22/v0.23 tests and independent GO after w-c closure and post-w-c roadmap audit; no implementation or new normative interpretation is planned."
       }
     ]
   }

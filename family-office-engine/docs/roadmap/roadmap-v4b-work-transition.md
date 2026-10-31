@@ -1,10 +1,5 @@
 # V4B Roadmap — Work Transition & Retirement Bridge
 
-### V4.15c - Code audit after RITA fund-stream intake
-
-**Stato:** `done`
-**Tipo:** `audit`
-
 Audit ricorrente eseguito dopo quattro incrementi funzionali completati. Verificati confini del servizio RITA, allineamento contratto/builder/test, regressioni, data gaps, provenance, privacy delle fixture e compatibilità dei path. Nessun blocker nel corrective pass V4.15b; follow-up non bloccante sul riesame end-to-end del timing del chiamante CLI. Suite Engine 797/0/0/0 e guardrail superati; V4.14/V4.15 restano bloccate dai prerequisiti già dichiarati.
 
 ## Obiettivo
@@ -649,11 +644,11 @@ Implementare il minimo intake question-first, workspace-local e deterministico p
 
 ### V4.14w-a — Art. 57 evidence-binding runtime fail-closed slice
 
-**Stato:** `blocked`
+**Stato:** `done`
 **Tipo:** `functional`
 **Dipende da:** V4.14w NO-GO; V4.14z-c v0.2.2 GO documentale limitato. Il GO documentale non approva il runtime.
-**Obiettivo:** correggere i finding runtime su binding del medesimo caso/beneficio coordinato, coerenza dei record Art. 57(3), fail-closed della completezza e validazione integrale della grammatica c14n-v4.
-**Scope:** Rules/Tests/Engine deterministici e fixture esclusivamente sintetiche; introdurre una versione esplicita del contratto; conservare riferimenti nazionali namespaced e non confrontare ID nazionali tra loro; nessun payer inferito; Annex VIII resta `not_assessed + data_gaps` senza catalogo eseguibile completo e versionato.
+**Obiettivo:** chiudere i finding residui di V4.14w-a/b sul fail-closed dell'attestazione Last-State e sul binding delle relative prove al registry source-bound.
+**Scope corrente (2026-10-30):** versionare il contratto tecnico Knowledge/Rules; validare il tipo di `last_state_attestation` prima di ogni accesso; risolvere refs di selezione, condizioni, comparabilità, evento, legislazione e record istituzionali in registry univoco con digest, issuer e coverage verificati su manifest/caso/beneficio/intervallo. Aggiungere regressioni sintetiche per forme malformate, ref mancanti/duplicati, digest/issuer/coverage errati e mismatch di caso. Nessuna conclusione legale di ultimo Stato, payer o pagamento; Annex VIII resta fail-closed.
 **Fuori scope:** costruzione/review del catalogo eseguibile Annex VIII, nuove conclusioni normative, casi o dati personali, importi/date individuali, sblocco complessivo V4.14/V4.15.
 **Done quando:** tutti i finding inclusi hanno regressioni; suite completa Engine termina con 0 failure, 0 errori e 0 skipped; review normativa indipendente dà GO limitato all'esatta versione runtime; roadmap audit, planner schema, execution guardrails e diff check passano. In caso contrario resta `in_progress`/`blocked`.
 **Selezione 2026-10-18:** audit roadmap OK; selezionato dopo che l'utente ha autorizzato di procedere allo sblocco di V4.14. Budget di delega ordinario massimo due eventi (implementazione e review exact-version). V4.14 resta `blocked` fino a chiusura dei finding V4.14w e degli ulteriori gap nazionali.
@@ -661,12 +656,16 @@ Implementare il minimo intake question-first, workspace-local e deterministico p
 
 **Retry reviewer exact-version (2026-10-18):** `NO-GO` confermato per `v0.18 / fo-art57-c14n-v4`. Con permesso per scrittura temporanea, test mirato 28/28 OK; la suite completa 775/0/0/0 resta quella eseguita prima del retry. I rilievi probatori P0/P1 restano invariati, quindi V4.14w-a e V4.14 restano bloccate. Nessuna modifica codice.
 
+**Ripresa 2026-10-30:** l'utente autorizza fino a due incrementi consecutivi; questo è il primo e affronta il residuo più antico. Il secondo non può iniziare finché V4.14w-a non ha GO exact-version, suite completa e guardrail verdi.
+
+**Esito 2026-10-30 — GO limitato:** candidato integrato `v0.24 / fo-art57-c14n-v4`; review normativa indipendente Sol/xhigh ha verificato gli hash esatti, inclusa la regressione public-builder cross-category. Malformazione, riferimenti mancanti/duplicati, digest/issuer/coverage e data condizioni fuori validità producono fail-closed con gap classificati; lo snapshot non espone un `article_57_3_last_state` legale e non inferisce payer/istituzione competente/pagamento. Suite Engine: 805 test, 0 failure, 0 errori, 0 skipped. Audit roadmap, schema planner, execution guardrails e diff-check passano. Il GO chiude solo V4.14w-a; V4.14w-b, V4.14w e V4.14 restano aperti/bloccati.
+
 ### V4.14w-b — Source-bound Art. 57 institutional evidence completion
 
-**Stato:** `blocked`
-**Gate:** review exact-version v0.19/c14n-v4 `NO-GO` limitata.
+**Stato:** `done`
+**Gate:** GO limitato exact-version v0.25/c14n-v4 sul sample corretto e binding registry; non chiude V4.14w né V4.14.
 **Tipo:** `functional`
-**Dipende da:** V4.14w-a (`blocked`, NO-GO exact-version v0.18/c14n-v4); V4.14z-c v0.2.2 (`done`, GO documentale limitato).
+**Dipende da:** V4.14w-a (`done`, GO limitato exact-version v0.24/c14n-v4, senza trasferimento del GO a w-b); V4.14z-c v0.2.2 (`done`, GO documentale limitato).
 **Obiettivo:** materializzare i requisiti source-bound del contratto v0.2.2 già approvato e correggere i finding P0/P1 senza introdurre interpretazioni legali nuove.
 **Scope:** candidata runtime v0.19/c14n-v4; prova del perimetro completo con issuer, data e copertura source-bound e verifica operatore; per ogni istituto periodi pertinenti, durata/comparatore, legislazione e verifica distinta del diritto autonomo; last-State con condizioni/legislazione ed evidenza dell'evento, richiedendo comparabilità attestata senza dedurre automaticamente quale Stato sia legalmente ultimo; traceability Rules agli artt. 46-48 Reg. 987/2009, in particolare art. 47(4)-(7); regressioni sintetiche Knowledge → Rules → Tests → Engine.
 **Fuori scope:** catalogo Annex VIII eseguibile, match/non-match positivi, inferenza di payer o istituzione competente, nuove regole nazionali, dati personali, importi/date individuali e sblocco complessivo V4.14/V4.15.
@@ -674,25 +673,43 @@ Implementare il minimo intake question-first, workspace-local e deterministico p
 
 **Esito reviewer (2026-10-18):** reviewer Sol/xhigh read-only concluso entro 5 minuti; autorizzata la directory temporanea dedicata. NO-GO limitato: P1 riferimenti `resolved_source_refs` e prove last-State non risolti/verificati su registry (issuer/contenuto/digest/copertura); P1 `article_57_1_relief_result` non riconciliato con le prove e non capace di rappresentare correttamente i casi non-relief; P2 `source_segment_id` del sample duration discordante dal digest c14n. Confermati Art. 47(4)-(7), c14n-v4, Annex VIII fail-closed, payer non inferito e human review. Servono nuova autorizzazione e regressioni specifiche prima di qualsiasi altro gate; V4.14 resta bloccata.
 
+**Ripresa 2026-10-30:** selezionato come secondo e ultimo incremento dell'autorizzazione utente, dopo chiusura di w-a e audit completo dei predecessori. Il GO v0.24 di w-a non si trasferisce; w-b richiede propria verifica esatta di copertura istituzionale, relief/non-relief, sample/citation e tracciabilità Art. 47. Parent V4.14w/V4.14 restano bloccati fino ai rispettivi gate.
+
+**Review exact-version 2026-10-31 — NO-GO limitato a w-b:** gli hash forniti corrispondono. Relief/non-relief Art.57(1), sample c14n-v4 e traceability Rules Art.47(4)-(7) risultano chiusi nel perimetro tecnico verificato; resta P1 il binding delle prove per singolo istituto: `article_57_1_evidence.source_evidence_refs` e `evidence_refs` del record sono controllati solo come non vuoti, non risolti tutti nel registry verificato. Il reviewer non ha potuto eseguire i test mirati per errore ACL/temp; la suite parent Engine 805/0/0/0 è passata ma non elimina il finding. Nessuna modifica runtime; Annex VIII resta fail-closed e non si inferiscono Stato ultimo, payer, entitlement o pagamento. Budget ordinario di delega esaurito; un ulteriore fix e gate exact-version richiedono nuova autorizzazione. V4.14w-b resta `blocked`; V4.14w/V4.14 non sono chiuse.
+
+**Autorizzazione correttiva 2026-10-31:** l'utente autorizza un ciclo bounded di fix/review per il P1 residuo e fino a tre incrementi roadmap consecutivi. Sequenza obbligatoria: V4.14w-b (corrente), poi V4.14w-c, poi V4.14w-d, solo dopo chiusura verificata di ogni predecessore. Il ciclo corrente risolve esclusivamente il binding registry di tutti i `source_evidence_refs` e `evidence_refs` istituzionali; mantenere v0.24 immutato e versionare l'eventuale successore. Nessuna estensione a V4.14w/V4.14 e nessun salto a w-e/f/g.
+
+**Esito ciclo correttivo 2026-10-31 — NO-GO esatto v0.25/c14n-v4:** tutti gli 11 hash candidati e il baseline v0.24 coincidono. Il reviewer Sol/xhigh conferma il binding runtime fail-closed, ma rileva che il sample `spanish-eu-theoretical-pension-pro-rata-input-sample.json` dichiara `synthetic-institutional-art57` in entrambe le liste istituzionali mentre l'evidence registry contiene solo `synthetic-institutions-completeness`; il sample quindi non soddisfa il contratto v0.25. Suite Engine riprodotta dal parent: 808 test, 0 failure/errori/skipped; audit roadmap, schema planner, execution guardrails e diff-check passano. Il primo handoff reviewer conteneva un hash atteso trascritto male; corretto senza cambi ai file, la review è stata completata e il solo finding prodotto è quello sul sample. Budget del ciclo autorizzato esaurito: w-b resta `blocked`; serve nuova autorizzazione per ulteriore fix/review. Non selezionare w-c o w-d.
+
+**Nuova autorizzazione 2026-10-31:** l'utente autorizza un ulteriore ciclo bounded e tre incrementi in ordine. Si conta la correzione corrente come w-b, poi w-c e w-d solo dopo i gate completi dei predecessori. Il ciclo w-b è riaperto per il solo mismatch nel sample sintetico e relativa regressione; nessuna semantica normativa nuova. Ogni NO-GO o gate incompleto mantiene bloccati gli incrementi successivi.
+
+**Esito correttivo 2026-10-31 — GO limitato:** review Sol/xhigh exact-version `v0.25/fo-art57-c14n-v4`; tutti gli 11 hash forniti corrispondono, il baseline v0.24 è byte-identico. Il sample ora lega `synthetic-institutional-art57` a una voce verificata con digest SHA-256 e coverage completa. Il public-builder test attesta l'assenza dei gap registry e conserva Annex VIII e obbligo di pagamento `not_assessed`; nessuna conclusione su payer, istituzione competente, entitlement o pagamento. Modulo Art.57: 39 test OK; suite Engine: 809 test, 0 failure/errori/skipped. Roadmap audit, schema planner, guardrails e diff-check verdi. GO limitato a w-b; non chiude il parent V4.14w/V4.14.
+
 ### V4.14w-c — Art. 57 v0.20 evidence registry reconciliation
 
-**Stato:** `blocked`
+**Stato:** `done`
 **Tipo:** `functional`
-**Dipende da:** V4.14w-b (`blocked`, NO-GO exact-version v0.19/c14n-v4).
+**Dipende da:** V4.14w-b (`done`, GO limitato exact-version v0.25/c14n-v4; nessuna estensione automatica del GO a w-c).
 
 Chiudere i tre finding circoscritti del NO-GO v0.19: risoluzione dei `resolved_source_refs` contro un evidence registry source-bound con issuer/digest/copertura, riconciliazione deterministica del relief result Art. 57(1) inclusi i casi non-relief, e digest c14n-v4 coerente nel sample. Il registry del candidato è sintetico e dimostra solo il contratto tecnico; Annex VIII resta fail-closed e nessun payer o diritto viene inferito.
 
-**Gate:** suite Engine 778/0/0 e verifiche di governance passano. Review normativa exact-version v0.20/c14n-v4 (retry autorizzato, 2026-10-20, timebox 5 minuti): NO-GO P1 sul registry. ID duplicati sovrascritti, digest non legato al contenuto, issuer del perimetro non confrontato col manifest e intervallo temporale non verificato; regressioni richieste. Relief Art. 57(1), non-relief, c14n sample, Annex VIII fail-closed e non-inferenza payer superati. V0.20 non approvata; V4.14w-c resta `blocked`.
+**Gate storico:** suite Engine 778/0/0 e verifiche di governance passano. Review normativa exact-version v0.20/c14n-v4 (2026-10-20): NO-GO P1 sul registry (unicità ID, digest legato al contenuto, issuer/manifest, coverage temporale). v0.20 non approvata.
+**Riconciliazione eleggibilità (2026-10-31):** i tre finding sono supersati dall'implementazione Knowledge→Rules→Tests→Engine v0.22/c14n-v4, dalle regressioni pubbliche/citation v0.23 e dal gate combinato V4.14w-g: 140 test mirati, suite Engine 781/0/0/0 e review Sol/xhigh GO limitato all'esatto pacchetto. V4.14w-h ha inoltre concluso esplicitamente che w-c è risolto nel perimetro esaminato. La suite corrente v0.25/v0.24 è 809/0/0/0. Questa riconciliazione non trasferisce il GO al parent V4.14w/V4.14 o ad altri finding.
+
+**Chiusura 2026-10-31 — stato riconciliato:** nessuna modifica di codice o nuova interpretazione. La prova combinata v0.22/v0.23 chiude esattamente i finding w-c e il parent ha riprodotto la suite corrente: 809 test, 0 failure, 0 errori, 0 skipped. Audit roadmap, planner schema, execution guardrails e diff-check passano. w-d resta il successivo predecessore incompleto; V4.14w/V4.14 restano bloccate.
 
 ### V4.14w-d — Art. 57 v0.21 registry content and coverage binding
 
-**Stato:** `blocked`
+**Stato:** `done`
 **Tipo:** `functional`
-**Dipende da:** V4.14w-c (`blocked`, NO-GO exact-version v0.20/c14n-v4); questo slice non approva né sblocca v0.20.
+**Dipende da:** V4.14w-c (`done`, findings supersati dal package v0.22/c14n-v4 + regressioni v0.23; nessun trasferimento automatico di GO).
 
 Chiudere esclusivamente i finding P1 del reviewer: ID registry e source refs univoci; digest SHA-256 strict verificato contro il contenuto UTF-8; issuer del perimetro uguale all'issuer del manifest; coverage registry che comprenda tutto l'intervallo temporale dichiarato dal perimetro. Ogni assenza, duplicato o mismatch resta fail-closed. Contenuti di casi reali restano nel workspace personale; fixtures sintetiche soltanto. Nessuna nuova conclusione legale, payer inference o esecuzione Annex VIII.
 
 **Gate:** Knowledge v0.21 → Rules → test → Engine; test mirati 138/0/0 e suite completa Engine 779/0/0/0; roadmap audit, execution guardrails, schema planner e diff-check passano. Review normativa exact-version v0.21/c14n-v4: NO-GO P1. Il registry viene bypassato nei rami non-relief/Annex e non è riconciliata l'evidenza Art.57(1) root con quella per istituzione. Runtime non approvato; il fix richiede v0.22, regressioni end-to-end e nuovo gate. Budget del ciclo corrente esaurito; V4.14w resta bloccata.
+**Riconciliazione eleggibilità (2026-10-31):** i finding w-d di integrità registry sono coperti dal runtime v0.22/c14n-v4 e dalla suite v0.23 di confine pubblico: i controlli su ID/ref, digest sul contenuto UTF-8, issuer/manifest e coverage temporale sono precondizioni globali all'assessment. Gate combinato V4.14w-g: 140 test mirati, suite Engine 781/0/0/0 e review Sol/xhigh GO limitato all'esatto package; w-h dichiara esplicitamente w-d risolto nel perimetro. La suite corrente è 809/0/0/0. Nessuna modifica funzionale o conclusione legale.
+
+**Chiusura 2026-10-31 — stato riconciliato:** w-b e w-c erano già chiusi e l'audit post-w-c ha passato la sequenza. I finding v0.21 sono coperti dall'esatto pacchetto v0.22/v0.23 e dal GO limitato w-g; il current-suite Engine è 809 test, 0 failure/errori/skipped, con schema planner, guardrails, roadmap audit e diff-check verdi. Nessuna modifica funzionale o interpretazione. Il parent V4.14w/V4.14 resta bloccato per residui ulteriori; w-e/f/g/h non ricevono un nuovo GO da questa riconciliazione.
 
 ### V4.14w-e — Art. 57 v0.22 end-to-end fail-closed reconciliation
 
@@ -700,7 +717,7 @@ Chiudere esclusivamente i finding P1 del reviewer: ID registry e source refs uni
 **Esito precedente:** il NO-GO exact-version v0.22/c14n-v4 resta storico per il pacchetto privo delle regressioni pubbliche v0.23; il gate combinato V4.14w-g ha verificato il controllo runtime.
 **Gate review:** GO indipendente limitato al pacchetto combinato runtime v0.22/c14n-v4 con regressioni pubbliche e citation v0.23.
 **Tipo:** `functional`
-**Dipende da:** V4.14w-d (`blocked`, NO-GO exact-version v0.21/c14n-v4); v0.21 resta non approvata.
+**Dipende da:** V4.14w-d (`done`, finding v0.21 coperti dal pacchetto v0.22/v0.23 e dal GO limitato w-g; nessuna estensione del GO al parent).
 
 Chiudere i due finding P1 senza introdurre semantica legale: tutti i rami decisionali devono validare manifest e registry prima di ritornare, inclusi Annex matched e non-relief; il record root e quello della stessa istituzione devono concordare sui predicati source-bound Art.57(1) (durata, comparatore, legislazione applicabile, diritto autonomo, relief). Qualunque duplicato, digest/issuer/coverage invalido o contraddizione produce `not_assessed + data_gaps`.
 
@@ -726,6 +743,25 @@ Chiudere esclusivamente i finding della review v0.22: eseguire le regressioni al
 Review normativa read-only dell'esatto pacchetto: Knowledge runtime v0.22, Rule Pack/runtime `v0.22`/`fo-art57-c14n-v4` e regressioni/citation v0.23. La review deve stabilire se le regressioni v0.23 risolvono i finding P1/P2 rispetto al medesimo runtime, senza estendere il GO ad Annex production, all'intera V4.14w/V4.14 o a casi individuali. Nessuna modifica codice/regole in questo gate.
 
 **Gate:** verdict indipendente Sol/xhigh `GO` limitato all'esatta combinazione runtime v0.22/c14n-v4 con test/citation v0.23; evidenza test parent 140/0/0/0 e suite completa Engine 781/0/0/0; schema planner, roadmap audit, execution guardrails e diff-check passano. Nessuna modifica runtime in questo gate. Restano fuori approvazione Annex VIII production, conclusioni individuali e sblocco complessivo V4.14w/V4.14.
+
+### V4.14w-h — Art. 57 exact-version status reconciliation
+
+**Stato:** `done`
+**Tipo:** `governance`
+**Dipende da:** V4.14w-e, V4.14w-f e V4.14w-g (`done`, GO limitato al pacchetto runtime v0.22/c14n-v4 e regressioni/citation v0.23); i NO-GO storici v0.18-v0.21 e gli stati `blocked` del parent/w-a..d restano da riconciliare.
+
+Richiedere una singola review normativa indipendente Sol/xhigh read-only sull'esatto Rule Pack/runtime `v0.22`/`fo-art57-c14n-v4`, Knowledge v0.22/v0.23 e regressioni pubbliche v0.23 già presenti nel worktree. La review deve stabilire quali finding di V4.14w e V4.14w-a/b/c/d siano effettivamente supersati dall'esatto pacchetto valutato e quali restino aperti; chiarire inoltre se gli audit documentali V4.14x/y/z-b/z-c hanno scope residuo o solo stati storici incoerenti.
+
+**Fuori scope:** modifiche a Knowledge/Rules/Engine o ai file dirty preesistenti; nuova interpretazione legale; catalogo Annex VIII eseguibile/produzione; casi o dati personali; inferenza di eleggibilità, istituzione competente/pagatore, riconoscimento, decorrenza o pagamento; dichiarare V4.14 completata.
+
+**Done quando:** il reviewer restituisce un verdetto exact-version entro la finestra bounded autorizzata, con finding e limiti per artefatto; solo allora roadmap/current-next/decision log possono essere aggiornati per i finding effettivamente supersati. Un NO-GO, timeout, o gap materiale mantiene V4.14w/V4.14 `blocked` e richiede una nuova autorizzazione per ulteriore implementazione/review. Fixture soltanto sintetiche; suite Engine completa 0/0/0 e guardrail governance prima della chiusura.
+
+**Esito 2026-10-30 — NO-GO tecnico/provenance, audit chiuso:** il reviewer exact-version ha confermato che w-c/w-d sono risolti nel perimetro verificato, ma w-a/w-b restano aperti per binding incompleto dei riferimenti Last-State al registry/contenuto. Sono inoltre emersi input Last-State malformati che possono sollevare eccezioni, assenza di asserzione identificativa v0.23 nel pacchetto test esaminato, traceability transitoria incompleta e rounding dipendente dal Decimal context. w-e/f/g restano GO limitati, non estesi al parent. V4.14x conserva un residuo per il catalogo Annex VIII machine-readable/temporale; z-b v0.1 è storicamente superata da z-c v0.2.2, senza approvare il runtime. Il reviewer ha eseguito un sottoinsieme con 6 pass e 2 errori di temp-directory, quindi quel run non è un gate verde; la suite Engine locale completa ha invece 803 test, 0 failure, 0 errori, 0 skipped. Il NO-GO è registrato; parent V4.14w/V4.14 e i residui w-a/b restano bloccati.
+
+### V4.15c — Code audit after RITA fund-stream intake
+
+**Stato:** `done`
+**Tipo:** `audit`
 
 ### V4.16 — Monthly decumulation and sequence-risk simulation
 

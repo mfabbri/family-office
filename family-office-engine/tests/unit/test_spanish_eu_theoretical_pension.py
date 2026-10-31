@@ -128,11 +128,10 @@ class SpanishEuTheoreticalPensionTest(unittest.TestCase):
                 spanish_theoretical_snapshot_path=theoretical_path,
             )
 
-            self.assertEqual(result["status"], "complete")
+            self.assertEqual(result["status"], "blocked_missing_inputs")
             self.assertEqual(result["spanish_theoretical_pension"]["source_country"], "ES")
-            self.assertEqual(result["spanish_pro_rata_pension"]["status"], "calculated")
-            self.assertEqual(result["spanish_pro_rata_pension"]["ratio"]["spain_months"], 12)
-            self.assertEqual(result["spanish_pro_rata_pension"]["ratio"]["total_eu_non_overlapping_months"], 304)
+            self.assertEqual(result["spanish_pro_rata_pension"]["status"], "not_calculable")
+            self.assertIn("missing_article_57_annex_viii_part_2_catalogue", {gap["code"] for gap in result["data_gaps"]})
 
     def test_rejects_unofficial_rule_source(self):
         broken = json.loads(THEORETICAL_RULE_PACK.read_text(encoding="utf-8"))
@@ -191,34 +190,49 @@ def _synthetic_article_57_assessment() -> dict:
     preimage = {
         "canonicalization_profile": "fo-art57-c14n-v4",
         "parent_period_refs": ["synthetic-period"],
-        "schema_version": "v0.17",
-        "source_bounds": [{"native_duration": {"precision": "exact", "unit": "day", "value": {"numerator": 365, "denominator": 1}}, "native_end": None, "native_start": None, "period_ref": "synthetic-period"}],
+        "schema_version": "v0.19",
+        "source_bounds": [{"native_duration": {"precision": "exact", "unit": "day", "value": {"numerator": 364, "denominator": 1}}, "native_end": None, "native_start": None, "period_ref": "synthetic-period"}],
     }
     segment_id = "sha256:" + hashlib.sha256(json.dumps(preimage, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")).hexdigest()
-    return {
-        "contract_schema_version": "v0.17", "canonicalization_profile": "fo-art57-c14n-v4", "human_review_required": True,
+    root_local_claim = {"issuer_institution_ref": "synthetic-es", "namespace": "synthetic-es-claim", "value": "claim-1", "evidence_refs": ["synthetic-local-claim"]}
+    root_local_benefit = {"issuer_institution_ref": "synthetic-es", "namespace": "synthetic-es-benefit", "value": "benefit-1", "evidence_refs": ["synthetic-local-benefit"]}
+    assessment = {
+        "contract_schema_version": "v0.25", "canonicalization_profile": "fo-art57-c14n-v4", "human_review_required": True,
         "member_state": "ES", "benefit_id": "synthetic-old-age", "benefit_type": "old_age", "scheme_id": "synthetic-es-scheme",
-        "competent_institution": "synthetic-es", "applicable_legislation_id": "synthetic-legislation", "applicable_legislation_version": "synthetic-v1",
+        "competent_institution": "synthetic-es", "root_institution_ref": "synthetic-es", "root_local_claim_ref": root_local_claim, "root_local_benefit_ref": root_local_benefit,
+        "applicable_legislation_id": "synthetic-legislation", "applicable_legislation_version": "synthetic-v1",
         "applicable_legislation_valid_from": "2020-01-01", "applicable_legislation_valid_to": None,
         "risk_materialization_date": "2026-12-01", "assessment_date": "2026-12-01",
         "transitional_applicability": _transitional("ES", "2026-12-01"),
-        "legal_duration_for_article_57": {"value": {"numerator": 365, "denominator": 1}, "unit": "day", "source_segment_id": segment_id},
+        "legal_duration_for_article_57": {"value": {"numerator": 364, "denominator": 1}, "unit": "day", "source_segment_id": segment_id},
         "one_year_comparator": {"value": {"numerator": 365, "denominator": 1}, "unit": "day", "legal_basis_refs": ["synthetic-art57-comparator"]},
-        "duration_basis": "synthetic source-bound duration", "duration_assessment_evidence_refs": ["synthetic-duration-evidence"], "duration_strictly_less_than_one_year": False,
+        "duration_basis": "synthetic source-bound duration", "duration_assessment_evidence_refs": ["synthetic-duration-evidence"], "duration_strictly_less_than_one_year": True,
         "duration_source_segment": {"segment_id": segment_id, "preimage": preimage},
         "autonomous_right_from_state_periods_only": {"result": False, "national_benefit_rule_pack_id": "synthetic-national-pack", "national_rule_version": "synthetic-v1", "risk_materialization_date": "2026-12-01", "evidence_refs": ["synthetic-autonomous-evidence"]},
-        "annex_viii_part_2_applicability": {"result": False, "annex_consolidation_version": "reg-988-2009-2010-05-01", "annex_validity_or_applicability_date": "2026-12-01", "matched_scheme_entry": "synthetic-es-scheme", "scheme_match_status": "not_matched", "annex_evidence_refs": ["synthetic-annex-evidence"]},
+        "annex_viii_part_2_applicability": {"result": None},
+        "coordination_manifest": {"manifest_ref": "synthetic-manifest", "case_ref": "synthetic-case", "coordinated_benefit_ref": "synthetic-coordinated-old-age", "contingency_date": "2026-12-01", "issuer_institution_ref": "synthetic-contact-institution", "as_of_date": "2026-12-01", "evidence_refs": ["synthetic-manifest-evidence"]},
         "concerned_institutions": [{
-            "institution_id": "synthetic-es", "member_state": "ES", "benefit_id": "synthetic-old-age", "benefit_type": "old_age", "scheme_id": "synthetic-es-scheme", "competent_institution": "synthetic-es",
+            "institution_ref": "synthetic-es", "member_state": "ES", "coordination_manifest_ref": "synthetic-manifest", "coordination_case_ref": "synthetic-case", "coordinated_benefit_ref": "synthetic-coordinated-old-age", "contingency_date": "2026-12-01", "local_claim_ref": root_local_claim, "local_benefit_ref": root_local_benefit, "benefit_type": "old_age", "scheme_id": "synthetic-es-scheme", "competent_institution": "synthetic-es",
             "applicable_legislation_id": "synthetic-legislation", "applicable_legislation_version": "synthetic-v1", "applicable_legislation_valid_from": "2020-01-01", "applicable_legislation_valid_to": None,
             "risk_materialization_date": "2026-12-01", "assessment_date": "2026-12-01",
             "transitional_applicability": _transitional("ES", "2026-12-01"),
-            "institution_order": 1, "institution_order_evidence_refs": ["synthetic-institution-order"],
-            "article_57_1_relief_result": False, "evidence_refs": ["synthetic-institutional-art57"],
+            "article_57_1_relief_result": True, "article_57_1_evidence": {"pertinent_period_refs": ["synthetic-period"], "total_duration": {"value": {"numerator": 364, "denominator": 1}, "unit": "day", "legal_basis_refs": ["synthetic-art57-duration"]}, "one_year_comparator": {"value": {"numerator": 365, "denominator": 1}, "unit": "day", "legal_basis_refs": ["synthetic-art57-comparator"]}, "applicable_legislation": {"id": "synthetic-legislation", "version": "synthetic-v1", "valid_from": "2020-01-01", "valid_to": None, "source_refs": ["synthetic-legislation-source"]}, "autonomous_right_determination": {"result": False, "national_rule_pack_id": "synthetic-national-pack", "national_rule_version": "synthetic-v1", "risk_materialization_date": "2026-12-01", "evidence_refs": ["synthetic-autonomous-evidence"]}, "source_evidence_refs": ["synthetic-institutional-art57"]}, "evidence_refs": ["synthetic-institutional-art57"],
         }],
-        "concerned_institutions_complete": {"result": True, "institution_ids": ["synthetic-es"], "evidence_refs": ["synthetic-institutions-completeness"]},
-        "all_concerned_institutions_relieved": False,
+        "institution_scope_evidence": {"manifest_ref": "synthetic-manifest", "case_ref": "synthetic-case", "coordinated_benefit_ref": "synthetic-coordinated-old-age", "contingency_date": "2026-12-01", "issuer_institution_ref": "synthetic-contact-institution", "as_of_date": "2026-12-01", "temporal_coverage_from": "2026-01-01", "temporal_coverage_to": "2026-12-31", "procedural_coverage_ref": "synthetic-procedural-scope", "institution_refs": ["synthetic-es"], "full_perimeter_status": "source_bound_full_perimeter", "operator_verification_status": "verified", "resolved_source_refs": ["synthetic-institutions-completeness"]},
+        "evidence_registry": [{"evidence_id": "synthetic-institutions-completeness", "issuer_institution_ref": "synthetic-contact-institution", "content_utf8": "synthetic evidence", "content_digest": "sha256:" + hashlib.sha256("synthetic evidence".encode("utf-8")).hexdigest(), "coverage": {"manifest_ref": "synthetic-manifest", "case_ref": "synthetic-case", "coordinated_benefit_ref": "synthetic-coordinated-old-age", "contingency_date": "2026-12-01", "as_of_date": "2026-12-01", "temporal_coverage_from": "2026-01-01", "temporal_coverage_to": "2026-12-31", "procedural_coverage_ref": "synthetic-procedural-scope", "institution_refs": ["synthetic-es"]}, "verified": True}],
     }
+    assessment["last_state_attestation"] = _last_state_attestation()
+    assessment["evidence_registry"].extend(_last_state_registry_entries())
+    return assessment
+
+
+def _last_state_attestation() -> dict:
+    return {"manifest_ref": "synthetic-manifest", "case_ref": "synthetic-case", "coordinated_benefit_ref": "synthetic-coordinated-old-age", "contingency_date": "2026-12-01", "institution_ref": "synthetic-es", "member_state": "ES", "applicable_legislation": {"id": "synthetic-legislation", "version": "synthetic-v1", "valid_from": "2020-01-01", "valid_to": None, "source_refs": ["synthetic-legislation-source"]}, "conditions_satisfied": True, "conditions_satisfied_on": "2026-11-01", "conditions_event_ref": "synthetic-condition-event", "candidate_institution_refs": ["synthetic-es"], "candidate_conditions_comparability_status": "verified_comparable", "last_state_selection_status": "operator_verified_unique_last_state", "selection_evidence_refs": ["synthetic-selection"], "conditions_evidence_refs": ["synthetic-conditions"], "comparability_evidence_refs": ["synthetic-comparability"], "institutional_record_evidence_refs": ["synthetic-institutional-art57"]}
+
+
+def _last_state_registry_entries() -> list[dict]:
+    coverage = {"manifest_ref": "synthetic-manifest", "case_ref": "synthetic-case", "coordinated_benefit_ref": "synthetic-coordinated-old-age", "contingency_date": "2026-12-01", "as_of_date": "2026-12-01", "temporal_coverage_from": "2020-01-01", "temporal_coverage_to": "2026-12-31", "procedural_coverage_ref": "synthetic-procedural-scope", "institution_refs": ["synthetic-es"], "applicable_legislation_valid_from": "2020-01-01", "applicable_legislation_valid_to": None}
+    return [{"evidence_id": evidence_id, "issuer_institution_ref": "synthetic-contact-institution", "content_utf8": f"synthetic {evidence_id}", "content_digest": "sha256:" + hashlib.sha256(f"synthetic {evidence_id}".encode("utf-8")).hexdigest(), "coverage": dict(coverage), "verified": True} for evidence_id in ("synthetic-selection", "synthetic-conditions", "synthetic-comparability", "synthetic-condition-event", "synthetic-legislation-source", "synthetic-institutional-art57")]
 
 
 def _transitional(member_state: str, risk_date: str) -> dict:
