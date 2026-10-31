@@ -7,6 +7,7 @@ sources, infer legal validity, or certify that a human review was substantive.
 from __future__ import annotations
 
 import json
+import hashlib
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable
@@ -19,6 +20,7 @@ ACTIVE_PENSION_RULE_PACKS = (
     Path("italy/2026/inps-old-age-eligibility.json"),
     Path("spain/statutory-retirement-general.json"),
     Path("cross-border/eu-pension-coordination-it-es.json"),
+    Path("cross-border/eu-pension-coordination-it-es-v5.json"),
     Path("cross-border/spanish-eu-theoretical-pension.json"),
 )
 OFFICIAL_SOURCE_HOSTS = {
@@ -91,6 +93,10 @@ def audit_pension_rule_pack(rule_pack_path: Path, as_of_date: str | date) -> dic
             "status": "fresh" if not source_gaps else "blocked",
             "data_gaps": source_gaps,
         })
+
+    registry = pack.get("normative_source_registry")
+    if registry is not None:
+        gaps.extend(_audit_normative_source_registry(registry))
 
     return {
         "path": rule_pack_path.as_posix(),
@@ -229,6 +235,51 @@ def _audit_source(source: Any, index: int, as_of: date) -> list[dict[str, Any]]:
             source_id=label,
             next_review_due=due.isoformat(),
         ))
+    return gaps
+
+
+def _audit_normative_source_registry(registry: Any) -> list[dict[str, Any]]:
+    """Validate declared source identity metadata; it is not an authenticity check."""
+    if not isinstance(registry, list) or not registry:
+        return [_gap("normative_source_registry_invalid", "normative_source_registry must be a non-empty list.")]
+    required = {
+        "registry_id", "version", "celex_or_eli", "document_type", "authority", "territory",
+        "language_scope", "oj_publication_date", "entry_into_force", "application_date_or_conditions",
+        "consolidation_as_of", "provisions", "related_amendments_or_corrigenda", "retrieved_on",
+        "reviewed_on", "integrity_digest_record",
+    }
+    identifiers: set[str] = set()
+    gaps: list[dict[str, Any]] = []
+    for index, entry in enumerate(registry):
+        if not isinstance(entry, dict) or set(entry) != required:
+            gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] has an invalid immutable identity shape."))
+            continue
+        identifier = entry.get("registry_id")
+        if not _non_empty_string(identifier) or identifier in identifiers:
+            gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] registry_id must be unique."))
+        identifiers.add(identifier) if isinstance(identifier, str) else None
+        text_fields = required - {"oj_publication_date", "entry_into_force", "consolidation_as_of", "provisions", "related_amendments_or_corrigenda", "retrieved_on", "reviewed_on"}
+        if any(not _non_empty_string(entry.get(field)) for field in text_fields):
+            gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] has missing identity metadata."))
+        if not isinstance(entry.get("provisions"), list) or not entry["provisions"] or not all(_non_empty_string(item) for item in entry["provisions"]):
+            gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] requires provisions."))
+        if not isinstance(entry.get("related_amendments_or_corrigenda"), list):
+            gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] requires a related-amendments/corrigenda list."))
+        digest_value = entry.get("integrity_digest_record")
+        canonical_record = json.dumps(
+            {key: item for key, item in entry.items() if key != "integrity_digest_record"},
+            ensure_ascii=False, separators=(",", ":"), sort_keys=True,
+        ).encode("utf-8")
+        expected_digest = "sha256:" + hashlib.sha256(canonical_record).hexdigest()
+        if digest_value != expected_digest:
+            gaps.append(_gap("normative_source_registry_integrity_digest_mismatch", f"normative_source_registry[{index}] canonical record digest does not match."))
+        for field in ("oj_publication_date", "entry_into_force", "retrieved_on", "reviewed_on"):
+            if field == "entry_into_force" and entry.get(field) == "not assessed":
+                continue
+            try:
+                _parse_date(entry.get(field), field)
+            except ValueError:
+                gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] has invalid {field}."))
     return gaps
 
 

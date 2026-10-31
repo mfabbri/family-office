@@ -758,6 +758,46 @@ Richiedere una singola review normativa indipendente Sol/xhigh read-only sull'es
 
 **Esito 2026-10-30 — NO-GO tecnico/provenance, audit chiuso:** il reviewer exact-version ha confermato che w-c/w-d sono risolti nel perimetro verificato, ma w-a/w-b restano aperti per binding incompleto dei riferimenti Last-State al registry/contenuto. Sono inoltre emersi input Last-State malformati che possono sollevare eccezioni, assenza di asserzione identificativa v0.23 nel pacchetto test esaminato, traceability transitoria incompleta e rounding dipendente dal Decimal context. w-e/f/g restano GO limitati, non estesi al parent. V4.14x conserva un residuo per il catalogo Annex VIII machine-readable/temporale; z-b v0.1 è storicamente superata da z-c v0.2.2, senza approvare il runtime. Il reviewer ha eseguito un sottoinsieme con 6 pass e 2 errori di temp-directory, quindi quel run non è un gate verde; la suite Engine locale completa ha invece 803 test, 0 failure, 0 errori, 0 skipped. Il NO-GO è registrato; parent V4.14w/V4.14 e i residui w-a/b restano bloccati.
 
+### V4.14w-i — Art. 57 post-v0.25 exact-version blocker reconciliation
+
+**Stato:** `blocked`
+**Tipo:** `audit`
+**Dipende da:** V4.14w-a/b/c/d/e/f/g/h (`done` nei rispettivi perimetri limitati); package v0.25/c14n-v4 e regressioni pubbliche già verificati da w-b.
+
+**Obiettivo:** sottoporre a review indipendente exact-version il package corrente dopo la correzione w-b v0.25, determinare se i finding w-a/w-b del NO-GO w-h sono supersati e aggiornare soltanto la mappa dei blocker tecnici/provenance di V4.14w.
+**Scope:** Knowledge Art. 57 v0.24/v0.25 e regressioni v0.23; Rule Pack, consumer Engine e fixture/test sintetici della versione esatta; confronto puntuale con i finding w-h su Last-State binding, input malformati, traceability transitoria, identificazione v0.23 e rounding.
+**Fuori scope:** modifiche runtime/rules/knowledge, interpretazione o conclusione individuale, Annex VIII production, payer/istituzione/riconoscimento/decorrenza/pagamento, chiusura di V4.14w o V4.14, accesso a `family-office-workspace/`.
+**Done quando:** reviewer `fo_normative_reviewer` Sol/xhigh produce un verdetto bounded sugli artefatti esatti; i finding sono riconciliati uno per uno con test/evidenze; suite Engine completa 0/0/0 e governance passano. Se resta un finding tecnico/provenance, w-i rimane `blocked` finché il minimo micro-incremento correttivo non lo risolve; nessun esito limitato sblocca implicitamente i parent.
+**Stop:** timeout, hash/versione non corrispondente o test non riproducibili non equivalgono a GO. Nessuna modifica di prodotto in questo audit.
+
+**Esito review exact-version (2026-10-31) — NO-GO limitato:** package identity confermata (v0.25/c14n-v4). Finding w-h #1 (binding Last-State registry/contenuto) e #3 (identificazione test/citazione v0.23) risolti nel perimetro pubblico esaminato. #2 resta incoerente: input malformati vengono validati solo dopo early-return e Knowledge promette fail-closed senza eccezioni. #4 resta aperto: provenance source-bound mancante per Reg. 883/2004 art. 87, Reg. 987/2009 artt. 93–94 e Reg. 465/2012 art. 87a. #5 resta aperto: rapporto e denaro dipendono in parte dalla precisione/rounding context Decimal ambientale. Reviewer read-only non ha eseguito test che scrivono temp/output; parent ha riprodotto la suite Engine completa nel virtualenv: **809 test, 0 failure, 0 errori, 0 skipped**. Planner schema, roadmap audit, execution guardrails e diff-check passano. Parent V4.14w/V4.14 restano bloccati; selezionare il minimo fix che copra #2/#4/#5.
+
+### V4.14w-j — Art. 57 fail-closed, transition provenance, deterministic Decimal contract
+
+**Gate pre-implementazione (2026-10-31):** Sol/xhigh ha dato GO limitato alla proposta esatta. Last-State malformato va validato prima di ogni early-return e produce `not_assessed + data_gaps`, importi nulli, senza eccezioni/inferenza. La provenance deve distinguere atto GU, consolidamento, modifiche/corrigenda, lingua, territorio e periodi; la portata HR del corrigendum 2026 resta un gap non utilizzabile. Decimal deve essere indipendente dal context ambientale. Knowledge e Rules v0.25 restano byte-identici; è ammesso un nuovo profilo coesistente selezionato esplicitamente. GO non approva runtime, casi individuali, Annex VIII production o i parent.
+**Profilo Rules richiesto:** aggiungere `eu-pension-coordination-it-es-v5.json` come profilo coesistente v0.26/v5; CLI seleziona esplicitamente v5 per default, il baseline rimane disponibile e immutato, e il freshness audit copre entrambi.
+
+**Stato:** `blocked`
+Review exact-version w-k NO-GO su residui contrattuali/provenance; nuovo corrective pass richiede scope autorizzato. Implementazione e test locali verdi, ma non sufficienti alla chiusura.
+**Tipo:** `functional`
+**Dipende da:** V4.14w-i (`blocked`; NO-GO exact-version identifica i soli gap correttivi #2/#4/#5). Questo è il micro-incremento abilitante minimo; non è lavoro a valle.
+
+**Gate pre-implementazione:** review indipendente `fo_normative_reviewer` Sol/xhigh su package/proposta esatti prima di Knowledge/Rules/Tests/Engine. Fonti primarie candidate: Reg. 883/2004 art. 87 (testo consolidato EUR-Lex 31-07-2019); Reg. 987/2009 artt. 93–94 (testo ufficiale e modifiche/corrigenda applicabili); Reg. 465/2012 art. 87a. Distinguere intervallo della disposizione, applicabilità al caso e periodi storici; nessuna applicabilità futura/incondizionata.
+**Scope:** (1) allineare contratto Knowledge e comportamento pubblico fail-closed sui Last-State malformati in tutti i rami; (2) aggiungere provenance documentale e source binding transitorio con periodo/authority per gli articoli suddetti, senza inferire esiti individuali; (3) isolare rapporto e importi dal Decimal context ambientale con precisione e rounding espliciti; testare output pubblico/persistito sotto contesti mutati.
+**Sequenza:** Knowledge → Rules (nuova versione, baseline v0.25 immutata) → Tests/fixture sintetiche → Engine. Review normativa post-fix in V4.14w-k.
+**Fuori scope:** classificazione di schemi Annex VIII in produzione, identificazione istituzione/payer, importi individuali, diritto/eligibility, riconoscimento, decorrenza o pagamento; dati personali; sblocco di V4.14w/V4.14.
+**Done quando:** pre-review GO circoscritto; candidati versionati e source-bound; regressioni pubbliche fail-closed/temporal/Decimal; suite Engine 0/0/0; review post-implementazione in w-k conferma solo il diff esatto; governance verde. Se fonti/precisione/contratto non sono approvati, fermarsi e mantenere il NO-GO.
+
+### V4.14w-k — Art. 57 exact-version post-implementation review
+
+**Stato:** `done`
+Audit read-only concluso con NO-GO limitato al candidato w-j; nessuna chiusura w-j/w-i o parent.
+**Tipo:** `audit`
+**Dipende da:** V4.14w-j (candidato implementato; w-j non chiuso perché il presente gate è NO-GO).
+**Scope:** verifica read-only degli hash esatti Knowledge v0.26, Rules v5, baseline v0.25 e consumer/test; nessuna modifica del reviewer, nessun dato personale, nessun esito individuale.
+**Esito 2026-10-31:** tutti i 13 hash forniti corrispondono, inclusi i due baseline v0.25. NO-GO per residui su (1) Last-State `null` trattato come assenza e non validato prima degli early return, (2) associazione non abbastanza stretta fra ramo di transizione e articolo citato, (3) mismatch fra compatibilità generica v0.25/v0.26 e identità del contratto selezionato, (4) attribuzione della fonte per Art. 87a. Suite locale parent: 819/0/0/0; la review non ha rilanciato i test. Il superamento dei test non rimuove questi finding.
+**Azione:** w-j e w-i restano bloccati. Non selezionare incrementi a valle; un nuovo micro-incremento correttivo richiede autorizzazione e review della base normativa Art.87a prima dell'implementazione.
+
 ### V4.15c — Code audit after RITA fund-stream intake
 
 **Stato:** `done`
@@ -862,3 +902,7 @@ Chiudere la roadmap con un workflow end-to-end sintetico e un readiness report a
 - consulenza legale, fiscale o previdenziale sostitutiva del professionista;
 - previsione certa di norme future;
 - ottimizzazione opaca non riconducibile a scenario, regole e metriche.
+
+## Stato operativo dopo V4.14w-k
+
+V4.14w-k è conclusa come audit con NO-GO. V4.14w-j e V4.14w-i restano bloccate; nessun incremento a valle è selezionabile. La suite 819/0/0/0 dimostra stabilità automatica, non risolve i finding su contratto e provenienza. Serve nuova autorizzazione per il prossimo micro-fix correttivo.

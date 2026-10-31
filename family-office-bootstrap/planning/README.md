@@ -28,6 +28,10 @@ Il planner viene marcato `superseded` e ricalcolato.
 - deleghe, escalation e fallback aggiornano la routing trace;
 - il budget ordinario è due eventi sostanziali; un'estensione fino a diciotto richiede autorizzazione utente esplicita, scope/versione e blocker registrati in `routing.delegation_budget`;
 - `routing.trace` è circoscritta all'incremento attivo; gli esiti storici si conservano in `verification`/decision log, non accumulando deleghe concluse nel budget della sessione corrente;
+- una review `done` con verdetto NO-GO chiude solo l'attività di audit: l'incremento revisionato e i suoi parent restano `blocked`/`in_progress`; suite, hash e governance verdi non annullano finding normativi, semantici o di contratto;
+- registrare gli hash esaminati e riportare il verdetto sullo stesso set di artefatti. Se l'hash cambia, la review non copre più il candidato; hash identici provano solo l'identità, non la correttezza;
+- esaurito il numero/scope di incrementi o deleghe autorizzati, fermarsi, aggiornare `blockers` e `next_action` e attendere nuova autorizzazione prima di un altro corrective loop;
+- i test di branch/early-return devono dimostrare con controlli validi che ogni ramo dichiarato è raggiungibile; non contare un preflight comune che interrompe tutti i casi come copertura dei singoli rami;
 - chiudere una sessione non significa chiudere l'incremento: un gate o un'autorizzazione ancora pendenti mantengono lo stato `in_progress`/`blocked` e una `next_action` concreta;
 - nessun dato personale o risultato sensibile nel planner;
 - niente chain-of-thought;

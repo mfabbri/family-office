@@ -1,5 +1,23 @@
 # Current Next Increment
 
+## Stato aggiornato — 2026-10-31
+
+Il gate V4.14w-k è concluso con **NO-GO** sul solo pacchetto w-j: i 13 hash esaminati coincidono, ma restano quattro finding su Last-State `null`, binding ramo/articolo delle transizioni, identità contrattuale v0.25/v0.26 e attribuzione della fonte Art. 87a. La suite Engine parent è verde (819 test, 0 failure/errori/skipped), ma non supera questi finding semantici/provenance. w-j e w-i restano bloccati; V4.14w e V4.14 restano bloccate. Il ciclo autorizzato di tre incrementi è esaurito: non è selezionato lavoro a valle; serve autorizzazione per il successivo micro-incremento correttivo, con review della fonte Art. 87a prima di implementare.
+
+## Ultimo candidato non chiuso — V4.14w-j — Art. 57 fail-closed, transition provenance, deterministic Decimal contract
+
+**Gate aggiornato:** Sol/xhigh ha dato GO pre-implementazione limitato; il post-review w-k è però NO-GO per i quattro residui descritti sopra. L'implementazione locale non è approvata per chiusura; niente dati individuali, Annex VIII production o inferenze.
+**Versioning:** preservare byte-identici Knowledge/Rules v0.25; creare `family-office-rules/cross-border/eu-pension-coordination-it-es-v5.json` come profilo coesistente v0.26/v5, selezionato esplicitamente dal CLI. Il freshness gate copre baseline e profilo nuovo.
+
+**Stato:** `blocked` — candidato implementato e verifiche automatiche verdi, ma w-k ha rilevato residui contrattuali/provenance. Nessun ulteriore fix è autorizzato nel ciclo esaurito.
+**Obiettivo:** ottenere gate normativo pre-implementazione per correggere soltanto i tre finding w-i, poi aggiornare Knowledge → Rules → Tests → Engine con fixture sintetiche.
+**Scope:** fail-closed in ogni ramo per Last-State malformato; tracciabilità source-bound temporale degli artt.87 Reg.883/2004, 93–94 Reg.987/2009, 87a Reg.465/2012; Decimal ratio/amounts deterministici indipendentemente da rounding/precision context.
+**Fuori scope:** runtime prima del GO; Annex VIII production; inferenza individuale di eligibility/istituzione/payer/riconoscimento/decorrenza/pagamento; dati personali; sblocco parent V4.14w/V4.14.
+**Route:** T4 pensione, review pre-implementazione Sol/xhigh; eventuale implementazione Terra/medium solo dopo GO. V4.14w-k è il gate post-implementazione.
+**Fonti candidate:** [Reg.883/2004, consolidato al 31-07-2019](https://eur-lex.europa.eu/eli/reg/2004/883/2019-07-31/eng); [Reg.987/2009, artt.93–94](https://eur-lex.europa.eu/eli/reg/2009/987/oj/eng); [Reg.465/2012, fonte modificativa ufficiale](https://eur-lex.europa.eu/eli/reg/2012/465/oj/eng). Consultare e registrare corrigenda/validità prima di codificare; nessuna estensione implicita.
+
+---
+
 ## Incremento chiuso — V4.14w-d — Art. 57 v0.21 registry content and coverage binding
 
 **Stato:** `done` — riconciliazione sulla base del runtime v0.22/c14n-v4, regressioni pubbliche v0.23 e review indipendente GO limitato già registrati; w-b, w-c e w-d sono chiusi.
@@ -1265,7 +1283,7 @@ V4.14 - Entitlement-driven pension timeline IT/ES/EU.
 
 ### Stato operativo dopo i tre incrementi autorizzati
 
-V4.14w-b, w-c e w-d sono chiusi in sequenza. Il prossimo gap per simulazione resta la timeline V4.14, bloccata dal NO-GO normativo del 2026-10-11: servono perimetro IT per gestione/periodo, versionamento e validità fonti ES, coordinamento UE artt. 50/52/56/57 e distinzione fra eligibility, requisiti soddisfatti, riconoscimento, decorrenza economica e primo pagamento. Anche V4.14w resta blocked per residui tecnici/provenance e Annex VIII. Nessun nuovo incremento è selezionato o autorizzato oltre il ciclo w-b/w-c/w-d.
+V4.14w-b, w-c e w-d sono chiusi in sequenza. Nel nuovo ciclo, w-i ha riconciliato il package v0.25 ma resta `blocked` per i residui #2/#4/#5 del NO-GO esatto. È selezionato w-j come micro-incremento correttivo minimo, con review normativa pre-implementazione e sequenza Knowledge → Rules → Tests → Engine; w-k sarà il gate post-implementazione solo se w-j arriva a un candidato verificabile. La timeline V4.14 resta bloccata dai gap normativi IT/ES/UE e dalla distinzione fra eligibility, requisiti soddisfatti, riconoscimento, decorrenza economica e primo pagamento; V4.14w resta bloccata finché i residui Art.57/Annex VIII non sono risolti. Il gate dei predecessori resta vincolante.
 
 **Esito storico w-b, corretto e chiuso:** il NO-GO v0.25 aveva individuato il riferimento sintetico `synthetic-institutional-art57` assente nel registry del sample; il ciclo autorizzato ha aggiunto la voce sintetica e la regressione public-builder. Knowledge v0.24 resta invariato; nessuna nuova semantica o accesso a dati personali.
 

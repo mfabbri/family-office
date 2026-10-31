@@ -135,11 +135,29 @@ class PensionSourceFreshnessTest(unittest.TestCase):
         repository_root = Path(__file__).resolve().parents[3]
         rules_root = repository_root / "family-office-rules"
 
-        report = audit_active_pension_rule_packs(rules_root, date(2026, 10, 16))
+        report = audit_active_pension_rule_packs(rules_root, date(2026, 10, 31))
 
         self.assertEqual(report["status"], "fresh", report["data_gaps"])
         self.assertFalse(report["network_checked"])
-        self.assertEqual(len(report["rule_packs"]), 5)
+        self.assertEqual(len(report["rule_packs"]), 6)
+
+    def test_v5_registry_requires_immutable_identity_metadata_without_authenticity_claim(self):
+        repository_root = Path(__file__).resolve().parents[3]
+        path = repository_root / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v5.json"
+        report = audit_pension_rule_pack(path, "2026-10-31")
+
+        self.assertEqual(report["status"], "fresh", report["data_gaps"])
+
+    def test_v5_registry_digest_mismatch_fails_closed(self):
+        pack_path = Path(__file__).resolve().parents[3] / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v5.json"
+        pack = json.loads(pack_path.read_text(encoding="utf-8"))
+        pack["normative_source_registry"][0]["authority"] = "Modified synthetic metadata"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "rules.json"
+            path.write_text(json.dumps(pack), encoding="utf-8")
+            report = audit_pension_rule_pack(path, "2026-10-31")
+        self.assertEqual(report["status"], "blocked")
+        self.assertIn("normative_source_registry_integrity_digest_mismatch", {gap["code"] for gap in report["data_gaps"]})
 
     def _audit(self, pack: dict, as_of: str) -> dict:
         with tempfile.TemporaryDirectory() as temp_dir:

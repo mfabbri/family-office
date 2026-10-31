@@ -5,7 +5,7 @@ import math
 import re
 import unicodedata
 from datetime import date
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_UP, localcontext
 from pathlib import Path
 from typing import Any
 
@@ -144,8 +144,8 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     article_57 = data["pro_rata_method"].get("article_57_source_bound")
     if not isinstance(article_57, dict):
         raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.article_57_source_bound")
-    if article_57.get("contract_schema_version") != "v0.25" or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
-        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.25/fo-art57-c14n-v4")
+    if article_57.get("contract_schema_version") not in {"v0.25", "v0.26"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.25 or v0.26 with fo-art57-c14n-v4")
     if article_57.get("human_review_required") is not True:
         raise ItEsEuPensionProRataError("Rule pack Article 57 contract must require human review")
     last_state_policy = article_57.get("last_state_attestation")
@@ -401,11 +401,11 @@ def _spanish_theoretical_amount(value: Any) -> dict[str, Any]:
     if payments is None:
         payments = 1
     if monthly_decimal is None:
-        monthly_decimal = annual_decimal / _decimal(payments, "payments_per_year")
+        monthly_decimal = _decimal_divide(annual_decimal, _decimal(payments, "payments_per_year"))
     if annual_decimal is None:
-        annual_decimal = monthly_decimal * _decimal(payments, "payments_per_year")
+        annual_decimal = _decimal_multiply(monthly_decimal, _decimal(payments, "payments_per_year"))
     if monthly is not None and annual is not None:
-        expected = _round_money(monthly_decimal * _decimal(payments, "payments_per_year"))
+        expected = _round_money(_decimal_multiply(monthly_decimal, _decimal(payments, "payments_per_year")))
         if expected != _round_money(annual_decimal):
             gaps.append(
                 {
@@ -460,16 +460,20 @@ def _article_57_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, A
     }
     if not isinstance(value, dict):
         return _article_57_not_assessed(base, "missing_article_57_source_bound_assessment", "A v0.25/fo-art57-c14n-v4 source-bound Article 57 assessment is required.")
+    if value.get("last_state_attestation") is not None:
+        structure_gap = _article_57_last_state_structure_gap(value["last_state_attestation"])
+        if structure_gap is not None:
+            return {"result": base, "data_gaps": [structure_gap]}
     _validate_article_57_contract(value, policy)
     manifest = _article_57_coordination_manifest(value.get("coordination_manifest"))
-    institutions = _article_57_institutional_records(value.get("concerned_institutions"), manifest)
+    institutions = _article_57_institutional_records(value.get("concerned_institutions"), manifest, policy)
     if manifest is None or institutions is None:
         gaps = _article_57_duration_binding_gaps(value)
         gaps.append(_article_57_gap("missing_article_57_multi_institution_evidence", "A valid manifest and institutional Article 57(1) records are required."))
         return {"result": base, "data_gaps": gaps}
+    institution_refs = sorted((record["institution_ref"] for record in institutions), key=lambda item: item.encode("utf-8"))
     if manifest["contingency_date"] != value["risk_materialization_date"] or manifest["as_of_date"] != value["assessment_date"]:
         return _article_57_not_assessed(base, "inconsistent_article_57_coordination_manifest", "The manifest must bind the root dates.")
-    institution_refs = sorted((record["institution_ref"] for record in institutions), key=lambda item: item.encode("utf-8"))
     perimeter_gap = _article_57_full_perimeter_scope_gap(value.get("institution_scope_evidence"), manifest, institution_refs, value.get("evidence_registry"))
     if perimeter_gap is not None:
         return {"result": base, "data_gaps": [perimeter_gap]}
@@ -478,7 +482,7 @@ def _article_57_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, A
     )
     if institutional_registry_gap is not None:
         return {"result": base, "data_gaps": [institutional_registry_gap]}
-    if _transitional_result(value["transitional_applicability"], value["member_state"], value["risk_materialization_date"]) is None:
+    if _transitional_result(value["transitional_applicability"], value["member_state"], value["risk_materialization_date"], policy) is None:
         return _article_57_not_assessed(base, "missing_article_57_transitional_applicability", "A decisive transitional applicability record is not assessed.")
     duration_binding_gaps = _article_57_duration_binding_gaps(value)
     duration = value.get("duration_strictly_less_than_one_year")
@@ -494,6 +498,13 @@ def _article_57_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, A
     root_record = next((record for record in institutions if record["institution_ref"] == value["root_institution_ref"]), None)
     if root_record is None or not _article_57_root_reconciles(value, root_record, autonomous["result"]):
         return _article_57_not_assessed(base, "inconsistent_article_57_root_institution_binding", "Root predicates must match the source-bound institution record.")
+    if value.get("last_state_attestation") is not None:
+        last_state_gap = _article_57_last_state_registry_binding_gap(
+            value["last_state_attestation"], manifest, institutions, institution_refs,
+            value["assessment_date"], value.get("evidence_registry"),
+        )
+        if last_state_gap is not None:
+            return {"result": base, "data_gaps": [last_state_gap]}
     if annex["result"] is True:
         base.update({
             "article_57_exception_status": "excluded_by_57_4",
@@ -552,8 +563,8 @@ def _validate_article_57_contract(value: dict[str, Any], policy: dict[str, Any])
     }
     if "schema_version" in value or set(value) - allowed:
         raise ItEsEuPensionProRataError("Article 57 assessment has forbidden root schema_version or fields.")
-    if value.get("contract_schema_version") != policy["contract_schema_version"] or value.get("canonicalization_profile") != policy["canonicalization_profile"]:
-        raise ItEsEuPensionProRataError("Article 57 assessment must use v0.25/fo-art57-c14n-v4; legacy contracts are rejected.")
+    if value.get("contract_schema_version") not in {"v0.25", "v0.26"} or value.get("canonicalization_profile") != policy["canonicalization_profile"]:
+        raise ItEsEuPensionProRataError("Article 57 assessment must use the selected v0.25 or v0.26 fo-art57-c14n-v4 contract.")
     if value.get("human_review_required") is not True:
         raise ItEsEuPensionProRataError("Article 57 assessment must require human review.")
     required_root_strings = (
@@ -882,6 +893,23 @@ def _article_57_last_state_registry_binding_gap(
     return None
 
 
+def _article_57_last_state_structure_gap(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return _article_57_gap("invalid_article_57_3_last_state_attestation", "Article 57(3) last-State attestation must be a canonical object; no legal last State or payer is inferred.")
+    required = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "institution_ref", "member_state", "applicable_legislation", "conditions_satisfied", "conditions_satisfied_on", "conditions_event_ref", "candidate_institution_refs", "candidate_conditions_comparability_status", "last_state_selection_status", "selection_evidence_refs", "conditions_evidence_refs", "comparability_evidence_refs", "institutional_record_evidence_refs"}
+    if set(value) != required:
+        return _article_57_gap("invalid_article_57_3_last_state_attestation", "Article 57(3) last-State attestation must use the canonical object shape.")
+    ref_fields = ("selection_evidence_refs", "conditions_evidence_refs", "comparability_evidence_refs", "institutional_record_evidence_refs")
+    if any(not _nonempty_canonical_string_list(value.get(field)) for field in ref_fields):
+        return _article_57_gap("missing_article_57_3_registry_evidence", "Each Article 57(3) evidence category requires non-empty canonical evidence references.")
+    legislation = value.get("applicable_legislation")
+    if not isinstance(legislation, dict) or set(legislation) != {"id", "version", "valid_from", "valid_to", "source_refs"} or not _nonempty_canonical_string_list(legislation.get("source_refs")):
+        return _article_57_gap("missing_article_57_3_registry_evidence", "Applicable-legislation evidence requires a canonical record and source references.")
+    if any(len(set(value[field])) != len(value[field]) for field in ref_fields) or len(set(legislation["source_refs"])) != len(legislation["source_refs"]):
+        return _article_57_gap("inconsistent_article_57_3_registry_binding", "Article 57(3) evidence-reference identifiers must be unique within each category.")
+    return None
+
+
 def _article_57_last_state_evidence(value: dict[str, Any], manifest: dict[str, Any], record: dict[str, Any], institution_refs: list[str], assessment_date: str) -> bool:
     required = {"manifest_ref", "case_ref", "coordinated_benefit_ref", "contingency_date", "institution_ref", "member_state", "applicable_legislation", "conditions_satisfied", "conditions_satisfied_on", "conditions_event_ref", "candidate_institution_refs", "candidate_conditions_comparability_status", "last_state_selection_status", "selection_evidence_refs", "conditions_evidence_refs", "comparability_evidence_refs", "institutional_record_evidence_refs"}
     if not isinstance(value, dict) or set(value) != required:
@@ -901,7 +929,7 @@ def _article_57_last_state_evidence(value: dict[str, Any], manifest: dict[str, A
     )
 
 
-def _article_57_institutional_records(value: Any, manifest: dict[str, Any] | None) -> list[dict[str, Any]] | None:
+def _article_57_institutional_records(value: Any, manifest: dict[str, Any] | None, policy: dict[str, Any] | None = None) -> list[dict[str, Any]] | None:
     if not isinstance(value, list) or not value:
         return None
     records: list[dict[str, Any]] = []
@@ -921,7 +949,7 @@ def _article_57_institutional_records(value: Any, manifest: dict[str, Any] | Non
             or not _iso_date(record["applicable_legislation_valid_from"])
             or (record["applicable_legislation_valid_to"] is not None and not _iso_date(record["applicable_legislation_valid_to"]))
             or not _date_in_range(record["risk_materialization_date"], record["applicable_legislation_valid_from"], record["applicable_legislation_valid_to"])
-            or _transitional_result(record["transitional_applicability"], record["member_state"], record["risk_materialization_date"]) is None
+            or _transitional_result(record["transitional_applicability"], record["member_state"], record["risk_materialization_date"], policy) is None
             or record["risk_materialization_date"] != manifest["contingency_date"]
             or record["assessment_date"] != manifest["as_of_date"]
             or type(record["article_57_1_relief_result"]) is not bool
@@ -1014,11 +1042,15 @@ def _source_bound_result(value: Any, label: str, policy: dict[str, Any] | None =
     return {"result": result}
 
 
-def _transitional_result(value: Any, member_state: str, risk_date: str) -> bool | None:
+def _transitional_result(value: Any, member_state: str, risk_date: str, policy: dict[str, Any] | None = None) -> bool | None:
+    v026 = policy is not None and "transition_source_registry" in policy
     if not isinstance(value, dict) or set(value) != {"basic_regulation_883_87", "implementing_regulation_987_93", "regulation_465_2012_883_87a", "pension_transitional_987_94_1"}:
         return None
     basic = value["basic_regulation_883_87"]
-    if not isinstance(basic, dict) or set(basic) != {"member_state", "territorial_application_date", "contingency_date", "pre_application_period_refs", "result", "evidence_refs", "data_gaps"}:
+    basic_fields = {"member_state", "territorial_application_date", "contingency_date", "pre_application_period_refs", "result", "evidence_refs", "data_gaps"}
+    if v026:
+        basic_fields.add("normative_source_refs")
+    if not isinstance(basic, dict) or set(basic) != basic_fields:
         return None
     territorial = basic["territorial_application_date"]
     if (
@@ -1039,9 +1071,12 @@ def _transitional_result(value: Any, member_state: str, risk_date: str) -> bool 
         return None
 
     implementing = value["implementing_regulation_987_93"]
+    implementing_fields = {"result", "evidence_refs", "data_gaps"}
+    if v026:
+        implementing_fields.add("normative_source_refs")
     if (
         not isinstance(implementing, dict)
-        or set(implementing) != {"result", "evidence_refs", "data_gaps"}
+        or set(implementing) != implementing_fields
         or implementing["result"] not in {"applicable", "not_applicable", "not_assessed"}
         or not _nonempty_string_list(implementing["evidence_refs"])
         or not isinstance(implementing["data_gaps"], list)
@@ -1055,6 +1090,8 @@ def _transitional_result(value: Any, member_state: str, risk_date: str) -> bool 
         "relevant_situation_unchanged", "within_ten_year_limit", "opt_out_request_date",
         "opt_out_effective_date", "result", "evidence_refs", "data_gaps",
     }
+    if v026:
+        title_ii_fields.add("normative_source_refs")
     if (
         not isinstance(title_ii, dict)
         or set(title_ii) != title_ii_fields
@@ -1082,6 +1119,8 @@ def _transitional_result(value: Any, member_state: str, risk_date: str) -> bool 
         "benefits_due_for_pre_application_period", "contingency_pre_application", "claim_awarded_before_application_date",
         "prior_leg", "basic_regulation_leg", "comparison", "preserved_result", "result", "data_gaps",
     }
+    if v026:
+        pension_fields.update({"member_state", "territorial_application_date", "normative_source_refs"})
     if (
         not isinstance(pension, dict)
         or set(pension) != pension_fields
@@ -1090,6 +1129,8 @@ def _transitional_result(value: Any, member_state: str, risk_date: str) -> bool 
         or pension["comparison"] not in {"prior_higher", "basic_higher", "equal", "not_assessed", "not_applicable"}
         or pension["preserved_result"] not in {"prior_leg", "basic_regulation_leg", "not_assessed", "not_applicable"}
         or not isinstance(pension["data_gaps"], list)
+        or (v026 and pension["member_state"] != member_state)
+        or (v026 and not _iso_date(pension["territorial_application_date"]))
     ):
         return None
     if pension["result"] == "both_legs_assessed":
@@ -1115,6 +1156,50 @@ def _transitional_result(value: Any, member_state: str, risk_date: str) -> bool 
 
     if any(value[name]["result"] == "not_assessed" for name in value):
         return None
+    if policy is not None and not _transition_source_refs_match_registry(value, policy, risk_date):
+        return None
+    return True
+
+
+def _transition_source_refs_match_registry(value: dict[str, Any], policy: dict[str, Any], risk_date: str) -> bool:
+    registry = policy.get("transition_source_registry")
+    # The v0.25 profile remains coexisting and byte-identical; only a profile
+    # that declares this v5 control is subject to its additional binding.
+    if registry is None:
+        return True
+    if not isinstance(registry, list) or not registry:
+        return False
+    entries = {entry.get("registry_id"): entry for entry in registry if isinstance(entry, dict)}
+    if len(entries) != len(registry):
+        return False
+    for item in value.values():
+        refs = item.get("normative_source_refs") if isinstance(item, dict) else None
+        if not isinstance(refs, list) or not refs or len({json.dumps(ref, sort_keys=True) for ref in refs if isinstance(ref, dict)}) != len(refs):
+            return False
+        for ref in refs:
+            if not isinstance(ref, dict) or set(ref) != {"registry_id", "version", "article", "territory", "member_state", "period_from", "period_to", "language_scope"}:
+                return False
+            if ref.get("member_state") != value["basic_regulation_883_87"].get("member_state"):
+                return False
+            entry = entries.get(ref.get("registry_id"))
+            if entry is None or any(ref.get(key) != entry.get(key) for key in ("version", "territory", "language_scope")):
+                return False
+            if ref.get("article") not in entry.get("provisions", []) or not _iso_date(ref.get("period_from")) or (ref.get("period_to") is not None and not _iso_date(ref.get("period_to"))):
+                return False
+            if (
+                not _iso_date(entry.get("period_from"))
+                or (entry.get("period_to") is not None and not _iso_date(entry.get("period_to")))
+                or ref["period_from"] < entry["period_from"]
+                or (entry.get("period_to") is not None and (ref["period_to"] is None or ref["period_to"] > entry["period_to"]))
+                or not ref["period_from"] <= risk_date <= (ref["period_to"] or "9999-12-31")
+            ):
+                return False
+            if ref["article"] == "Article 94" and (
+                item is not value.get("pension_transitional_987_94_1")
+                or item.get("member_state") != ref["member_state"]
+                or item.get("territorial_application_date") != ref["period_from"]
+            ):
+                return False
     return True
 
 
@@ -1173,9 +1258,9 @@ def _spanish_pro_rata(
         return {"result": {"status": "not_calculable", "method": rule_pack["pro_rata_method"], "article_57": article_57_result, "amounts": None}, "data_gaps": gaps}
 
     ratio_decimals = int(rule_pack["pro_rata_method"]["rounding"]["ratio_decimals"])
-    ratio = (Decimal(es) / Decimal(total)).quantize(Decimal("1").scaleb(-ratio_decimals))
-    monthly = _round_money(_decimal(theoretical_result["monthly_gross_amount"], "monthly_gross_amount") * ratio)
-    annual = _round_money(_decimal(theoretical_result["annual_gross_amount"], "annual_gross_amount") * ratio)
+    ratio = _ratio(es, total, ratio_decimals)
+    monthly = _round_money(_decimal_multiply(_decimal(theoretical_result["monthly_gross_amount"], "monthly_gross_amount"), ratio))
+    annual = _round_money(_decimal_multiply(_decimal(theoretical_result["annual_gross_amount"], "annual_gross_amount"), ratio))
     return {
         "result": {
             "status": "calculated",
@@ -1427,9 +1512,12 @@ def _write_snapshot(snapshot: dict[str, Any], output_path: Path) -> dict[str, An
 
 def _decimal(value: Any, field: str) -> Decimal:
     try:
-        return Decimal(str(value))
+        result = Decimal(str(value))
     except (InvalidOperation, TypeError) as exc:
         raise ItEsEuPensionProRataError(f"Invalid decimal value for {field}: {value}") from exc
+    if not result.is_finite() or len(result.as_tuple().digits) > 15 or result.adjusted() > 12:
+        raise ItEsEuPensionProRataError(f"Decimal operand for {field} exceeds the declared deterministic bound.")
+    return result
 
 
 def _money(value: Decimal) -> str:
@@ -1437,4 +1525,20 @@ def _money(value: Decimal) -> str:
 
 
 def _round_money(value: Decimal) -> Decimal:
-    return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    with localcontext(Context(prec=50, rounding=ROUND_HALF_UP)):
+        return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def _ratio(numerator: int, denominator: int, decimals: int) -> Decimal:
+    with localcontext(Context(prec=50, rounding=ROUND_HALF_UP)):
+        return (Decimal(numerator) / Decimal(denominator)).quantize(Decimal("1").scaleb(-decimals), rounding=ROUND_HALF_UP)
+
+
+def _decimal_multiply(left: Decimal, right: Decimal) -> Decimal:
+    with localcontext(Context(prec=50, rounding=ROUND_HALF_UP)):
+        return left * right
+
+
+def _decimal_divide(left: Decimal, right: Decimal) -> Decimal:
+    with localcontext(Context(prec=50, rounding=ROUND_HALF_UP)):
+        return left / right

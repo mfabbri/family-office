@@ -33,7 +33,7 @@ class CitationIndexTest(unittest.TestCase):
         self.assertEqual(first["schema_version"], "citation-index/v1")
         self.assertEqual(first["status"], "complete_with_gaps")
         self.assertGreaterEqual(first["summary"]["citation_count"], 10)
-        self.assertEqual(first["summary"]["knowledge_document_count"], 25)
+        self.assertEqual(first["summary"]["knowledge_document_count"], 26)
         self.assertGreaterEqual(first["summary"]["contract_count"], 15)
         self.assertEqual(
             first["reproducibility"]["content_hash"],
@@ -51,6 +51,7 @@ class CitationIndexTest(unittest.TestCase):
         self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.22", document_ids)
         self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.24", document_ids)
         self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.25", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.26", document_ids)
         self.assertIn("knowledge.international.eu-pension-art57-public-boundary-regressions-v0.23", document_ids)
         self.assertIn("knowledge.international.eu-annex-viii-part2-catalogue-candidate", document_ids)
 

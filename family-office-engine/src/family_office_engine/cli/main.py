@@ -416,7 +416,7 @@ def default_spanish_statutory_pension_output() -> Path:
 
 
 def default_eu_pension_coordination_rule_pack() -> Path:
-    return resolve_repo("rules") / "cross-border" / "eu-pension-coordination-it-es.json"
+    return resolve_repo("rules") / "cross-border" / "eu-pension-coordination-it-es-v5.json"
 
 
 def default_it_es_pension_tax_classification_rule_pack() -> Path:

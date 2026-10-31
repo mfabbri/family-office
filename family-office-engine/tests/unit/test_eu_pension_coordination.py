@@ -113,8 +113,18 @@ class EuPensionCoordinationTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp_dir:
             path = Path(tmp_dir) / "rules.json"
             path.write_text(json.dumps(broken), encoding="utf-8")
-            with self.assertRaisesRegex(EuPensionCoordinationError, "v0.25/fo-art57-c14n-v4"):
+            with self.assertRaisesRegex(EuPensionCoordinationError, "v0.25 or v0.26"):
                 load_rule_pack(path)
+
+    def test_loader_accepts_v025_and_v026_with_the_same_canonicalization_profile(self):
+        for contract_version in ("v0.25", "v0.26"):
+            pack = json.loads(RULE_PACK.read_text(encoding="utf-8"))
+            pack["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"] = contract_version
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                path = Path(tmp_dir) / "rules.json"
+                path.write_text(json.dumps(pack), encoding="utf-8")
+                loaded = load_rule_pack(path)
+            self.assertEqual(loaded["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"], contract_version)
 
     def test_rejects_annex_version_or_date_missing_from_rule_pack(self):
         for field, value in (("applicable_annex_part_2_version", ""), ("applicable_annex_part_2_valid_from", "2026-13-01")):
