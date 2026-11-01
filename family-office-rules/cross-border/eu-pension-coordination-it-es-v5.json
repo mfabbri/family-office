@@ -98,7 +98,7 @@
       "reviewed_on": "2026-10-31",
       "next_review_due": "2027-01-29",
       "provisions": [
-        "Article 87a"
+        "Article 1(11), inserting Regulation (EC) No 883/2004 Article 87a"
       ]
     },
     {
@@ -153,7 +153,7 @@
       "consolidation_as_of": "not applicable to original act",
       "provisions": [
         "Article 93",
-        "Article 94",
+        "Article 94(1)",
         "Article 97"
       ],
       "related_amendments_or_corrigenda": [
@@ -161,7 +161,7 @@
       ],
       "retrieved_on": "2026-10-31",
       "reviewed_on": "2026-10-31",
-      "integrity_digest_record": "sha256:3b8253b22e763d6bfaba1fc6fea25b2d9cc7046102ac5a46e703a67c17f98ef9"
+      "integrity_digest_record": "sha256:ff03a56a93a3125d848e83bb240ec6eae5f722ec0256451019da606aa9dedfb7"
     },
     {
       "registry_id": "reg-465-2012-original-oj",
@@ -173,15 +173,15 @@
       "language_scope": "EN/IT/ES",
       "oj_publication_date": "2012-06-08",
       "entry_into_force": "2012-06-28",
-      "application_date_or_conditions": "Article 87a Title II unchanged-situation transition, maximum ten years and opt-out; no automatic Art.57/pension applicability inference",
+      "application_date_or_conditions": "Article 1(11) inserts Article 87a: Title II unchanged-situation transition, maximum ten years and opt-out; no automatic Art.57/pension applicability inference",
       "consolidation_as_of": "not applicable to original amendment",
       "provisions": [
-        "Article 87a"
+        "Article 1(11)"
       ],
       "related_amendments_or_corrigenda": [],
       "retrieved_on": "2026-10-31",
       "reviewed_on": "2026-10-31",
-      "integrity_digest_record": "sha256:e6fcdaa7dfd340cdb4a2f239caa2d9670556bbcb0371178ef3da20bb0581ebe4"
+      "integrity_digest_record": "sha256:30ad2727a3b3b4a95214dc698adf2f43ff2681d70129971882e85d094d847154"
     },
     {
       "registry_id": "reg-987-2009-corrigendum-2026-07-22",
@@ -284,7 +284,8 @@
           "language_scope": "EN/IT/ES",
           "provisions": [
             "Article 93",
-            "Article 94"
+            "Article 94(1)",
+            "Article 97"
           ],
           "period_from": "2010-05-01",
           "period_to": null
@@ -295,12 +296,86 @@
           "territory": "EU",
           "language_scope": "EN/IT/ES",
           "provisions": [
-            "Article 87a"
+            "Article 1(11)"
           ],
           "period_from": "2012-06-28",
           "period_to": null
         }
       ],
+      "transition_branch_bindings": {
+        "basic_regulation_883_87": {
+          "registry_id": "reg-883-2004-original-oj",
+          "article": "Article 87"
+        },
+        "implementing_regulation_987_93": {
+          "registry_id": "reg-987-2009-original-oj",
+          "article": "Article 93"
+        },
+        "regulation_465_2012_883_87a": {
+          "registry_id": "reg-465-2012-original-oj",
+          "article": "Article 1(11)",
+          "target_regulation": "Regulation (EC) No 883/2004",
+          "target_article": "Article 87a"
+        },
+        "pension_transitional_987_94_1": {
+          "registry_id": "reg-987-2009-original-oj",
+          "article": "Article 94(1)"
+        }
+      },
+      "article_94_1_it_es_semantics": {
+        "split_period_contract_by_member_state": {
+          "IT": {
+            "boundary_date": "2010-05-01",
+            "article_94_1_source": {
+              "registry_id": "reg-987-2009-original-oj",
+              "version": "CELEX:32009R0987/OJ",
+              "article": "Article 94(1)",
+              "territory": "EU",
+              "language_scope": "EN/IT/ES"
+            },
+            "article_97_source": {
+              "registry_id": "reg-987-2009-original-oj",
+              "version": "CELEX:32009R0987/OJ",
+              "article": "Article 97",
+              "territory": "EU",
+              "language_scope": "EN/IT/ES"
+            }
+          },
+          "ES": {
+            "boundary_date": "2010-05-01",
+            "article_94_1_source": {
+              "registry_id": "reg-987-2009-original-oj",
+              "version": "CELEX:32009R0987/OJ",
+              "article": "Article 94(1)",
+              "territory": "EU",
+              "language_scope": "EN/IT/ES"
+            },
+            "article_97_source": {
+              "registry_id": "reg-987-2009-original-oj",
+              "version": "CELEX:32009R0987/OJ",
+              "article": "Article 97",
+              "territory": "EU",
+              "language_scope": "EN/IT/ES"
+            }
+          }
+        },
+        "prior_leg_period": {
+          "start_relation_to_boundary": "strictly_before",
+          "end_exclusive_relation_to_boundary": "equals"
+        },
+        "basic_regulation_leg_period": {
+          "start_relation_to_boundary": "equals",
+          "end_exclusive_relation_to_boundary": "strictly_after"
+        },
+        "contiguity": {
+          "prior_end_exclusive_equals_basic_start": true,
+          "shared_boundary_equals_member_state_boundary": true
+        },
+        "amount_selection": {
+          "prior_greater_than_basic": "prior_leg",
+          "prior_less_than_or_equal_to_basic": "basic_regulation_leg"
+        }
+      },
       "legal_duration": {
         "source_bound_required": true,
         "requires_duration_basis": true,

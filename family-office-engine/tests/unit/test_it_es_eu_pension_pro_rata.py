@@ -19,7 +19,152 @@ RULE_PACK_V5 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pe
 
 
 class ItEsEuPensionProRataTest(unittest.TestCase):
-    def test_v026_supplied_malformed_last_state_fails_closed_before_every_early_return(self):
+    def test_v026_article_94_1_it_es_strict_temporal_predicates_boundaries_and_selection(self):
+        from family_office_engine.services.it_es_eu_pension_pro_rata import (
+            _article_57_assessment,
+            _transitional_result,
+        )
+
+        policy = load_rule_pack(RULE_PACK_V5)["pro_rata_method"]["article_57_source_bound"]
+        for member_state in ("IT", "ES"):
+            for prior_amount, basic_amount, comparison, preserved in (
+                ("101.00", "100.00", "prior_higher", "prior_leg"),
+                ("100.00", "100.00", "equal", "basic_regulation_leg"),
+                ("100.00", "101.00", "basic_higher", "basic_regulation_leg"),
+            ):
+                transitional = _transitional_v026(member_state, "2026-12-01")
+                _set_article_94_both_legs(transitional, prior_amount, basic_amount, comparison, preserved)
+                with self.subTest(member_state=member_state, comparison=comparison):
+                    self.assertTrue(_transitional_result(transitional, member_state, "2026-12-01", policy))
+
+            for field, value in (
+                ("benefits_due_for_pre_application_period", False),
+                ("contingency_pre_application", False),
+                ("claim_awarded_before_application_date", True),
+            ):
+                transitional = _transitional_v026(member_state, "2026-12-01")
+                pension = transitional["pension_transitional_987_94_1"]
+                pension[field] = value
+                with self.subTest(member_state=member_state, false_predicate=field):
+                    self.assertTrue(_transitional_result(transitional, member_state, "2026-12-01", policy))
+
+            for mutation in (
+                "unknown", "application_date", "both_preceding", "overlapping", "gapped",
+                "unequal_boundary", "malformed_prior_end", "unknown_basic_end", "comparison", "amount",
+            ):
+                transitional = _transitional_v026(member_state, "2026-12-01")
+                _set_article_94_both_legs(transitional, "101.00", "100.00", "prior_higher", "prior_leg")
+                pension = transitional["pension_transitional_987_94_1"]
+                if mutation == "unknown":
+                    pension["contingency_pre_application"] = None
+                    pension["result"] = "not_assessed"
+                    pension["prior_leg"] = None
+                    pension["basic_regulation_leg"] = None
+                    pension["comparison"] = "not_assessed"
+                    pension["preserved_result"] = "not_assessed"
+                    pension["data_gaps"] = [{"code": "unknown_contingency"}]
+                elif mutation == "application_date":
+                    pension["territorial_application_date"] = "2010-05-02"
+                elif mutation == "both_preceding":
+                    pension["basic_regulation_leg"]["period"] = {
+                        "start_date": "2009-01-01", "end_date_exclusive": "2010-05-01"
+                    }
+                elif mutation == "overlapping":
+                    pension["basic_regulation_leg"]["period"]["start_date"] = "2010-04-30"
+                elif mutation == "gapped":
+                    pension["basic_regulation_leg"]["period"]["start_date"] = "2010-05-02"
+                elif mutation == "unequal_boundary":
+                    pension["prior_leg"]["period"]["end_date_exclusive"] = "2010-04-30"
+                elif mutation == "malformed_prior_end":
+                    pension["prior_leg"]["period"]["end_date_exclusive"] = "not-a-date"
+                elif mutation == "unknown_basic_end":
+                    pension["basic_regulation_leg"]["period"]["end_date_exclusive"] = None
+                elif mutation == "comparison":
+                    pension["comparison"] = "equal"
+                    pension["preserved_result"] = "basic_regulation_leg"
+                else:
+                    pension["prior_leg"]["amount"] = "not-a-decimal"
+                with self.subTest(member_state=member_state, mutation=mutation):
+                    self.assertIsNone(_transitional_result(transitional, member_state, "2026-12-01", policy))
+                    if mutation in {"malformed_prior_end", "unknown_basic_end"}:
+                        assessment = _article_57_v026(False, False, None)
+                        assessment["transitional_applicability"] = transitional
+                        outcome = _article_57_assessment(assessment, load_rule_pack(RULE_PACK_V5))
+                        self.assertIn(
+                            "missing_article_57_transitional_applicability",
+                            {gap["code"] for gap in outcome["data_gaps"]},
+                        )
+
+    def test_v026_public_builder_fails_closed_for_every_invalid_article_94_split_boundary(self):
+        invalid_cases = {
+            "both_preceding": lambda pension: pension["basic_regulation_leg"].update({
+                "period": {"start_date": "2009-01-01", "end_date_exclusive": "2010-05-01"}
+            }),
+            "overlap": lambda pension: pension["basic_regulation_leg"]["period"].update({"start_date": "2010-04-30"}),
+            "gap": lambda pension: pension["basic_regulation_leg"]["period"].update({"start_date": "2010-05-02"}),
+            "unequal_boundaries": lambda pension: pension["prior_leg"]["period"].update({"end_date_exclusive": "2010-04-30"}),
+        }
+        for endpoint, leg, field in (
+            ("prior_start", "prior_leg", "start_date"),
+            ("prior_end_exclusive", "prior_leg", "end_date_exclusive"),
+            ("basic_start", "basic_regulation_leg", "start_date"),
+            ("basic_end_exclusive", "basic_regulation_leg", "end_date_exclusive"),
+        ):
+            for kind, value in (("null", None), ("unknown", "unknown"), ("non_iso", "2010/05/01")):
+                invalid_cases[f"{endpoint}_{kind}"] = (
+                    lambda pension, leg=leg, field=field, value=value: pension[leg]["period"].update({field: value})
+                )
+
+        for case, mutate in invalid_cases.items():
+            payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
+            assessment = _article_57_v026(False, False, None)
+            _set_article_94_both_legs(
+                assessment["transitional_applicability"], "101.00", "100.00", "prior_higher", "prior_leg"
+            )
+            for record in assessment["concerned_institutions"]:
+                _set_article_94_both_legs(
+                    record["transitional_applicability"], "101.00", "100.00", "prior_higher", "prior_leg"
+                )
+            mutate(assessment["transitional_applicability"]["pension_transitional_987_94_1"])
+            payload["article_57_assessment"] = assessment
+            with self.subTest(case=case):
+                snapshot = self._build(payload, RULE_PACK_V5)
+                self.assertEqual(snapshot["status"], "blocked_missing_inputs")
+                self.assertEqual(snapshot["article_57"]["article_57_exception_status"], "not_assessed")
+                self.assertEqual(snapshot["spanish_pro_rata_pension"]["status"], "not_calculable")
+                self.assertIsNone(snapshot["spanish_pro_rata_pension"]["amounts"])
+                self.assertIn(
+                    "missing_article_57_transitional_applicability",
+                    {gap["code"] for gap in snapshot["data_gaps"]},
+                )
+
+    def test_v026_cross_pair_persists_fail_closed_contract_identity_snapshot(self):
+        for rule_pack, assessment in ((RULE_PACK, _article_57_v026(False, False, None)), (RULE_PACK_V5, _article_57(False, False, None))):
+            payload = _input([])
+            payload["article_57_assessment"] = assessment
+            snapshot = self._build(payload, rule_pack)
+            with self.subTest(rule_pack=rule_pack.name):
+                self.assertEqual(snapshot["status"], "blocked_missing_inputs")
+                self.assertEqual(snapshot["article_57"]["article_57_exception_status"], "not_assessed")
+                self.assertEqual(snapshot["spanish_entitlement"]["status"], "not_assessed")
+                self.assertEqual(snapshot["spanish_theoretical_pension"]["status"], "not_assessed")
+                self.assertEqual(snapshot["spanish_pro_rata_pension"]["status"], "not_calculable")
+                self.assertIsNone(snapshot["spanish_pro_rata_pension"]["amounts"])
+                gap = next(item for item in snapshot["data_gaps"] if item["code"] == "article_57_contract_identity_mismatch")
+                self.assertEqual(gap["expected_contract_identity"]["contract_schema_version"], snapshot["article_57"]["contract_schema_version"])
+                self.assertEqual(gap["supplied_contract_identity"]["contract_schema_version"], assessment["contract_schema_version"])
+                self.assertEqual(snapshot["rule_pack"]["rule_pack_id"], load_rule_pack(rule_pack)["rule_pack_id"])
+                self.assertRegex(snapshot["rule_pack"]["sha256"], r"^[0-9a-f]{64}$")
+
+    def test_v025_and_v026_valid_pairs_remain_usable(self):
+        payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
+        for rule_pack, assessment in ((RULE_PACK, _article_57(False, False, None)), (RULE_PACK_V5, _article_57_v026(False, False, None))):
+            payload["article_57_assessment"] = assessment
+            with self.subTest(rule_pack=rule_pack.name):
+                snapshot = self._build(deepcopy(payload), rule_pack)
+                self.assertNotIn("article_57_contract_identity_mismatch", {gap["code"] for gap in snapshot["data_gaps"]})
+
+    def test_v026_supplied_null_or_malformed_last_state_fails_closed_before_every_early_return(self):
         from family_office_engine.services.it_es_eu_pension_pro_rata import _article_57_assessment
 
         policy = load_rule_pack(RULE_PACK_V5)
@@ -49,11 +194,13 @@ class ItEsEuPensionProRataTest(unittest.TestCase):
                 assessment["institution_scope_evidence"]["institution_refs"] = institution_refs
                 for entry in assessment["evidence_registry"]:
                     entry["coverage"]["institution_refs"] = institution_refs
-            assessment["last_state_attestation"].pop("selection_evidence_refs")
-            outcome = _article_57_assessment(assessment, policy)
-            self.assertEqual(outcome["result"]["article_57_exception_status"], "not_assessed")
-            self.assertEqual(outcome["result"]["national_payment_obligation_status"], "not_assessed")
-            self.assertIn("invalid_article_57_3_last_state_attestation", {gap["code"] for gap in outcome["data_gaps"]})
+            for supplied in (None, "malformed-supplied-evidence"):
+                candidate = deepcopy(assessment)
+                candidate["last_state_attestation"] = supplied
+                outcome = _article_57_assessment(candidate, policy)
+                self.assertEqual(outcome["result"]["article_57_exception_status"], "not_assessed")
+                self.assertEqual(outcome["result"]["national_payment_obligation_status"], "not_assessed")
+                self.assertIn("invalid_article_57_3_last_state_attestation", {gap["code"] for gap in outcome["data_gaps"]})
 
     def test_v026_transition_registry_binding_fails_closed_on_missing_duplicate_or_mismatch(self):
         from family_office_engine.services.it_es_eu_pension_pro_rata import _article_57_assessment
@@ -94,15 +241,32 @@ class ItEsEuPensionProRataTest(unittest.TestCase):
         self.assertFalse(_transition_source_refs_match_registry(transitional, policy, "2010-05-01"))
         self.assertTrue(_transition_source_refs_match_registry(transitional, policy, "2012-06-28"))
 
-    def test_v026_rule_loader_keeps_v025_compatibility(self):
-        for contract_version in ("v0.25", "v0.26"):
-            pack = json.loads(RULE_PACK_V5.read_text(encoding="utf-8"))
+    def test_rule_pack_contract_identity_rejects_v025_v026_cross_pairs(self):
+        for path_source, contract_version in ((RULE_PACK, "v0.26"), (RULE_PACK_V5, "v0.25")):
+            pack = json.loads(path_source.read_text(encoding="utf-8"))
             pack["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"] = contract_version
             with tempfile.TemporaryDirectory() as tmp_dir:
                 path = Path(tmp_dir) / "rules.json"
                 path.write_text(json.dumps(pack), encoding="utf-8")
-                loaded = load_rule_pack(path)
-            self.assertEqual(loaded["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"], contract_version)
+                with self.assertRaisesRegex(ItEsEuPensionProRataError, "contract identity"):
+                    load_rule_pack(path)
+
+    def test_v026_loader_rejects_missing_or_altered_article_94_split_period_metadata(self):
+        for mutation in (
+            lambda semantics: semantics.pop("contiguity"),
+            lambda semantics: semantics["split_period_contract_by_member_state"]["IT"].update({"boundary_date": "2010-05-02"}),
+            lambda semantics: semantics["split_period_contract_by_member_state"]["ES"]["article_94_1_source"].update({"article": "Article 94"}),
+            lambda semantics: semantics["prior_leg_period"].update({"start_relation_to_boundary": "equals"}),
+            lambda semantics: semantics["amount_selection"].update({"prior_less_than_or_equal_to_basic": "prior_leg"}),
+        ):
+            pack = json.loads(RULE_PACK_V5.read_text(encoding="utf-8"))
+            mutation(pack["pro_rata_method"]["article_57_source_bound"]["article_94_1_it_es_semantics"])
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                path = Path(tmp_dir) / "rules.json"
+                path.write_text(json.dumps(pack), encoding="utf-8")
+                with self.subTest(mutation=mutation):
+                    with self.assertRaisesRegex(ItEsEuPensionProRataError, "Article 94\\(1\\)|split-period"):
+                        load_rule_pack(path)
 
     def test_v025_pro_rata_contract_remains_usable_with_its_historical_transition_shape(self):
         payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
@@ -1276,7 +1440,40 @@ def _transitional(member_state: str, risk_date: str) -> dict:
     pension = value["pension_transitional_987_94_1"]
     pension.pop("member_state")
     pension.pop("territorial_application_date")
+    pension.pop("contingency_date")
     return value
+
+
+def _set_article_94_both_legs(
+    transitional: dict, prior_amount: str, basic_amount: str, comparison: str, preserved_result: str
+) -> None:
+    pension = transitional["pension_transitional_987_94_1"]
+    prior_period = {"start_date": "2009-01-01", "end_date_exclusive": "2010-05-01"}
+    basic_period = {"start_date": "2010-05-01", "end_date_exclusive": "2011-01-01"}
+    pension.update({
+        "benefits_due_for_pre_application_period": True,
+        "contingency_pre_application": True,
+        "contingency_date": "2010-04-30",
+        "claim_awarded_before_application_date": False,
+        "prior_leg": {
+            "legal_basis": "synthetic-prior-member-state-legislation",
+            "period": deepcopy(prior_period),
+            "amount": prior_amount,
+            "amount_result_ref": "synthetic-prior-result",
+            "evidence_refs": ["synthetic-prior-evidence"],
+        },
+        "basic_regulation_leg": {
+            "legal_basis": "Regulation (EC) No 883/2004",
+            "period": deepcopy(basic_period),
+            "amount": basic_amount,
+            "amount_result_ref": "synthetic-basic-result",
+            "evidence_refs": ["synthetic-basic-evidence"],
+        },
+        "comparison": comparison,
+        "preserved_result": preserved_result,
+        "result": "both_legs_assessed",
+        "data_gaps": [],
+    })
 
 
 def _transitional_v026(member_state: str, risk_date: str) -> dict:
@@ -1286,8 +1483,8 @@ def _transitional_v026(member_state: str, risk_date: str) -> dict:
     return {
         "basic_regulation_883_87": {"member_state": member_state, "territorial_application_date": {"date": "2010-05-01", "legal_source_ref": "synthetic-883-87"}, "contingency_date": risk_date, "pre_application_period_refs": [], "result": "not_applicable", "evidence_refs": ["synthetic-transitional-evidence"], "normative_source_refs": [ref("reg-883-2004-original-oj", "CELEX:32004R0883/OJ", "Article 87")], "data_gaps": []},
         "implementing_regulation_987_93": {"result": "not_applicable", "evidence_refs": ["synthetic-987-93"], "normative_source_refs": [ref("reg-987-2009-original-oj", "CELEX:32009R0987/OJ", "Article 93")], "data_gaps": []},
-        "regulation_465_2012_883_87a": {"title_ii_change_caused_by_465_2012": None, "legislation_before_change": None, "legislation_after_change": None, "relevant_situation_unchanged": None, "within_ten_year_limit": None, "opt_out_request_date": None, "opt_out_effective_date": None, "result": "not_applicable", "evidence_refs": ["synthetic-465-87a"], "normative_source_refs": [ref("reg-465-2012-original-oj", "CELEX:32012R0465/OJ", "Article 87a")], "data_gaps": []},
-        "pension_transitional_987_94_1": {"benefits_due_for_pre_application_period": None, "contingency_pre_application": None, "claim_awarded_before_application_date": None, "prior_leg": None, "basic_regulation_leg": None, "comparison": "not_applicable", "preserved_result": "not_applicable", "result": "not_applicable", "member_state": member_state, "territorial_application_date": "2010-05-01", "normative_source_refs": [ref("reg-987-2009-original-oj", "CELEX:32009R0987/OJ", "Article 94")], "data_gaps": []},
+        "regulation_465_2012_883_87a": {"title_ii_change_caused_by_465_2012": None, "legislation_before_change": None, "legislation_after_change": None, "relevant_situation_unchanged": None, "within_ten_year_limit": None, "opt_out_request_date": None, "opt_out_effective_date": None, "result": "not_applicable", "evidence_refs": ["synthetic-465-87a"], "normative_source_refs": [{**ref("reg-465-2012-original-oj", "CELEX:32012R0465/OJ", "Article 1(11)"), "target_regulation": "Regulation (EC) No 883/2004", "target_article": "Article 87a"}], "data_gaps": []},
+        "pension_transitional_987_94_1": {"benefits_due_for_pre_application_period": False, "contingency_pre_application": False, "contingency_date": "2026-12-01", "claim_awarded_before_application_date": False, "prior_leg": None, "basic_regulation_leg": None, "comparison": "not_applicable", "preserved_result": "not_applicable", "result": "not_applicable", "member_state": member_state, "territorial_application_date": "2010-05-01", "normative_source_refs": [ref("reg-987-2009-original-oj", "CELEX:32009R0987/OJ", "Article 94(1)")], "data_gaps": []},
     }
 
 

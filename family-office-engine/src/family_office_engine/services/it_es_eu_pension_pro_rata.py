@@ -18,6 +18,10 @@ SCHEMA_VERSION = "it-es-eu-pension-pro-rata/v1"
 INPUT_SCHEMA_VERSION = "it-es-eu-pension-pro-rata-input/v1"
 RECORD_TYPE = "ItEsEuPensionProRataEstimate"
 RULE_PACK_SCHEMA_VERSION = "eu-pension-coordination-rule-pack/v2"
+ARTICLE_57_PACK_CONTRACTS = {
+    "eu.it-es.pension-coordination.2026.v4": "v0.25",
+    "eu.it-es.pension-coordination.2026.v5": "v0.26",
+}
 
 
 class ItEsEuPensionProRataError(ValueError):
@@ -34,6 +38,8 @@ def build_it_es_eu_pension_pro_rata(
     rule_pack = load_rule_pack(rule_pack_path)
     if data.get("schema_version") != INPUT_SCHEMA_VERSION:
         raise ItEsEuPensionProRataError(f"Unsupported IT-ES EU pension pro-rata input schema: {data.get('schema_version')}")
+    if _article_57_contract_mismatch(data, rule_pack):
+        return _write_snapshot(_article_57_contract_mismatch_snapshot(data, rule_pack, rule_pack_path), output_path)
     if spanish_theoretical_snapshot_path is not None:
         data = dict(data)
         data["spanish_theoretical_pension"] = _theoretical_from_snapshot(spanish_theoretical_snapshot_path)
@@ -98,6 +104,83 @@ def build_it_es_eu_pension_pro_rata(
     return _write_snapshot(snapshot, output_path)
 
 
+def _article_57_contract_mismatch(data: dict[str, Any], rule_pack: dict[str, Any]) -> bool:
+    assessment = data.get("article_57_assessment")
+    if not isinstance(assessment, dict):
+        return False
+    policy = rule_pack["pro_rata_method"]["article_57_source_bound"]
+    supplied_version = assessment.get("contract_schema_version")
+    supplied_profile = assessment.get("canonicalization_profile")
+    return (
+        supplied_version in {"v0.25", "v0.26"}
+        and (supplied_version != policy["contract_schema_version"] or supplied_profile != policy["canonicalization_profile"])
+    )
+
+
+def _article_57_contract_mismatch_snapshot(
+    data: dict[str, Any], rule_pack: dict[str, Any], rule_pack_path: Path
+) -> dict[str, Any]:
+    policy = rule_pack["pro_rata_method"]["article_57_source_bound"]
+    assessment = data["article_57_assessment"]
+    expected = {
+        "contract_schema_version": policy["contract_schema_version"],
+        "canonicalization_profile": policy["canonicalization_profile"],
+    }
+    supplied = {
+        "contract_schema_version": assessment.get("contract_schema_version"),
+        "canonicalization_profile": assessment.get("canonicalization_profile"),
+    }
+    gap = {
+        "code": "article_57_contract_identity_mismatch",
+        "message": "The supplied Article 57 contract identity does not match the selected rule pack; the snapshot is fail-closed.",
+        "expected_contract_identity": expected,
+        "supplied_contract_identity": supplied,
+        "article_57_contract": expected["contract_schema_version"],
+        "human_review_required": True,
+    }
+    article_57 = {
+        "human_review_required": True,
+        "contract_schema_version": expected["contract_schema_version"],
+        "national_eligibility_status": "not_assessed",
+        "article_57_exception_status": "not_assessed",
+        "theoretical_amount_period_inclusion": "not_assessed",
+        "pro_rata_amount_status": "not_assessed",
+        "national_payment_obligation_status": "not_assessed",
+    }
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "record_type": RECORD_TYPE,
+        "status": "blocked_missing_inputs",
+        "retirement_date": data.get("retirement_date"),
+        "scenario": data.get("scenario", "ordinary"),
+        "rule_pack": {
+            "path": str(rule_pack_path),
+            "rule_pack_id": rule_pack["rule_pack_id"],
+            "schema_version": rule_pack["schema_version"],
+            "sha256": _file_sha256(rule_pack_path),
+            "valid_from": rule_pack["spanish_ordinary_entitlement"]["valid_from"],
+            "valid_to": rule_pack["spanish_ordinary_entitlement"]["valid_to"],
+            "source_refs": rule_pack["source_refs"],
+            "limitations": rule_pack["limitations"],
+        },
+        "sources": data.get("sources", []),
+        "periods": _empty_period_summary(),
+        "overlaps": [],
+        "spanish_entitlement": {"status": "not_assessed"},
+        "article_57": article_57,
+        "spanish_theoretical_pension": {"status": "not_assessed", "amounts": None},
+        "spanish_pro_rata_pension": {
+            "status": "not_calculable",
+            "method": rule_pack["pro_rata_method"],
+            "article_57": article_57,
+            "amounts": None,
+        },
+        "data_gaps": [gap],
+        "warnings": [{"code": "not_official_p1_decision", "message": "Internal estimate only; the competent institutions decide official entitlement and amounts."}],
+        "notes": "Fail-closed because the supplied Article 57 contract does not match the selected rule pack; no eligibility, payment, or entitlement conclusion is made.",
+    }
+
+
 def _declared_data_gaps(data: dict[str, Any], theoretical: dict[str, Any]) -> list[dict[str, Any]]:
     gaps = data.get("data_gaps", []) if isinstance(data.get("data_gaps"), list) else []
     if theoretical.get("result") is None:
@@ -144,8 +227,21 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     article_57 = data["pro_rata_method"].get("article_57_source_bound")
     if not isinstance(article_57, dict):
         raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.article_57_source_bound")
-    if article_57.get("contract_schema_version") not in {"v0.25", "v0.26"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+    contract_version = article_57.get("contract_schema_version")
+    if contract_version not in {"v0.25", "v0.26"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
         raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.25 or v0.26 with fo-art57-c14n-v4")
+    if ARTICLE_57_PACK_CONTRACTS.get(data["rule_pack_id"]) != contract_version:
+        raise ItEsEuPensionProRataError("Rule pack Article 57 contract identity does not match its selected pack.")
+    if contract_version == "v0.25" and ("transition_source_registry" in article_57 or "normative_source_registry" in data):
+        raise ItEsEuPensionProRataError("v0.25 Rule pack must retain only the historical Article 57 shape.")
+    if contract_version == "v0.26" and (
+        not isinstance(article_57.get("transition_source_registry"), list)
+        or not isinstance(article_57.get("transition_branch_bindings"), dict)
+        or not isinstance(data.get("normative_source_registry"), list)
+    ):
+        raise ItEsEuPensionProRataError("v0.26 Rule pack requires the transition registry and exact branch bindings.")
+    if contract_version == "v0.26":
+        _validate_article_94_1_it_es_policy(article_57)
     if article_57.get("human_review_required") is not True:
         raise ItEsEuPensionProRataError("Rule pack Article 57 contract must require human review")
     last_state_policy = article_57.get("last_state_attestation")
@@ -450,6 +546,16 @@ def _theoretical_from_snapshot(snapshot_path: Path) -> dict[str, Any]:
 
 def _article_57_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, Any]:
     policy = rule_pack["pro_rata_method"]["article_57_source_bound"]
+    outcome = _article_57_assessment_for_policy(value, policy)
+    contract = policy["contract_schema_version"]
+    outcome["result"]["contract_schema_version"] = contract
+    for gap in outcome["data_gaps"]:
+        if isinstance(gap, dict):
+            gap["article_57_contract"] = contract
+    return outcome
+
+
+def _article_57_assessment_for_policy(value: Any, policy: dict[str, Any]) -> dict[str, Any]:
     base = {
         "human_review_required": True,
         "national_eligibility_status": "not_assessed",
@@ -460,7 +566,7 @@ def _article_57_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, A
     }
     if not isinstance(value, dict):
         return _article_57_not_assessed(base, "missing_article_57_source_bound_assessment", "A v0.25/fo-art57-c14n-v4 source-bound Article 57 assessment is required.")
-    if value.get("last_state_attestation") is not None:
+    if "last_state_attestation" in value:
         structure_gap = _article_57_last_state_structure_gap(value["last_state_attestation"])
         if structure_gap is not None:
             return {"result": base, "data_gaps": [structure_gap]}
@@ -563,8 +669,8 @@ def _validate_article_57_contract(value: dict[str, Any], policy: dict[str, Any])
     }
     if "schema_version" in value or set(value) - allowed:
         raise ItEsEuPensionProRataError("Article 57 assessment has forbidden root schema_version or fields.")
-    if value.get("contract_schema_version") not in {"v0.25", "v0.26"} or value.get("canonicalization_profile") != policy["canonicalization_profile"]:
-        raise ItEsEuPensionProRataError("Article 57 assessment must use the selected v0.25 or v0.26 fo-art57-c14n-v4 contract.")
+    if value.get("contract_schema_version") != policy["contract_schema_version"] or value.get("canonicalization_profile") != policy["canonicalization_profile"]:
+        raise ItEsEuPensionProRataError("Article 57 assessment contract identity does not match the selected rule pack.")
     if value.get("human_review_required") is not True:
         raise ItEsEuPensionProRataError("Article 57 assessment must require human review.")
     required_root_strings = (
@@ -1120,12 +1226,13 @@ def _transitional_result(value: Any, member_state: str, risk_date: str, policy: 
         "prior_leg", "basic_regulation_leg", "comparison", "preserved_result", "result", "data_gaps",
     }
     if v026:
-        pension_fields.update({"member_state", "territorial_application_date", "normative_source_refs"})
+        pension_fields.update({"member_state", "territorial_application_date", "contingency_date", "normative_source_refs"})
     if (
         not isinstance(pension, dict)
         or set(pension) != pension_fields
         or pension["result"] not in {"both_legs_assessed", "not_applicable", "not_assessed"}
         or any(type(pension[field]) not in {bool, type(None)} for field in ("benefits_due_for_pre_application_period", "contingency_pre_application", "claim_awarded_before_application_date"))
+        or (v026 and not _iso_date(pension["contingency_date"]))
         or pension["comparison"] not in {"prior_higher", "basic_higher", "equal", "not_assessed", "not_applicable"}
         or pension["preserved_result"] not in {"prior_leg", "basic_regulation_leg", "not_assessed", "not_applicable"}
         or not isinstance(pension["data_gaps"], list)
@@ -1134,7 +1241,7 @@ def _transitional_result(value: Any, member_state: str, risk_date: str, policy: 
     ):
         return None
     if pension["result"] == "both_legs_assessed":
-        leg_fields = {"legal_basis", "period", "amount_result_ref", "evidence_refs"}
+        leg_fields = {"legal_basis", "period", "amount", "amount_result_ref", "evidence_refs"}
         for field in ("prior_leg", "basic_regulation_leg"):
             leg = pension[field]
             if (
@@ -1154,11 +1261,164 @@ def _transitional_result(value: Any, member_state: str, risk_date: str, policy: 
     elif pension["result"] == "not_assessed" and not pension["data_gaps"]:
         return None
 
+    if v026 and not _article_94_1_it_es_semantics_match(pension, member_state, policy):
+        return None
+
     if any(value[name]["result"] == "not_assessed" for name in value):
         return None
     if policy is not None and not _transition_source_refs_match_registry(value, policy, risk_date):
         return None
     return True
+
+
+def _validate_article_94_1_it_es_policy(policy: dict[str, Any]) -> None:
+    semantics = policy.get("article_94_1_it_es_semantics")
+    registry = policy.get("transition_source_registry")
+    required_semantics = {
+        "split_period_contract_by_member_state",
+        "prior_leg_period",
+        "basic_regulation_leg_period",
+        "contiguity",
+        "amount_selection",
+    }
+    if not isinstance(semantics, dict) or set(semantics) != required_semantics:
+        raise ItEsEuPensionProRataError("v0.26 Rule pack requires exact Article 94(1) IT/ES semantics.")
+    if not isinstance(registry, list):
+        raise ItEsEuPensionProRataError("v0.26 Rule pack Article 94(1) semantics are invalid.")
+    entries = {entry.get("registry_id"): entry for entry in registry if isinstance(entry, dict)}
+    split_contracts = semantics["split_period_contract_by_member_state"]
+    required_source = {"registry_id", "version", "article", "territory", "language_scope"}
+    if not isinstance(split_contracts, dict) or set(split_contracts) != {"IT", "ES"}:
+        raise ItEsEuPensionProRataError("v0.26 Rule pack Article 94(1) must bind IT and ES split-period contracts.")
+    for member_state, contract in split_contracts.items():
+        if (
+            not isinstance(contract, dict)
+            or set(contract) != {"boundary_date", "article_94_1_source", "article_97_source"}
+            or contract.get("boundary_date") != "2010-05-01"
+            or not _iso_date(contract.get("boundary_date"))
+        ):
+            raise ItEsEuPensionProRataError("v0.26 Rule pack Article 94(1) boundary must be 2010-05-01.")
+        for source_key, required_article in (("article_94_1_source", "Article 94(1)"), ("article_97_source", "Article 97")):
+            source = contract.get(source_key)
+            if (
+                not isinstance(source, dict)
+                or set(source) != required_source
+                or source.get("article") != required_article
+            ):
+                raise ItEsEuPensionProRataError(f"v0.26 Rule pack Article 94(1) {member_state} {source_key} binding is invalid.")
+            entry = entries.get(source["registry_id"])
+            if (
+                entry is None
+                or any(source.get(key) != entry.get(key) for key in ("version", "territory", "language_scope"))
+                or source["article"] not in entry.get("provisions", [])
+                or contract["boundary_date"] < entry.get("period_from", "9999-12-31")
+            ):
+                raise ItEsEuPensionProRataError(f"v0.26 Rule pack Article 94(1) {member_state} {source_key} registry binding is invalid.")
+    if (
+        semantics["prior_leg_period"] != {
+            "start_relation_to_boundary": "strictly_before",
+            "end_exclusive_relation_to_boundary": "equals",
+        }
+        or semantics["basic_regulation_leg_period"] != {
+            "start_relation_to_boundary": "equals",
+            "end_exclusive_relation_to_boundary": "strictly_after",
+        }
+        or semantics["contiguity"] != {
+            "prior_end_exclusive_equals_basic_start": True,
+            "shared_boundary_equals_member_state_boundary": True,
+        }
+        or semantics["amount_selection"] != {
+            "prior_greater_than_basic": "prior_leg",
+            "prior_less_than_or_equal_to_basic": "basic_regulation_leg",
+        }
+    ):
+        raise ItEsEuPensionProRataError("v0.26 Rule pack Article 94(1) split-period metadata is invalid.")
+
+
+def _article_94_1_it_es_semantics_match(pension: dict[str, Any], member_state: str, policy: dict[str, Any]) -> bool:
+    semantics = policy["article_94_1_it_es_semantics"]
+    split_contract = semantics["split_period_contract_by_member_state"].get(member_state)
+    if not isinstance(split_contract, dict):
+        return False
+    application_date = split_contract["boundary_date"]
+    if pension.get("territorial_application_date") != application_date:
+        return False
+    predicates = (
+        pension.get("benefits_due_for_pre_application_period"),
+        pension.get("contingency_pre_application"),
+        pension.get("claim_awarded_before_application_date"),
+    )
+    if any(type(predicate) is not bool for predicate in predicates):
+        return pension["result"] == "not_assessed" and bool(pension["data_gaps"])
+    benefits_due, contingency_pre_application, claim_awarded = predicates
+    if contingency_pre_application and pension.get("contingency_date") >= application_date:
+        return False
+    if not benefits_due or not contingency_pre_application or claim_awarded:
+        return (
+            pension["result"] == "not_applicable"
+            and pension["prior_leg"] is None
+            and pension["basic_regulation_leg"] is None
+            and pension["comparison"] == "not_applicable"
+            and pension["preserved_result"] == "not_applicable"
+        )
+    if pension["result"] != "both_legs_assessed":
+        return False
+    prior = pension["prior_leg"]
+    basic = pension["basic_regulation_leg"]
+    if not _article_94_1_legs_are_contiguous(prior, basic, application_date, semantics):
+        return False
+    prior_amount = _article_94_1_decimal(prior["amount"])
+    basic_amount = _article_94_1_decimal(basic["amount"])
+    if prior_amount is None or basic_amount is None:
+        return False
+    expected_comparison = "prior_higher" if prior_amount > basic_amount else "basic_higher" if basic_amount > prior_amount else "equal"
+    expected_preserved = (
+        semantics["amount_selection"]["prior_greater_than_basic"]
+        if expected_comparison == "prior_higher"
+        else semantics["amount_selection"]["prior_less_than_or_equal_to_basic"]
+    )
+    return pension["comparison"] == expected_comparison and pension["preserved_result"] == expected_preserved
+
+
+def _article_94_1_legs_are_contiguous(
+    prior_leg: dict[str, Any], basic_regulation_leg: dict[str, Any], application_date: str, semantics: dict[str, Any]
+) -> bool:
+    """Require the distinct Article 94(1) legs to meet at application.
+
+    The prior-regime leg is [start, application); the basic-Regulation leg is
+    [application, end).  Invalid or unknown endpoints are deliberately not
+    normalized: callers convert this failed validation into a data gap.
+    """
+    prior_period = prior_leg.get("period")
+    basic_period = basic_regulation_leg.get("period")
+    prior_metadata = semantics["prior_leg_period"]
+    basic_metadata = semantics["basic_regulation_leg_period"]
+    contiguity = semantics["contiguity"]
+    return (
+        isinstance(prior_period, dict)
+        and set(prior_period) == {"start_date", "end_date_exclusive"}
+        and _iso_date(prior_period.get("start_date"))
+        and (prior_period["start_date"] < application_date) == (prior_metadata["start_relation_to_boundary"] == "strictly_before")
+        and (prior_period.get("end_date_exclusive") == application_date) == (prior_metadata["end_exclusive_relation_to_boundary"] == "equals")
+        and isinstance(basic_period, dict)
+        and set(basic_period) == {"start_date", "end_date_exclusive"}
+        and (basic_period.get("start_date") == application_date) == (basic_metadata["start_relation_to_boundary"] == "equals")
+        and _iso_date(basic_period.get("end_date_exclusive"))
+        and (application_date < basic_period["end_date_exclusive"]) == (basic_metadata["end_exclusive_relation_to_boundary"] == "strictly_after")
+        and (prior_period["end_date_exclusive"] == basic_period["start_date"]) == contiguity["prior_end_exclusive_equals_basic_start"]
+        and (prior_period["end_date_exclusive"] == application_date) == contiguity["shared_boundary_equals_member_state_boundary"]
+    )
+
+
+def _article_94_1_decimal(value: Any) -> Decimal | None:
+    if not isinstance(value, str) or not _canonical_string(value):
+        return None
+    try:
+        with localcontext(Context(prec=34, rounding=ROUND_HALF_UP)):
+            parsed = Decimal(value)
+    except (InvalidOperation, ValueError):
+        return None
+    return parsed if parsed.is_finite() else None
 
 
 def _transition_source_refs_match_registry(value: dict[str, Any], policy: dict[str, Any], risk_date: str) -> bool:
@@ -1172,34 +1432,44 @@ def _transition_source_refs_match_registry(value: dict[str, Any], policy: dict[s
     entries = {entry.get("registry_id"): entry for entry in registry if isinstance(entry, dict)}
     if len(entries) != len(registry):
         return False
-    for item in value.values():
+    branch_bindings = policy.get("transition_branch_bindings")
+    if not isinstance(branch_bindings, dict) or set(branch_bindings) != set(value):
+        return False
+    for branch, item in value.items():
         refs = item.get("normative_source_refs") if isinstance(item, dict) else None
-        if not isinstance(refs, list) or not refs or len({json.dumps(ref, sort_keys=True) for ref in refs if isinstance(ref, dict)}) != len(refs):
+        expected = branch_bindings.get(branch)
+        if not isinstance(expected, dict) or not isinstance(refs, list) or len(refs) != 1:
             return False
-        for ref in refs:
-            if not isinstance(ref, dict) or set(ref) != {"registry_id", "version", "article", "territory", "member_state", "period_from", "period_to", "language_scope"}:
-                return False
-            if ref.get("member_state") != value["basic_regulation_883_87"].get("member_state"):
-                return False
-            entry = entries.get(ref.get("registry_id"))
-            if entry is None or any(ref.get(key) != entry.get(key) for key in ("version", "territory", "language_scope")):
-                return False
-            if ref.get("article") not in entry.get("provisions", []) or not _iso_date(ref.get("period_from")) or (ref.get("period_to") is not None and not _iso_date(ref.get("period_to"))):
-                return False
-            if (
-                not _iso_date(entry.get("period_from"))
-                or (entry.get("period_to") is not None and not _iso_date(entry.get("period_to")))
-                or ref["period_from"] < entry["period_from"]
-                or (entry.get("period_to") is not None and (ref["period_to"] is None or ref["period_to"] > entry["period_to"]))
-                or not ref["period_from"] <= risk_date <= (ref["period_to"] or "9999-12-31")
-            ):
-                return False
-            if ref["article"] == "Article 94" and (
-                item is not value.get("pension_transitional_987_94_1")
-                or item.get("member_state") != ref["member_state"]
-                or item.get("territorial_application_date") != ref["period_from"]
-            ):
-                return False
+        ref = refs[0]
+        required = {"registry_id", "version", "article", "territory", "member_state", "period_from", "period_to", "language_scope"}
+        if branch == "regulation_465_2012_883_87a":
+            required.update({"target_regulation", "target_article"})
+        if not isinstance(ref, dict) or set(ref) != required or ref.get("member_state") != value["basic_regulation_883_87"].get("member_state"):
+            return False
+        if any(ref.get(key) != expected.get(key) for key in ("registry_id", "article")):
+            return False
+        if branch == "regulation_465_2012_883_87a" and any(ref.get(key) != expected.get(key) for key in ("target_regulation", "target_article")):
+            return False
+        entry = entries.get(ref["registry_id"])
+        if entry is None or any(ref.get(key) != entry.get(key) for key in ("version", "territory", "language_scope")):
+            return False
+        if ref["article"] not in entry.get("provisions", []) or not _iso_date(ref.get("period_from")) or (ref.get("period_to") is not None and not _iso_date(ref.get("period_to"))):
+            return False
+        if (
+            not _iso_date(entry.get("period_from"))
+            or (entry.get("period_to") is not None and (ref["period_to"] is None or ref["period_to"] > entry["period_to"]))
+            or ref["period_from"] < entry["period_from"]
+            or (
+                branch != "pension_transitional_987_94_1"
+                and not ref["period_from"] <= risk_date <= (ref["period_to"] or "9999-12-31")
+            )
+        ):
+            return False
+        if branch == "pension_transitional_987_94_1" and (
+            item.get("member_state") != ref["member_state"]
+            or item.get("territorial_application_date") != ref["period_from"]
+        ):
+            return False
     return True
 
 

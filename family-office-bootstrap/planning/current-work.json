@@ -1,9 +1,9 @@
 {
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
-  "status": "blocked",
-  "selected_at": "2026-10-31T16:39:13Z",
-  "updated_at": "2026-10-31T16:46:56Z",
+  "status": "in_progress",
+  "selected_at": "2026-10-31T17:00:00Z",
+  "updated_at": "2026-10-31T17:00:00Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
@@ -12,9 +12,9 @@
     }
   ],
   "increment": {
-    "id": "V4.14w-k-art57-exact-version-post-implementation-review",
-    "title": "Art. 57 exact-version post-implementation review",
-    "objective": "Independently review the exact w-j candidate against the limited pre-implementation GO, verify version/source/test identity, and reconcile only findings supported by exact artifact evidence.",
+    "id": "V4.14w-j4-art94-traceability-public-regressions",
+    "title": "Art. 94(1) traceability and public regressions",
+    "objective": "Version the complete Article 94(1) split-period contract in Knowledge and Rules and prove every invalid boundary through the public builder.",
     "scope": [
       "Read-only exact-hash review of Knowledge v0.26, Rules v5, the unchanged v0.25 baselines, Engine consumers, freshness/citation metadata and synthetic regressions.",
       "Verify malformed Last-State fail-closed behavior in all four branches, source/version/article/territory/member-state/language/period binding, no use of uncertain HR/SV corrigendum scope, deterministic Decimal and serialized output, and v0.25 compatibility with v5 CLI default.",
@@ -47,7 +47,7 @@
       "family-office-engine/docs/decision-log.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
-    "stop_condition": "Close w-k only on an exact-version bounded review and passing governance. Any NO-GO, source/applicability defect, hash mismatch, unsupported period or non-reproducible test keeps w-i and parent V4.14w/V4.14 blocked; no downstream increment is eligible."
+    "stop_condition": "Close only after pre-review GO, bounded implementation, focused/full 0/0/0, exact post-review GO and governance. Any NO-GO, unsupported period or non-reproducible test keeps w-j/w-i and parent V4.14w/V4.14 blocked; no downstream increment is eligible."
   },
   "verification": {
     "tests": [
@@ -78,11 +78,11 @@
       "family-office-engine/docs/current-next-increment.md",
       "family-office-bootstrap/planning/current-work.json"
     ],
-    "result": "failed",
+    "result": null,
     "task_envelope": {
       "mode": "normative-change",
       "risk_domain": "pension",
-      "objective": "Perform the exact-version read-only w-k review of the w-j candidate, verify all hashes and evaluate only the approved scope; record the NO-GO accurately and preserve predecessor/parent blocks.",
+      "objective": "Correct and verify only the exact P1 Art.94(1) temporal and v0.25/v0.26 contract-identity findings, with independent normative gates and no parent closure.",
       "repositories": [
         "family-office-knowledge",
         "family-office-rules",
@@ -143,7 +143,7 @@
         "Only synthetic evidence; no user workspace access."
       ]
     },
-    "notes": "Prior w-b/w-c/w-d cycle is closed. In the current three-increment authorization, w-i identified three residual findings with full suite/governance passing; w-j is the minimum corrective slice. Its pre-implementation gate returned limited GO. Preserve unrelated dirty worktree changes and never access family-office-workspace."
+    "notes": "Prior w-b/w-c/w-d cycle is closed. In the current three-increment authorization, w-i identified three residual findings; w-j corrective implementation now has limited pre-review GO, focused 76/0/0/0 and full Engine 820/0/0/0. Exact post-review remains mandatory. Preserve unrelated dirty worktree changes and never access family-office-workspace."
   },
   "blockers": [
     "w-k completed as a read-only NO-GO review: hashes match, but four contract/provenance blockers remain in w-j. The authorized three-increment cycle is exhausted; w-j/w-i and V4.14w/V4.14 remain blocked pending new user authorization.",
@@ -175,11 +175,18 @@
     "2026-10-31: corrective candidate v0.25 exact hashes verified; full Engine suite 808/0/0/0. Sol/xhigh review initially stopped on an incorrect expected digest supplied by parent; corrected within the same review thread, then returned NO-GO because the sample registry omits synthetic-institutional-art57. No reviewer edits. User now authorizes another bounded corrective cycle and three increments w-b/w-c/w-d in strict order.",
     "2026-10-31: user authorizes up to three further increments. Roadmap audit passed; selected V4.14w-i as the smallest bounded audit to reconcile the stale 2026-10-30 w-h NO-GO findings against the later w-b v0.25 exact package. No personal workspace access or downstream increment is implied.",
     "2026-10-31: w-i exact-version NO-GO isolated three technical/provenance findings; parent reproduced 809/0/0/0 and governance. Re-ran predecessor audit, then selected w-j as the minimum corrective slice, with the required pre-implementation Sol/xhigh gate.",
-    "2026-10-31: the v5 profile requires the shared EU coordination loader to accept both v0.25 and v0.26; the write set was narrowly amended for that compatibility check, with no change to pension semantics. Terra was authorized to resume the same implementation task after the scoped update."
+    "2026-10-31: the v5 profile requires the shared EU coordination loader to accept both v0.25 and v0.26; the write set was narrowly amended for that compatibility check, with no change to pension semantics. Terra was authorized to resume the same implementation task after the scoped update.",
+    "2026-10-31: pre-implementation Sol/xhigh review returned NO-GO only because the shared v5 EU coordination consumer still had ambient Decimal-context dependence. This is recorded as an in-scope deterministic-arithmetic blocker; no product files were changed and implementation remains paused pending bounded reviewer confirmation.",
+    "2026-10-31: follow-up Sol/xhigh pre-review GO limited after adding the shared v5 Decimal consumer. Terra implemented Knowledge/Rules/Tests/Engine corrections; focused suite 76/0/0/0, full Engine suite 820/0/0/0, roadmap audit/guardrails/diff-check pass. Exact post-implementation review remains open.",
+    "2026-10-31: bounded exact-version post-implementation Sol/xhigh review was delegated with all four hashes and 820-test evidence, but no verdict arrived within the bounded wait window. Timeout is not GO; no roadmap closure or downstream selection is allowed.",
+    "2026-11-01: retry exact-version review returned NO-GO on two P1 findings: contradictory Article 94(1) pre-application temporal semantics and cross-pair v0.25/v0.26 failure without persisted fail-closed contract identity. Hashes and prior Art.87a/corrigendum/Decimal controls passed. User authorized the next three increments; selected the minimum corrective pass.",
+    "2026-11-01: post-j2 exact review confirmed cross-pair correction and prior controls, but rejected the Article 94(1) candidate because both legs were modeled as the same preceding period and unequal valid starts were not rejected. Selected j3 as the minimum split-period correction; parent remains blocked.",
+    "2026-11-01: post-j3 exact review confirmed runtime split behavior but returned NO-GO because Knowledge still described the old same-period contract, Rules lacked complete split/contiguity metadata, and public-builder regressions did not cover every invalid boundary. Selected j4 as the final authorized corrective slice.",
+    "2026-11-01: j4 implementation and local gates pass (focused 63/0/0/0, full Engine 825/0/0/0, roadmap audit/guardrails/diff-check). The exact review timed out once; the bounded retry returned evidence-limited NO-GO because candidate artifacts were unavailable in reviewer context. No GO inferred; the three-increment authorization is exhausted and no downstream increment is eligible."
   ],
     "next_action": {
-    "mode": "resume",
-    "description": "Await explicit user authorization for one corrective micro-increment addressing w-k findings in strict predecessor order. First correct the w-j contract/source issues; do not select downstream increments or infer V4.14 readiness."
+    "mode": "review",
+    "description": "Await a fresh explicit authorization for an exact-version review with reviewer artifact access; do not select downstream increments or infer V4.14 readiness from local tests alone."
   },
   "routing": {
     "policy_version": "3.1",
@@ -190,30 +197,181 @@
     "reasoning_effort": "xhigh",
     "rationale": "w-j implementation and exact local gates are complete; pension source applicability and legal-boundary changes require the independent post-implementation Sol/xhigh exact-version review w-k before any state reconciliation.",
     "delegation_budget": {
-      "max_events": 3,
-      "authorization": "User explicitly authorized this bounded cycle and up to three increments in strict predecessor order.",
-      "scope": "One exact-version w-j implementation cycle, including pre-review, implementation and one bounded independent post-review.",
+      "max_events": 15,
+      "authorization": "User explicitly authorized the next three bounded increments in strict predecessor order on 2026-11-01.",
+      "scope": "Finish this oldest incomplete corrective pass, then select only the next oldest eligible predecessor; no downstream selection before each predecessor closes.",
       "blocker": "w-i exact-version findings #2/#4/#5 and w-j post-review gate. No authority to pass an incomplete predecessor or close V4.14w/V4.14."
     },
     "trace": [
       {
-        "at": "2026-10-31T16:39:13Z",
-        "event": "selected",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Select w-k only after w-j focused and full Engine gates passed; exact hashes, source scope, regressions and immutable v0.25 baseline need independent read-only review."
-      },
-      {
-        "at": "2026-10-31T16:39:13Z",
+        "at": "2026-10-31T17:00:00Z",
         "event": "delegated",
         "from_tier": "medium",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-        "reason": "One bounded read-only exact-version review of w-j/v0.26/v5; check source-period-language binding, fail-closed early returns, Decimal context stability, CLI compatibility, citation registry and v0.25 byte identity. No edits, no personal data, no parent closure."
+        "reason": "Bounded pre-implementation review of the authorized corrective slice; reviewer identified one in-scope shared-consumer Decimal blocker and no new normative scope."
+      },
+      {
+        "at": "2026-10-31T17:03:00Z",
+        "event": "fallback",
+        "from_tier": "critical",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "NO-GO retained; expand the same deterministic-arithmetic acceptance criteria to the shared v5 consumer before implementation."
+      },
+      {
+        "at": "2026-10-31T17:08:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Pre-review GO limited after adding the shared v5 Decimal consumer; implement only the exact four w-k corrections plus deterministic arithmetic in both consumers, with synthetic regressions and immutable v0.25/v4 baselines."
+      },
+      {
+        "at": "2026-10-31T17:25:00Z",
+        "event": "delegated",
+        "from_tier": "medium",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Exact-version post-implementation review of the v0.26/v5 candidate after focused 76 and full Engine 820 test gates; verify hashes, provenance, strict version pairing, fail-closed branches and Decimal determinism."
+      },
+      {
+        "at": "2026-10-31T17:31:00Z",
+        "event": "fallback",
+        "from_tier": "critical",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Bounded review timed out without verdict; preserve in_progress and do not infer GO from automatic tests."
+      },
+      {
+        "at": "2026-11-01T09:00:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "User authorized the next three increments; retry only the pending bounded w-j exact-version post-review against unchanged candidate hashes and existing 820-test/governance evidence."
+      },
+      {
+        "at": "2026-11-01T09:20:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Pre-implementation review for the minimum corrective pass addressing only Art.94(1) temporal semantics and persisted cross-pair contract identity."
+      },
+      {
+        "at": "2026-11-01T09:45:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Pre-review GO limited; implement only the Art.94(1) temporal correction and persisted v0.25/v0.26 cross-pair identity gaps in Knowledge/Rules/Tests/Engine."
+      },
+      {
+        "at": "2026-11-01T10:30:00Z",
+        "event": "delegated",
+        "from_tier": "medium",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Exact post-implementation review after focused 61/0/0/0 and full Engine 823/0/0/0; verify only Art.94(1) temporal semantics, persisted cross-pair identity, hashes and unchanged prior controls."
+      },
+      {
+        "at": "2026-11-01T11:00:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Pre-review for j3: only correct the Article94(1) prior/basic split-period boundary and reject unequal/overlapping/gapped legs; preserve approved cross-pair and other controls."
+      },
+      {
+        "at": "2026-11-01T11:20:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Pre-review GO; implement only the Article94(1) split-period boundary correction and synthetic regressions, preserving cross-pair and prior controls."
+      },
+      {
+        "at": "2026-11-01T12:00:00Z",
+        "event": "delegated",
+        "from_tier": "medium",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Exact post-implementation review j3 after focused 61/0/0/0 and full Engine 823/0/0/0; verify only split Article94(1) periods, boundary rejection, hashes and unchanged controls."
+      },
+      {
+        "at": "2026-11-01T12:30:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Pre-review for j4: version complete split-period semantics in Knowledge/Rules and add public-builder regressions for every invalid boundary, with no runtime scope expansion."
+      },
+      {
+        "at": "2026-11-01T13:00:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Pre-review GO; version complete split-period metadata and add public-builder regressions only, then rerun full deterministic gates."
+      },
+      {
+        "at": "2026-11-01T14:00:00Z",
+        "event": "delegated",
+        "from_tier": "medium",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Exact post-implementation review j4 after focused 63/0/0/0 and full Engine 825/0/0/0; verify complete split-period Knowledge/Rules traceability and public regressions, hashes and unchanged controls."
+      },
+      {
+        "at": "2026-11-01T14:10:00Z",
+        "event": "fallback",
+        "from_tier": "critical",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "First j4 exact-version review timed out; no GO inferred from tests. One same-scope retry remains bounded and does not select a new increment."
+      },
+      {
+        "at": "2026-11-01T14:12:00Z",
+        "event": "delegated",
+        "from_tier": "critical",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Same-scope retry of j4 exact-version review after timeout; no repository changes, no new increment."
       }
     ]
   }

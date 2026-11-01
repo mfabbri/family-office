@@ -1,6 +1,6 @@
 import json
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_UP, localcontext
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +12,10 @@ from family_office_engine.governance.pension_source_freshness import (
 SCHEMA_VERSION = "eu-pension-coordination-it-es/v1"
 RECORD_TYPE = "EuPensionCoordinationItEsSnapshot"
 RULE_PACK_SCHEMA_VERSION = "eu-pension-coordination-rule-pack/v2"
+ARTICLE_57_PACK_CONTRACTS = {
+    "eu.it-es.pension-coordination.2026.v4": "v0.25",
+    "eu.it-es.pension-coordination.2026.v5": "v0.26",
+}
 
 
 class EuPensionCoordinationError(ValueError):
@@ -119,8 +123,19 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     article_57 = data["pro_rata_method"].get("article_57_source_bound")
     if not isinstance(article_57, dict):
         raise EuPensionCoordinationError("EU pension coordination rule pack must define article_57_source_bound")
-    if article_57.get("contract_schema_version") not in {"v0.25", "v0.26"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+    contract_version = article_57.get("contract_schema_version")
+    if contract_version not in {"v0.25", "v0.26"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
         raise EuPensionCoordinationError("EU pension coordination Article 57 contract must be v0.25 or v0.26 with fo-art57-c14n-v4")
+    if ARTICLE_57_PACK_CONTRACTS.get(data["rule_pack_id"]) != contract_version:
+        raise EuPensionCoordinationError("EU pension coordination Article 57 contract identity does not match its selected pack.")
+    if contract_version == "v0.25" and ("transition_source_registry" in article_57 or "normative_source_registry" in data):
+        raise EuPensionCoordinationError("v0.25 Rule pack must retain only the historical Article 57 shape.")
+    if contract_version == "v0.26" and (
+        not isinstance(article_57.get("transition_source_registry"), list)
+        or not isinstance(article_57.get("transition_branch_bindings"), dict)
+        or not isinstance(data.get("normative_source_registry"), list)
+    ):
+        raise EuPensionCoordinationError("v0.26 Rule pack requires the transition registry and exact branch bindings.")
     if article_57.get("human_review_required") is not True:
         raise EuPensionCoordinationError("EU pension coordination Article 57 contract must require human review")
     annex_policy = article_57.get("annex_viii_part_2")
@@ -409,6 +424,7 @@ def _write_snapshot(snapshot: dict[str, Any], output_path: Path) -> dict[str, An
 
 def _decimal_ratio(numerator: Decimal, denominator: Decimal) -> str:
     try:
-        return format((numerator / denominator).quantize(Decimal("0.0001")), "f")
+        with localcontext(Context(prec=50, rounding=ROUND_HALF_UP)):
+            return format((numerator / denominator).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP), "f")
     except (InvalidOperation, ZeroDivisionError) as exc:
         raise EuPensionCoordinationError("Invalid period ratio calculation") from exc

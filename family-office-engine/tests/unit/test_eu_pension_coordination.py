@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+from decimal import Inexact, ROUND_DOWN, localcontext
 from pathlib import Path
 
 from family_office_engine.services.eu_pension_coordination import (
@@ -117,14 +118,19 @@ class EuPensionCoordinationTest(unittest.TestCase):
                 load_rule_pack(path)
 
     def test_loader_accepts_v025_and_v026_with_the_same_canonicalization_profile(self):
-        for contract_version in ("v0.25", "v0.26"):
-            pack = json.loads(RULE_PACK.read_text(encoding="utf-8"))
-            pack["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"] = contract_version
-            with tempfile.TemporaryDirectory() as tmp_dir:
-                path = Path(tmp_dir) / "rules.json"
-                path.write_text(json.dumps(pack), encoding="utf-8")
-                loaded = load_rule_pack(path)
-            self.assertEqual(loaded["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"], contract_version)
+        v5 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v5.json"
+        self.assertEqual(load_rule_pack(RULE_PACK)["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"], "v0.25")
+        self.assertEqual(load_rule_pack(v5)["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"], "v0.26")
+
+    def test_period_ratios_ignore_ambient_decimal_context(self):
+        results = []
+        for precision, trap_inexact in ((6, False), (45, True)):
+            with localcontext() as context:
+                context.prec = precision
+                context.rounding = ROUND_DOWN
+                context.traps[Inexact] = trap_inexact
+                results.append(self._coordinate(_inps_snapshot(), _spanish_snapshot(), italian_months=240))
+        self.assertEqual(results[0]["period_summary"]["ratios"], results[1]["period_summary"]["ratios"])
 
     def test_rejects_annex_version_or_date_missing_from_rule_pack(self):
         for field, value in (("applicable_annex_part_2_version", ""), ("applicable_annex_part_2_valid_from", "2026-13-01")):

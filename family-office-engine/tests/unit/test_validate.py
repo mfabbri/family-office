@@ -2412,6 +2412,8 @@ class ValidateCliTest(unittest.TestCase):
                         "build",
                         "--input",
                         str(REPOSITORY_ROOT / "family-office-engine" / "examples" / "spanish-eu-theoretical-pension-pro-rata-input-sample.json"),
+                        "--rule-pack",
+                        str(REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es.json"),
                         "--output",
                         str(output_path),
                     ]
