@@ -1,0 +1,17 @@
+{
+  "as_of_date": "2026-02-28",
+  "bindings": {
+    "primary_employment_1557c6211925_69f8bf25b7eb": {
+      "category": "employment_income",
+      "member_id": "primary",
+      "value_basis": "net"
+    }
+  },
+  "record_type": "WorkTransitionSourceBinding",
+  "schema_version": "work-transition-source-binding/v1",
+  "source_snapshot": {
+    "content_hash": "69f8bf25b7eb5fe2d1e244bf6f974255b08d6b4ad8be94513d12e103170eb70c",
+    "path": "snapshots/payroll.snapshot.json",
+    "schema_version": "payroll/v1"
+  }
+}

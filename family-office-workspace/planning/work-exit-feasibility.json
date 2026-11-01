@@ -1,0 +1,42 @@
+{
+  "adults": [
+    {
+      "date_of_birth": "1971-01-18",
+      "person_id": "primary",
+      "role": "primary"
+    },
+    {
+      "date_of_birth": "1975-01-01",
+      "person_id": "spouse",
+      "role": "spouse"
+    }
+  ],
+  "as_of_date": "2026-09-02",
+  "candidate_dates": [
+    "2033-01-01"
+  ],
+  "candidate_granularity": "explicit_dates",
+  "data_gaps": [
+    {
+      "code": "missing_primary_inps_contributory_estimate",
+      "message": "No primary contributory estimate was declared; use documented pension sources rather than a placeholder."
+    },
+    {
+      "code": "missing_spouse_inps_contributory_estimate",
+      "message": "No spouse contributory estimate was declared; use documented pension sources rather than a placeholder."
+    },
+    {
+      "code": "unknown_available_bridge_assets",
+      "message": "Available bridge assets must be documented or supplied by net-worth and liquidity snapshots."
+    }
+  ],
+  "household_id": "famiglia_casa",
+  "record_type": "WorkExitFeasibilityInput",
+  "schema_version": "work-exit-feasibility-input/v1",
+  "sustainability_constraints": {
+    "annual_spending_need": "80000",
+    "available_bridge_assets": "0.00",
+    "horizon_years": 25,
+    "minimum_terminal_assets": "0.00"
+  }
+}

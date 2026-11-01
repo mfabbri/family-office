@@ -1,0 +1,114 @@
+{
+  "as_of_date": "2026-09-02",
+  "household_id": "famiglia_casa",
+  "household_members": [
+    "primary",
+    "spouse"
+  ],
+  "record_type": "WorkTransitionReadinessInput",
+  "required_inputs": [
+    {
+      "accepted_value_basis": [
+        "net"
+      ],
+      "category": "employment_income",
+      "input_id": "primary_employment",
+      "member_id": "primary",
+      "requires_stream_bounds": true
+    },
+    {
+      "accepted_value_basis": [
+        "net"
+      ],
+      "category": "spouse_income",
+      "input_id": "spouse_employment",
+      "member_id": "spouse",
+      "requires_stream_bounds": true
+    },
+    {
+      "accepted_value_basis": [
+        "net"
+      ],
+      "category": "expenses",
+      "input_id": "household_expenses"
+    },
+    {
+      "accepted_value_basis": [
+        "not_applicable"
+      ],
+      "category": "net_worth",
+      "input_id": "household_net_worth"
+    },
+    {
+      "accepted_value_basis": [
+        "not_applicable"
+      ],
+      "category": "liquidity",
+      "input_id": "bridge_liquidity",
+      "requires_liquid_asset": true
+    },
+    {
+      "accepted_value_basis": [
+        "gross"
+      ],
+      "category": "rita_complementary_pension",
+      "input_id": "rita",
+      "member_id": "primary",
+      "requires_stream_bounds": true
+    },
+    {
+      "accepted_value_basis": [
+        "gross"
+      ],
+      "category": "inps_pension",
+      "input_id": "inps",
+      "member_id": "primary",
+      "requires_stream_bounds": true
+    },
+    {
+      "accepted_value_basis": [
+        "gross"
+      ],
+      "category": "spain_eu_pension",
+      "input_id": "spain_eu",
+      "member_id": "primary",
+      "requires_stream_bounds": true
+    },
+    {
+      "accepted_value_basis": [
+        "net"
+      ],
+      "category": "other_income",
+      "input_id": "other_income",
+      "requires_stream_bounds": true
+    }
+  ],
+  "schema_version": "work-transition-readiness-input/v1",
+  "sources": [
+    {
+      "binding_pointer": "/bindings/primary_employment_1557c6211925_69f8bf25b7eb",
+      "category": "employment_income",
+      "expected_schema_versions": [
+        "work-transition-source-binding/v1"
+      ],
+      "input_id": "primary_employment",
+      "member_id": "primary",
+      "path": "work-transition-source-bindings/primary_employment_1557c6211925_69f8bf25b7eb.json",
+      "period": {
+        "end_date": "2026-02-28",
+        "start_date": "2019-04-01"
+      },
+      "provenance": {
+        "origin": "workspace-local explicit source binding",
+        "source_content_hash": "69f8bf25b7eb5fe2d1e244bf6f974255b08d6b4ad8be94513d12e103170eb70c",
+        "source_schema_version": "payroll/v1",
+        "source_snapshot_path": "snapshots/payroll.snapshot.json"
+      },
+      "source_id": "primary_employment_1557c6211925_69f8bf25b7eb",
+      "source_kind": "documentary",
+      "stream_end_date": "2026-02-28",
+      "stream_start_date": "2019-04-01",
+      "value_basis": "net"
+    }
+  ]
+}
