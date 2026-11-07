@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://family-office.local/schemas/eu-annex-viii-part-2-source-ledger/v0.3",
+  "title": "EU Annex VIII Part 2 source ledger v0.3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["catalogue_id", "schema_version", "status", "documented_snapshot_only", "snapshot_as_of", "reviewed_on", "entries_sha256", "scope_limitations", "entries"],
+  "properties": {
+    "catalogue_id": {"const": "eu-annex-viii-part-2-source-ledger-v0.3"},
+    "schema_version": {"const": "eu-annex-viii-part-2-source-ledger/v0.3"},
+    "status": {"const": "source_ledger_only"},
+    "documented_snapshot_only": {"const": true},
+    "snapshot_as_of": {"type": "string", "format": "date"},
+    "reviewed_on": {"type": "string", "format": "date"},
+    "entries_sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+    "scope_limitations": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "entries": {"type": "array", "minItems": 26, "maxItems": 26, "items": {"$ref": "#/$defs/entry"}}
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry_id", "state", "official_text", "language", "source", "valid_from", "valid_to", "valid_to_meaning"],
+      "properties": {
+        "entry_id": {"type": "string", "pattern": "^[A-Z]{2}-(?:[a-z]|[0-9]+)$"},
+        "state": {"type": "string", "minLength": 1},
+        "official_text": {"type": "string", "minLength": 1},
+        "language": {"const": "en"},
+        "source": {"$ref": "#/$defs/source"},
+        "valid_from": {"type": "string", "format": "date"},
+        "valid_to": {"type": ["string", "null"], "format": "date"},
+        "valid_to_meaning": {"const": "null means no later amendment found as of reviewed_on; it does not assert indefinite legal validity"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["celex", "official_journal_locator", "provision", "operation", "url"],
+      "properties": {
+        "celex": {"enum": ["32009R0988", "32010R1244", "32012R1224", "32013R0517", "32013R1372", "32017R0492"]},
+        "official_journal_locator": {"type": "string", "minLength": 1},
+        "provision": {"type": "string", "minLength": 1},
+        "operation": {"enum": ["replaces_annex", "adds_entry", "replaces_entry"]},
+        "url": {
+          "enum": [
+            "https://eur-lex.europa.eu/eli/reg/2009/988/oj/eng",
+            "https://eur-lex.europa.eu/eli/reg/2010/1244/oj/eng",
+            "https://eur-lex.europa.eu/eli/reg/2012/1224/oj/eng",
+            "https://eur-lex.europa.eu/eli/reg/2013/517/oj/eng",
+            "https://eur-lex.europa.eu/eli/reg/2013/1372/oj/eng",
+            "https://eur-lex.europa.eu/eli/reg/2017/492/oj/eng"
+          ]
+        }
+      }
+    }
+  }
+}

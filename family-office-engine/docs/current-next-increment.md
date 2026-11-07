@@ -1,22 +1,34 @@
 # Current Next Increment
 
-## Stato aggiornato — 2026-10-31
+## Stato aggiornato - 2026-11-07
 
-Il gate V4.14w-k è concluso con **NO-GO** sul solo pacchetto w-j: i 13 hash esaminati coincidono, ma restano quattro finding su Last-State `null`, binding ramo/articolo delle transizioni, identità contrattuale v0.25/v0.26 e attribuzione della fonte Art. 87a. La suite Engine parent è verde (819 test, 0 failure/errori/skipped), ma non supera questi finding semantici/provenance. w-j e w-i restano bloccati; V4.14w e V4.14 restano bloccate. Il ciclo autorizzato di tre incrementi è esaurito: non è selezionato lavoro a valle; serve autorizzazione per il successivo micro-incremento correttivo, con review della fonte Art. 87a prima di implementare.
+V4.14w-j and V4.14w-n are complete within their reviewed scopes; w-n keeps Rules v8 payer-free and the validator non-decisional. V4.14w-o is complete with limited normative GO (8/8 hashes) for a separate Annex VIII machine-readable `source_ledger_only` ledger. The reviewer noted that the documentary catalogue uses paraphrases, does not verify dates against every authentic act, and DK-c must preserve the official "after" wording. Full Engine suite 841/0/0/0; governance passed.
 
-## Ultimo candidato non chiuso — V4.14w-j — Art. 57 fail-closed, transition provenance, deterministic Decimal contract
+V4.14w, V4.14 and V4.15 remain `blocked`. The user authorized one final correction and review after the v0.3 NO-GO. Current work creates immutable v0.4, sets the 2009 SE-1 locator to OJ L 284 p.57, and makes the regression entry/version-specific. Rules v8 stays `unavailable`; runtime and matching remain unchanged.
 
-**Gate aggiornato:** Sol/xhigh ha dato GO pre-implementazione limitato; il post-review w-k è però NO-GO per i quattro residui descritti sopra. L'implementazione locale non è approvata per chiusura; niente dati individuali, Annex VIII production o inferenze.
-**Versioning:** preservare byte-identici Knowledge/Rules v0.25; creare `family-office-rules/cross-border/eu-pension-coordination-it-es-v5.json` come profilo coesistente v0.26/v5, selezionato esplicitamente dal CLI. Il freshness gate copre baseline e profilo nuovo.
+## Incremento chiuso - V4.14w-p - Immutable Annex VIII source-ledger catalogue
 
-**Stato:** `blocked` — candidato implementato e verifiche automatiche verdi, ma w-k ha rilevato residui contrattuali/provenance. Nessun ulteriore fix è autorizzato nel ciclo esaurito.
-**Obiettivo:** ottenere gate normativo pre-implementazione per correggere soltanto i tre finding w-i, poi aggiornare Knowledge → Rules → Tests → Engine con fixture sintetiche.
-**Scope:** fail-closed in ogni ramo per Last-State malformato; tracciabilità source-bound temporale degli artt.87 Reg.883/2004, 93–94 Reg.987/2009, 87a Reg.465/2012; Decimal ratio/amounts deterministici indipendentemente da rounding/precision context.
-**Fuori scope:** runtime prima del GO; Annex VIII production; inferenza individuale di eligibility/istituzione/payer/riconoscimento/decorrenza/pagamento; dati personali; sblocco parent V4.14w/V4.14.
-**Route:** T4 pensione, review pre-implementazione Sol/xhigh; eventuale implementazione Terra/medium solo dopo GO. V4.14w-k è il gate post-implementazione.
-**Fonti candidate:** [Reg.883/2004, consolidato al 31-07-2019](https://eur-lex.europa.eu/eli/reg/2004/883/2019-07-31/eng); [Reg.987/2009, artt.93–94](https://eur-lex.europa.eu/eli/reg/2009/987/oj/eng); [Reg.465/2012, fonte modificativa ufficiale](https://eur-lex.europa.eu/eli/reg/2012/465/oj/eng). Consultare e registrare corrigenda/validità prima di codificare; nessuna estensione implicita.
+**Status:** `done` - limited GO exact-version; source-ledger only.
+**Gate:** V4.14w-o GO limited to a separate `source_ledger_only` artifact; exact OJ text and half-open versions; Rules v8 stays `unavailable`; no matching.
+**Corrective evidence:** v0.2 remains byte-identical; v0.3 has 26 version rows/23 at snapshot, exact six-CELEX and EUR-Lex URL allowlists, required scope limits, fail-closed mutation/continuity tests, and snapshot-only status. SE-1 texts match OJ L 284/58 and OJ L 349/46.
+**Authorized final scope:** preserve v0.2/v0.3; clone corrected candidate as immutable v0.4; set SE-1 2009 locator to p.57; assert exact locator for each relevant entry/version; then one Sol/xhigh exact review.
+**Verifica:** implementazione Terra/medium e review normativa Sol/xhigh (massimo due eventi), test mirati, suite Engine completa 0/0/0, roadmap audit, schema planner, execution guardrails e `git diff --check`.
+**Stop:** mismatch with the OJ, non-reproducible tests or a need to enable matching keeps w-p `blocked`/`in_progress`; the parent remains blocked.
+**Authorization:** one final correction and one exact-version review only. Four of six total events already consumed; stop after final review.
 
----
+## Closed increment - V4.14w-n - Article 57(3) payer-free Rules v8 and fail-closed validator slice
+
+**Status:** `done`
+**Evidence:** exact Sol/xhigh review GO, 13/13 hashes matched; focused Engine 181/0/0/0; complete Engine 841/0/0/0; governance gates pass.
+**Contract:** v7 remains byte-identical; v8 only removes payer attribution and is explicit default. Unsupported evidence remains `not_assessed + data_gaps`; Annex VIII unavailable.
+**Limit:** w-n does not decide payer, competent institution, entitlement, recognition, effective date or payment, and does not close V4.14w/V4.14.
+
+## Incremento chiuso — V4.14w-j — Art. 57 fail-closed, transition provenance, deterministic Decimal contract
+
+**Stato:** done
+**Evidenza:** v0.28/v7 exact-hash review normativa e tecnica GO; focused Engine 92/0/0/0; suite completa 836/0/0/0; governance verde.
+**Perimetro:** correggere e verificare soltanto il source-bound Title-II/Art. 87a e i contratti di fail-closed/provenance già approvati. I baseline v0.25/v5 e i candidati storici v0.27/v6 restano immutati.
+**Limiti:** nessun esito individuale, payer, riconoscimento, decorrenza, pagamento, classificazione Annex VIII production o chiusura dei parent V4.14w/V4.14.
 
 ## Incremento chiuso — V4.14w-d — Art. 57 v0.21 registry content and coverage binding
 
@@ -1274,16 +1286,17 @@ V4.15b — Source-bound RITA fund-stream intake and validation.
 `done`
 
 ## ID e titolo
-
-V4.14 - Entitlement-driven pension timeline IT/ES/EU.
+V4.14w-p - Immutable Annex VIII source-ledger catalogue.
 
 ## Stato
 
-`blocked`
+`in_progress`
 
-### Stato operativo dopo i tre incrementi autorizzati
+### Historical note: V4.14w-j closure
 
-V4.14w-b, w-c e w-d sono chiusi in sequenza. Nel nuovo ciclo, w-i ha riconciliato il package v0.25 ma resta `blocked` per i residui #2/#4/#5 del NO-GO esatto. È selezionato w-j come micro-incremento correttivo minimo, con review normativa pre-implementazione e sequenza Knowledge → Rules → Tests → Engine; w-k sarà il gate post-implementazione solo se w-j arriva a un candidato verificabile. La timeline V4.14 resta bloccata dai gap normativi IT/ES/UE e dalla distinzione fra eligibility, requisiti soddisfatti, riconoscimento, decorrenza economica e primo pagamento; V4.14w resta bloccata finché i residui Art.57/Annex VIII non sono risolti. Il gate dei predecessori resta vincolante.
+V4.14w-j è chiusa nel perimetro Knowledge v0.28 / Rules v7 esaminato exact-hash. Le review normative e tecniche sono GO; suite mirate 92/0/0/0 e suite Engine completa 836/0/0/0. Roadmap audit, planner schema, execution guardrails e diff-check passano.
+
+V4.14w, V4.14 e V4.15 restano bloccate per prerequisiti distinti su Art.57(3), Annex VIII e timeline pensionistica. Il GO locale w-j non chiude o sblocca i parent. Non selezionare incrementi a valle: il prossimo piano deve individuare il micro-incremento minimo sul più antico blocker secondo la roadmap.
 
 **Esito storico w-b, corretto e chiuso:** il NO-GO v0.25 aveva individuato il riferimento sintetico `synthetic-institutional-art57` assente nel registry del sample; il ciclo autorizzato ha aggiunto la voce sintetica e la regressione public-builder. Knowledge v0.24 resta invariato; nessuna nuova semantica o accesso a dati personali.
 
@@ -1369,3 +1382,13 @@ V4.13 è chiusa il 2026-10-11 con GO limitato post-review e 131 test focalizzati
 - Fermarsi se le fonti non distinguono in modo verificabile requisito, decorrenza e pagamento o se manca una base/precisione necessaria; non sostituire le evidenze con un'aliquota o una data presunta.
 - Nessun accesso ai dati personali in `family-office-workspace/` durante questa fase di pianificazione/review.
 - L'audit periodico non equivale a certificazione INPS/Seguridad Social o a riconoscimento amministrativo del diritto.
+
+**Checkpoint v0.4 (2026-11-07):** ledger F6AC74CF8DD4976405D91BA91D9537727903A24F67699C925CE03DBBCEFEA197, schema 136A6EC69CEEB314BD2BA423373DC34580F4ACA2F5E9B09B4C8EAD5704F790FC, test 4E97561A026916C90047D18CEF20F018118838E0D83D19C93C5877707A709EC. Locator SE-1 2009 p.57 e test esatto entry/versione; focused 7/0/0/0, suite completa 848/0/0/0, schema valida, audit roadmap OK. Review finale Sol/xhigh pendente; w-p resta in_progress.
+
+**Esito review finale v0.4 (2026-11-07):** NO-GO, 11/12 hash. Il reviewer conferma la correzione SE-1 p.57, il mapping esatto delle 26 entry/versioni e i test; blocca il pacchetto perch? lo schema v0.3 non corrisponde all hash immutabile atteso C42BAC3F8547263105E62275F439ECC977E17C5E16DB0566071BCE85FE404C45 (corrente 756D1332769E63D951C0992EF5B84D4FE74442A12F143E1FCD89528847539525). V4.14w-p ? blocked; eventi 6/6 consumati, nessun altro ciclo autorizzato.
+
+**Nuovo ciclo (2026-11-07):** autorizzati un correttivo e una review. Il candidato schema v0.3 con soli identificatori/titolo downgraded da v0.4 riproduce il digest storico C42BAC3F8547263105E62275F439ECC977E17C5E16DB0566071BCE85FE404C45. Nessuna modifica al ledger/test v0.4; suite e review finale seguiranno.
+
+**Checkpoint ripristino baseline (2026-11-07):** schema v0.3 ripristinato esattamente a C42BAC3F8547263105E62275F439ECC977E17C5E16DB0566071BCE85FE404C45. Focused 7/0/0/0, suite Engine 848/0/0/0; schema v0.3 e v0.4 validi. v0.2/v0.3/v0.4 e Rules/runtime hash allineati. Review finale exact-version del v0.4 invariato pendente; w-p resta in_progress.
+
+**Esito finale (2026-11-07):** Sol/xhigh GO limitato, 12/12 hash corrispondenti. Schema v0.3 ripristinato al digest storico C42BAC3F8547263105E62275F439ECC977E17C5E16DB0566071BCE85FE404C45; v0.4 immutato. Test mirati 7/0/0/0, suite Engine 848/0/0/0; governance verde. w-p ? chiuso solo per il ledger non decisionale. V4.14w e V4.14 restano bloccati; il GO non abilita matching o conclusioni individuali.

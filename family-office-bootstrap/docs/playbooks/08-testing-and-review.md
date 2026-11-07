@@ -29,6 +29,14 @@ Al gate di incremento o release l'intera suite del repository deve terminare con
 
 La review e' un gate, non un sostituto dell'implementazione. Il parent deve avere gia' un diff verificabile e test mirati prima di invocare il reviewer, salvo una review architetturale esplicitamente prerequisita. Le attese sul reviewer sono bounded: dopo un timeout si controlla il worktree e si prosegue localmente, si chiede una consegna sintetica oppure si registra un blocker; non si effettua polling indefinito. Un NO-GO deve produrre finding azionabili e un solo ciclo di correzione bounded. Se il finding non e' bounded o il ciclo fallisce, l'incremento resta `in_progress` e il planner registra evidenze, impatto e prerequisito. Per i gate normativi, il reviewer valuta una versione esatta del contratto: dopo una modifica sostanziale, il verdetto precedente non copre la nuova versione. Un ulteriore ciclo oltre il default richiede blocker documentato e decisione esplicita nel planner; autorizzazione e timebox valgono soltanto per quel tentativo.
 
+### Exact-version e baseline immutabili
+
+La review deve identificare e hashare l'intero pacchetto esaminato: candidati, dipendenze immutabili e baseline di confronto. Il report indica per ogni elemento hash atteso e osservato; verificare soltanto gli artefatti candidati può nascondere una deriva della baseline. Un GO precedente non si trasferisce a byte cambiati.
+
+Se una baseline immutabile deriva ma l'hash della versione già revisionata è noto, non accettare silenziosamente la deriva né modificare un candidato più nuovo per occultarla: ripristinare solo i byte della versione già revisionata, verificare lo SHA-256 atteso e riesaminare il candidato esatto e invariato. Qualunque mismatch ulteriore rispetto alla correzione autorizzata è NO-GO.
+
+Suite mirate/complete concluse e hash corrispondenti sono evidenze necessarie, ma non annullano i finding del reviewer. Un GO limitato chiude soltanto l'ambito e gli artefatti nominati nel verdetto; non chiude il parent, non abilita runtime o disponibilità generale.
+
 ## CLI UX checks
 
 Quando cambia un comando CLI o un wizard, verificare almeno:
