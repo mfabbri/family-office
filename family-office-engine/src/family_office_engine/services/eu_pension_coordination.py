@@ -15,6 +15,9 @@ RULE_PACK_SCHEMA_VERSION = "eu-pension-coordination-rule-pack/v2"
 ARTICLE_57_PACK_CONTRACTS = {
     "eu.it-es.pension-coordination.2026.v4": "v0.25",
     "eu.it-es.pension-coordination.2026.v5": "v0.26",
+    "eu.it-es.pension-coordination.2026.v6": "v0.27",
+    "eu.it-es.pension-coordination.2026.v7": "v0.28",
+    "eu.it-es.pension-coordination.2026.v8": "v0.28",
 }
 
 
@@ -124,18 +127,32 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     if not isinstance(article_57, dict):
         raise EuPensionCoordinationError("EU pension coordination rule pack must define article_57_source_bound")
     contract_version = article_57.get("contract_schema_version")
-    if contract_version not in {"v0.25", "v0.26"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
-        raise EuPensionCoordinationError("EU pension coordination Article 57 contract must be v0.25 or v0.26 with fo-art57-c14n-v4")
+    if contract_version not in {"v0.25", "v0.26", "v0.27", "v0.28"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise EuPensionCoordinationError("EU pension coordination Article 57 contract must be v0.25, v0.26, v0.27 or v0.28 with fo-art57-c14n-v4")
     if ARTICLE_57_PACK_CONTRACTS.get(data["rule_pack_id"]) != contract_version:
         raise EuPensionCoordinationError("EU pension coordination Article 57 contract identity does not match its selected pack.")
     if contract_version == "v0.25" and ("transition_source_registry" in article_57 or "normative_source_registry" in data):
         raise EuPensionCoordinationError("v0.25 Rule pack must retain only the historical Article 57 shape.")
-    if contract_version == "v0.26" and (
+    if contract_version in {"v0.26", "v0.27", "v0.28"} and (
         not isinstance(article_57.get("transition_source_registry"), list)
         or not isinstance(article_57.get("transition_branch_bindings"), dict)
         or not isinstance(data.get("normative_source_registry"), list)
     ):
-        raise EuPensionCoordinationError("v0.26 Rule pack requires the transition registry and exact branch bindings.")
+        raise EuPensionCoordinationError("v0.26/v0.27 Rule pack requires the transition registry and exact branch bindings.")
+    if contract_version == "v0.27" and article_57.get("article_87a_transition") != {
+        "anchor_date": "2012-06-28",
+        "maximum_duration_years": 10,
+        "latest_applicable_date": "2022-06-28",
+        "end_date_exclusive": "2022-06-29",
+        "source_validity_is_separate_from_transition_applicability": True,
+        "outputs_only_title_ii_transition_status_and_provenance": True,
+        "does_not_determine_article_57_relief_or_pension_outputs": True,
+    }:
+        raise EuPensionCoordinationError("v0.27 Rule pack requires the exact Article 87a transition contract.")
+    if data["rule_pack_id"] in {"eu.it-es.pension-coordination.2026.v7", "eu.it-es.pension-coordination.2026.v8"}:
+        _validate_v7_title_ii_policy(data)
+    if data["rule_pack_id"] == "eu.it-es.pension-coordination.2026.v8":
+        _validate_v8_payer_precondition(article_57)
     if article_57.get("human_review_required") is not True:
         raise EuPensionCoordinationError("EU pension coordination Article 57 contract must require human review")
     annex_policy = article_57.get("annex_viii_part_2")
@@ -148,6 +165,39 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     if not isinstance(data["limitations"], list) or not data["limitations"]:
         raise EuPensionCoordinationError("EU pension coordination rule pack must contain limitations")
     return data
+
+
+def _validate_v7_title_ii_policy(data: dict[str, Any]) -> None:
+    policy = data.get("pro_rata_method", {}).get("title_ii_transition_policy")
+    expected = [
+        {"registry_id": "reg-465-2012-original-oj", "version": "CELEX:32012R0465/OJ", "article": "Article 1(11)", "target_regulation": "Regulation (EC) No 883/2004", "target_article": "Article 87a", "role": "amending_legal_basis", "territory": "EU", "language_scope": "EN/IT/ES"},
+        {"registry_id": "reg-1182-1971-original-oj", "version": "CELEX:31971R1182/OJ", "provisions": ["Article 3", "Article 4"], "role": "general_time_calculation_rule", "territory": "EU", "language_scope": "EN"},
+        {"registry_id": "cjeu-c-171-03-judgment", "version": "CELEX:62003CJ0171; ECLI:EU:C:2004:714", "provisions": ["paragraphs 31-38"], "role": "binding_interpretation_of_regulation_1182_71_article_3", "territory": "EU", "language_scope": "EN"},
+    ]
+    if not isinstance(policy, dict) or policy != {
+        "contract_schema_version": "v0.28", "human_review_required": True,
+        "anchor_date": "2012-06-28", "latest_applicable_date": "2022-06-28", "end_date_exclusive": "2022-06-29",
+        "source_bindings": expected,
+    }:
+        raise EuPensionCoordinationError("v7 Title-II transition policy must match the exact approved allowlist.")
+    registry = {
+        entry.get("registry_id"): entry
+        for entry in data.get("normative_source_registry", [])
+        if isinstance(entry, dict)
+    }
+    for binding in expected:
+        entry = registry.get(binding["registry_id"])
+        if entry is None or any(binding[key] != entry.get(key) for key in ("version", "territory", "language_scope")):
+            raise EuPensionCoordinationError("v7 Title-II transition source binding does not match its registry.")
+        bound_provisions = [binding["article"]] if "article" in binding else binding["provisions"]
+        if not isinstance(entry.get("provisions"), list) or any(provision not in entry["provisions"] for provision in bound_provisions):
+            raise EuPensionCoordinationError("v7 Title-II transition source binding provisions do not match its registry.")
+
+
+def _validate_v8_payer_precondition(article_57: dict[str, Any]) -> None:
+    multi = article_57.get("multi_institution")
+    if not isinstance(multi, dict) or multi.get("article_57_3_all_concerned_institutions_relief_is_precondition") is not True or multi.get("article_57_3_does_not_determine_payment_institution") is not True:
+        raise EuPensionCoordinationError("v8 requires the payer-free all-concerned-institutions relief precondition.")
 
 
 def _rule_period_gaps(

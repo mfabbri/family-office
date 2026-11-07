@@ -11,7 +11,7 @@ CATALOG_SCHEMA_VERSION = "knowledge-citation-catalog/v1"
 INDEX_SCHEMA_VERSION = "citation-index/v1"
 SEARCH_SCHEMA_VERSION = "citation-search/v1"
 
-SUPPORTED_AUTHORITY_LEVELS = {"primary_law", "official_guidance", "institutional_guidance"}
+SUPPORTED_AUTHORITY_LEVELS = {"primary_law", "binding_case_law", "official_guidance", "institutional_guidance"}
 SUPPORTED_SOURCE_STATUSES = {"active", "abrogated", "superseded", "withdrawn"}
 
 
@@ -187,6 +187,8 @@ def _normalize_citations(
         locator_key = _canonical_url(url) if url else f"ref:{official_reference.casefold()}"
         valid_from = _optional_iso_date(raw.get("valid_from"), f"{citation_id}.valid_from")
         valid_to = _optional_iso_date(raw.get("valid_to"), f"{citation_id}.valid_to")
+        decision_date = _optional_iso_date(raw.get("decision_date"), f"{citation_id}.decision_date")
+        published_on = _optional_iso_date(raw.get("published_on"), f"{citation_id}.published_on")
         if valid_from and valid_to and valid_to < valid_from:
             raise CitationIndexError(f"Citation {citation_id} valid_to precedes valid_from")
         if source_status in {"abrogated", "superseded"} and not valid_to:
@@ -204,6 +206,8 @@ def _normalize_citations(
             "topics": _text_list(raw.get("topics"), f"{citation_id}.topics"),
             "valid_from": valid_from,
             "valid_to": valid_to,
+            "decision_date": decision_date,
+            "published_on": published_on,
             "verified_at": _optional_iso_date(raw.get("verified_at"), f"{citation_id}.verified_at"),
             "source_status": source_status,
             "knowledge_document_ids": [],
@@ -379,11 +383,11 @@ def _temporal_status(citation: dict[str, Any], as_of_date: str) -> str:
 
 
 def _authority_rank(authority_level: str) -> int:
-    return {"primary_law": 3, "official_guidance": 2, "institutional_guidance": 1}.get(authority_level, 0)
+    return {"primary_law": 3, "binding_case_law": 3, "official_guidance": 2, "institutional_guidance": 1}.get(authority_level, 0)
 
 
 def _validate_duplicate_compatibility(existing: dict[str, Any], duplicate: dict[str, Any]) -> None:
-    keys = ("issuer", "source_type", "authority_level", "valid_from", "valid_to", "verified_at", "source_status")
+    keys = ("issuer", "source_type", "authority_level", "valid_from", "valid_to", "decision_date", "published_on", "verified_at", "source_status")
     conflicts = [key for key in keys if existing.get(key) != duplicate.get(key)]
     if conflicts:
         raise CitationIndexError(

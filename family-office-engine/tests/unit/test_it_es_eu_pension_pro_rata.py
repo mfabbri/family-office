@@ -16,9 +16,175 @@ from family_office_engine.services.it_es_eu_pension_pro_rata import (
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 RULE_PACK = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es.json"
 RULE_PACK_V5 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v5.json"
+RULE_PACK_V6 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v6.json"
+RULE_PACK_V7 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v7.json"
+RULE_PACK_V8 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v8.json"
 
 
 class ItEsEuPensionProRataTest(unittest.TestCase):
+    def test_v8_policy_is_payer_free_and_requires_all_concerned_relief(self):
+        multi = load_rule_pack(RULE_PACK_V8)["pro_rata_method"]["article_57_source_bound"]["multi_institution"]
+        self.assertTrue(multi["article_57_3_all_concerned_institutions_relief_is_precondition"])
+        self.assertTrue(multi["article_57_3_does_not_determine_payment_institution"])
+        self.assertNotIn("article_57_3_payer_requires_all_concerned_institutions_relieved", multi)
+
+    def test_v028_title_ii_public_output_is_isolated_and_fail_closed(self):
+        policy = load_rule_pack(RULE_PACK_V7)
+        policy["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"].update({
+            "machine_readable_validity_catalogue_status": "available", "catalogue_entry_ids": ["synthetic-catalogue-entry"],
+            "catalogue_id": "synthetic-annex", "catalogue_schema_version": "v1", "catalogue_digest": "sha256:synthetic",
+            "catalogue_valid_from": "2010-05-01", "catalogue_valid_to": None,
+        })
+        payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
+        payload["article_57_assessment"] = _article_57_v028(False, False, False, assessment_date="2026-12-01")
+        payload["article_57_assessment"]["annex_viii_part_2_applicability"] = _synthetic_annex_not_matched()
+        payload["title_ii_transition_assessment"] = _title_ii_v028("2022-06-28")
+        on_boundary = self._build(deepcopy(payload), RULE_PACK_V7, loaded_rule_pack=policy)
+        payload["title_ii_transition_assessment"] = _title_ii_v028("2022-06-29")
+        after_boundary = self._build(deepcopy(payload), RULE_PACK_V7, loaded_rule_pack=policy)
+        self.assertEqual(on_boundary["title_ii_transition"]["result"], "old_legislation_continues")
+        self.assertEqual(after_boundary["title_ii_transition"]["result"], "new_legislation_applies")
+        self.assertEqual(set(on_boundary["title_ii_transition"]), {"contract_schema_version", "human_review_required", "assessment_date", "result", "evidence_refs", "normative_source_refs", "data_gaps"})
+        self.assertEqual(on_boundary["article_57"], after_boundary["article_57"])
+        self.assertEqual(on_boundary["spanish_entitlement"], after_boundary["spanish_entitlement"])
+        self.assertEqual(on_boundary["spanish_theoretical_pension"], after_boundary["spanish_theoretical_pension"])
+        self.assertEqual(on_boundary["spanish_pro_rata_pension"]["status"], "calculated")
+        self.assertEqual(after_boundary["spanish_pro_rata_pension"]["status"], "calculated")
+        self.assertIsNotNone(on_boundary["spanish_pro_rata_pension"]["amounts"])
+        self.assertIsNotNone(after_boundary["spanish_pro_rata_pension"]["amounts"])
+        self.assertEqual(on_boundary["spanish_pro_rata_pension"], after_boundary["spanish_pro_rata_pension"])
+        payload["title_ii_transition_assessment"]["relevant_situation_status"] = "unknown"
+        unknown = self._build(payload, RULE_PACK_V7, loaded_rule_pack=policy)
+        self.assertEqual(unknown["title_ii_transition"]["result"], "not_assessed")
+        self.assertIn("missing_relevant_situation_status", {gap["code"] for gap in unknown["data_gaps"]})
+        self.assertEqual(unknown["spanish_pro_rata_pension"], on_boundary["spanish_pro_rata_pension"])
+
+    def test_v028_loader_rejects_title_ii_binding_when_registry_provisions_drift(self):
+        broken = json.loads(RULE_PACK_V7.read_text(encoding="utf-8"))
+        entry = next(item for item in broken["normative_source_registry"] if item["registry_id"] == "cjeu-c-171-03-judgment")
+        entry["provisions"] = ["paragraph 31"]
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "rules.json"
+            path.write_text(json.dumps(broken), encoding="utf-8")
+            with patch("family_office_engine.services.it_es_eu_pension_pro_rata.require_fresh_pension_rule_pack"):
+                with self.assertRaisesRegex(ItEsEuPensionProRataError, "binding provisions do not match"):
+                    load_rule_pack(path)
+
+    def test_v028_loader_rejects_extra_title_ii_policy_key(self):
+        broken = json.loads(RULE_PACK_V7.read_text(encoding="utf-8"))
+        broken["pro_rata_method"]["title_ii_transition_policy"]["unapproved_semantic_key"] = True
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "rules.json"
+            path.write_text(json.dumps(broken), encoding="utf-8")
+            with patch("family_office_engine.services.it_es_eu_pension_pro_rata.require_fresh_pension_rule_pack"):
+                with self.assertRaisesRegex(ItEsEuPensionProRataError, "exact sibling Title-II transition policy"):
+                    load_rule_pack(path)
+
+    def test_v028_public_title_ii_boundaries_and_malformed_facts_are_isolated_fail_closed(self):
+        policy = load_rule_pack(RULE_PACK_V7)
+        policy["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"].update({
+            "machine_readable_validity_catalogue_status": "available", "catalogue_entry_ids": ["synthetic-catalogue-entry"],
+            "catalogue_id": "synthetic-annex", "catalogue_schema_version": "v1", "catalogue_digest": "sha256:synthetic",
+            "catalogue_valid_from": "2010-05-01", "catalogue_valid_to": None,
+        })
+        payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
+        payload["article_57_assessment"] = _article_57_v028(False, False, False, assessment_date="2026-12-01")
+        payload["article_57_assessment"]["annex_viii_part_2_applicability"] = _synthetic_annex_not_matched()
+        payload["title_ii_transition_assessment"] = _title_ii_v028("2022-06-28")
+        baseline = self._build(deepcopy(payload), RULE_PACK_V7, loaded_rule_pack=policy)
+
+        cases = (
+            ("pre_commencement", _title_ii_v028("2012-06-27"), "not_applicable"),
+            ("commencement", _title_ii_v028("2012-06-28"), "old_legislation_continues"),
+            ("situation_change", {**_title_ii_v028("2020-04-01"), "relevant_situation_status": "changed", "relevant_situation_change_date": "2020-04-01", "result": "new_legislation_applies"}, "new_legislation_applies"),
+            ("early_opt_out", {**_title_ii_v028("2012-09-29"), "opt_out_status": "requested", "opt_out_request_date": "2012-09-29", "opt_out_effective_date": "2012-06-28", "result": "new_legislation_applies"}, "new_legislation_applies"),
+            ("late_opt_out", {**_title_ii_v028("2012-09-30"), "opt_out_status": "requested", "opt_out_request_date": "2012-09-30", "opt_out_effective_date": "2012-10-01", "result": "old_legislation_continues"}, "old_legislation_continues"),
+            ("non_causal", {**_title_ii_v028("2022-06-28"), "title_ii_change_caused_by_465_2012": False, "result": "not_applicable"}, "not_applicable"),
+        )
+        for label, assessment, expected in cases:
+            with self.subTest(label=label):
+                candidate = deepcopy(payload)
+                candidate["title_ii_transition_assessment"] = assessment
+                snapshot = self._build(candidate, RULE_PACK_V7, loaded_rule_pack=policy)
+                self.assertEqual(snapshot["title_ii_transition"]["result"], expected)
+                for key in ("article_57", "spanish_entitlement", "spanish_theoretical_pension", "spanish_pro_rata_pension"):
+                    self.assertEqual(snapshot[key], baseline[key])
+
+        malformed_cases = (
+            ("non_list_gaps", {"data_gaps": "not-a-list"}),
+            ("scalar_gap", {"data_gaps": ["not-an-object"]}),
+            ("malformed_gap", {"data_gaps": [{}]}),
+            ("unknown_with_date", {"relevant_situation_status": "unknown", "relevant_situation_change_date": "2020-04-01", "result": "not_assessed"}),
+            ("unchanged_with_date", {"relevant_situation_change_date": "2020-04-01"}),
+            ("change_after_assessment", {"relevant_situation_status": "changed", "relevant_situation_change_date": "2022-06-29", "result": "not_assessed"}),
+            ("unknown_opt_out_with_dates", {"opt_out_status": "unknown", "opt_out_request_date": "2012-09-29", "opt_out_effective_date": "2012-06-28", "result": "not_assessed"}),
+            ("not_requested_with_dates", {"opt_out_request_date": "2012-09-29", "opt_out_effective_date": "2012-06-28"}),
+            ("null_causal_change", {"title_ii_change_caused_by_465_2012": None, "result": "not_assessed"}),
+        )
+        for label, changes in malformed_cases:
+            with self.subTest(label=label):
+                candidate = deepcopy(payload)
+                candidate["title_ii_transition_assessment"].update(changes)
+                snapshot = self._build(candidate, RULE_PACK_V7, loaded_rule_pack=policy)
+                self.assertEqual(snapshot["title_ii_transition"]["result"], "not_assessed")
+                self.assertTrue({"invalid_title_ii_data_gaps", "missing_title_ii_change_caused_by_465_2012", "missing_relevant_situation_status", "contradictory_relevant_situation_change_date", "contradictory_opt_out_dates"} & {gap["code"] for gap in snapshot["data_gaps"]})
+                for key in ("article_57", "spanish_entitlement", "spanish_theoretical_pension", "spanish_pro_rata_pension"):
+                    self.assertEqual(snapshot[key], baseline[key])
+    def test_v027_article_87a_boundaries_opt_out_unknowns_and_source_scope_fail_closed(self):
+        from family_office_engine.services.it_es_eu_pension_pro_rata import _transitional_result
+
+        policy = load_rule_pack(RULE_PACK_V6)["pro_rata_method"]["article_57_source_bound"]
+        source = next(item for item in policy["transition_source_registry"] if item["registry_id"] == "reg-465-2012-original-oj")
+        self.assertIsNone(source["period_to"])
+        cases = (
+            ("before_commencement", "2012-06-27", "unchanged", "not_requested", None, None, "not_applicable"),
+            ("on_commencement", "2012-06-28", "unchanged", "not_requested", None, None, "old_legislation_continues"),
+            ("before_maximum_limit", "2022-06-27", "unchanged", "not_requested", None, None, "old_legislation_continues"),
+            ("on_latest", "2022-06-28", "unchanged", "not_requested", None, None, "old_legislation_continues"),
+            ("after_end_exclusive", "2022-06-29", "unchanged", "not_requested", None, None, "new_legislation_applies"),
+            ("situation_change_is_exclusive_end", "2020-04-01", "changed", "not_requested", "2020-04-01", None, "new_legislation_applies"),
+            ("early_opt_out", "2012-06-28", "unchanged", "requested", None, "2012-09-29", "new_legislation_applies"),
+            ("late_opt_out_before_effect", "2012-09-30", "unchanged", "requested", None, "2012-09-30", "old_legislation_continues"),
+            ("late_opt_out_on_effect", "2012-10-01", "unchanged", "requested", None, "2012-09-30", "new_legislation_applies"),
+        )
+        for label, assessment_date, situation, opt_out, change_date, request_date, expected in cases:
+            with self.subTest(label=label):
+                transitional = _transitional_v027("ES", assessment_date, situation, opt_out, change_date, request_date)
+                title = transitional["regulation_465_2012_883_87a"]
+                self.assertEqual(title["result"], expected)
+                self.assertTrue(_transitional_result(transitional, "ES", assessment_date, policy))
+
+        for field, value in (
+            ("title_ii_change_caused_by_465_2012", None),
+            ("relevant_situation_status", "unknown"),
+            ("opt_out_status", "unknown"),
+        ):
+            with self.subTest(unknown=field):
+                transitional = _transitional_v027("ES", "2020-01-01")
+                title = transitional["regulation_465_2012_883_87a"]
+                title[field] = value
+                title["result"] = "not_assessed"
+                title["data_gaps"] = [{"code": f"missing_{field}"}]
+                self.assertIsNone(_transitional_result(transitional, "ES", "2020-01-01", policy))
+
+        transitional = _transitional_v027("ES", "2020-01-01")
+        transitional["regulation_465_2012_883_87a"]["normative_source_refs"][0]["registry_id"] = "reg-465-2012-corrigendum-2015-03-28-ro"
+        self.assertIsNone(_transitional_result(transitional, "ES", "2020-01-01", policy))
+
+    def test_v027_article_87a_never_infers_article_57_or_pension_outputs(self):
+        payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
+        continuing = _article_57_v027(False, False, None, assessment_date="2022-06-28")
+        ended = _article_57_v027(False, False, None, assessment_date="2022-06-29")
+        payload["article_57_assessment"] = continuing
+        continuing_snapshot = self._build(deepcopy(payload), RULE_PACK_V6)
+        payload["article_57_assessment"] = ended
+        ended_snapshot = self._build(deepcopy(payload), RULE_PACK_V6)
+
+        self.assertEqual(continuing_snapshot["article_57"], ended_snapshot["article_57"])
+        self.assertEqual(continuing_snapshot["spanish_pro_rata_pension"], ended_snapshot["spanish_pro_rata_pension"])
+        policy = load_rule_pack(RULE_PACK_V6)["pro_rata_method"]["article_57_source_bound"]["article_87a_transition"]
+        self.assertTrue(policy["outputs_only_title_ii_transition_status_and_provenance"])
+        self.assertTrue(policy["does_not_determine_article_57_relief_or_pension_outputs"])
     def test_v026_article_94_1_it_es_strict_temporal_predicates_boundaries_and_selection(self):
         from family_office_engine.services.it_es_eu_pension_pro_rata import (
             _article_57_assessment,
@@ -464,6 +630,41 @@ class ItEsEuPensionProRataTest(unittest.TestCase):
         result = self._build(payload)
         self.assertEqual(result["article_57"]["article_57_exception_status"], "not_assessed")
         self.assertIn("invalid_article_57_duration_source_segment", {gap["code"] for gap in result["data_gaps"]})
+
+    def test_c14n_v4_rejects_every_parent_and_bound_shape_mutation(self):
+        from family_office_engine.services.it_es_eu_pension_pro_rata import _c14n_v4_duration_source_bound
+
+        baseline = _article_57(True, False, False)["duration_source_segment"]["preimage"]
+        self.assertIsNotNone(_c14n_v4_duration_source_bound(baseline))
+        mutations = []
+        for key, value in (("canonicalization_profile", "other"), ("schema_version", "v0.20")):
+            candidate = deepcopy(baseline); candidate[key] = value; mutations.append(candidate)
+        for value in ([], ["other"], ["synthetic-period", "other"], [{}]):
+            candidate = deepcopy(baseline); candidate["parent_period_refs"] = value; mutations.append(candidate)
+        for value in ([], [{"period_ref": "synthetic-period"}], [deepcopy(baseline["source_bounds"][0]), deepcopy(baseline["source_bounds"][0])]):
+            candidate = deepcopy(baseline); candidate["source_bounds"] = value; mutations.append(candidate)
+        for field, value in (("period_ref", "other"), ("native_start", "2026-01-01"), ("native_end", "2026-12-31")):
+            candidate = deepcopy(baseline); candidate["source_bounds"][0][field] = value; mutations.append(candidate)
+        for field, value in (("precision", "rounded"), ("unit", ""), ("value", {"numerator": 364}), ("value", {"numerator": 364, "denominator": 0}), ("value", {"numerator": "364", "denominator": 1})):
+            candidate = deepcopy(baseline); candidate["source_bounds"][0]["native_duration"][field] = value; mutations.append(candidate)
+        for candidate in mutations:
+            with self.subTest(candidate=candidate):
+                self.assertIsNone(_c14n_v4_duration_source_bound(candidate))
+
+    def test_v8_scope_registry_must_cover_every_claimed_institution(self):
+        from family_office_engine.services.it_es_eu_pension_pro_rata import _article_57_assessment
+
+        policy = load_rule_pack(RULE_PACK_V8)
+        assessment = _article_57(True, False, False, all_relieved=True)
+        assessment["contract_schema_version"] = "v0.28"
+        assessment["institution_scope_evidence"]["institution_refs"] = ["synthetic-es", "synthetic-it"]
+        assessment["institution_scope_evidence"]["full_perimeter_status"] = "source_bound_full_perimeter"
+        assessment["institution_scope_evidence"]["operator_verification_status"] = "verified"
+        outcome = _article_57_assessment(assessment, policy)
+        self.assertEqual(outcome["result"]["article_57_exception_status"], "not_assessed")
+        self.assertTrue(outcome["data_gaps"])
+        self.assertEqual(outcome["result"]["national_payment_obligation_status"], "not_assessed")
+        self.assertNotIn("payment_institution", outcome["result"])
 
         payload = _input([])
         payload["article_57_assessment"]["duration_source_segment"]["preimage"]["parent_period_refs"] = [{}]
@@ -1225,14 +1426,18 @@ class ItEsEuPensionProRataTest(unittest.TestCase):
         self.assertEqual(article_57["national_payment_obligation_status"], "not_assessed")
         self.assertNotIn("article_57_3_last_state", article_57)
 
-    def _build(self, payload: dict, rule_pack_path: Path = RULE_PACK) -> dict:
+    def _build(self, payload: dict, rule_pack_path: Path = RULE_PACK, loaded_rule_pack: dict | None = None) -> dict:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
             input_path = root / "it-es-eu-pension-pro-rata-input.json"
             output_path = root / "it-es-eu-pension-pro-rata.snapshot.json"
             input_path.write_text(json.dumps(payload), encoding="utf-8")
 
-            result = build_it_es_eu_pension_pro_rata(input_path, rule_pack_path, output_path)
+            if loaded_rule_pack is None:
+                result = build_it_es_eu_pension_pro_rata(input_path, rule_pack_path, output_path)
+            else:
+                with patch("family_office_engine.services.it_es_eu_pension_pro_rata.load_rule_pack", return_value=loaded_rule_pack):
+                    result = build_it_es_eu_pension_pro_rata(input_path, rule_pack_path, output_path)
 
             self.assertTrue(output_path.exists())
             self.assertEqual(result, json.loads(output_path.read_text(encoding="utf-8")))
@@ -1433,6 +1638,25 @@ def _article_57_v026(duration: bool | None, autonomous: bool | None, annex: bool
     return assessment
 
 
+def _article_57_v027(duration: bool | None, autonomous: bool | None, annex: bool | None, assessment_date: str) -> dict:
+    assessment = _article_57_v026(duration, autonomous, annex)
+    assessment["contract_schema_version"] = "v0.27"
+    assessment["assessment_date"] = assessment_date
+    assessment["transitional_applicability"] = _transitional_v027("ES", assessment_date)
+    for record in assessment["concerned_institutions"]:
+        record["transitional_applicability"] = _transitional_v027(record["member_state"], assessment_date)
+    return assessment
+
+
+def _article_57_v028(duration: bool | None, autonomous: bool | None, annex: bool | None, assessment_date: str) -> dict:
+    assessment = _article_57_v027(duration, autonomous, annex, assessment_date)
+    assessment["contract_schema_version"] = "v0.28"
+    assessment["transitional_applicability"] = _transitional_v028("ES", assessment_date)
+    for record in assessment["concerned_institutions"]:
+        record["transitional_applicability"] = _transitional_v028(record["member_state"], assessment_date)
+    return assessment
+
+
 def _transitional(member_state: str, risk_date: str) -> dict:
     value = _transitional_v026(member_state, risk_date)
     for evidence in value.values():
@@ -1486,6 +1710,69 @@ def _transitional_v026(member_state: str, risk_date: str) -> dict:
         "regulation_465_2012_883_87a": {"title_ii_change_caused_by_465_2012": None, "legislation_before_change": None, "legislation_after_change": None, "relevant_situation_unchanged": None, "within_ten_year_limit": None, "opt_out_request_date": None, "opt_out_effective_date": None, "result": "not_applicable", "evidence_refs": ["synthetic-465-87a"], "normative_source_refs": [{**ref("reg-465-2012-original-oj", "CELEX:32012R0465/OJ", "Article 1(11)"), "target_regulation": "Regulation (EC) No 883/2004", "target_article": "Article 87a"}], "data_gaps": []},
         "pension_transitional_987_94_1": {"benefits_due_for_pre_application_period": False, "contingency_pre_application": False, "contingency_date": "2026-12-01", "claim_awarded_before_application_date": False, "prior_leg": None, "basic_regulation_leg": None, "comparison": "not_applicable", "preserved_result": "not_applicable", "result": "not_applicable", "member_state": member_state, "territorial_application_date": "2010-05-01", "normative_source_refs": [ref("reg-987-2009-original-oj", "CELEX:32009R0987/OJ", "Article 94(1)")], "data_gaps": []},
     }
+
+
+def _transitional_v027(
+    member_state: str,
+    assessment_date: str,
+    situation: str = "unchanged",
+    opt_out: str = "not_requested",
+    change_date: str | None = None,
+    request_date: str | None = None,
+) -> dict:
+    transition = _transitional_v026(member_state, assessment_date)
+    title = transition["regulation_465_2012_883_87a"]
+    if opt_out == "requested":
+        effective_date = "2012-06-28" if request_date <= "2012-09-29" else f"{int(request_date[:4]) + (request_date[5:7] == '12'):04d}-{'01' if request_date[5:7] == '12' else int(request_date[5:7]) + 1:02d}-01"
+    else:
+        effective_date = None
+    end_exclusive = "2022-06-29"
+    if situation == "changed" and change_date is not None:
+        end_exclusive = min(end_exclusive, change_date)
+    if effective_date is not None:
+        end_exclusive = min(end_exclusive, effective_date)
+    result = "not_applicable" if assessment_date < "2012-06-28" else "old_legislation_continues" if assessment_date < end_exclusive else "new_legislation_applies"
+    title.clear()
+    title.update({
+        "assessment_date": assessment_date,
+        "title_ii_change_caused_by_465_2012": True,
+        "relevant_situation_status": situation,
+        "relevant_situation_change_date": change_date,
+        "opt_out_status": opt_out,
+        "opt_out_request_date": request_date,
+        "opt_out_effective_date": effective_date,
+        "result": result,
+        "evidence_refs": ["synthetic-465-87a"],
+        "normative_source_refs": _transitional_v026(member_state, assessment_date)["regulation_465_2012_883_87a"]["normative_source_refs"],
+        "data_gaps": [],
+    })
+    return transition
+
+
+def _transitional_v028(member_state: str, risk_date: str) -> dict:
+    transition = _transitional_v026(member_state, risk_date)
+    transition.pop("regulation_465_2012_883_87a")
+    return transition
+
+
+def _title_ii_v028(assessment_date: str) -> dict:
+    policy = load_rule_pack(RULE_PACK_V7)["pro_rata_method"]["title_ii_transition_policy"]
+    return {
+        "contract_schema_version": "v0.28", "human_review_required": True,
+        "assessment_date": assessment_date, "title_ii_change_caused_by_465_2012": True,
+        "relevant_situation_status": "unchanged", "relevant_situation_change_date": None,
+        "opt_out_status": "not_requested", "opt_out_request_date": None, "opt_out_effective_date": None,
+        "result": (
+            "not_applicable" if assessment_date < "2012-06-28"
+            else "old_legislation_continues" if assessment_date < "2022-06-29"
+            else "new_legislation_applies"
+        ),
+        "evidence_refs": ["synthetic-465-87a"], "normative_source_refs": policy["source_bindings"], "data_gaps": [],
+    }
+
+
+def _synthetic_annex_not_matched() -> dict:
+    return {"result": False, "catalogue_id": "synthetic-annex", "catalogue_schema_version": "v1", "catalogue_digest": "sha256:synthetic", "catalogue_valid_from": "2010-05-01", "catalogue_valid_to": None, "annex_consolidation_version": "reg-988-2009-2010-05-01", "annex_validity_or_applicability_date": "2026-12-01", "scheme_match_status": "not_matched", "matched_scheme_entry": None, "annex_evidence_refs": ["synthetic-annex-evidence"]}
 
 
 def _period(country: str, start: str, end: str) -> dict:

@@ -33,7 +33,7 @@ class CitationIndexTest(unittest.TestCase):
         self.assertEqual(first["schema_version"], "citation-index/v1")
         self.assertEqual(first["status"], "complete_with_gaps")
         self.assertGreaterEqual(first["summary"]["citation_count"], 10)
-        self.assertEqual(first["summary"]["knowledge_document_count"], 26)
+        self.assertEqual(first["summary"]["knowledge_document_count"], 28)
         self.assertGreaterEqual(first["summary"]["contract_count"], 15)
         self.assertEqual(
             first["reproducibility"]["content_hash"],
@@ -52,6 +52,8 @@ class CitationIndexTest(unittest.TestCase):
         self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.24", document_ids)
         self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.25", document_ids)
         self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.26", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.27", document_ids)
+        self.assertIn("knowledge.international.eu-pension-art57-evidence-audit-v0.28", document_ids)
         self.assertIn("knowledge.international.eu-pension-art57-public-boundary-regressions-v0.23", document_ids)
         self.assertIn("knowledge.international.eu-annex-viii-part2-catalogue-candidate", document_ids)
 
@@ -90,6 +92,56 @@ class CitationIndexTest(unittest.TestCase):
             self.assertEqual(index["summary"]["citation_count"], 1)
             self.assertEqual(index["citations"][0]["alias_citation_ids"], ["source.current.alias"])
             self.assertEqual(index["knowledge_documents"][0]["citation_ids"], ["source.current"])
+
+    def test_decision_and_publication_dates_are_preserved_but_not_validity(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            catalog_path = _write_catalog(root)
+            catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+            case_law = catalog["citations"][0]
+            case_law.update({
+                "citation_id": "a.case",
+                "title": "Synthetic binding judgment",
+                "source_type": "case_law",
+                "authority_level": "binding_case_law",
+                "url": "https://example.test/case",
+                "valid_from": None,
+                "valid_to": None,
+                "decision_date": "2004-11-11",
+                "published_on": "2005-01-08",
+            })
+            primary_law = dict(case_law)
+            primary_law.update({
+                "citation_id": "z.law",
+                "title": "Synthetic primary law",
+                "source_type": "legislation",
+                "authority_level": "primary_law",
+                "url": "https://example.test/law",
+                "valid_from": "2004-01-01",
+                "decision_date": None,
+                "published_on": None,
+            })
+            catalog["citations"] = [case_law, primary_law]
+            catalog["documents"][0]["citation_ids"] = ["z.law", "a.case"]
+            catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
+
+            index = build_citation_index(catalog_path, root, as_of_date="2026-06-01")
+            case_record = next(item for item in index["citations"] if item["citation_id"] == "a.case")
+            self.assertEqual(case_record["decision_date"], "2004-11-11")
+            self.assertEqual(case_record["published_on"], "2005-01-08")
+            self.assertIsNone(case_record["valid_from"])
+
+            index_path = root / "index.json"
+            index_path.write_text(json.dumps(index), encoding="utf-8")
+            result = search_citation_index(
+                index_path, topic="taxation", as_of_date="2026-06-01", include_inactive=True
+            )
+            # Both authority levels rank equally; reversed IDs make the secondary ID ordering observable.
+            self.assertEqual([item["citation_id"] for item in result["citations"]], ["a.case", "z.law"])
+            self.assertEqual(
+                next(item for item in result["citations"] if item["citation_id"] == "a.case")["temporal_status"],
+                "unknown_validity",
+            )
 
     def test_knowledge_path_cannot_escape_repository(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

@@ -21,6 +21,9 @@ RULE_PACK_SCHEMA_VERSION = "eu-pension-coordination-rule-pack/v2"
 ARTICLE_57_PACK_CONTRACTS = {
     "eu.it-es.pension-coordination.2026.v4": "v0.25",
     "eu.it-es.pension-coordination.2026.v5": "v0.26",
+    "eu.it-es.pension-coordination.2026.v6": "v0.27",
+    "eu.it-es.pension-coordination.2026.v7": "v0.28",
+    "eu.it-es.pension-coordination.2026.v8": "v0.28",
 }
 
 
@@ -59,6 +62,10 @@ def build_it_es_eu_pension_pro_rata(
     )
     theoretical = _spanish_theoretical_amount(data.get("spanish_theoretical_pension"))
     article_57 = _article_57_assessment(data.get("article_57_assessment"), rule_pack)
+    is_v7_or_v8 = rule_pack["rule_pack_id"] in {"eu.it-es.pension-coordination.2026.v7", "eu.it-es.pension-coordination.2026.v8"}
+    if not is_v7_or_v8 and "title_ii_transition_assessment" in data:
+        raise ItEsEuPensionProRataError("title_ii_transition_assessment is supported only by the v7 or v8 rule pack.")
+    title_ii_transition = _title_ii_transition_assessment(data.get("title_ii_transition_assessment"), rule_pack) if is_v7_or_v8 else None
     pro_rata = _spanish_pro_rata(theoretical, periods_result, entitlement, rule_pack, article_57)
     data_gaps = []
     data_gaps.extend(_declared_data_gaps(data, theoretical))
@@ -68,6 +75,8 @@ def build_it_es_eu_pension_pro_rata(
     data_gaps.extend(entitlement["data_gaps"])
     data_gaps.extend(theoretical["data_gaps"])
     data_gaps.extend(article_57["data_gaps"])
+    if title_ii_transition is not None:
+        data_gaps.extend(title_ii_transition["data_gaps"])
     data_gaps.extend(pro_rata["data_gaps"])
 
     snapshot = {
@@ -101,6 +110,8 @@ def build_it_es_eu_pension_pro_rata(
             "this candidate-only estimate is not an official P1 decision, recognition, or payment determination."
         ),
     }
+    if title_ii_transition is not None:
+        snapshot["title_ii_transition"] = title_ii_transition["result"]
     return _write_snapshot(snapshot, output_path)
 
 
@@ -112,7 +123,7 @@ def _article_57_contract_mismatch(data: dict[str, Any], rule_pack: dict[str, Any
     supplied_version = assessment.get("contract_schema_version")
     supplied_profile = assessment.get("canonicalization_profile")
     return (
-        supplied_version in {"v0.25", "v0.26"}
+        supplied_version in {"v0.25", "v0.26", "v0.27", "v0.28"}
         and (supplied_version != policy["contract_schema_version"] or supplied_profile != policy["canonicalization_profile"])
     )
 
@@ -228,20 +239,26 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     if not isinstance(article_57, dict):
         raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.article_57_source_bound")
     contract_version = article_57.get("contract_schema_version")
-    if contract_version not in {"v0.25", "v0.26"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
-        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.25 or v0.26 with fo-art57-c14n-v4")
+    if contract_version not in {"v0.25", "v0.26", "v0.27", "v0.28"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.25, v0.26, v0.27 or v0.28 with fo-art57-c14n-v4")
     if ARTICLE_57_PACK_CONTRACTS.get(data["rule_pack_id"]) != contract_version:
         raise ItEsEuPensionProRataError("Rule pack Article 57 contract identity does not match its selected pack.")
     if contract_version == "v0.25" and ("transition_source_registry" in article_57 or "normative_source_registry" in data):
         raise ItEsEuPensionProRataError("v0.25 Rule pack must retain only the historical Article 57 shape.")
-    if contract_version == "v0.26" and (
+    if contract_version in {"v0.26", "v0.27", "v0.28"} and (
         not isinstance(article_57.get("transition_source_registry"), list)
         or not isinstance(article_57.get("transition_branch_bindings"), dict)
         or not isinstance(data.get("normative_source_registry"), list)
     ):
-        raise ItEsEuPensionProRataError("v0.26 Rule pack requires the transition registry and exact branch bindings.")
-    if contract_version == "v0.26":
+        raise ItEsEuPensionProRataError("v0.26/v0.27 Rule pack requires the transition registry and exact branch bindings.")
+    if contract_version in {"v0.26", "v0.27", "v0.28"}:
         _validate_article_94_1_it_es_policy(article_57)
+    if contract_version == "v0.27":
+        _validate_article_87a_transition_policy(article_57)
+    if data["rule_pack_id"] in {"eu.it-es.pension-coordination.2026.v7", "eu.it-es.pension-coordination.2026.v8"}:
+        _validate_title_ii_transition_policy(data)
+    if data["rule_pack_id"] == "eu.it-es.pension-coordination.2026.v8":
+        _validate_v8_payer_precondition(article_57)
     if article_57.get("human_review_required") is not True:
         raise ItEsEuPensionProRataError("Rule pack Article 57 contract must require human review")
     last_state_policy = article_57.get("last_state_attestation")
@@ -1150,6 +1167,9 @@ def _source_bound_result(value: Any, label: str, policy: dict[str, Any] | None =
 
 def _transitional_result(value: Any, member_state: str, risk_date: str, policy: dict[str, Any] | None = None) -> bool | None:
     v026 = policy is not None and "transition_source_registry" in policy
+    if policy is not None and policy.get("contract_schema_version") == "v0.28":
+        return _v028_article_57_transitional_result(value, member_state, policy)
+    v027 = policy is not None and policy.get("contract_schema_version") == "v0.27"
     if not isinstance(value, dict) or set(value) != {"basic_regulation_883_87", "implementing_regulation_987_93", "regulation_465_2012_883_87a", "pension_transitional_987_94_1"}:
         return None
     basic = value["basic_regulation_883_87"]
@@ -1191,11 +1211,18 @@ def _transitional_result(value: Any, member_state: str, risk_date: str, policy: 
         return None
 
     title_ii = value["regulation_465_2012_883_87a"]
-    title_ii_fields = {
-        "title_ii_change_caused_by_465_2012", "legislation_before_change", "legislation_after_change",
-        "relevant_situation_unchanged", "within_ten_year_limit", "opt_out_request_date",
-        "opt_out_effective_date", "result", "evidence_refs", "data_gaps",
-    }
+    title_ii_fields = (
+        {
+            "assessment_date", "title_ii_change_caused_by_465_2012", "relevant_situation_status",
+            "relevant_situation_change_date", "opt_out_status", "opt_out_request_date",
+            "opt_out_effective_date", "result", "evidence_refs", "data_gaps",
+        }
+        if v027 else {
+            "title_ii_change_caused_by_465_2012", "legislation_before_change", "legislation_after_change",
+            "relevant_situation_unchanged", "within_ten_year_limit", "opt_out_request_date",
+            "opt_out_effective_date", "result", "evidence_refs", "data_gaps",
+        }
+    )
     if v026:
         title_ii_fields.add("normative_source_refs")
     if (
@@ -1203,12 +1230,19 @@ def _transitional_result(value: Any, member_state: str, risk_date: str, policy: 
         or set(title_ii) != title_ii_fields
         or title_ii["result"] not in {"old_legislation_continues", "new_legislation_applies", "not_applicable", "not_assessed"}
         or type(title_ii["title_ii_change_caused_by_465_2012"]) not in {bool, type(None)}
-        or type(title_ii["relevant_situation_unchanged"]) not in {bool, type(None)}
+        or not _nonempty_string_list(title_ii["evidence_refs"])
+        or not isinstance(title_ii["data_gaps"], list)
+        or (title_ii["result"] == "not_assessed" and not title_ii["data_gaps"])
+    ):
+        return None
+    if v027:
+        if not _article_87a_transition_semantics_match(title_ii, policy):
+            return None
+    elif (
+        type(title_ii["relevant_situation_unchanged"]) not in {bool, type(None)}
         or type(title_ii["within_ten_year_limit"]) not in {bool, type(None)}
         or any(title_ii[field] is not None and not _canonical_string(title_ii[field]) for field in ("legislation_before_change", "legislation_after_change"))
         or any(title_ii[field] is not None and not _iso_date(title_ii[field]) for field in ("opt_out_request_date", "opt_out_effective_date"))
-        or not _nonempty_string_list(title_ii["evidence_refs"])
-        or not isinstance(title_ii["data_gaps"], list)
         or (title_ii["result"] in {"old_legislation_continues", "new_legislation_applies"} and (
             title_ii["title_ii_change_caused_by_465_2012"] is not True
             or title_ii["relevant_situation_unchanged"] is None
@@ -1216,7 +1250,6 @@ def _transitional_result(value: Any, member_state: str, risk_date: str, policy: 
             or not _canonical_string(title_ii["legislation_before_change"])
             or not _canonical_string(title_ii["legislation_after_change"])
         ))
-        or (title_ii["result"] == "not_assessed" and not title_ii["data_gaps"])
     ):
         return None
 
@@ -1269,6 +1302,181 @@ def _transitional_result(value: Any, member_state: str, risk_date: str, policy: 
     if policy is not None and not _transition_source_refs_match_registry(value, policy, risk_date):
         return None
     return True
+
+
+def _v028_article_57_transitional_result(value: Any, member_state: str, policy: dict[str, Any]) -> bool | None:
+    expected = {"basic_regulation_883_87", "implementing_regulation_987_93", "pension_transitional_987_94_1"}
+    if not isinstance(value, dict) or set(value) != expected:
+        return None
+    for name, item in value.items():
+        if not isinstance(item, dict) or item.get("result") == "not_assessed" or not isinstance(item.get("data_gaps"), list):
+            return None
+    basic = value["basic_regulation_883_87"]
+    pension = value["pension_transitional_987_94_1"]
+    if basic.get("member_state") != member_state or pension.get("member_state") != member_state:
+        return None
+    return True if _transition_source_refs_match_registry(value, policy, basic.get("contingency_date", "")) else None
+
+
+def _validate_article_87a_transition_policy(policy: dict[str, Any]) -> None:
+    expected = {
+        "anchor_date": "2012-06-28",
+        "maximum_duration_years": 10,
+        "latest_applicable_date": "2022-06-28",
+        "end_date_exclusive": "2022-06-29",
+        "source_validity_is_separate_from_transition_applicability": True,
+        "outputs_only_title_ii_transition_status_and_provenance": True,
+        "does_not_determine_article_57_relief_or_pension_outputs": True,
+    }
+    if policy.get("article_87a_transition") != expected:
+        raise ItEsEuPensionProRataError("v0.27 Rule pack requires the exact Article 87a transition contract.")
+
+
+def _validate_title_ii_transition_policy(rule_pack: dict[str, Any]) -> None:
+    policy = rule_pack.get("pro_rata_method", {}).get("title_ii_transition_policy")
+    expected_fields = {
+        "contract_schema_version": "v0.28", "human_review_required": True,
+        "anchor_date": "2012-06-28", "latest_applicable_date": "2022-06-28", "end_date_exclusive": "2022-06-29",
+    }
+    expected_bindings = [
+        {"registry_id": "reg-465-2012-original-oj", "version": "CELEX:32012R0465/OJ", "article": "Article 1(11)", "target_regulation": "Regulation (EC) No 883/2004", "target_article": "Article 87a", "role": "amending_legal_basis", "territory": "EU", "language_scope": "EN/IT/ES"},
+        {"registry_id": "reg-1182-1971-original-oj", "version": "CELEX:31971R1182/OJ", "provisions": ["Article 3", "Article 4"], "role": "general_time_calculation_rule", "territory": "EU", "language_scope": "EN"},
+        {"registry_id": "cjeu-c-171-03-judgment", "version": "CELEX:62003CJ0171; ECLI:EU:C:2004:714", "provisions": ["paragraphs 31-38"], "role": "binding_interpretation_of_regulation_1182_71_article_3", "territory": "EU", "language_scope": "EN"},
+    ]
+    expected = {**expected_fields, "source_bindings": expected_bindings}
+    if not isinstance(policy, dict) or policy != expected:
+        raise ItEsEuPensionProRataError("v7 Rule pack requires the exact sibling Title-II transition policy.")
+    registry = {item.get("registry_id"): item for item in rule_pack.get("normative_source_registry", []) if isinstance(item, dict)}
+    bindings = policy["source_bindings"]
+    for binding in bindings:
+        entry = registry.get(binding["registry_id"])
+        if entry is None or any(binding[key] != entry[key] for key in ("version", "territory", "language_scope")):
+            raise ItEsEuPensionProRataError("v7 Title-II transition source binding does not match its registry.")
+        bound_provisions = [binding["article"]] if "article" in binding else binding["provisions"]
+        if not isinstance(entry.get("provisions"), list) or any(provision not in entry["provisions"] for provision in bound_provisions):
+            raise ItEsEuPensionProRataError("v7 Title-II transition source binding provisions do not match its registry.")
+
+
+def _validate_v8_payer_precondition(article_57: dict[str, Any]) -> None:
+    multi = article_57.get("multi_institution")
+    if not isinstance(multi, dict) or multi.get("article_57_3_all_concerned_institutions_relief_is_precondition") is not True or multi.get("article_57_3_does_not_determine_payment_institution") is not True:
+        raise ItEsEuPensionProRataError("v8 requires the payer-free all-concerned-institutions relief precondition.")
+
+
+def _title_ii_transition_assessment(value: Any, rule_pack: dict[str, Any]) -> dict[str, Any]:
+    policy = rule_pack.get("pro_rata_method", {}).get("title_ii_transition_policy")
+    base = {"contract_schema_version": "v0.28", "human_review_required": True, "assessment_date": None,
+            "result": "not_assessed", "evidence_refs": [], "normative_source_refs": [], "data_gaps": []}
+    if policy is None:
+        return {"result": base, "data_gaps": []}
+    required = {"contract_schema_version", "human_review_required", "assessment_date", "title_ii_change_caused_by_465_2012", "relevant_situation_status", "relevant_situation_change_date", "opt_out_status", "opt_out_request_date", "opt_out_effective_date", "result", "evidence_refs", "normative_source_refs", "data_gaps"}
+    if not isinstance(value, dict) or set(value) != required:
+        base["data_gaps"] = [{"code": "missing_title_ii_transition_assessment", "message": "A v0.28 Title-II transition assessment is required."}]
+        return {"result": base, "data_gaps": base["data_gaps"]}
+    base.update({key: value[key] for key in base if key in value})
+    gaps = []
+    if not isinstance(value["data_gaps"], list) or any(
+        not isinstance(item, dict)
+        or not _canonical_string(item.get("code"))
+        or not _canonical_string(item.get("message"))
+        for item in value["data_gaps"]
+    ):
+        gaps.append({"code": "invalid_title_ii_data_gaps", "message": "data_gaps must be a list of gap objects with code and message."})
+    if value["contract_schema_version"] != "v0.28" or value["human_review_required"] is not True:
+        gaps.append({"code": "invalid_title_ii_transition_contract", "message": "Title-II transition must use v0.28 and require human review."})
+    if not _iso_date(value["assessment_date"]): gaps.append({"code": "missing_or_invalid_title_ii_assessment_date", "message": "assessment_date is required."})
+    for field in ("title_ii_change_caused_by_465_2012",):
+        if type(value[field]) not in {bool, type(None)}: gaps.append({"code": f"invalid_{field}", "message": f"{field} is invalid."})
+        elif value[field] is None: gaps.append({"code": f"missing_{field}", "message": f"{field} is required."})
+    if value["relevant_situation_status"] not in {"unchanged", "changed", "unknown"}: gaps.append({"code": "invalid_relevant_situation_status", "message": "Relevant-situation status is invalid."})
+    elif value["relevant_situation_status"] == "unknown":
+        gaps.append({"code": "missing_relevant_situation_status", "message": "Relevant-situation status is unknown."})
+        if value["relevant_situation_change_date"] is not None:
+            gaps.append({"code": "contradictory_relevant_situation_change_date", "message": "Unknown relevant situation cannot state a change date."})
+    elif value["relevant_situation_status"] == "changed":
+        if not _iso_date(value["relevant_situation_change_date"]): gaps.append({"code": "missing_relevant_situation_change_date", "message": "Changed situation requires its date."})
+        elif _iso_date(value["assessment_date"]) and value["relevant_situation_change_date"] > value["assessment_date"]: gaps.append({"code": "contradictory_relevant_situation_change_date", "message": "Relevant-situation change date cannot follow the assessment date."})
+    elif value["relevant_situation_change_date"] is not None:
+        gaps.append({"code": "contradictory_relevant_situation_change_date", "message": "Unchanged relevant situation cannot state a change date."})
+    if value["opt_out_status"] not in {"not_requested", "requested", "unknown"}: gaps.append({"code": "invalid_opt_out_status", "message": "Opt-out status is invalid."})
+    elif value["opt_out_status"] == "unknown":
+        gaps.append({"code": "missing_opt_out_status", "message": "Opt-out status is unknown."})
+        if value["opt_out_request_date"] is not None or value["opt_out_effective_date"] is not None:
+            gaps.append({"code": "contradictory_opt_out_dates", "message": "Unknown opt-out status cannot state opt-out dates."})
+    elif value["opt_out_status"] == "requested":
+        if not _iso_date(value["opt_out_request_date"]): gaps.append({"code": "missing_or_invalid_opt_out_request_date", "message": "Requested opt-out requires an ISO request date."})
+        elif _iso_date(value["assessment_date"]) and value["opt_out_request_date"] > value["assessment_date"]: gaps.append({"code": "contradictory_opt_out_request_date", "message": "Opt-out request date cannot follow the assessment date."})
+    elif value["opt_out_request_date"] is not None or value["opt_out_effective_date"] is not None:
+        gaps.append({"code": "contradictory_opt_out_dates", "message": "Opt-out dates require requested status."})
+    if not _nonempty_string_list(value["evidence_refs"]): gaps.append({"code": "missing_title_ii_evidence_refs", "message": "Evidence references are required."})
+    if value["normative_source_refs"] != policy["source_bindings"]: gaps.append({"code": "invalid_title_ii_normative_source_refs", "message": "Title-II source bindings do not match the rule policy."})
+    if gaps:
+        base["result"] = "not_assessed"; base["data_gaps"] = gaps
+        return {"result": base, "data_gaps": gaps}
+    end = policy["end_date_exclusive"]
+    if value["title_ii_change_caused_by_465_2012"] is False or value["assessment_date"] < policy["anchor_date"]:
+        expected = "not_applicable"
+    else:
+        if value["relevant_situation_status"] == "changed": end = min(end, value["relevant_situation_change_date"])
+        if value["opt_out_status"] == "requested":
+            expected_effective = policy["anchor_date"] if value["opt_out_request_date"] <= "2012-09-29" else _first_day_of_following_month(value["opt_out_request_date"])
+            if value["opt_out_effective_date"] != expected_effective:
+                base["data_gaps"] = [{"code": "invalid_opt_out_effective_date", "message": "Opt-out effective date does not match the reviewed rule."}]
+                return {"result": base, "data_gaps": base["data_gaps"]}
+            end = min(end, expected_effective)
+        expected = "old_legislation_continues" if value["assessment_date"] < end else "new_legislation_applies"
+    if value["result"] != expected:
+        base["data_gaps"] = [{"code": "inconsistent_title_ii_transition_result", "message": "Title-II result is inconsistent with the reviewed boundary contract."}]
+        return {"result": base, "data_gaps": base["data_gaps"]}
+    return {"result": base, "data_gaps": []}
+
+
+def _article_87a_transition_semantics_match(title_ii: dict[str, Any], policy: dict[str, Any]) -> bool:
+    contract = policy["article_87a_transition"]
+    assessment_date = title_ii.get("assessment_date")
+    changed = title_ii.get("title_ii_change_caused_by_465_2012")
+    situation = title_ii.get("relevant_situation_status")
+    situation_date = title_ii.get("relevant_situation_change_date")
+    opt_out = title_ii.get("opt_out_status")
+    request_date = title_ii.get("opt_out_request_date")
+    effective_date = title_ii.get("opt_out_effective_date")
+    result = title_ii.get("result")
+    if not _iso_date(assessment_date) or situation not in {"unchanged", "changed", "unknown"} or opt_out not in {"not_requested", "requested", "unknown"}:
+        return False
+    if changed is None or situation == "unknown" or opt_out == "unknown":
+        return result == "not_assessed" and bool(title_ii["data_gaps"])
+    if changed is False:
+        return situation_date is None and request_date is None and effective_date is None and result == "not_applicable"
+    if assessment_date < contract["anchor_date"]:
+        return situation_date is None and request_date is None and effective_date is None and result == "not_applicable"
+    if situation == "changed":
+        if not _iso_date(situation_date):
+            return result == "not_assessed" and bool(title_ii["data_gaps"])
+    elif situation_date is not None:
+        return False
+    if opt_out == "requested":
+        if not _iso_date(request_date) or not _iso_date(effective_date):
+            return result == "not_assessed" and bool(title_ii["data_gaps"])
+        expected_effective = (
+            contract["anchor_date"] if request_date <= "2012-09-29" else _first_day_of_following_month(request_date)
+        )
+        if effective_date != expected_effective:
+            return False
+    elif request_date is not None or effective_date is not None:
+        return False
+    end_exclusive = contract["end_date_exclusive"]
+    if situation == "changed":
+        end_exclusive = min(end_exclusive, situation_date)
+    if opt_out == "requested":
+        end_exclusive = min(end_exclusive, effective_date)
+    expected_result = "old_legislation_continues" if assessment_date < end_exclusive else "new_legislation_applies"
+    return result == expected_result
+
+
+def _first_day_of_following_month(value: str) -> str:
+    parsed = date.fromisoformat(value)
+    year, month = (parsed.year + 1, 1) if parsed.month == 12 else (parsed.year, parsed.month + 1)
+    return date(year, month, 1).isoformat()
 
 
 def _validate_article_94_1_it_es_policy(policy: dict[str, Any]) -> None:
@@ -1455,13 +1663,19 @@ def _transition_source_refs_match_registry(value: dict[str, Any], policy: dict[s
             return False
         if ref["article"] not in entry.get("provisions", []) or not _iso_date(ref.get("period_from")) or (ref.get("period_to") is not None and not _iso_date(ref.get("period_to"))):
             return False
+        assessment_for_branch = ref["period_from"] if (
+            branch == "regulation_465_2012_883_87a"
+            and _iso_date(item.get("assessment_date"))
+            and item.get("assessment_date") < ref["period_from"]
+            and item.get("result") == "not_applicable"
+        ) else risk_date
         if (
             not _iso_date(entry.get("period_from"))
             or (entry.get("period_to") is not None and (ref["period_to"] is None or ref["period_to"] > entry["period_to"]))
             or ref["period_from"] < entry["period_from"]
             or (
                 branch != "pension_transitional_987_94_1"
-                and not ref["period_from"] <= risk_date <= (ref["period_to"] or "9999-12-31")
+                and not ref["period_from"] <= assessment_for_branch <= (ref["period_to"] or "9999-12-31")
             )
         ):
             return False

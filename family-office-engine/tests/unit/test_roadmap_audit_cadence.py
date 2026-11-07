@@ -226,6 +226,17 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
 
         self.assertEqual("V4.14w-a", report.current_increment_id)
 
+    def test_audit_remediation_slice_can_address_its_own_blocked_parent(self) -> None:
+        entries = [
+            ("V4.14", "functional", "blocked"),
+            ("V4.14w", "functional", "blocked"),
+            ("V4.14w-m", "audit", "planned"),
+        ]
+
+        report = self._validate(entries, "V4.14w-m", "planned")
+
+        self.assertEqual("V4.14w-m", report.current_increment_id)
+
     def test_functional_slice_cannot_skip_earlier_sibling_in_its_release(self) -> None:
         entries = [
             ("V4.14w-b", "functional", "planned"),

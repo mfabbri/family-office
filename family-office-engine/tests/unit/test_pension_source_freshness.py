@@ -139,7 +139,7 @@ class PensionSourceFreshnessTest(unittest.TestCase):
 
         self.assertEqual(report["status"], "fresh", report["data_gaps"])
         self.assertFalse(report["network_checked"])
-        self.assertEqual(len(report["rule_packs"]), 6)
+        self.assertEqual(len(report["rule_packs"]), 9)
 
     def test_v5_registry_requires_immutable_identity_metadata_without_authenticity_claim(self):
         repository_root = Path(__file__).resolve().parents[3]
@@ -158,6 +158,31 @@ class PensionSourceFreshnessTest(unittest.TestCase):
             report = audit_pension_rule_pack(path, "2026-10-31")
         self.assertEqual(report["status"], "blocked")
         self.assertIn("normative_source_registry_integrity_digest_mismatch", {gap["code"] for gap in report["data_gaps"]})
+
+    def test_v6_corrigendum_registry_is_fresh_and_language_scoped(self):
+        pack_path = Path(__file__).resolve().parents[3] / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v6.json"
+        pack = json.loads(pack_path.read_text(encoding="utf-8"))
+        report = audit_pension_rule_pack(pack_path, "2026-11-01")
+        corrigendum = next(item for item in pack["normative_source_registry"] if item["registry_id"] == "reg-465-2012-corrigendum-2015-03-28-ro")
+
+        self.assertEqual(report["status"], "fresh", report["data_gaps"])
+        self.assertEqual(corrigendum["language_scope"], "RO only")
+        self.assertEqual(corrigendum["provisions"], ["Annex XI point 2(c)(iii)(a)"])
+        self.assertIn("does not correct Regulation (EU) No 465/2012 Article 1(11)", corrigendum["application_date_or_conditions"])
+
+    def test_v7_case_law_registry_keeps_decision_and_publication_dates_distinct(self):
+        path = Path(__file__).resolve().parents[3] / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v7.json"
+        entry = next(item for item in json.loads(path.read_text(encoding="utf-8"))["normative_source_registry"] if item["registry_id"] == "cjeu-c-171-03-judgment")
+        self.assertEqual(entry["decision_date"], "2004-11-11")
+        self.assertEqual(entry["oj_publication_date"], "2005-01-08")
+        self.assertEqual(entry["entry_into_force"], "not assessed")
+
+    def test_v8_payer_policy_is_precondition_and_payer_free(self):
+        path = Path(__file__).resolve().parents[3] / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v8.json"
+        policy = json.loads(path.read_text(encoding="utf-8"))["pro_rata_method"]["article_57_source_bound"]["multi_institution"]
+        self.assertTrue(policy["article_57_3_all_concerned_institutions_relief_is_precondition"])
+        self.assertTrue(policy["article_57_3_does_not_determine_payment_institution"])
+        self.assertNotIn("article_57_3_payer_requires_all_concerned_institutions_relieved", policy)
 
     def _audit(self, pack: dict, as_of: str) -> dict:
         with tempfile.TemporaryDirectory() as temp_dir:

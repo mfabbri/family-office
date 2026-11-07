@@ -21,6 +21,9 @@ ACTIVE_PENSION_RULE_PACKS = (
     Path("spain/statutory-retirement-general.json"),
     Path("cross-border/eu-pension-coordination-it-es.json"),
     Path("cross-border/eu-pension-coordination-it-es-v5.json"),
+    Path("cross-border/eu-pension-coordination-it-es-v6.json"),
+    Path("cross-border/eu-pension-coordination-it-es-v7.json"),
+    Path("cross-border/eu-pension-coordination-it-es-v8.json"),
     Path("cross-border/spanish-eu-theoretical-pension.json"),
 )
 OFFICIAL_SOURCE_HOSTS = {
@@ -251,7 +254,7 @@ def _audit_normative_source_registry(registry: Any) -> list[dict[str, Any]]:
     identifiers: set[str] = set()
     gaps: list[dict[str, Any]] = []
     for index, entry in enumerate(registry):
-        if not isinstance(entry, dict) or set(entry) != required:
+        if not isinstance(entry, dict) or (set(entry) != required and set(entry) != required | {"decision_date"}):
             gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] has an invalid immutable identity shape."))
             continue
         identifier = entry.get("registry_id")
@@ -280,6 +283,11 @@ def _audit_normative_source_registry(registry: Any) -> list[dict[str, Any]]:
                 _parse_date(entry.get(field), field)
             except ValueError:
                 gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] has invalid {field}."))
+        if "decision_date" in entry:
+            try:
+                _parse_date(entry["decision_date"], "decision_date")
+            except ValueError:
+                gaps.append(_gap("normative_source_registry_invalid", f"normative_source_registry[{index}] has invalid decision_date."))
     return gaps
 
 

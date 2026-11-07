@@ -192,10 +192,11 @@ def validate_predecessor_order(
         is_earlier = (release, suffix) < (current_release, current_suffix)
         # A suffixed remediation slice may address its own blocked parent; it
         # may not skip an earlier sibling in that same release.
-        is_own_blocked_parent = current.kind == "functional" and increment.increment_id in {
-            current_root_id,
-            current_slice_parent_id,
-        }
+        is_own_blocked_parent = (
+            current.kind in {"functional", "audit"}
+            and increment.status == "blocked"
+            and increment.increment_id in {current_root_id, current_slice_parent_id}
+        )
         if is_earlier and not is_own_blocked_parent:
             if increment.status not in {"done", "deferred"}:
                 predecessors.append(increment)

@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from decimal import Inexact, ROUND_DOWN, localcontext
 from pathlib import Path
+from unittest.mock import patch
 
 from family_office_engine.services.eu_pension_coordination import (
     EuPensionCoordinationError,
@@ -12,6 +13,8 @@ from family_office_engine.services.eu_pension_coordination import (
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 RULE_PACK = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es.json"
+RULE_PACK_V7 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v7.json"
+RULE_PACK_V8 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v8.json"
 
 
 class EuPensionCoordinationTest(unittest.TestCase):
@@ -114,13 +117,37 @@ class EuPensionCoordinationTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp_dir:
             path = Path(tmp_dir) / "rules.json"
             path.write_text(json.dumps(broken), encoding="utf-8")
-            with self.assertRaisesRegex(EuPensionCoordinationError, "v0.25 or v0.26"):
+            with self.assertRaisesRegex(EuPensionCoordinationError, "v0.25, v0.26, v0.27 or v0.28"):
                 load_rule_pack(path)
 
-    def test_loader_accepts_v025_and_v026_with_the_same_canonicalization_profile(self):
+    def test_loader_accepts_v025_v026_and_v027_with_the_same_canonicalization_profile(self):
         v5 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v5.json"
+        v6 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v6.json"
         self.assertEqual(load_rule_pack(RULE_PACK)["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"], "v0.25")
         self.assertEqual(load_rule_pack(v5)["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"], "v0.26")
+        self.assertEqual(load_rule_pack(v6)["pro_rata_method"]["article_57_source_bound"]["contract_schema_version"], "v0.27")
+        self.assertEqual(load_rule_pack(RULE_PACK_V8)["rule_pack_id"], "eu.it-es.pension-coordination.2026.v8")
+
+    def test_v028_loader_rejects_title_ii_binding_when_registry_provisions_drift(self):
+        broken = json.loads(RULE_PACK_V7.read_text(encoding="utf-8"))
+        entry = next(item for item in broken["normative_source_registry"] if item["registry_id"] == "cjeu-c-171-03-judgment")
+        entry["provisions"] = ["paragraph 31"]
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "rules.json"
+            path.write_text(json.dumps(broken), encoding="utf-8")
+            with patch("family_office_engine.services.eu_pension_coordination.require_fresh_pension_rule_pack"):
+                with self.assertRaisesRegex(EuPensionCoordinationError, "binding provisions do not match"):
+                    load_rule_pack(path)
+
+    def test_v028_loader_rejects_extra_title_ii_policy_key(self):
+        broken = json.loads(RULE_PACK_V7.read_text(encoding="utf-8"))
+        broken["pro_rata_method"]["title_ii_transition_policy"]["unapproved_semantic_key"] = True
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "rules.json"
+            path.write_text(json.dumps(broken), encoding="utf-8")
+            with patch("family_office_engine.services.eu_pension_coordination.require_fresh_pension_rule_pack"):
+                with self.assertRaisesRegex(EuPensionCoordinationError, "exact approved allowlist"):
+                    load_rule_pack(path)
 
     def test_period_ratios_ignore_ambient_decimal_context(self):
         results = []
