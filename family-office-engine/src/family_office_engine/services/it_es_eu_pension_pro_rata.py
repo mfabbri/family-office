@@ -24,6 +24,8 @@ ARTICLE_57_PACK_CONTRACTS = {
     "eu.it-es.pension-coordination.2026.v6": "v0.27",
     "eu.it-es.pension-coordination.2026.v7": "v0.28",
     "eu.it-es.pension-coordination.2026.v8": "v0.28",
+    "eu.it-es.pension-coordination.2026.v9": "v0.29",
+    "eu.it-es.pension-coordination.2026.v10": "v0.29",
 }
 
 
@@ -41,6 +43,8 @@ def build_it_es_eu_pension_pro_rata(
     rule_pack = load_rule_pack(rule_pack_path)
     if data.get("schema_version") != INPUT_SCHEMA_VERSION:
         raise ItEsEuPensionProRataError(f"Unsupported IT-ES EU pension pro-rata input schema: {data.get('schema_version')}")
+    if rule_pack["rule_pack_id"] == "eu.it-es.pension-coordination.2026.v10":
+        return _write_snapshot(_v10_applicability_evidence_only_snapshot(data, rule_pack, rule_pack_path), output_path)
     if _article_57_contract_mismatch(data, rule_pack):
         return _write_snapshot(_article_57_contract_mismatch_snapshot(data, rule_pack, rule_pack_path), output_path)
     if spanish_theoretical_snapshot_path is not None:
@@ -192,6 +196,58 @@ def _article_57_contract_mismatch_snapshot(
     }
 
 
+def _v10_applicability_evidence_only_snapshot(
+    data: dict[str, Any], rule_pack: dict[str, Any], rule_pack_path: Path
+) -> dict[str, Any]:
+    assessment = data.get("article_57_assessment")
+    assessment_date = assessment.get("assessment_date") if isinstance(assessment, dict) else None
+    gaps = [{
+        "code": "annex_viii_evidence_only_rule_pack",
+        "message": "Rules v10 validates Annex VIII applicability evidence only and is not authorized to produce pension eligibility, entitlement, Article 57 or amount outputs.",
+        "human_review_required": True,
+    }]
+    if not _iso_date(assessment_date) or not ("2019-08-01" <= assessment_date < "2026-11-02"):
+        gaps.append({
+            "code": "annex_viii_currentness_outside_verified_interval",
+            "message": "Annex VIII Part 2 currentness evidence is limited to [2019-08-01, 2026-11-02); this assessment date is outside that interval or unavailable.",
+            "human_review_required": True,
+        })
+    article_57 = {
+        "human_review_required": True,
+        "contract_schema_version": "v0.29",
+        "national_eligibility_status": "not_assessed",
+        "article_57_exception_status": "not_assessed",
+        "theoretical_amount_period_inclusion": "not_assessed",
+        "pro_rata_amount_status": "not_assessed",
+        "national_payment_obligation_status": "not_assessed",
+    }
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "record_type": RECORD_TYPE,
+        "status": "blocked_missing_inputs",
+        "scenario": data.get("scenario", "ordinary"),
+        "rule_pack": {
+            "path": str(rule_pack_path),
+            "rule_pack_id": rule_pack["rule_pack_id"],
+            "schema_version": rule_pack["schema_version"],
+            "sha256": _file_sha256(rule_pack_path),
+            "valid_from": rule_pack["spanish_ordinary_entitlement"]["valid_from"],
+            "valid_to": rule_pack["spanish_ordinary_entitlement"]["valid_to"],
+            "source_refs": rule_pack["source_refs"],
+            "limitations": rule_pack["limitations"],
+        },
+        "periods": _empty_period_summary(),
+        "overlaps": [],
+        "spanish_entitlement": {"status": "not_assessed"},
+        "article_57": article_57,
+        "spanish_theoretical_pension": {"status": "not_assessed", "amounts": None},
+        "spanish_pro_rata_pension": {"status": "not_calculable", "amounts": None},
+        "data_gaps": gaps,
+        "warnings": [{"code": "human_review_required", "message": "No pension conclusion is produced by the evidence-only Rules v10 pack."}],
+        "notes": "Annex VIII applicability evidence only; no eligibility, entitlement, payer, payment, effective date, or amount is assessed.",
+    }
+
+
 def _declared_data_gaps(data: dict[str, Any], theoretical: dict[str, Any]) -> list[dict[str, Any]]:
     gaps = data.get("data_gaps", []) if isinstance(data.get("data_gaps"), list) else []
     if theoretical.get("result") is None:
@@ -239,8 +295,8 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     if not isinstance(article_57, dict):
         raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.article_57_source_bound")
     contract_version = article_57.get("contract_schema_version")
-    if contract_version not in {"v0.25", "v0.26", "v0.27", "v0.28"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
-        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.25, v0.26, v0.27 or v0.28 with fo-art57-c14n-v4")
+    if contract_version not in {"v0.25", "v0.26", "v0.27", "v0.28", "v0.29"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise ItEsEuPensionProRataError("Rule pack Article 57 contract must be v0.25, v0.26, v0.27, v0.28 or v0.29 with fo-art57-c14n-v4")
     if ARTICLE_57_PACK_CONTRACTS.get(data["rule_pack_id"]) != contract_version:
         raise ItEsEuPensionProRataError("Rule pack Article 57 contract identity does not match its selected pack.")
     if contract_version == "v0.25" and ("transition_source_registry" in article_57 or "normative_source_registry" in data):
@@ -272,18 +328,179 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     ):
         raise ItEsEuPensionProRataError("Rule pack Article 57 last-State fail-closed registry policy is required")
     annex_policy = article_57.get("annex_viii_part_2")
-    if (
+    if data["rule_pack_id"] not in {"eu.it-es.pension-coordination.2026.v9", "eu.it-es.pension-coordination.2026.v10"} and (
         not isinstance(annex_policy, dict)
         or not _canonical_string(annex_policy.get("applicable_annex_part_2_version"))
         or not _iso_date(annex_policy.get("applicable_annex_part_2_valid_from"))
         or (annex_policy.get("applicable_annex_part_2_valid_to") is not None and not _iso_date(annex_policy.get("applicable_annex_part_2_valid_to")))
     ):
         raise ItEsEuPensionProRataError("Rule pack Article 57 Annex VIII applicability version and ISO validity dates are required")
+    if data["rule_pack_id"] == "eu.it-es.pension-coordination.2026.v9":
+        _validate_v9_annex_contract(annex_policy, rule_pack_path)
+    if data["rule_pack_id"] == "eu.it-es.pension-coordination.2026.v10":
+        _validate_v10_annex_contract(annex_policy, rule_pack_path)
     overlap_policy = data["pro_rata_method"].get("overlap_policy")
     if not isinstance(overlap_policy, dict):
         raise ItEsEuPensionProRataError("Rule pack must define pro_rata_method.overlap_policy")
     return data
 
+
+def _validate_v9_annex_contract(policy: Any, rule_pack_path: Path) -> None:
+    required = {
+        "source_bound_required", "contract_schema_version", "knowledge_contract", "assessment_results",
+        "territorial_scope", "complete_part_2_absent_state_codes", "state_code_to_ledger_name", "source_registry",
+        "matched_requires_separate_official_national_or_institutional_binding",
+        "not_matched_requires_complete_current_part_2", "interval_semantics", "true_excludes_article_57",
+    }
+    if not isinstance(policy, dict) or set(policy) != required:
+        raise ItEsEuPensionProRataError("v9 Rule pack requires the exact Annex VIII applicability contract.")
+    knowledge = policy["knowledge_contract"]
+    territory = policy["territorial_scope"]
+    if (
+        policy["source_bound_required"] is not True
+        or policy["contract_schema_version"] != "v0.1"
+        or policy["assessment_results"] != ["matched", "not_matched", "not_assessed"]
+        or policy["complete_part_2_absent_state_codes"] != ["IT", "ES"]
+        or policy["state_code_to_ledger_name"] != {"IT": "Italy", "ES": "Spain"}
+        or policy["matched_requires_separate_official_national_or_institutional_binding"] is not True
+        or policy["not_matched_requires_complete_current_part_2"] is not True
+        or policy["interval_semantics"] != "half_open"
+        or policy["true_excludes_article_57"] is not True
+        or not isinstance(knowledge, dict)
+        or set(knowledge) != {"contract_id", "schema_version", "sha256", "source_ledger_sha256"}
+        or knowledge["contract_id"] != "eu-annex-viii-part-2-applicability-evidence-v0.1"
+        or knowledge["schema_version"] != "eu-annex-viii-part-2-applicability-evidence/v0.1"
+        or not isinstance(territory, dict)
+        or territory != {"included": "EU_MEMBER_STATES", "excluded_without_incorporation_evidence": ["UK", "EEA", "CH"]}
+    ):
+        raise ItEsEuPensionProRataError("v9 Rule pack Annex VIII applicability contract is not source-bound.")
+    knowledge_root = rule_pack_path.resolve().parents[2] / "family-office-knowledge" / "international"
+    contract_path = knowledge_root / "eu-annex-viii-applicability-evidence-v0.1.json"
+    ledger_path = knowledge_root / "eu-annex-viii-part-2-catalogue-v0.4.json"
+    if (
+        not contract_path.is_file()
+        or not ledger_path.is_file()
+        or knowledge["sha256"] != _file_sha256(contract_path)
+        or knowledge["source_ledger_sha256"] != _file_sha256(ledger_path)
+    ):
+        raise ItEsEuPensionProRataError("v9 Rule pack Annex VIII Knowledge contract or immutable source ledger digest does not resolve.")
+    contract = _read_json(contract_path, "Annex VIII applicability evidence contract")
+    registry = policy["source_registry"]
+    if (
+        contract.get("contract_id") != knowledge["contract_id"]
+        or contract.get("schema_version") != knowledge["schema_version"]
+        or contract.get("status") != "evidence-contract-only"
+        or contract.get("reviewed_absence", {}).get("state_codes") != ["IT", "ES"]
+        or [
+            {key: item.get(key) for key in ("source_id", "role", "valid_from", "valid_to")}
+            for item in contract.get("source_registry", [])
+            if isinstance(item, dict)
+        ] != registry
+    ):
+        raise ItEsEuPensionProRataError("v9 Rule pack Annex VIII Knowledge contract identity is invalid.")
+    ledger = _read_json(ledger_path, "immutable Annex VIII Part 2 source ledger")
+    if (
+        ledger.get("catalogue_id") != knowledge["contract_id"].replace("-applicability-evidence-v0.1", "-source-ledger-v0.4")
+        or ledger.get("schema_version") != "eu-annex-viii-part-2-source-ledger/v0.4"
+        or ledger.get("status") != "source_ledger_only"
+        or ledger.get("snapshot_as_of") != contract.get("source_ledger", {}).get("snapshot_as_of")
+        or not isinstance(ledger.get("entries"), list)
+        or not ledger["entries"]
+    ):
+        raise ItEsEuPensionProRataError("v9 Rule pack Annex VIII immutable source ledger identity or coverage is invalid.")
+    policy["_verified_ledger_entries"] = ledger["entries"]
+    if not isinstance(registry, list) or len(registry) < 2 or len({item.get("source_id") for item in registry if isinstance(item, dict)}) != len(registry):
+        raise ItEsEuPensionProRataError("v9 Rule pack Annex VIII source registry must be unique and explicit.")
+    required_sources = {
+        "annex-viii-part-2-ledger-v0.4": "annex_catalogue",
+        "eurlex-883-2004-consolidated-2019-07-31": "annex_currentness",
+    }
+    for entry in registry:
+        if not isinstance(entry, dict) or set(entry) != {"source_id", "role", "valid_from", "valid_to"} or not _iso_date(entry.get("valid_from")) or (entry.get("valid_to") is not None and not _iso_date(entry["valid_to"])):
+            raise ItEsEuPensionProRataError("v9 Rule pack Annex VIII source registry entry is invalid.")
+        if entry["source_id"] in required_sources and entry["role"] != required_sources[entry["source_id"]]:
+            raise ItEsEuPensionProRataError("v9 Rule pack Annex VIII source registry role is invalid.")
+    if not required_sources.items() <= {entry["source_id"]: entry["role"] for entry in registry}.items():
+        raise ItEsEuPensionProRataError("v9 Rule pack Annex VIII source registry omits reviewed sources.")
+
+
+def _validate_v10_annex_contract(policy: Any, rule_pack_path: Path) -> None:
+    required = {
+        "source_bound_required", "consumer_use", "contract_schema_version", "knowledge_contract", "assessment_results",
+        "territorial_scope", "complete_part_2_absent_state_codes", "state_code_to_ledger_name", "source_registry",
+        "matched_requires_separate_official_national_or_institutional_binding",
+        "not_matched_requires_complete_current_part_2", "interval_semantics", "true_excludes_article_57",
+    }
+    if not isinstance(policy, dict) or set(policy) != required:
+        raise ItEsEuPensionProRataError("v10 Rule pack requires the exact Annex VIII applicability contract.")
+    knowledge = policy["knowledge_contract"]
+    if (
+        policy["source_bound_required"] is not True
+        or policy["consumer_use"] != "applicability_evidence_only"
+        or policy["contract_schema_version"] != "v0.2"
+        or policy["assessment_results"] != ["matched", "not_matched", "not_assessed"]
+        or policy["complete_part_2_absent_state_codes"] != ["IT", "ES"]
+        or policy["state_code_to_ledger_name"] != {"IT": "Italy", "ES": "Spain"}
+        or policy["matched_requires_separate_official_national_or_institutional_binding"] is not True
+        or policy["not_matched_requires_complete_current_part_2"] is not True
+        or policy["interval_semantics"] != "half_open"
+        or policy["true_excludes_article_57"] is not True
+        or not isinstance(knowledge, dict)
+        or set(knowledge) != {"contract_id", "schema_version", "sha256", "source_ledger_sha256"}
+        or knowledge["contract_id"] != "eu-annex-viii-part-2-applicability-evidence-v0.2"
+        or knowledge["schema_version"] != "eu-annex-viii-part-2-applicability-evidence/v0.2"
+        or policy["territorial_scope"] != {"included": "EU_MEMBER_STATES", "excluded_without_incorporation_evidence": ["UK", "EEA", "CH"]}
+    ):
+        raise ItEsEuPensionProRataError("v10 Rule pack Annex VIII applicability contract is not source-bound.")
+    knowledge_root = rule_pack_path.resolve().parents[2] / "family-office-knowledge" / "international"
+    contract_path = knowledge_root / "eu-annex-viii-applicability-evidence-v0.2.json"
+    ledger_path = knowledge_root / "eu-annex-viii-part-2-catalogue-v0.4.json"
+    if (
+        not contract_path.is_file() or not ledger_path.is_file()
+        or knowledge["sha256"] != _file_sha256(contract_path)
+        or knowledge["source_ledger_sha256"] != _file_sha256(ledger_path)
+    ):
+        raise ItEsEuPensionProRataError("v10 Rule pack Annex VIII Knowledge contract or immutable source ledger digest does not resolve.")
+    contract = _read_json(contract_path, "Annex VIII applicability evidence contract")
+    expected_registry = [
+        {key: item.get(key) for key in ("source_id", "role", "valid_from", "valid_to")}
+        for item in contract.get("source_registry", []) if isinstance(item, dict)
+    ]
+    expected_sources = {
+        "annex-viii-part-2-ledger-v0.4": "annex_catalogue",
+        "annex-viii-part-2-currentness-chain-through-2026-11-01": "annex_currentness",
+        "eurlex-883-2004-act-history-2026-11-01": "annex_currentness_metadata",
+        "eurlex-reg-2019-1149-oj": "annex_currentness_official_oj",
+        "eurlex-reg-2026-2359-oj": "annex_currentness_official_oj",
+    }
+    if (
+        contract.get("contract_id") != knowledge["contract_id"]
+        or contract.get("schema_version") != knowledge["schema_version"]
+        or contract.get("status") != "evidence-contract-only"
+        or contract.get("reviewed_absence", {}).get("state_codes") != ["IT", "ES"]
+        or contract.get("currentness_chain") != {
+            "chain_source_id": "annex-viii-part-2-currentness-chain-through-2026-11-01",
+            "official_oj_source_ids": ["eurlex-reg-2019-1149-oj", "eurlex-reg-2026-2359-oj"],
+            "metadata_source_id": "eurlex-883-2004-act-history-2026-11-01",
+            "metadata_is_not_legally_exhaustive": True,
+            "part_ii_status": "unchanged_through_2026-11-01_inclusive",
+            "verified_through": "2026-11-01",
+        }
+        or policy["source_registry"] != expected_registry
+        or {item.get("source_id"): item.get("role") for item in policy["source_registry"] if isinstance(item, dict)} != expected_sources
+        or any(item.get("valid_from") != "2019-08-01" or item.get("valid_to") != "2026-11-02" for item in policy["source_registry"])
+    ):
+        raise ItEsEuPensionProRataError("v10 Rule pack Annex VIII currentness chain is not exact.")
+    ledger = _read_json(ledger_path, "immutable Annex VIII Part 2 source ledger")
+    if (
+        ledger.get("catalogue_id") != "eu-annex-viii-part-2-source-ledger-v0.4"
+        or ledger.get("schema_version") != "eu-annex-viii-part-2-source-ledger/v0.4"
+        or ledger.get("status") != "source_ledger_only"
+        or ledger.get("snapshot_as_of") != contract.get("source_ledger", {}).get("snapshot_as_of")
+        or not isinstance(ledger.get("entries"), list) or not ledger["entries"]
+    ):
+        raise ItEsEuPensionProRataError("v10 Rule pack Annex VIII immutable source ledger identity or coverage is invalid.")
+    policy["_verified_ledger_entries"] = ledger["entries"]
 
 def _normalize_periods(periods: Any) -> dict[str, Any]:
     if not isinstance(periods, list) or not periods:
@@ -1118,6 +1335,8 @@ def _date_in_range(value: str, valid_from: str, valid_to: str | None) -> bool:
 def _source_bound_result(value: Any, label: str, policy: dict[str, Any] | None = None, root: dict[str, Any] | None = None) -> dict[str, Any]:
     if not isinstance(value, dict):
         return {"result": None}
+    if label == "annex_viii_part_2_applicability" and policy and policy.get("contract_schema_version") in {"v0.1", "v0.2"}:
+        return _v9_annex_source_bound_result(value, policy, root)
     result = value.get("result")
     if type(result) not in {bool, type(None)}:
         raise ItEsEuPensionProRataError(f"{label}.result must be true, false, or null.")
@@ -1165,9 +1384,160 @@ def _source_bound_result(value: Any, label: str, policy: dict[str, Any] | None =
     return {"result": result}
 
 
+def _v9_annex_source_bound_result(value: dict[str, Any], policy: dict[str, Any], root: dict[str, Any] | None) -> dict[str, Any]:
+    if set(value) == {"assessment_result"} and value.get("assessment_result") == "not_assessed":
+        return {"result": None}
+    required = {
+        "assessment_result", "state_code", "territory", "assessment_date", "part_2_completeness",
+        "annex_source_ref", "currentness_source_ref", "state_evidence_refs", "national_scheme_source_ref",
+        "national_scheme_evidence_refs", "matched_scheme_entry",
+    }
+    if set(value) != required or value.get("assessment_result") not in {"matched", "not_matched", "not_assessed"}:
+        return {"result": None}
+    if (
+        value["assessment_result"] == "not_assessed"
+        or value.get("territory") != policy.get("territorial_scope", {}).get("included")
+        or value.get("state_code") not in policy.get("state_code_to_ledger_name", {})
+        or not _iso_date(value.get("assessment_date"))
+        or root is None
+        or value["assessment_date"] != root.get("risk_materialization_date")
+    ):
+        return {"result": None}
+    sources = {entry["source_id"]: entry for entry in policy["source_registry"]}
+    annex = sources.get(value["annex_source_ref"])
+    currentness = sources.get(value["currentness_source_ref"])
+    if (
+        annex is None or currentness is None
+        or annex["role"] != "annex_catalogue" or currentness["role"] != "annex_currentness"
+        or not _annex_date_in_range(value["assessment_date"], annex["valid_from"], annex["valid_to"])
+        or not _annex_date_in_range(value["assessment_date"], currentness["valid_from"], currentness["valid_to"])
+    ):
+        return {"result": None}
+    state_evidence_refs = value.get("state_evidence_refs")
+    national_evidence_refs = value.get("national_scheme_evidence_refs")
+    if (
+        not _nonempty_canonical_string_list(state_evidence_refs)
+        or not isinstance(national_evidence_refs, list)
+        or any(not _canonical_string(ref) for ref in national_evidence_refs)
+        or len(set(national_evidence_refs)) != len(national_evidence_refs)
+        or not _v9_state_evidence_refs_resolve(state_evidence_refs, value["state_code"], value["assessment_date"], root)
+    ):
+        return {"result": None}
+    if value["assessment_result"] == "not_matched":
+        state_name = policy.get("state_code_to_ledger_name", {}).get(value["state_code"])
+        active_entries = _v9_active_ledger_entries(value["assessment_date"], policy)
+        if (
+            value.get("part_2_completeness") != "complete"
+            or value["state_code"] not in policy["complete_part_2_absent_state_codes"]
+            or state_name is None
+            or not active_entries
+            or any(entry.get("state") == state_name for entry in active_entries)
+            or value.get("national_scheme_source_ref") is not None
+            or national_evidence_refs
+            or value.get("matched_scheme_entry") is not None
+        ):
+            return {"result": None}
+        return {"result": False}
+    national = sources.get(value.get("national_scheme_source_ref"))
+    if (
+        value.get("part_2_completeness") != "complete"
+        or value.get("state_code") not in policy.get("state_code_to_ledger_name", {})
+        or not any(
+            entry.get("entry_id") == value.get("matched_scheme_entry")
+            and entry.get("state") == policy["state_code_to_ledger_name"][value["state_code"]]
+            for entry in _v9_active_ledger_entries(value["assessment_date"], policy)
+        )
+        or national is None
+        or national.get("role") != "national_scheme_benefit_binding"
+        or national.get("state_code") != value["state_code"]
+        or national.get("entry_id") != value.get("matched_scheme_entry")
+        or national.get("scheme_id") != root.get("scheme_id")
+        or national.get("benefit_id") != root.get("benefit_id")
+        or not _annex_date_in_range(value["assessment_date"], national["valid_from"], national["valid_to"])
+        or not national_evidence_refs
+        or not set(national_evidence_refs).issubset(state_evidence_refs)
+    ):
+        return {"result": None}
+    return {"result": True}
+
+
+def _v9_active_ledger_entries(assessment_date: str, policy: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = policy.get("_verified_ledger_entries")
+    if not isinstance(entries, list):
+        return []
+    active = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        valid_from = entry.get("valid_from")
+        valid_to = entry.get("valid_to")
+        if (
+            _iso_date(valid_from)
+            and (valid_to is None or _iso_date(valid_to))
+            and _annex_date_in_range(assessment_date, valid_from, valid_to)
+        ):
+            active.append(entry)
+    return active
+
+
+def _v9_state_evidence_refs_resolve(
+    evidence_refs: list[str], state_code: str, assessment_date: str, root: dict[str, Any] | None
+) -> bool:
+    if not isinstance(root, dict):
+        return False
+    records = root.get("concerned_institutions")
+    evidence_registry = root.get("evidence_registry")
+    if not isinstance(records, list) or not isinstance(evidence_registry, list):
+        return False
+    state_institutions = {
+        record.get("institution_ref")
+        for record in records
+        if isinstance(record, dict) and record.get("member_state") == state_code
+    }
+    if not state_institutions:
+        return False
+    registry_by_id = {
+        entry.get("evidence_id"): entry
+        for entry in evidence_registry
+        if isinstance(entry, dict) and isinstance(entry.get("evidence_id"), str)
+    }
+    for ref in evidence_refs:
+        entry = registry_by_id.get(ref)
+        if not isinstance(entry, dict) or entry.get("verified") is not True:
+            return False
+        if entry.get("issuer_institution_ref") not in state_institutions:
+            return False
+        coverage = entry.get("coverage")
+        if (
+            not isinstance(coverage, dict)
+            or not _iso_date(coverage.get("temporal_coverage_from"))
+            or not _iso_date(coverage.get("temporal_coverage_to"))
+            or not coverage["temporal_coverage_from"] <= assessment_date <= coverage["temporal_coverage_to"]
+            or coverage.get("contingency_date") != root.get("risk_materialization_date")
+            or coverage.get("as_of_date") != root.get("assessment_date")
+        ):
+            return False
+    record_refs: set[str] = set()
+    for record in records:
+        if not isinstance(record, dict) or record.get("institution_ref") not in state_institutions:
+            continue
+        record_refs.update(ref for ref in record.get("evidence_refs", []) if isinstance(ref, str))
+        article_evidence = record.get("article_57_1_evidence")
+        if isinstance(article_evidence, dict):
+            record_refs.update(
+                ref for ref in article_evidence.get("source_evidence_refs", []) if isinstance(ref, str)
+            )
+    return set(evidence_refs).issubset(record_refs)
+
+
+def _annex_date_in_range(value: str, valid_from: str, valid_to: str | None) -> bool:
+    """Annex VIII evidence intervals alone use the reviewed half-open convention."""
+    return value >= valid_from and (valid_to is None or value < valid_to)
+
+
 def _transitional_result(value: Any, member_state: str, risk_date: str, policy: dict[str, Any] | None = None) -> bool | None:
     v026 = policy is not None and "transition_source_registry" in policy
-    if policy is not None and policy.get("contract_schema_version") == "v0.28":
+    if policy is not None and policy.get("contract_schema_version") in {"v0.28", "v0.29"}:
         return _v028_article_57_transitional_result(value, member_state, policy)
     v027 = policy is not None and policy.get("contract_schema_version") == "v0.27"
     if not isinstance(value, dict) or set(value) != {"basic_regulation_883_87", "implementing_regulation_987_93", "regulation_465_2012_883_87a", "pension_transitional_987_94_1"}:

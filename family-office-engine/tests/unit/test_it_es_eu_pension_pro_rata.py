@@ -6,9 +6,12 @@ from copy import deepcopy
 from decimal import Inexact, ROUND_DOWN, localcontext
 from pathlib import Path
 from unittest.mock import patch
+from jsonschema import Draft202012Validator, FormatChecker
 
 from family_office_engine.services.it_es_eu_pension_pro_rata import (
     ItEsEuPensionProRataError,
+    _v9_active_ledger_entries,
+    _v9_annex_source_bound_result,
     build_it_es_eu_pension_pro_rata,
     load_rule_pack,
 )
@@ -19,9 +22,270 @@ RULE_PACK_V5 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pe
 RULE_PACK_V6 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v6.json"
 RULE_PACK_V7 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v7.json"
 RULE_PACK_V8 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v8.json"
+RULE_PACK_V9 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v9.json"
+RULE_PACK_V10 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v10.json"
+ANNEX_VIII_APPLICABILITY_V02 = REPOSITORY_ROOT / "family-office-knowledge" / "international" / "eu-annex-viii-applicability-evidence-v0.2.json"
+ANNEX_VIII_APPLICABILITY_V02_SCHEMA = REPOSITORY_ROOT / "family-office-knowledge" / "international" / "eu-annex-viii-applicability-evidence-v0.2.schema.json"
 
 
 class ItEsEuPensionProRataTest(unittest.TestCase):
+    def test_v9_rule_pack_binds_the_immutable_knowledge_contract_and_fail_closed_scope(self):
+        policy = load_rule_pack(RULE_PACK_V9)["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+
+        self.assertEqual(policy["assessment_results"], ["matched", "not_matched", "not_assessed"])
+        self.assertEqual(policy["complete_part_2_absent_state_codes"], ["IT", "ES"])
+        self.assertEqual(policy["interval_semantics"], "half_open")
+        self.assertTrue(policy["matched_requires_separate_official_national_or_institutional_binding"])
+        self.assertTrue(policy["not_matched_requires_complete_current_part_2"])
+        self.assertEqual(policy["source_registry"][1]["valid_from"], "2010-05-01")
+        self.assertEqual(policy["source_registry"][1]["valid_to"], "2019-08-01")
+        self.assertEqual(load_rule_pack(RULE_PACK_V8)["rule_pack_id"], "eu.it-es.pension-coordination.2026.v8")
+
+    def test_v9_not_matched_requires_resolved_state_date_territory_and_complete_annex_evidence(self):
+        from copy import deepcopy
+
+        policy = load_rule_pack(RULE_PACK_V9)["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+        date = "2019-07-31"
+        evidence = {
+            "evidence_id": "synthetic-it-state-date",
+            "issuer_institution_ref": "synthetic-it",
+            "content_utf8": "synthetic official state and date evidence",
+            "content_digest": "sha256:" + hashlib.sha256(b"synthetic official state and date evidence").hexdigest(),
+            "verified": True,
+            "coverage": {
+                "temporal_coverage_from": "2010-05-01",
+                "temporal_coverage_to": "2019-07-31",
+                "contingency_date": date,
+                "as_of_date": date,
+            },
+        }
+        root = {
+            "risk_materialization_date": date,
+            "assessment_date": date,
+            "scheme_id": "synthetic-it-scheme",
+            "benefit_id": "synthetic-it-benefit",
+            "concerned_institutions": [{
+                "institution_ref": "synthetic-it",
+                "member_state": "IT",
+                "evidence_refs": [evidence["evidence_id"]],
+                "article_57_1_evidence": {"source_evidence_refs": [evidence["evidence_id"]]},
+            }],
+            "evidence_registry": [evidence],
+        }
+        assessment = {
+            "assessment_result": "not_matched",
+            "state_code": "IT",
+            "territory": "EU_MEMBER_STATES",
+            "assessment_date": date,
+            "part_2_completeness": "complete",
+            "annex_source_ref": "annex-viii-part-2-ledger-v0.4",
+            "currentness_source_ref": "eurlex-883-2004-consolidated-2019-07-31",
+            "state_evidence_refs": [evidence["evidence_id"]],
+            "national_scheme_source_ref": None,
+            "national_scheme_evidence_refs": [],
+            "matched_scheme_entry": None,
+        }
+
+        self.assertEqual(_v9_annex_source_bound_result(assessment, policy, root), {"result": False})
+
+        mutations = (
+            ("missing state-date evidence", lambda x: x.update(state_evidence_refs=[])),
+            ("arbitrary evidence reference", lambda x: x.update(state_evidence_refs=["invented-ref"])),
+            ("incomplete Part 2", lambda x: x.update(part_2_completeness="unknown")),
+            ("unsupported territory", lambda x: x.update(territory="EEA")),
+            ("unresolved Annex source", lambda x: x.update(annex_source_ref="invented-annex")),
+            ("unresolved currentness", lambda x: x.update(currentness_source_ref="invented-currentness")),
+        )
+        for name, mutate in mutations:
+            with self.subTest(name=name):
+                candidate = deepcopy(assessment)
+                mutate(candidate)
+                self.assertIsNone(_v9_annex_source_bound_result(candidate, policy, root)["result"])
+
+        for outside in ("2010-04-30", "2019-08-01", "2026-12-01"):
+            with self.subTest(outside=outside):
+                candidate = deepcopy(assessment)
+                candidate["assessment_date"] = outside
+                changed_root = deepcopy(root)
+                changed_root["risk_materialization_date"] = outside
+                changed_root["assessment_date"] = outside
+                self.assertIsNone(_v9_annex_source_bound_result(candidate, policy, changed_root)["result"])
+
+    def test_v9_matched_requires_separate_source_bound_national_benefit_mapping(self):
+        from copy import deepcopy
+
+        policy = deepcopy(load_rule_pack(RULE_PACK_V9)["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"])
+        policy["state_code_to_ledger_name"]["SE"] = "Sweden"
+        policy["source_registry"].append({
+            "source_id": "synthetic-national-benefit-binding",
+            "role": "national_scheme_benefit_binding",
+            "valid_from": "2010-05-01",
+            "valid_to": "2019-08-01",
+            "state_code": "SE",
+            "entry_id": "SE-1",
+            "scheme_id": "synthetic-se-scheme",
+            "benefit_id": "synthetic-se-benefit",
+        })
+        date = "2019-07-31"
+        evidence_id = "synthetic-se-state-date"
+        root = {
+            "risk_materialization_date": date,
+            "assessment_date": date,
+            "scheme_id": "synthetic-se-scheme",
+            "benefit_id": "synthetic-se-benefit",
+            "concerned_institutions": [{
+                "institution_ref": "synthetic-se",
+                "member_state": "SE",
+                "evidence_refs": [evidence_id],
+                "article_57_1_evidence": {"source_evidence_refs": [evidence_id]},
+            }],
+            "evidence_registry": [{
+                "evidence_id": evidence_id,
+                "issuer_institution_ref": "synthetic-se",
+                "verified": True,
+                "coverage": {
+                    "temporal_coverage_from": "2010-05-01",
+                    "temporal_coverage_to": "2019-07-31",
+                    "contingency_date": date,
+                    "as_of_date": date,
+                },
+            }],
+        }
+        assessment = {
+            "assessment_result": "matched",
+            "state_code": "SE",
+            "territory": "EU_MEMBER_STATES",
+            "assessment_date": date,
+            "part_2_completeness": "complete",
+            "annex_source_ref": "annex-viii-part-2-ledger-v0.4",
+            "currentness_source_ref": "eurlex-883-2004-consolidated-2019-07-31",
+            "state_evidence_refs": [evidence_id],
+            "national_scheme_source_ref": "synthetic-national-benefit-binding",
+            "national_scheme_evidence_refs": [evidence_id],
+            "matched_scheme_entry": "SE-1",
+        }
+
+        self.assertEqual(_v9_annex_source_bound_result(assessment, policy, root), {"result": True})
+        assessment["national_scheme_source_ref"] = "invented-mapping"
+        self.assertIsNone(_v9_annex_source_bound_result(assessment, policy, root)["result"])
+
+    def test_v9_selects_annex_entries_at_half_open_amendment_boundary(self):
+        policy = load_rule_pack(RULE_PACK_V9)["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+        before = _v9_active_ledger_entries("2017-04-10", policy)
+        boundary = _v9_active_ledger_entries("2017-04-11", policy)
+
+        self.assertTrue(any(item["entry_id"] == "SE-1" and item["source"]["celex"] == "32012R1224" for item in before))
+        self.assertFalse(any(item["entry_id"] == "SE-1" and item["source"]["celex"] == "32017R0492" for item in before))
+        self.assertFalse(any(item["entry_id"] == "SE-1" and item["source"]["celex"] == "32012R1224" for item in boundary))
+        self.assertTrue(any(item["entry_id"] == "SE-1" and item["source"]["celex"] == "32017R0492" for item in boundary))
+
+    def test_v9_public_consumer_keeps_post_snapshot_annex_not_assessed(self):
+        payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
+        assessment = _article_57_v028(False, False, False, assessment_date="2026-12-01")
+        assessment["contract_schema_version"] = "v0.29"
+        assessment["annex_viii_part_2_applicability"] = {"assessment_result": "not_assessed"}
+        payload["article_57_assessment"] = assessment
+
+        result = self._build(payload, RULE_PACK_V9)
+
+        self.assertEqual(result["article_57"]["article_57_exception_status"], "not_assessed")
+        self.assertIn("missing_article_57_annex_viii_part_2_catalogue", {gap["code"] for gap in result["data_gaps"]})
+        self.assertEqual(result["spanish_pro_rata_pension"]["status"], "not_calculable")
+
+    def test_v10_binds_the_official_currentness_chain_without_promoting_eurlex_metadata(self):
+        policy = load_rule_pack(RULE_PACK_V10)["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+        sources = {item["source_id"]: item for item in policy["source_registry"]}
+
+        self.assertEqual(policy["knowledge_contract"]["contract_id"], "eu-annex-viii-part-2-applicability-evidence-v0.2")
+        self.assertEqual(sources["annex-viii-part-2-currentness-chain-through-2026-11-01"]["role"], "annex_currentness")
+        self.assertEqual(sources["eurlex-883-2004-act-history-2026-11-01"]["role"], "annex_currentness_metadata")
+        self.assertEqual(
+            {source_id for source_id, source in sources.items() if source["role"] == "annex_currentness_official_oj"},
+            {"eurlex-reg-2019-1149-oj", "eurlex-reg-2026-2359-oj"},
+        )
+        self.assertTrue(all(source["valid_from"] == "2019-08-01" and source["valid_to"] == "2026-11-02" for source in sources.values()))
+
+    def test_v10_currentness_boundaries_are_half_open_and_part_i_only_change_does_not_mutate_part_ii_ledger(self):
+        policy = load_rule_pack(RULE_PACK_V10)["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+        evidence_id = "synthetic-it-state-date"
+
+        def result_for(assessment_date):
+            evidence = {
+                "evidence_id": evidence_id, "issuer_institution_ref": "synthetic-it", "verified": True,
+                "coverage": {"temporal_coverage_from": "2019-07-31", "temporal_coverage_to": assessment_date, "contingency_date": assessment_date, "as_of_date": assessment_date},
+            }
+            root = {
+                "risk_materialization_date": assessment_date, "assessment_date": assessment_date,
+                "scheme_id": "synthetic-it-scheme", "benefit_id": "synthetic-it-benefit",
+                "concerned_institutions": [{"institution_ref": "synthetic-it", "member_state": "IT", "evidence_refs": [evidence_id], "article_57_1_evidence": {"source_evidence_refs": [evidence_id]}}],
+                "evidence_registry": [evidence],
+            }
+            assessment = {
+                "assessment_result": "not_matched", "state_code": "IT", "territory": "EU_MEMBER_STATES", "assessment_date": assessment_date,
+                "part_2_completeness": "complete", "annex_source_ref": "annex-viii-part-2-ledger-v0.4",
+                "currentness_source_ref": "annex-viii-part-2-currentness-chain-through-2026-11-01", "state_evidence_refs": [evidence_id],
+                "national_scheme_source_ref": None, "national_scheme_evidence_refs": [], "matched_scheme_entry": None,
+            }
+            return _v9_annex_source_bound_result(assessment, policy, root)["result"]
+
+        self.assertIsNone(result_for("2019-07-31"))
+        for supported in ("2019-08-01", "2026-10-31", "2026-11-01"):
+            with self.subTest(supported=supported):
+                self.assertIs(result_for(supported), False)
+        for unsupported in ("2026-11-02", "2026-11-07"):
+            with self.subTest(unsupported=unsupported):
+                self.assertIsNone(result_for(unsupported))
+
+        v9_policy = load_rule_pack(RULE_PACK_V9)["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+        self.assertEqual(policy["knowledge_contract"]["source_ledger_sha256"], "f6ac74cf8dd4976405d91ba91d9537727903a24f67699c925ce03dbbcefea197")
+        self.assertEqual(policy["_verified_ledger_entries"], v9_policy["_verified_ledger_entries"])
+
+    def test_v10_schema_requires_exact_unique_ordered_currentness_sources(self):
+        schema = json.loads(ANNEX_VIII_APPLICABILITY_V02_SCHEMA.read_text(encoding="utf-8"))
+        contract = json.loads(ANNEX_VIII_APPLICABILITY_V02.read_text(encoding="utf-8"))
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        validator.validate(contract)
+
+        mutations = (
+            ("duplicate source identity", lambda value: value["source_registry"][1].update(source_id=value["source_registry"][0]["source_id"])),
+            ("missing source", lambda value: value["source_registry"].pop()),
+            ("swapped role", lambda value: value["source_registry"][1].update(role="annex_currentness_metadata")),
+            ("changed interval", lambda value: value["source_registry"][4].update(valid_to="2026-11-03")),
+            ("unresolved currentness reference", lambda value: value["currentness_chain"].update(chain_source_id="invented-source")),
+        )
+        for name, mutate in mutations:
+            with self.subTest(name=name):
+                candidate = deepcopy(contract)
+                mutate(candidate)
+                self.assertFalse(validator.is_valid(candidate))
+
+    def test_v10_public_builder_remains_evidence_only_at_all_currentness_boundaries(self):
+        dates = ("2019-07-31", "2019-08-01", "2026-11-01", "2026-11-02", "2026-11-07")
+        for assessment_date in dates:
+            with self.subTest(assessment_date=assessment_date):
+                payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
+                assessment = _article_57_v028(False, False, False, assessment_date=assessment_date)
+                assessment["contract_schema_version"] = "v0.29"
+                assessment["annex_viii_part_2_applicability"] = {"assessment_result": "not_matched"}
+                payload["article_57_assessment"] = assessment
+
+                snapshot = self._build(payload, RULE_PACK_V10)
+
+                self.assertEqual(snapshot["status"], "blocked_missing_inputs")
+                self.assertEqual(snapshot["spanish_entitlement"], {"status": "not_assessed"})
+                self.assertEqual(snapshot["article_57"]["national_eligibility_status"], "not_assessed")
+                self.assertEqual(snapshot["article_57"]["article_57_exception_status"], "not_assessed")
+                self.assertEqual(snapshot["article_57"]["national_payment_obligation_status"], "not_assessed")
+                self.assertEqual(snapshot["spanish_theoretical_pension"]["amounts"], None)
+                self.assertEqual(snapshot["spanish_pro_rata_pension"]["amounts"], None)
+                gap_codes = {gap["code"] for gap in snapshot["data_gaps"]}
+                self.assertIn("annex_viii_evidence_only_rule_pack", gap_codes)
+                if assessment_date in {"2019-07-31", "2026-11-02", "2026-11-07"}:
+                    self.assertIn("annex_viii_currentness_outside_verified_interval", gap_codes)
+                else:
+                    self.assertNotIn("annex_viii_currentness_outside_verified_interval", gap_codes)
+                self.assertNotIn("ordinary_article_52", json.dumps(snapshot))
+
     def test_v8_policy_is_payer_free_and_requires_all_concerned_relief(self):
         multi = load_rule_pack(RULE_PACK_V8)["pro_rata_method"]["article_57_source_bound"]["multi_institution"]
         self.assertTrue(multi["article_57_3_all_concerned_institutions_relief_is_precondition"])

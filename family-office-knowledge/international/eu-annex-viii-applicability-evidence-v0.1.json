@@ -1,0 +1,52 @@
+{
+  "contract_id": "eu-annex-viii-part-2-applicability-evidence-v0.1",
+  "schema_version": "eu-annex-viii-part-2-applicability-evidence/v0.1",
+  "status": "evidence-contract-only",
+  "territorial_scope": {
+    "included": ["EU_MEMBER_STATES"],
+    "excluded_without_incorporation_evidence": ["UK", "EEA", "CH"]
+  },
+  "source_ledger": {
+    "catalogue_id": "eu-annex-viii-part-2-source-ledger-v0.4",
+    "schema_version": "eu-annex-viii-part-2-source-ledger/v0.4",
+    "snapshot_as_of": "2019-07-31",
+    "documented_snapshot_only": true,
+    "proves": ["official_text", "documented_version"],
+    "does_not_prove": ["concrete_national_scheme_applicability", "post_snapshot_currentness"]
+  },
+  "source_registry": [
+    {
+      "source_id": "annex-viii-part-2-ledger-v0.4",
+      "role": "annex_catalogue",
+      "authority": "European Union Official Journal / EUR-Lex",
+      "territory": "EU",
+      "valid_from": "2010-05-01",
+      "valid_to": "2019-08-01"
+    },
+    {
+      "source_id": "eurlex-883-2004-consolidated-2019-07-31",
+      "role": "annex_currentness",
+      "authority": "EUR-Lex",
+      "territory": "EU",
+      "valid_from": "2010-05-01",
+      "valid_to": "2019-08-01"
+    }
+  ],
+  "assessment_contract": {
+    "results": ["matched", "not_matched", "not_assessed"],
+    "not_matched": "Requires a source-bound State, assessment date, EU territory, a complete applicable Part 2, and currentness evidence covering the assessment date. It is permitted only where that complete Part 2 has no entry for the State.",
+    "matched": "Requires a separate official national or institutional source binding the concrete scheme and benefit to an applicable Part 2 entry.",
+    "fail_closed": "Incomplete, conflicting, stale, unsupported-territory, or unresolved source evidence is not_assessed with data_gaps.",
+    "interval_semantics": "All ledger and evidence validity intervals are half-open [valid_from, valid_to)."
+  },
+  "reviewed_absence": {
+    "state_codes": ["IT", "ES"],
+    "part": "Annex VIII Part 2",
+    "limited_to_source_ledger_snapshot": true
+  },
+  "limitations": [
+    "No concrete national scheme or benefit mapping is recorded by this contract.",
+    "No source in this contract establishes currentness after 2019-07-31.",
+    "This contract does not infer payer, entitlement, competent institution, amount, effective date, or payment."
+  ]
+}

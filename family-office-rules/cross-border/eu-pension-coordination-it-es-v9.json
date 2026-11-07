@@ -1,0 +1,605 @@
+{
+  "schema_version": "eu-pension-coordination-rule-pack/v2",
+  "rule_pack_id": "eu.it-es.pension-coordination.2026.v9",
+  "jurisdictions": [
+    "IT",
+    "ES",
+    "EU"
+  ],
+  "currency": "EUR",
+  "status": "coordination_method_not_official_decision",
+  "valid_from": "2026-01-01",
+  "valid_to": "2026-12-31",
+  "source_refs": [
+    {
+      "source_id": "eurlex.reg-883-2004",
+      "title": "Regulation (EC) No 883/2004 on the coordination of social security systems",
+      "authority": "European Parliament and Council of the European Union",
+      "jurisdiction": "EU",
+      "url": "https://eur-lex.europa.eu/eli/reg/2004/883/oj/eng",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-31",
+      "next_review_due": "2027-01-29",
+      "provisions": [
+        "Article 50",
+        "Article 51",
+        "Article 52",
+        "Article 56",
+        "Article 57"
+      ]
+    },
+    {
+      "source_id": "eurlex.reg-987-2009",
+      "title": "Regulation (EC) No 987/2009 laying down the procedure for implementing Regulation (EC) No 883/2004",
+      "authority": "European Parliament and Council of the European Union",
+      "jurisdiction": "EU",
+      "url": "https://eur-lex.europa.eu/eli/reg/2009/987/oj/eng",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-31",
+      "next_review_due": "2027-01-29",
+      "provisions": [
+        "Article 12",
+        "Article 13",
+        "Article 43",
+        "Articles 45-48",
+        "Article 47(4)-(7)"
+      ]
+    },
+    {
+      "source_id": "eurlex.reg-988-2009",
+      "title": "Regulation (EC) No 988/2009 amending Regulation (EC) No 883/2004 on the coordination of social security systems",
+      "authority": "European Parliament and Council of the European Union",
+      "jurisdiction": "EU",
+      "url": "https://eur-lex.europa.eu/eli/reg/2009/988/oj/eng",
+      "retrieved_on": "2026-10-16",
+      "reviewed_on": "2026-10-31",
+      "next_review_due": "2027-01-29",
+      "provisions": [
+        "Article 1(16)",
+        "Article 57(4)"
+      ]
+    },
+    {
+      "source_id": "boe.lgss.rdl-8-2015.consolidated",
+      "title": "BOE, Real Decreto Legislativo 8/2015, Ley General de la Seguridad Social",
+      "authority": "Agencia Estatal Boletín Oficial del Estado",
+      "jurisdiction": "ES",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-31",
+      "next_review_due": "2027-01-29",
+      "provisions": [
+        "Articulo 205",
+        "Disposicion transitoria septima"
+      ]
+    },
+    {
+      "source_id": "seg-social.eu-coordination.old-age",
+      "title": "Seguridad Social, EU coordination for old-age and survivors benefits",
+      "authority": "Instituto Nacional de la Seguridad Social / Seguridad Social",
+      "jurisdiction": "ES",
+      "url": "https://www.seg-social.es/wps/portal/wss/internet/InformacionUtil/32078/966/1819/1823",
+      "retrieved_on": "2026-10-11",
+      "reviewed_on": "2026-10-31",
+      "next_review_due": "2027-01-29",
+      "provisions": [
+        "aggregation for acquisition of entitlement and calculation",
+        "double calculation and pro-rata",
+        "insured or equivalent status and specific contribution period"
+      ]
+    },
+    {
+      "source_id": "eurlex.reg-465-2012",
+      "title": "Regulation (EU) No 465/2012 amending Regulations 883/2004 and 987/2009",
+      "authority": "European Parliament and Council of the European Union",
+      "jurisdiction": "EU",
+      "url": "https://eur-lex.europa.eu/eli/reg/2012/465/oj/eng",
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "next_review_due": "2027-01-29",
+      "provisions": [
+        "Article 1(11), inserting Regulation (EC) No 883/2004 Article 87a"
+      ]
+    },
+    {
+      "source_id": "eurlex.reg-465-2012.corrigendum-2015-03-28",
+      "title": "Corrigendum to Regulation (EU) No 465/2012, Romanian language only",
+      "authority": "European Union Official Journal",
+      "jurisdiction": "EU",
+      "url": "https://eur-lex.europa.eu/legal-content/RO/TXT/PDF/?uri=CELEX%3A32012R0465R%2801%29",
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "next_review_due": "2027-01-29",
+      "provisions": [
+        "Annex XI point 2(c)(iii)(a) only; no correction to Regulation 465/2012 Article 1(11) or Regulation 883/2004 Article 87a"
+      ]
+    },
+    {
+      "source_id": "eurlex.reg-987-2009.corrigendum-2026-07-22",
+      "title": "Corrigendum to Regulation 987/2009, OJ 2026/90618",
+      "authority": "European Union Official Journal",
+      "jurisdiction": "EU",
+      "url": "https://eur-lex.europa.eu/legal-content/HR/TXT/PDF/?uri=CELEX%3A32009R0987R%2804%29",
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "next_review_due": "2027-01-29",
+      "provisions": [
+        "HR Arts 28, 31, 75, 87; SV Arts 78, 83; language-scoped metadata only"
+      ]
+    }
+  ],
+  "normative_source_registry": [
+    {
+      "registry_id": "reg-883-2004-original-oj",
+      "version": "CELEX:32004R0883/OJ",
+      "celex_or_eli": "CELEX:32004R0883; ELI:reg/2004/883/oj/eng",
+      "document_type": "original OJ act",
+      "authority": "European Parliament and Council of the European Union",
+      "territory": "EU",
+      "language_scope": "EN/IT/ES",
+      "oj_publication_date": "2004-04-30",
+      "entry_into_force": "2004-05-20",
+      "application_date_or_conditions": "applies from 2010-05-01",
+      "consolidation_as_of": "2019-07-31 documentation consolidation only; not a new act or effective date",
+      "provisions": [
+        "Article 57",
+        "Article 87"
+      ],
+      "related_amendments_or_corrigenda": [
+        "Regulation (EU) No 465/2012"
+      ],
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "integrity_digest_record": "sha256:da0f394f3cc8f50e5a7da7ab1323b2f4865d7d143b003477e7fe187942af06ae"
+    },
+    {
+      "registry_id": "reg-987-2009-original-oj",
+      "version": "CELEX:32009R0987/OJ",
+      "celex_or_eli": "CELEX:32009R0987; ELI:reg/2009/987/oj/eng",
+      "document_type": "original OJ act",
+      "authority": "European Parliament and Council of the European Union",
+      "territory": "EU",
+      "language_scope": "EN/IT/ES",
+      "oj_publication_date": "2009-10-30",
+      "entry_into_force": "2010-05-01",
+      "application_date_or_conditions": "Article 97 entry into force 2010-05-01; Article 93 applies Article 87 basic Regulation to situations within scope; Article 94 requires the Member State territorial application date and its stated conditions, with no universal date encoded.",
+      "consolidation_as_of": "not applicable to original act",
+      "provisions": [
+        "Article 93",
+        "Article 94(1)",
+        "Article 97"
+      ],
+      "related_amendments_or_corrigenda": [
+        "2026-07-22 corrigendum HR/SV scope not fully verified"
+      ],
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "integrity_digest_record": "sha256:ff03a56a93a3125d848e83bb240ec6eae5f722ec0256451019da606aa9dedfb7"
+    },
+    {
+      "registry_id": "reg-465-2012-original-oj",
+      "version": "CELEX:32012R0465/OJ",
+      "celex_or_eli": "CELEX:32012R0465; ELI:reg/2012/465/oj/eng",
+      "document_type": "amending OJ act",
+      "authority": "European Parliament and Council of the European Union",
+      "territory": "EU",
+      "language_scope": "EN/IT/ES",
+      "oj_publication_date": "2012-06-08",
+      "entry_into_force": "2012-06-28",
+      "application_date_or_conditions": "Article 1(11) inserts Article 87a: Title II unchanged-situation transition, maximum ten years and opt-out; no automatic Art.57/pension applicability inference",
+      "consolidation_as_of": "not applicable to original amendment",
+      "provisions": [
+        "Article 1(11)"
+      ],
+      "related_amendments_or_corrigenda": [
+        "2015-03-28 Romanian corrigendum CELEX:32012R0465R(01), Annex XI point 2(c)(iii)(a) only; no effect on Article 1(11) or Article 87a"
+      ],
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "integrity_digest_record": "sha256:deeda37efccaed514f4390beaf839e87e4e36d3ae10449ece33c8bc403b1837e"
+    },
+    {
+      "registry_id": "reg-465-2012-corrigendum-2015-03-28-ro",
+      "version": "CELEX:32012R0465R(01); OJ L 84 p.74",
+      "celex_or_eli": "CELEX:32012R0465R(01)",
+      "document_type": "corrigendum",
+      "authority": "European Union Official Journal",
+      "territory": "EU",
+      "language_scope": "RO only",
+      "oj_publication_date": "2015-03-28",
+      "entry_into_force": "not assessed",
+      "application_date_or_conditions": "Corrects Annex XI point 2(c)(iii)(a) only. It does not correct Regulation (EU) No 465/2012 Article 1(11) or Regulation (EC) No 883/2004 Article 87a.",
+      "consolidation_as_of": "not assessed",
+      "provisions": [
+        "Annex XI point 2(c)(iii)(a)"
+      ],
+      "related_amendments_or_corrigenda": [],
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "integrity_digest_record": "sha256:6378f9861ce3bb4f1f6848df72273e04c211b4e74452d9b2f441b8b7f5e9b729"
+    },
+    {
+      "registry_id": "reg-1182-1971-original-oj",
+      "version": "CELEX:31971R1182/OJ",
+      "celex_or_eli": "CELEX:31971R1182",
+      "document_type": "original OJ act",
+      "authority": "European Union",
+      "territory": "EU",
+      "language_scope": "EN",
+      "oj_publication_date": "1971-06-08",
+      "entry_into_force": "1971-07-01",
+      "application_date_or_conditions": "General time-calculation rule only; not an Article 87a or pension legal basis.",
+      "consolidation_as_of": "not assessed",
+      "provisions": [
+        "Article 3",
+        "Article 4"
+      ],
+      "related_amendments_or_corrigenda": [],
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "integrity_digest_record": "sha256:f2b18f634b4caeb8019072fb33cc2344daebb96f813e73872b2ebb9220876553"
+    },
+    {
+      "registry_id": "cjeu-c-171-03-judgment",
+      "version": "CELEX:62003CJ0171; ECLI:EU:C:2004:714",
+      "celex_or_eli": "CELEX:62003CJ0171; ECLI:EU:C:2004:714",
+      "document_type": "CJEU judgment",
+      "authority": "Court of Justice of the European Union",
+      "territory": "EU",
+      "language_scope": "EN",
+      "oj_publication_date": "2005-01-08",
+      "entry_into_force": "not assessed",
+      "decision_date": "2004-11-11",
+      "application_date_or_conditions": "Binding interpretation of Regulation 1182/71 Article 3 only; not an Article 87a or pension legal basis.",
+      "consolidation_as_of": "not applicable",
+      "provisions": [
+        "paragraphs 31-38"
+      ],
+      "related_amendments_or_corrigenda": [],
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "integrity_digest_record": "sha256:f854532f0216375934fd50749c302ee6420a9e0b121136b0786a3dbfd7c83373"
+    },
+    {
+      "registry_id": "reg-987-2009-corrigendum-2026-07-22",
+      "version": "OJ 2026/90618; CELEX:32009R0987R(04)",
+      "celex_or_eli": "CELEX:32009R0987R(04)",
+      "document_type": "corrigendum",
+      "authority": "European Union Official Journal",
+      "territory": "EU",
+      "language_scope": "HR/SV only; full Croatian scope not verified",
+      "oj_publication_date": "2026-07-22",
+      "entry_into_force": "not assessed",
+      "application_date_or_conditions": "HR/SV corrections only: HR Art.28 heading and paras 1-3, Art.31(2)-(3), Art.75(1), Art.87(4); SV Art.78(2)(a), Art.83(1)(a). Not applicable to EN/IT/ES or Arts 93-94.",
+      "consolidation_as_of": "not assessed",
+      "provisions": [
+        "HR Art.28 heading and paras 1-3",
+        "HR Art.31(2)-(3)",
+        "HR Art.75(1)",
+        "HR Art.87(4)",
+        "SV Art.78(2)(a)",
+        "SV Art.83(1)(a)"
+      ],
+      "related_amendments_or_corrigenda": [],
+      "retrieved_on": "2026-10-31",
+      "reviewed_on": "2026-10-31",
+      "integrity_digest_record": "sha256:c173e740d16231358a9869383e978576a9d9d512617945bf6bdaae97af86a43d"
+    }
+  ],
+  "coordination_principles": {
+    "separate_national_entitlements": true,
+    "aggregation_for_entitlement_and_theoretical_calculation": true,
+    "no_transfer_or_merger_of_contributions": true,
+    "compare_independent_and_pro_rata_when_calculable": true,
+    "payment_obligation_not_assessed_without_article_57_evidence": true
+  },
+  "required_inputs": [
+    "date_of_birth",
+    "retirement_date",
+    "recent_contribution_anchor_date",
+    "spanish_insured_or_equivalent_status",
+    "inps_history_status",
+    "future_assumptions_status",
+    "dated_insurance_periods",
+    "spanish_theoretical_gross_pension_with_spanish_only_provenance"
+  ],
+  "spanish_ordinary_entitlement": {
+    "valid_from": "2026-01-01",
+    "valid_to": "2026-12-31",
+    "minimum_total_contribution_months": 180,
+    "specific_contribution_months_within_lookback": 24,
+    "specific_contribution_lookback_months": 180,
+    "insured_or_equivalent_status_required": true,
+    "ordinary_age_if_long_career": {
+      "years": 65,
+      "months": 0,
+      "minimum_contribution_months": 459
+    },
+    "standard_ordinary_age": {
+      "years": 66,
+      "months": 10
+    },
+    "totalization_applies_to_entitlement_and_theoretical_calculation": true,
+    "recent_contribution_anchor_required": true,
+    "source_provision": "Seguridad Social jubilacion requisitos 2026"
+  },
+  "pro_rata_method": {
+    "legal_basis": "Regulation (EC) No 883/2004 Article 52",
+    "theoretical_amount_required": true,
+    "spanish_ratio_numerator": "non_overlapping_spanish_insurance_months",
+    "ratio_denominator": "non_overlapping_total_eu_insurance_months",
+    "rounding": {
+      "money_decimals": 2,
+      "ratio_decimals": 6,
+      "mode": "ROUND_HALF_UP"
+    },
+    "article_57_source_bound": {
+      "contract_schema_version": "v0.29",
+      "canonicalization_profile": "fo-art57-c14n-v4",
+      "human_review_required": true,
+      "legal_basis": [
+        "Regulation (EC) No 883/2004 Article 57",
+        "Regulation (EC) No 987/2009 Articles 12-13 and 47(4)-(7)",
+        "Regulation (EC) No 988/2009 Article 1(16)"
+      ],
+      "transition_source_registry": [
+        {
+          "registry_id": "reg-883-2004-original-oj",
+          "version": "CELEX:32004R0883/OJ",
+          "territory": "EU",
+          "language_scope": "EN/IT/ES",
+          "provisions": [
+            "Article 87"
+          ],
+          "period_from": "2010-05-01",
+          "period_to": null
+        },
+        {
+          "registry_id": "reg-987-2009-original-oj",
+          "version": "CELEX:32009R0987/OJ",
+          "territory": "EU",
+          "language_scope": "EN/IT/ES",
+          "provisions": [
+            "Article 93",
+            "Article 94(1)",
+            "Article 97"
+          ],
+          "period_from": "2010-05-01",
+          "period_to": null
+        }
+      ],
+      "transition_branch_bindings": {
+        "basic_regulation_883_87": {
+          "registry_id": "reg-883-2004-original-oj",
+          "article": "Article 87"
+        },
+        "implementing_regulation_987_93": {
+          "registry_id": "reg-987-2009-original-oj",
+          "article": "Article 93"
+        },
+        "pension_transitional_987_94_1": {
+          "registry_id": "reg-987-2009-original-oj",
+          "article": "Article 94(1)"
+        }
+      },
+      "article_94_1_it_es_semantics": {
+        "split_period_contract_by_member_state": {
+          "IT": {
+            "boundary_date": "2010-05-01",
+            "article_94_1_source": {
+              "registry_id": "reg-987-2009-original-oj",
+              "version": "CELEX:32009R0987/OJ",
+              "article": "Article 94(1)",
+              "territory": "EU",
+              "language_scope": "EN/IT/ES"
+            },
+            "article_97_source": {
+              "registry_id": "reg-987-2009-original-oj",
+              "version": "CELEX:32009R0987/OJ",
+              "article": "Article 97",
+              "territory": "EU",
+              "language_scope": "EN/IT/ES"
+            }
+          },
+          "ES": {
+            "boundary_date": "2010-05-01",
+            "article_94_1_source": {
+              "registry_id": "reg-987-2009-original-oj",
+              "version": "CELEX:32009R0987/OJ",
+              "article": "Article 94(1)",
+              "territory": "EU",
+              "language_scope": "EN/IT/ES"
+            },
+            "article_97_source": {
+              "registry_id": "reg-987-2009-original-oj",
+              "version": "CELEX:32009R0987/OJ",
+              "article": "Article 97",
+              "territory": "EU",
+              "language_scope": "EN/IT/ES"
+            }
+          }
+        },
+        "prior_leg_period": {
+          "start_relation_to_boundary": "strictly_before",
+          "end_exclusive_relation_to_boundary": "equals"
+        },
+        "basic_regulation_leg_period": {
+          "start_relation_to_boundary": "equals",
+          "end_exclusive_relation_to_boundary": "strictly_after"
+        },
+        "contiguity": {
+          "prior_end_exclusive_equals_basic_start": true,
+          "shared_boundary_equals_member_state_boundary": true
+        },
+        "amount_selection": {
+          "prior_greater_than_basic": "prior_leg",
+          "prior_less_than_or_equal_to_basic": "basic_regulation_leg"
+        }
+      },
+      "legal_duration": {
+        "source_bound_required": true,
+        "requires_duration_basis": true,
+        "requires_duration_assessment_evidence": true,
+        "requires_one_year_comparator_with_legal_basis": true,
+        "calendar_months_are_not_a_substitute": true,
+        "conversion_is_not_inferred_from_article_13": true
+      },
+      "autonomous_right": {
+        "source_bound_required": true,
+        "requires_national_rule_pack_and_version": true,
+        "requires_risk_materialization_date": true,
+        "requires_evidence": true
+      },
+      "evidence_registry": {
+        "manifest_perimeter_and_registry_required_before_every_assessment_result": true,
+        "requires_unique_evidence_ids": true,
+        "requires_unique_resolved_source_refs": true,
+        "requires_sha256_of_utf8_content": true,
+        "content_digest_format": "sha256-lowercase-hex-64",
+        "digest_proves_integrity_only": true,
+        "requires_issuer_match_to_manifest": true,
+        "requires_registry_coverage_of_declared_temporal_interval": true,
+        "requires_per_institution_article_57_1_refs_to_resolve": true,
+        "requires_per_institution_article_57_1_ref_uniqueness": true,
+        "fail_closed_on_missing_duplicate_or_mismatch": true
+      },
+      "last_state_attestation": {
+        "malformed_input_action": "not_assessed_with_data_gaps",
+        "registry_binding_required": true,
+        "does_not_emit_legal_last_state_output": true,
+        "required_evidence_categories": [
+          "selection",
+          "conditions",
+          "comparability",
+          "event",
+          "applicable_legislation",
+          "institutional_records"
+        ],
+        "registry_controls_are_internal_provenance_not_legal_presumptions": true
+      },
+      "annex_viii_part_2": {
+        "source_bound_required": true,
+        "contract_schema_version": "v0.1",
+        "knowledge_contract": {
+          "contract_id": "eu-annex-viii-part-2-applicability-evidence-v0.1",
+          "schema_version": "eu-annex-viii-part-2-applicability-evidence/v0.1",
+          "sha256": "48926e2b8614edaeac347a11dc91be8b371207854d17cad9b90f71f017fb83a1",
+          "source_ledger_sha256": "f6ac74cf8dd4976405d91ba91d9537727903a24f67699c925ce03dbbcefea197"
+        },
+        "assessment_results": [
+          "matched",
+          "not_matched",
+          "not_assessed"
+        ],
+        "territorial_scope": {
+          "included": "EU_MEMBER_STATES",
+          "excluded_without_incorporation_evidence": [
+            "UK",
+            "EEA",
+            "CH"
+          ]
+        },
+        "complete_part_2_absent_state_codes": [
+          "IT",
+          "ES"
+        ],
+        "state_code_to_ledger_name": {
+          "IT": "Italy",
+          "ES": "Spain"
+        },
+        "source_registry": [
+          {
+            "source_id": "annex-viii-part-2-ledger-v0.4",
+            "role": "annex_catalogue",
+            "valid_from": "2010-05-01",
+            "valid_to": "2019-08-01"
+          },
+          {
+            "source_id": "eurlex-883-2004-consolidated-2019-07-31",
+            "role": "annex_currentness",
+            "valid_from": "2010-05-01",
+            "valid_to": "2019-08-01"
+          }
+        ],
+        "matched_requires_separate_official_national_or_institutional_binding": true,
+        "not_matched_requires_complete_current_part_2": true,
+        "interval_semantics": "half_open",
+        "true_excludes_article_57": true
+      },
+      "multi_institution": {
+        "root_institution_predicates_must_reconcile_in_both_directions": true,
+        "fail_closed_when_institutions_or_last_state_evidence_are_missing": true,
+        "article_57_3_all_concerned_institutions_relief_is_precondition": true,
+        "requires_separate_institution_scope_evidence": true,
+        "institution_scope_requires_operator_verified_source_bound_full_perimeter": true,
+        "per_institution_article_57_1_requires_pertinent_periods_duration_comparator_legislation_and_autonomous_right_evidence": true,
+        "article_57_3_last_state_must_be_source_bound": true,
+        "article_57_3_last_state_requires_comparable_candidate_state_conditions": true,
+        "article_57_3_last_state_is_not_inferred_from_date_ordering": true,
+        "article_57_3_requires_per_institution_relief_records": true,
+        "article_57_3_does_not_determine_payment_institution": true
+      },
+      "other_member_states_include_periods_in_theoretical_amount": true,
+      "unmodeled_branch_action": "not_assessed_with_data_gaps"
+    },
+    "title_ii_transition_policy": {
+      "contract_schema_version": "v0.28",
+      "human_review_required": true,
+      "anchor_date": "2012-06-28",
+      "latest_applicable_date": "2022-06-28",
+      "end_date_exclusive": "2022-06-29",
+      "source_bindings": [
+        {
+          "registry_id": "reg-465-2012-original-oj",
+          "version": "CELEX:32012R0465/OJ",
+          "article": "Article 1(11)",
+          "target_regulation": "Regulation (EC) No 883/2004",
+          "target_article": "Article 87a",
+          "role": "amending_legal_basis",
+          "territory": "EU",
+          "language_scope": "EN/IT/ES"
+        },
+        {
+          "registry_id": "reg-1182-1971-original-oj",
+          "version": "CELEX:31971R1182/OJ",
+          "provisions": [
+            "Article 3",
+            "Article 4"
+          ],
+          "role": "general_time_calculation_rule",
+          "territory": "EU",
+          "language_scope": "EN"
+        },
+        {
+          "registry_id": "cjeu-c-171-03-judgment",
+          "version": "CELEX:62003CJ0171; ECLI:EU:C:2004:714",
+          "provisions": [
+            "paragraphs 31-38"
+          ],
+          "role": "binding_interpretation_of_regulation_1182_71_article_3",
+          "territory": "EU",
+          "language_scope": "EN"
+        }
+      ]
+    },
+    "overlap_policy": {
+      "legal_basis": "Regulation (EC) No 987/2009 Article 12",
+      "monthly_deduplication_alone_sufficient": false,
+      "unclassified_overlap_action": "blocking_data_gap"
+    },
+    "no_foreign_bases_in_spanish_theoretical_amount": true
+  },
+  "calculation_limits": [
+    "Does not calculate Italian statutory pension from first principles.",
+    "Does not create official P1 decisions.",
+    "Does not calculate tax, net amounts, exchange rates or application procedures.",
+    "Spanish pro-rata amounts require dated non-overlapping periods and an explicit Spanish theoretical amount.",
+    "Italian periods can be used for entitlement and theoretical/pro-rata calculation under EU coordination, not as Spanish contribution bases."
+  ],
+  "limitations": [
+    "Internal coordination dossier only; not an official INPS or Seguridad Social decision.",
+    "Periods may be aggregated for acquisition of entitlement and theoretical/pro-rata calculation under applicable coordination rules.",
+    "Contributions remain under their national schemes and are not transferred or merged.",
+    "Human review is required before administrative or legal use."
+  ]
+}

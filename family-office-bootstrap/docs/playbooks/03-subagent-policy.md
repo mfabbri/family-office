@@ -44,6 +44,13 @@ La delega non può trasformare il parent in un osservatore passivo. Prima di del
 - Il completion report deve elencare separatamente codice runtime, test, documentazione e file preesistenti preservati; non basta dire “implementato” o “test verdi”.
 - Prima della chiusura eseguire `python planning/validate-execution-guardrails.py`; se fallisce, lo stato resta attivo o blocked e non si dichiara completato il lavoro.
 
+## Capacita e finestre di attesa
+
+- Prima dello spawn controllare il limite di thread: gli agenti completati ma ancora aperti consumano capacita. Chiudere i thread completati e non piu necessari; uno spawn fallito non e una delega e non consuma un evento.
+- Un aumento esplicito delle finestre di attesa si applica al tentativo nominato e all'agent/versione gia attivi. Le finestre sono sotto-intervalli dello stesso timebox, non nuovi tentativi, reviewer paralleli o autorizzazioni a correggere/revisionare una versione successiva.
+- Dopo ogni finestra controllare lo stato dell'agent. Se l'ultima finestra scade e il task e ancora in esecuzione, chiedere una sola consegna/stop e registrare `pending`/`blocked`; il timeout non e un verdetto. Un risultato tardivo puo essere attribuito allo stesso evento solo se arriva prima che cambi il candidato e prima di avviare un nuovo evento.
+- Comunicare i timeout intermedi e mantenere attivo il lavoro locale non sovrapposto. Fermarsi quando arriva un risultato utile o termina il budget autorizzato.
+
 ## Quando parallelizzare
 
 Solo se i workstream sono indipendenti, ad esempio:

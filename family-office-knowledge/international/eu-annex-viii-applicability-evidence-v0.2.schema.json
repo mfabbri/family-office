@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://family-office.local/schemas/eu-annex-viii-part-2-applicability-evidence/v0.2",
+  "title": "EU Annex VIII Part 2 applicability evidence contract v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_id",
+    "schema_version",
+    "status",
+    "territorial_scope",
+    "source_ledger",
+    "source_registry",
+    "currentness_chain",
+    "assessment_contract",
+    "reviewed_absence",
+    "limitations"
+  ],
+  "properties": {
+    "contract_id": {
+      "const": "eu-annex-viii-part-2-applicability-evidence-v0.2"
+    },
+    "schema_version": {
+      "const": "eu-annex-viii-part-2-applicability-evidence/v0.2"
+    },
+    "status": {
+      "const": "evidence-contract-only"
+    },
+    "territorial_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "included",
+        "excluded_without_incorporation_evidence"
+      ],
+      "properties": {
+        "included": {
+          "const": [
+            "EU_MEMBER_STATES"
+          ]
+        },
+        "excluded_without_incorporation_evidence": {
+          "const": [
+            "UK",
+            "EEA",
+            "CH"
+          ]
+        }
+      }
+    },
+    "source_ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalogue_id",
+        "schema_version",
+        "snapshot_as_of",
+        "documented_snapshot_only",
+        "proves",
+        "does_not_prove"
+      ],
+      "properties": {
+        "catalogue_id": {
+          "const": "eu-annex-viii-part-2-source-ledger-v0.4"
+        },
+        "schema_version": {
+          "const": "eu-annex-viii-part-2-source-ledger/v0.4"
+        },
+        "snapshot_as_of": {
+          "const": "2019-07-31"
+        },
+        "documented_snapshot_only": {
+          "const": true
+        },
+        "proves": {
+          "const": [
+            "official_text",
+            "documented_version"
+          ]
+        },
+        "does_not_prove": {
+          "const": [
+            "concrete_national_scheme_applicability",
+            "post_snapshot_currentness"
+          ]
+        }
+      }
+    },
+    "source_registry": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/source0"
+        },
+        {
+          "$ref": "#/$defs/source1"
+        },
+        {
+          "$ref": "#/$defs/source2"
+        },
+        {
+          "$ref": "#/$defs/source3"
+        },
+        {
+          "$ref": "#/$defs/source4"
+        }
+      ]
+    },
+    "currentness_chain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chain_source_id",
+        "official_oj_source_ids",
+        "metadata_source_id",
+        "metadata_is_not_legally_exhaustive",
+        "part_ii_status",
+        "verified_through"
+      ],
+      "properties": {
+        "chain_source_id": {
+          "const": "annex-viii-part-2-currentness-chain-through-2026-11-01"
+        },
+        "official_oj_source_ids": {
+          "const": [
+            "eurlex-reg-2019-1149-oj",
+            "eurlex-reg-2026-2359-oj"
+          ]
+        },
+        "metadata_source_id": {
+          "const": "eurlex-883-2004-act-history-2026-11-01"
+        },
+        "metadata_is_not_legally_exhaustive": {
+          "const": true
+        },
+        "part_ii_status": {
+          "const": "unchanged_through_2026-11-01_inclusive"
+        },
+        "verified_through": {
+          "const": "2026-11-01"
+        }
+      }
+    },
+    "assessment_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "results",
+        "not_matched",
+        "matched",
+        "fail_closed",
+        "interval_semantics"
+      ],
+      "properties": {
+        "results": {
+          "const": [
+            "matched",
+            "not_matched",
+            "not_assessed"
+          ]
+        },
+        "not_matched": {
+          "type": "string",
+          "minLength": 1
+        },
+        "matched": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fail_closed": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interval_semantics": {
+          "const": "All ledger and evidence validity intervals are half-open [valid_from, valid_to)."
+        }
+      }
+    },
+    "reviewed_absence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state_codes",
+        "part",
+        "limited_to_source_ledger_snapshot"
+      ],
+      "properties": {
+        "state_codes": {
+          "const": [
+            "IT",
+            "ES"
+          ]
+        },
+        "part": {
+          "const": "Annex VIII Part 2"
+        },
+        "limited_to_source_ledger_snapshot": {
+          "const": false
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "sourceBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "role",
+        "authority",
+        "territory",
+        "valid_from",
+        "valid_to"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "territory": {
+          "const": "EU"
+        },
+        "valid_from": {
+          "const": "2019-08-01"
+        },
+        "valid_to": {
+          "const": "2026-11-02"
+        }
+      }
+    },
+    "source0": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/sourceBase"
+        },
+        {
+          "properties": {
+            "source_id": {
+              "const": "annex-viii-part-2-ledger-v0.4"
+            },
+            "role": {
+              "const": "annex_catalogue"
+            },
+            "authority": {
+              "const": "European Union Official Journal / EUR-Lex"
+            }
+          }
+        }
+      ]
+    },
+    "source1": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/sourceBase"
+        },
+        {
+          "properties": {
+            "source_id": {
+              "const": "annex-viii-part-2-currentness-chain-through-2026-11-01"
+            },
+            "role": {
+              "const": "annex_currentness"
+            },
+            "authority": {
+              "const": "European Union Official Journal chain; EUR-Lex history is indexing evidence only"
+            }
+          }
+        }
+      ]
+    },
+    "source2": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/sourceBase"
+        },
+        {
+          "properties": {
+            "source_id": {
+              "const": "eurlex-883-2004-act-history-2026-11-01"
+            },
+            "role": {
+              "const": "annex_currentness_metadata"
+            },
+            "authority": {
+              "const": "EUR-Lex"
+            }
+          }
+        }
+      ]
+    },
+    "source3": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/sourceBase"
+        },
+        {
+          "properties": {
+            "source_id": {
+              "const": "eurlex-reg-2019-1149-oj"
+            },
+            "role": {
+              "const": "annex_currentness_official_oj"
+            },
+            "authority": {
+              "const": "European Union Official Journal"
+            }
+          }
+        }
+      ]
+    },
+    "source4": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/sourceBase"
+        },
+        {
+          "properties": {
+            "source_id": {
+              "const": "eurlex-reg-2026-2359-oj"
+            },
+            "role": {
+              "const": "annex_currentness_official_oj"
+            },
+            "authority": {
+              "const": "European Union Official Journal"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

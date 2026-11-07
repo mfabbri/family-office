@@ -854,7 +854,7 @@ Audit read-only concluso con NO-GO limitato; il verdetto non chiude né sblocca 
 
 ### V4.14w-p — Immutable Annex VIII source-ledger catalogue
 
-**Stato:** `in_progress`
+**Stato:** `done`
 **Tipo:** `functional`
 **Dipende da:** V4.14w-o (`done`, GO limitato al catalogo non decisionale); Rules v8 resta immutata e non disponibile per matching.
 **Obiettivo:** materializzare in Knowledge il ledger machine-readable immutabile delle voci Annex VIII Part 2 con testi GUUE, locator, fonti e intervalli verificati, senza cambiare il comportamento runtime.
@@ -868,6 +868,72 @@ Audit read-only concluso con NO-GO limitato; il verdetto non chiude né sblocca 
 **Ripresa finale autorizzata 2026-11-07:** utente autorizza una sola correzione immutabile v0.4 e una review exact-version, scope limitato al locator SE-1 2009 p.57 e alla regressione esatta entry/versione. Quattro eventi precedenti consumati; budget massimo sei. Nessun altro retry o matching.
 
 Review-time SHA-256 (13/13 matched): Rules v7 `4BE136CC73D64C546DA0A21E5802727E59FDE24428CA2E7AB46AED4DC7B87F26`; Rules v8 `0D3D4B3B87F805E279B5707DACA17662B86A7BC20C4D31DF0AE440CE8021B55E`; Rules README `F7112D18259875FA81F6B6ABAB13DC278062A7D756DDC2E6BE03FE9CEDB415F2`; pro-rata service `B875D7E7625A3972D26E823F3B88F6B350B9B80783B09CF175A4B7B9CB2D9320`; coordination loader `CB047CC87F6015B07337B828A232C5B75510405EAC553391470C86AEEF2E9451`; freshness `1106929ADF12C73C0712DAFCF1152BCB036F5A1CE121490714159FEBCBE85CC5`; CLI `5FC67BF02DB598222461E2A0503AF539491F036499B707DF03F4987216D9FECA`; pro-rata tests `6EEB2D7DEFEB737576DAB10C562605A9050ECD57E82F2F97F97084098144D965`; coordination tests `39E4DE63B4C2270C965A8BC619C60EA4CA0AF65BDA248D3A01BA6F3552FB602D`; freshness tests `D077B63374D6C53B53977FD504357D5A6E9501DA015CBD6AA3B5A7137184BC81`; validate tests `26D567E9B95FBDA3252DCBFD8D1B7F015FD83B9278DCDE3DDF9F8997B121084D`; Knowledge v0.18 `14E245513F42EA4995BD6E6048BF7A79FF00BC1327648867AB1FF0500E013AAF`; current-next at review `A7A4F3AB9A196250032A3486ED9F3DAB928AC4F949BAEA1F8FFF4E5D3E3C1725`.
+
+### V4.14w-q — Annex VIII consumer-readiness normative gate
+
+**Stato:** `done`
+**Tipo:** `audit`
+**Dipende da:** V4.14w-p (`done`, limited GO for immutable `source_ledger_only`); V4.14w-n (`done`, Rules v8 validator remains non-decisional); V4.14w and V4.14 remain blocked.
+**Obiettivo:** determine through exact-version normative review whether and under what evidence/territorial/time scope the reviewed source ledger can support Annex VIII assessment in the Article 57 consumer, and identify the smallest source-bound contract that can remove the current `unavailable` blocker.
+**Scope:** read-only review of Knowledge catalogue/schema v0.4, its synthetic tests, Rules v8 and consumer fail-closed boundary, plus primary EU sources; distinguish official Annex text/version from proof that a concrete national scheme falls within an entry; identify supported and unsupported dates/territories and required source evidence.
+**Fuori scope:** editing Knowledge/Rules/Engine, enabling matching, producing match/non-match or individual outputs, entitlement, payer, competent institution, recognition, effective date or payment; closing V4.14w/V4.14/V4.15.
+**Done quando:** Sol/xhigh returns a bounded exact-version GO/NO-GO with artifact hashes, source citations, legal and temporal scope, required evidence, unresolved gaps and a concrete next increment; roadmap audit, planner schema, guardrails and diff-check pass. Timeout or absent verdict is pending, never GO.
+**Autorizzazione:** l'utente autorizza i prossimi 3 incrementi in ordine stretto per avanzare alla chiusura V4.14. Questo è 1/3; implementazione e review successiva sono ammesse solo se i gate del predecessore le rendono eleggibili e devono restare entro i due incrementi residui.
+**Routing:** `critical/fo_normative_reviewer`, Sol/xhigh; una review read-only bounded. Nessun runtime implementativo prima del verdetto.
+**Esito review exact-version 2026-11-07 ? GO limitato pre-implementazione:** tutti i 5 hash (ledger, schema, Rules v8, service, test) corrispondono. Reg. 883/2004 artt. 52(5), 57(1)-(4) e Reg. 987/2009 artt. 46-48 separano l?elenco legale dalla prova che una prestazione nazionale ricada in una voce; fonti primarie: https://eur-lex.europa.eu/eli/reg/2004/883/2019-07-31/eng e https://eur-lex.europa.eu/eli/reg/2009/987/2018-01-01/eng. Il ledger v0.4 ? utilizzabile solo come testo/versioni Annex VIII Part 2. `not_matched` ? ammesso per uno Stato assente dalla versione completa solo con prova source-bound dello Stato, data, territorio e currentness; `matched` richiede prova ufficiale nazionale/istituzionale della prestazione concreta. Intervalli half-open; oltre lo snapshot serve prova di currentness separata. UE soltanto; UK/SEE/Svizzera esclusi. Rules v8 resta `unavailable`; il verdetto non approva runtime, match individuali, entitlement, payer o pagamento e non chiude w/V4.14.
+**Hash verificati:** ledger `F6AC74CF8DD4976405D91BA91D9537727903A24F67699C925CE03DBBCEFEA197`; schema `136A6EC69CEEB314BD2BA423373DC34580F4ACA2F5E9B09B4C8EAD5704F790FC`; Rules v8 `0D3D4B3B87F805E279B5707DACA17662B86A7BC20C4D31DF0AE440CE8021B55E`.
+service `B875D7E7625A3972D26E823F3B88F6B350B9B80783B09CF175A4B7B9CB2D9320`; test `6EEB2D7DEFEB737576DAB10C562605A9050ECD57E82F2F97F97084098144D965`.
+**Implementazione selezionata:** V4.14w-r, incremento 2/3, nuovo artefatto Knowledge e Rules v9, fixture sintetiche e confine Engine; v0.4/v8 restano immutati.
+
+### V4.14w-r - Source-bound Annex VIII applicability contract and deterministic consumer slice
+
+**Stato:** `done`
+**Tipo:** `functional`
+**Dipende da:** V4.14w-q (`done`, GO limitato pre-implementazione); V4.14w-p (`done`, source-ledger-only); V4.14w-n (`done`, Rules v8 non-decisional). V4.14w e V4.14 restano bloccate.
+**Obiettivo:** implementare un contratto immutabile versionato per prova territoriale, temporale/currentness e mapping Annex VIII; consumer deterministico ternario e fail-closed.
+**Ordine:** Knowledge v0.1 separato dal ledger v0.4 ? Rules v9 nuova senza sovrascrivere v8 ? regressioni sintetiche ? Engine, con intervalli Annex `[valid_from, valid_to)`.
+**Scope:** solo UE; IT/ES assenti dal Part 2 possono risultare `not_matched` solo con prova source-bound di Stato/data/territorio e completezza/currentness dell?Annex. `matched` richiede prova ufficiale nazionale e istituzionale che colleghi prestazione concreta alla voce vigente. Oltre lo snapshot v0.4 la currentness va attestata da fonti ufficiali separate. UK/SEE/CH, prova incompleta/conflittuale o ref non risolti => `not_assessed + data_gaps`.
+**Fuori scope:** modifiche in-place a Knowledge v0.4/Rules v8; mapping nazionali reali; dati personali; inferenze di entitlement, payer, importo, decorrenza, istituzione competente o pagamento; chiusura parent.
+**Verifica:** modulo pensionistico 65/0/0/0; suite Engine completa 853/0/0/0; schema contract v0.1 e planner, hash v0.4/v8 invariati, roadmap audit, guardrails e diff-check passano. Testano i match basis sintetici, binding state/date, riferimenti unresolved, scope, post-snapshot e boundary half-open di ogni emendamento. Nessun dato o mapping nazionale reale aggiunto. Le date oltre lo snapshot restano `not_assessed`.
+
+
+### V4.14w-s - Annex VIII applicability exact-version post-implementation review
+
+**Stato:** `done`
+**Esito:** GO limitato exact-version Sol/xhigh; tutti gli 8 hash corrispondono. Nessun runtime, matching reale, entitlement, payer, importo o pagamento approvato.
+**Tipo:** `audit`
+**Dipende da:** V4.14w-r (`done` per implementazione/test); V4.14w-q (`done`, GO limitato pre-implementazione); V4.14w-p e V4.14w-n (`done`). V4.14w/V4.14 restano bloccate.
+**Obiettivo:** review normativa indipendente Sol/xhigh sul pacchetto esatto Knowledge v0.1, Rules v9, consumer e regressioni, senza modifiche del reviewer.
+**Scope:** confrontare tutti gli hash candidati e le baseline immutabili; verificare source-binding dello Stato/data, completeness/version selection, territori, matching e absence basis, currentness fino allo snapshot, fail-closed oltre snapshot, half-open boundaries e limiti payer/entitlement/payment. Fonti primarie: Reg. 883/2004 artt. 52 e 57; Reg. 987/2009 artt. 46-48.
+**Fuori scope:** fix o retry, promozione di date oltre 2019-07-31, mapping nazionali reali, abilitazione di Rules v8, output individuali o chiusura parent.
+**Gate:** verdetto bounded GO/NO-GO sui soli hash forniti; timeout/pending non e GO. Suite Engine 853/0/0/0, schema, roadmap audit, planner, guardrails e diff-check sono gates indipendenti. Il risultato di s non ricertifica versioni diverse ne chiude automaticamente V4.14w/V4.14.
+**Esito del ciclo corrente:** w-s resta incremento 1/3; precedente attesa senza verdetto. L utente ha aumentato a cinque il numero massimo di finestre di attesa per la stessa revisione. Non avanzare a valle prima del verdetto. Parent V4.14w/V4.14 restano bloccati.
+
+### V4.14w-u - Annex VIII Part II bounded currentness contract
+
+**Stato:** `done`
+
+Esito: LIMITED GO exact-hash Sol/xhigh sul candidato corretto; 11/11 hash verificati due volte.
+**Sequenza autorizzata:** 3/3 dopo w-s exact-version review e w-t audit di currentness.
+**Tipo:** `functional`
+**Dipende da:** V4.14w-s (`done`, GO limitato exact-version); V4.14w-t (`done`, limited GO UE fino al 2026-11-01 incluso); V4.14w-r (`done`, consumer fail-closed v9).
+**Obiettivo:** codificare in un contratto immutabile l'evidenza Part II completa e l'assenza di IT/ES nel solo intervallo verificato `[2019-08-01, 2026-11-02)`.
+**Esito:** Knowledge applicability evidence v0.2/schema; Rules v10 evidence-only; il builder pubblico non emette eligibility, entitlement, obbligo di pagamento o importi. Dal 2026-11-02 ogni assessment resta `not_assessed + data_gaps`; il matching non e abilitato.
+**Review:** primo NO-GO risolto; review finale indipendente limited GO sul set esatto di hash. Solo territorio UE; la history metadata EUR-Lex e indice non esaustivo; Reg. 2026/2359 modifica soltanto Annex VIII Part I.
+**Verifica:** test consumer 69/0/0/0; suite Engine 857/0/0/0; JSON Schema valido; v0.1/v0.4/v9/v8 byte-identici; audit roadmap, planner schema, execution guardrails e `git diff --check` passano.
+**Limite:** chiude solo w-u. V4.14w/V4.14 restano `blocked`; currentness dal 2026-11-02 resta un gap esplicito.
+
+### V4.14w-t - Annex VIII Part II post-snapshot currentness audit
+
+**Stato:** `done`
+**Esito:** GO limitato Sol/xhigh: Part II unchanged and IT/ES absent through 2026-11-01 inclusive, EU only. No exact-currentness GO for 2026-11-02 through 2026-11-07; gap remains.
+**Tipo:** `audit`
+**Dipende da:** V4.14w-s (`done`, GO limitato exact-version); V4.14w-r (`done`, fail-closed consumer v9). V4.14w/V4.14 restano `blocked`.
+**Obiettivo:** ricostruire con atti primari EUR-Lex la catena di modifiche di Annex VIII Part II dal cut-off del ledger v0.4 fino al 2026, determinando se e quando l'assenza di IT/ES dal Part II risulta provata.
+**Scope:** identificare atti, testo Part II modificato e date di applicazione; confrontare l'ultimo snapshot con il testo ufficiale successivo; distinguere Part I da Part II; verificare il limite territoriale UE e i limiti della prova di currentness. Fonti candidate: Reg. 2026/2359 (OJ L 2026/2359, Annex I point 6), 2019/1149, 2017/492, 2014/1368, 2013/1372 e gli atti incorporati nel ledger v0.4. Reviewer indipendente Sol/xhigh.
+**Fuori scope:** modifiche Rules/Engine o mapping di schemi nazionali concreti; inferenza da assenza di voce a classificazione di una pensione; entitlement, payer o pagamento.
+**Gate:** verdict limitato con catena ufficiale completa, date/versioni e hash degli artefatti locali esaminati. GO non abilita runtime e non chiude il parent; catena incompleta o ambigua resta `not_assessed`.
+**Evidenza verificata:** EUR-Lex history per CELEX 32004R0883 riporta, dopo lo snapshot, Reg. 2019/1149 (art. 1(na), art. 74a; effective 31-07-2019) e Reg. 2026/2359 (Annex VIII Part I only; effective 01-11-2026); nessuna modifica Part II elencata. Il testo Part II ? unchanged through 2026-11-01 inclusive, ma currentness 2026-11-02?2026-11-07 resta `data_gap`. Fonti ufficiali: https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:32004R0883 ; https://eur-lex.europa.eu/eli/reg/2019/1149/oj/eng ; https://eur-lex.europa.eu/eli/reg/2026/2359/oj/eng. EUR-Lex information metadata is evidentiary, not itself the authentic OJ; direct signed OJ provisions were checked by reviewer.
 
 ### V4.15c — Code audit after RITA fund-stream intake
 

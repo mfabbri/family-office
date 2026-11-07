@@ -37,6 +37,12 @@ Se una baseline immutabile deriva ma l'hash della versione già revisionata è n
 
 Suite mirate/complete concluse e hash corrispondenti sono evidenze necessarie, ma non annullano i finding del reviewer. Un GO limitato chiude soltanto l'ambito e gli artefatti nominati nel verdetto; non chiude il parent, non abilita runtime o disponibilità generale.
 
+## Integrazione dei test delegati
+
+- I test mirati o la suite di modulo eseguiti da un agent sono evidenza parziale. Il parent esegue la suite completa sul candidato integrato finale e registra comando, conteggio totale e `failure/error/skip`, che devono essere tutti zero.
+- Per contratti fail-closed coprire il percorso pubblico fino all'output: verificare `data_gaps` e che valori non valutati non si propaghino in eligibility, amount, payment o altri output downstream. Le asserzioni su un helper privato non provano il comportamento del consumer.
+- Dopo ogni modifica successiva alla review, ricalcolare gli hash del candidato. Il verdetto vale solo per gli artefatti esatti esaminati.
+
 ## CLI UX checks
 
 Quando cambia un comando CLI o un wizard, verificare almeno:

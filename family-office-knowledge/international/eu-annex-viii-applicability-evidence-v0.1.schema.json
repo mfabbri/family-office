@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://family-office.local/schemas/eu-annex-viii-part-2-applicability-evidence/v0.1",
+  "title": "EU Annex VIII Part 2 applicability evidence contract v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_id", "schema_version", "status", "territorial_scope", "source_ledger", "source_registry", "assessment_contract", "reviewed_absence", "limitations"],
+  "properties": {
+    "contract_id": {"const": "eu-annex-viii-part-2-applicability-evidence-v0.1"},
+    "schema_version": {"const": "eu-annex-viii-part-2-applicability-evidence/v0.1"},
+    "status": {"const": "evidence-contract-only"},
+    "territorial_scope": {"type": "object", "additionalProperties": false, "required": ["included", "excluded_without_incorporation_evidence"], "properties": {"included": {"const": ["EU_MEMBER_STATES"]}, "excluded_without_incorporation_evidence": {"const": ["UK", "EEA", "CH"]}}},
+    "source_ledger": {"type": "object", "additionalProperties": false, "required": ["catalogue_id", "schema_version", "snapshot_as_of", "documented_snapshot_only", "proves", "does_not_prove"], "properties": {"catalogue_id": {"const": "eu-annex-viii-part-2-source-ledger-v0.4"}, "schema_version": {"const": "eu-annex-viii-part-2-source-ledger/v0.4"}, "snapshot_as_of": {"const": "2019-07-31"}, "documented_snapshot_only": {"const": true}, "proves": {"const": ["official_text", "documented_version"]}, "does_not_prove": {"const": ["concrete_national_scheme_applicability", "post_snapshot_currentness"]}}},
+    "source_registry": {"type": "array", "minItems": 2, "items": {"type": "object", "additionalProperties": false, "required": ["source_id", "role", "authority", "territory", "valid_from", "valid_to"], "properties": {"source_id": {"enum": ["annex-viii-part-2-ledger-v0.4", "eurlex-883-2004-consolidated-2019-07-31"]}, "role": {"enum": ["annex_catalogue", "annex_currentness"]}, "authority": {"type": "string", "minLength": 1}, "territory": {"const": "EU"}, "valid_from": {"type": "string", "format": "date"}, "valid_to": {"type": "string", "format": "date"}}}},
+    "assessment_contract": {"type": "object", "additionalProperties": false, "required": ["results", "not_matched", "matched", "fail_closed", "interval_semantics"], "properties": {"results": {"const": ["matched", "not_matched", "not_assessed"]}, "not_matched": {"type": "string", "minLength": 1}, "matched": {"type": "string", "minLength": 1}, "fail_closed": {"type": "string", "minLength": 1}, "interval_semantics": {"const": "All ledger and evidence validity intervals are half-open [valid_from, valid_to)."}}},
+    "reviewed_absence": {"type": "object", "additionalProperties": false, "required": ["state_codes", "part", "limited_to_source_ledger_snapshot"], "properties": {"state_codes": {"const": ["IT", "ES"]}, "part": {"const": "Annex VIII Part 2"}, "limited_to_source_ledger_snapshot": {"const": true}}},
+    "limitations": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}}
+  }
+}

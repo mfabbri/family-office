@@ -2,19 +2,43 @@
 
 ## Stato aggiornato - 2026-11-07
 
-V4.14w-j and V4.14w-n are complete within their reviewed scopes; w-n keeps Rules v8 payer-free and the validator non-decisional. V4.14w-o is complete with limited normative GO (8/8 hashes) for a separate Annex VIII machine-readable `source_ledger_only` ledger. The reviewer noted that the documentary catalogue uses paraphrases, does not verify dates against every authentic act, and DK-c must preserve the official "after" wording. Full Engine suite 841/0/0/0; governance passed.
+V4.14w-p/q/r/s/t/u sono chiusi nei rispettivi perimetri limitati. w-t prova currentness Part II e assenza IT/ES per territorio UE solo fino al 2026-11-01 incluso; dal 2026-11-02 resta `not_assessed + data_gaps`. Nessun mapping nazionale o parent closure e approvato.
 
-V4.14w, V4.14 and V4.15 remain `blocked`. The user authorized one final correction and review after the v0.3 NO-GO. Current work creates immutable v0.4, sets the 2009 SE-1 locator to OJ L 284 p.57, and makes the regression entry/version-specific. Rules v8 stays `unavailable`; runtime and matching remain unchanged.
+## Incremento completato 3/3 - V4.14w-u - Annex VIII Part II bounded currentness contract
+
+**Stato:** `done` - LIMITED GO indipendente Sol/xhigh sul candidato exact-hash, 11/11 hash verificati due volte; finding del primo NO-GO risolti.
+**Evidenza legale limitata:** solo UE, intervallo `[2019-08-01, 2026-11-02)`; 1 novembre 2026 incluso, dal 2 novembre `not_assessed + data_gaps`.
+**Implementazione:** Knowledge v0.2/schema e Rules v10 evidence-only; il builder non emette risultati pensionistici, entitlement, obblighi di pagamento o importi. Baseline v0.1/v0.4/v9/v8 invariati.
+**Verifica:** modulo mirato 69/0/0/0; suite Engine 857/0/0/0; schema, roadmap audit, guardrails e diff-check verdi.
+**Limite:** chiude solo w-u. V4.14w e V4.14 restano bloccati; sequenza utente 3/3 esaurita.
+
+## Incremento completato 1/3 - V4.14w-s - Annex VIII applicability exact-version post-implementation review
+
+**Stato:** `done`
+**Esito:** GO limitato exact-version Sol/xhigh; 8/8 hash corrispondenti; nessun matching reale o output individuale approvato.
+**Dipendenza piu antica:** V4.14w remains blocked on post-snapshot currentness and approved Annex applicability for concrete schemes.
+**Obiettivo:** independent bounded review of exact Knowledge v0.1, Rules v9, service/test and immutable v0.4/v8 baselines.
+**Scope:** source-binding of State/date, ledger completeness and selected version, EU territory, both match bases, currentness to snapshot, fail-closed after snapshot, half-open boundaries, no payer/entitlement/payment inference.
+**Gate:** exact hashes, source citations, limited GO/NO-GO and residual gaps; suite Engine 853/0/0/0 and governance checks pass independently. No reviewer edits or follow-up retry in this increment.
+**Esito finale:** ledger source-only, match positivo richiede mapping nazionale ufficiale separato; post-snapshot resta not_assessed. Il parent non ? chiuso. Prossimo blocco minimo da analizzare: currentness Part II dopo lo snapshot 2019.
+
+## Incremento completato 2/3 - V4.14w-t - Annex VIII Part II post-snapshot currentness audit
+
+**Stato:** `done`
+**Esito:** limited GO Sol/xhigh for Part II through 2026-11-01 inclusive, EU-only; exact-currentness 2026-11-02 to 2026-11-07 remains unresolved.
+**Obiettivo:** audit normativo indipendente della catena EUR-Lex Annex VIII Part II dopo lo snapshot v0.4, fino agli atti 2026.
+**Scope:** date, atti, testo modificato, distinzione Part I/Part II, status IT/ES absence, territorial scope e precise currentness boundary.
+**Gate:** audit completato sul perimetro temporale indicato; questo esito non abilita runtime o scheme match.
 
 ## Incremento chiuso - V4.14w-p - Immutable Annex VIII source-ledger catalogue
 
 **Status:** `done` - limited GO exact-version; source-ledger only.
 **Gate:** V4.14w-o GO limited to a separate `source_ledger_only` artifact; exact OJ text and half-open versions; Rules v8 stays `unavailable`; no matching.
-**Corrective evidence:** v0.2 remains byte-identical; v0.3 has 26 version rows/23 at snapshot, exact six-CELEX and EUR-Lex URL allowlists, required scope limits, fail-closed mutation/continuity tests, and snapshot-only status. SE-1 texts match OJ L 284/58 and OJ L 349/46.
+**Corrective evidence:** v0.2/v0.3 remain byte-identical; v0.4 has 26 version rows/23 at snapshot, exact six-CELEX and EUR-Lex URL allowlists, required scope limits, fail-closed mutation/continuity tests, and snapshot-only status. SE-1 text and locator match OJ L 284 p.57 and OJ L 349 p.46.
 **Authorized final scope:** preserve v0.2/v0.3; clone corrected candidate as immutable v0.4; set SE-1 2009 locator to p.57; assert exact locator for each relevant entry/version; then one Sol/xhigh exact review.
 **Verifica:** implementazione Terra/medium e review normativa Sol/xhigh (massimo due eventi), test mirati, suite Engine completa 0/0/0, roadmap audit, schema planner, execution guardrails e `git diff --check`.
 **Stop:** mismatch with the OJ, non-reproducible tests or a need to enable matching keeps w-p `blocked`/`in_progress`; the parent remains blocked.
-**Authorization:** one final correction and one exact-version review only. Four of six total events already consumed; stop after final review.
+**Final result:** one final correction and exact-version review completed; 12/12 hashes matched. Full Engine 848/0/0/0; w-p closed only for the source-ledger deliverable.
 
 ## Closed increment - V4.14w-n - Article 57(3) payer-free Rules v8 and fail-closed validator slice
 
@@ -1286,11 +1310,13 @@ V4.15b — Source-bound RITA fund-stream intake and validation.
 `done`
 
 ## ID e titolo
-V4.14w-p - Immutable Annex VIII source-ledger catalogue.
+V4.14w-t - Annex VIII Part II post-snapshot currentness audit.
 
 ## Stato
 
-`in_progress`
+`done`
+
+**Esito limitato:** Annex VIII Part II unchanged through 2026-11-01 inclusive (EU only); exact date 2026-11-07 remains a gap.
 
 ### Historical note: V4.14w-j closure
 
@@ -1383,7 +1409,7 @@ V4.13 è chiusa il 2026-10-11 con GO limitato post-review e 131 test focalizzati
 - Nessun accesso ai dati personali in `family-office-workspace/` durante questa fase di pianificazione/review.
 - L'audit periodico non equivale a certificazione INPS/Seguridad Social o a riconoscimento amministrativo del diritto.
 
-**Checkpoint v0.4 (2026-11-07):** ledger F6AC74CF8DD4976405D91BA91D9537727903A24F67699C925CE03DBBCEFEA197, schema 136A6EC69CEEB314BD2BA423373DC34580F4ACA2F5E9B09B4C8EAD5704F790FC, test 4E97561A026916C90047D18CEF20F018118838E0D83D19C93C5877707A709EC. Locator SE-1 2009 p.57 e test esatto entry/versione; focused 7/0/0/0, suite completa 848/0/0/0, schema valida, audit roadmap OK. Review finale Sol/xhigh pendente; w-p resta in_progress.
+**Checkpoint v0.4 (2026-11-07):** ledger F6AC74CF8DD4976405D91BA91D9537727903A24F67699C925CE03DBBCEFEA197, schema 136A6EC69CEEB314BD2BA423373DC34580F4ACA2F5E9B09B4C8EAD5704F790FC, test 4E97561A026916C90047D18CEF20F018118838E0D83D19C93C5877707A709EC. Locator SE-1 2009 p.57 e test esatto entry/versione; focused 7/0/0/0, suite completa 848/0/0/0, schema valida, audit roadmap OK. Review finale Sol/xhigh GO limitato 12/12 hash; w-p è `done` nel solo perimetro source-ledger.
 
 **Esito review finale v0.4 (2026-11-07):** NO-GO, 11/12 hash. Il reviewer conferma la correzione SE-1 p.57, il mapping esatto delle 26 entry/versioni e i test; blocca il pacchetto perch? lo schema v0.3 non corrisponde all hash immutabile atteso C42BAC3F8547263105E62275F439ECC977E17C5E16DB0566071BCE85FE404C45 (corrente 756D1332769E63D951C0992EF5B84D4FE74442A12F143E1FCD89528847539525). V4.14w-p ? blocked; eventi 6/6 consumati, nessun altro ciclo autorizzato.
 

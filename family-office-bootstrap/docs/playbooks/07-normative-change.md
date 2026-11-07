@@ -34,6 +34,12 @@ Il risultato numerico resta deterministico; il modello può spiegare, citare e c
 
 ## NO-GO e cicli di review
 
+### Perimetro di evidenza e consumer
+
+- Modellare la currentness con un intervallo esplicito, preferibilmente half-open `[valid_from, valid_to)`. Non estendere la data finale alla data corrente perche la fonte e stata consultata di recente; ogni data successiva resta `not_assessed + data_gaps` finche una nuova evidenza non la copre.
+- Verificare la propagazione fino al consumer pubblico: anche un esito negativo (`not_matched`) puo sbloccare calcoli, eligibility, importi o obblighi a valle. Se l'incremento approva solo evidenza, il rule pack e il consumer devono impedire quelle emissioni; testare il builder/API pubblico con input validi, non solo l'helper interno.
+- Fare concordare schema e loader/engine sui medesimi ID, cardinalita, ruoli, autorita, territorio e date delle fonti. Aggiungere mutazioni avverse per record duplicati/mancanti, ruoli scambiati, date alterate e riferimenti non risolti.
+
 - Registrare il NO-GO con ambito preciso, rilievi azionabili e scope non approvati; non trasformare timeout o mancata risposta in un verdetto normativo.
 - Ogni verdetto vincola la precisa versione della specifica/documento, giurisdizione, periodo e artefatti esaminati. Ogni correzione che cambia la semantica genera una nuova versione candidata; non trasferire un GO alla revisione successiva. Una chiusura editoriale senza nuovo parere è ammessa solo se il reviewer la dichiara esplicitamente e le modifiche restano entro quei limiti.
 - Verificare e registrare gli hash degli artefatti prima della review e confrontarli con il verdetto. Hash corrispondenti provano l'identità del pacchetto, non la correttezza normativa o tecnica.
