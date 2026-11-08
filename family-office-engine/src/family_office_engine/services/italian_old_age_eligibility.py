@@ -373,6 +373,218 @@ def search_first_post_1996_ordinary_threshold_eligibility_month(
     )], search_as_of)
 
 
+def search_first_pre_1996_ordinary_eligibility_month(
+    facts: dict[str, Any], monthly_history: list[dict[str, Any]],
+    rule_pack_path: Path, as_of_date: str | date | None = None,
+) -> dict[str, Any]:
+    """Find only the first observed month for the approved pre-1996 FPLD path.
+
+    Month-end is a technical screening checkpoint, never an asserted legal
+    eligibility day.  The search consumes source-bound cumulative qualifying
+    years already expressed in years and deliberately has no amount input.
+    """
+    search_as_of = _date(as_of_date)
+    if search_as_of is None:
+        return _pre_1996_month_search_not_assessed(None, [_gap(
+            "as_of_date_missing_or_invalid", "An explicit ISO as_of_date is required for a reproducible month search."
+        )])
+    if not date(2026, 1, 1) <= search_as_of <= date(2028, 12, 31):
+        return _pre_1996_month_search_not_assessed(None, [_gap(
+            "rule_pack_period_unsupported", "The search as-of date is outside the supported 2026-2028 rule-pack period."
+        )], search_as_of)
+    try:
+        pack = _load_pack(rule_pack_path, search_as_of)
+    except ItalianOldAgeEligibilityError:
+        return _pre_1996_month_search_not_assessed(None, [_gap(
+            "rule_pack_unavailable_or_stale", "A fresh, exact supported rule pack is required for this month search."
+        )], search_as_of)
+
+    last_complete_month = date(search_as_of.year, search_as_of.month, 1)
+    if search_as_of != _month_end(last_complete_month):
+        last_complete_month = date(
+            search_as_of.year - (search_as_of.month == 1),
+            12 if search_as_of.month == 1 else search_as_of.month - 1,
+            1,
+        )
+    if last_complete_month < date(2026, 1, 1):
+        return _pre_1996_month_search_not_assessed(pack, [_gap(
+            "no_complete_observed_month", "The as-of date contains no complete supported month to screen."
+        )], search_as_of)
+
+    gaps = _monthly_search_common_gaps(facts, pack, search_as_of)
+    birth = _date(facts.get("date_of_birth"))
+    evidence = facts.get("contribution_evidence")
+    first_contribution = _date(evidence.get("first_contribution_date")) if isinstance(evidence, dict) else None
+    cutoff = _date(pack.get("post_1996_cohort_start"))
+    if (facts.get("contribution_cohort_confirmed") is not True
+            or facts.get("contribution_cohort") != "before_1996"
+            or first_contribution is None or cutoff is None or first_contribution >= cutoff
+            or not isinstance(evidence, dict) or evidence.get("verified") is not True
+            or not _source_refs(evidence.get("source_refs"))
+            or _date(evidence.get("as_of_date")) is None
+            or _date(evidence.get("period_end")) is None
+            or _date(evidence.get("period_end")) > _date(evidence.get("as_of_date"))
+            or _date(evidence.get("as_of_date")) > search_as_of
+            or first_contribution > _date(evidence.get("period_end"))):
+        gaps.append(_gap(
+            "pre_1996_cohort_unconfirmed",
+            "A confirmed, dated, source-bound first contribution before 1996-01-01 is required.",
+        ))
+    observations, history_gaps = _pre_1996_monthly_observations(
+        monthly_history, first_contribution, search_as_of, last_complete_month
+    )
+    gaps.extend(history_gaps)
+    if gaps:
+        return _pre_1996_month_search_not_assessed(pack, gaps, search_as_of)
+
+    scope = facts["scope_evidence"]
+    last_month_end = _month_end(last_complete_month)
+    if (_date(scope.get("coverage_from")) > date(2026, 1, 1)
+            or _date(scope.get("coverage_to")) < last_month_end):
+        return _pre_1996_month_search_not_assessed(pack, [_gap(
+            "scope_evidence_does_not_cover_history",
+            "Source-bound FPLD employee ordinary-profile evidence must cover every observed candidate month.",
+        )], search_as_of)
+
+    qualifying_threshold = _decimal(pack["paths"]["pre_1996"].get("minimum_qualifying_contribution_years"))
+    if qualifying_threshold != Decimal("20"):
+        return _pre_1996_month_search_not_assessed(pack, [_gap(
+            "unsupported_pre_1996_contribution_rule",
+            "The loaded pack does not define the approved pre-1996 20-year path.",
+        )], search_as_of)
+    cessation_date = _date(facts["cessation_evidence"].get("cessation_date"))
+    used_observations: list[tuple[date, Decimal, list[str]]] = []
+    for month, qualifying_years, source_refs in observations:
+        used_observations.append((month, qualifying_years, source_refs))
+        month_end = _month_end(month)
+        if cessation_date > month_end:
+            continue
+        age = _age_met(birth, month_end, pack["requirements_by_year"][str(month.year)]["ordinary_age"])
+        if age is None:
+            return _pre_1996_month_search_not_assessed(pack, [_gap(
+                "age_day_semantics_unsupported",
+                "The applicable ordinary age threshold falls on an unsupported calendar date.",
+            )], search_as_of)
+        if age and qualifying_years >= qualifying_threshold:
+            return _pre_1996_month_search_result(pack, month, search_as_of, facts, used_observations)
+    return _pre_1996_month_search_not_assessed(pack, [_gap(
+        "eligibility_not_found_in_observed_history",
+        "No eligible month was established within the complete observed history; this is not a finding of ineligibility.",
+    )], search_as_of, observations=observations)
+
+
+def _pre_1996_monthly_observations(
+    monthly_history: Any, first_contribution: date | None, search_as_of: date, last_complete_month: date,
+) -> tuple[list[tuple[date, Decimal, list[str]]], list[dict[str, str]]]:
+    if not isinstance(monthly_history, list) or not monthly_history:
+        return [], [_gap("monthly_history_missing", "A complete monthly contribution history is required.")]
+    observations: list[tuple[date, Decimal, list[str]]] = []
+    expected_month = date(2026, 1, 1)
+    previous_total: Decimal | None = None
+    for index, row in enumerate(monthly_history):
+        month_text = row.get("month") if isinstance(row, dict) else None
+        try:
+            month = date.fromisoformat(f"{month_text}-01") if isinstance(month_text, str) else None
+        except ValueError:
+            month = None
+        total = _decimal(row.get("qualifying_contribution_years")) if isinstance(row, dict) else None
+        refs = row.get("source_refs") if isinstance(row, dict) else None
+        row_ok = (
+            isinstance(row, dict) and month is not None and month.isoformat()[:7] == month_text
+            and month == expected_month and month <= last_complete_month and row.get("verified") is True
+            and _source_refs(refs) and row.get("qualifying_contribution_unit") == "years"
+            and row.get("original_contribution_units") == ["years"]
+            and isinstance(row.get("original_contribution_types"), list) and bool(row["original_contribution_types"])
+            and all(isinstance(item, str) and item.strip() for item in row["original_contribution_types"])
+            and total is not None and (previous_total is None or total >= previous_total)
+            and _date(row.get("as_of_date")) is not None and _date(row.get("period_start")) == month
+            and _date(row.get("period_end")) == _month_end(month)
+            and _date(row.get("period_end")) <= _date(row.get("as_of_date")) <= search_as_of
+            and (total == 0 or (first_contribution is not None and first_contribution <= _month_end(month)))
+        )
+        if not row_ok:
+            return [], [_gap(
+                "monthly_history_invalid_or_incomplete",
+                f"Monthly row {index + 1} is missing, duplicate, out of order, partial, non-monotonic, converted, or outside dated source evidence.",
+            )]
+        observations.append((month, total, list(refs)))
+        previous_total = total
+        expected_month = date(month.year + (month.month == 12), 1 if month.month == 12 else month.month + 1, 1)
+    if expected_month != date(
+        last_complete_month.year + (last_complete_month.month == 12),
+        1 if last_complete_month.month == 12 else last_complete_month.month + 1,
+        1,
+    ):
+        return [], [_gap(
+            "monthly_history_invalid_or_incomplete",
+            "Monthly history must contain one consecutive source-bound observation from 2026-01 through the last complete as-of month.",
+        )]
+    return observations, []
+
+
+def _pre_1996_monthly_provenance_refs(
+    observations: list[tuple[date, Decimal, list[str]]],
+) -> dict[str, list[str]]:
+    return {month.isoformat()[:7]: source_refs for month, _, source_refs in observations}
+
+
+def _pre_1996_provenance_refs(
+    pack: dict[str, Any], facts: dict[str, Any], observations: list[tuple[date, Decimal, list[str]]],
+) -> dict[str, Any]:
+    scope = facts.get("scope_evidence") if isinstance(facts.get("scope_evidence"), dict) else {}
+    cessation = facts.get("cessation_evidence") if isinstance(facts.get("cessation_evidence"), dict) else {}
+    evidence = facts.get("contribution_evidence") if isinstance(facts.get("contribution_evidence"), dict) else {}
+    return {
+        "rule_pack_source_ids": [source["source_id"] for source in pack["source_refs"]],
+        "date_of_birth_source_refs": list(facts.get("date_of_birth_source_refs", [])),
+        "scope_source_refs": list(scope.get("source_refs", [])),
+        "cessation_source_refs": list(cessation.get("source_refs", [])),
+        "contribution_source_refs": list(evidence.get("source_refs", [])),
+        "monthly_observation_source_refs": _pre_1996_monthly_provenance_refs(observations),
+    }
+
+
+def _pre_1996_month_search_result(
+    pack: dict[str, Any], month: date, search_as_of: date, facts: dict[str, Any],
+    observations: list[tuple[date, Decimal, list[str]]],
+) -> dict[str, Any]:
+    return {
+        "schema_version": "italian-old-age-eligibility-month-search/v1",
+        "status": "assessed", "path": "pre_1996_ordinary_fpld_employee",
+        "first_observed_eligible_month": month.isoformat()[:7],
+        "human_review_required": True, "rule_pack_id": pack["rule_pack_id"],
+        "provenance_refs": _pre_1996_provenance_refs(pack, facts, observations), "data_gaps": [],
+        "limitations": [
+            "Month-end is only a technical screening checkpoint; this output does not establish an exact eligibility day.",
+            "First observed month is limited to complete source-bound history and the 2026-2028 pack; no future contribution is projected.",
+            "Not an INPS decision, recognition, economic effective date, pension start, amount, payer, or payment.",
+        ],
+    }
+
+
+def _pre_1996_month_search_not_assessed(
+    pack: dict[str, Any] | None, gaps: list[dict[str, str]], as_of_date: date | None = None,
+    observations: list[tuple[date, Decimal, list[str]]] | None = None,
+) -> dict[str, Any]:
+    provenance_refs: dict[str, Any] = {
+        "rule_pack_source_ids": [source["source_id"] for source in pack["source_refs"]]
+    } if pack else {}
+    if observations:
+        provenance_refs["monthly_observation_source_refs"] = _pre_1996_monthly_provenance_refs(observations)
+    return {
+        "schema_version": "italian-old-age-eligibility-month-search/v1",
+        "status": "not_assessed", "path": "pre_1996_ordinary_fpld_employee",
+        "first_observed_eligible_month": None,
+        "human_review_required": True, "rule_pack_id": pack["rule_pack_id"] if pack else None,
+        "provenance_refs": provenance_refs,
+        "data_gaps": gaps,
+        "limitations": [
+            "Month-end is only a technical screening checkpoint; this output does not establish an exact eligibility day.",
+            "No overall pension date, recognition, economic effective date, pension start, amount, payer, or payment is determined.",
+        ],
+    }
+
+
 def _monthly_search_common_gaps(facts: dict[str, Any], pack: dict[str, Any], search_as_of: date) -> list[dict[str, str]]:
     gaps = _scope_gaps(facts, pack["supported_scope"])
     birth = _date(facts.get("date_of_birth"))

@@ -24,6 +24,9 @@ Il planner viene marcato `superseded` e ricalcolato.
 
 - un solo incremento attivo;
 - prima di selezionare **o chiudere** un incremento, verificare tutti i predecessori nell'ordine della roadmap attiva e tutte le dipendenze dichiarate. Se un predecessore resta `planned`, `in_progress` o `blocked`, non proseguire con un incremento funzionale/audit a valle: riprendere il predecessore più antico oppure selezionare il minimo micro-incremento per sbloccarlo. Un GO limitato a un figlio non completa il parent;
+- `roadmap_audit.py` verifica la cadenza, non l'eleggibilita' in sequenza: confrontare manualmente ciascun predecessore/dipendenza con la roadmap attiva e riallineare `current-next-increment.md` e `current-work.json` se puntano a valle;
+- un GO locale chiude solo lo scope esaminato. Prima di marcare un parent `done`, ottenere la sua verifica richiesta sul candidato corrente; non inferire la chiusura da una review successiva che cita i suoi finding come PASS;
+- i valori `mode` del task envelope e di `next_action` hanno enum distinti in `current-work.schema.json`; validare il planner con lo schema usando il venv Engine, non affidarsi al solo validator di routing che puo' saltare JSON Schema se il Python di sistema non ha `jsonschema`;
 - ogni incremento attivo registra il routing prima della delega;
 - deleghe, escalation e fallback aggiornano la routing trace;
 - il budget ordinario è due eventi sostanziali; un'estensione fino a diciotto richiede autorizzazione utente esplicita, scope/versione e blocker registrati in `routing.delegation_budget`;

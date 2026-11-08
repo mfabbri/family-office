@@ -2,7 +2,7 @@ import unittest
 import json
 import tempfile
 from pathlib import Path
-from family_office_engine.services.italian_old_age_eligibility import ItalianOldAgeEligibilityError, assess_italian_old_age_eligibility, search_first_post_1996_alternative_eligibility_month, search_first_post_1996_ordinary_threshold_eligibility_month
+from family_office_engine.services.italian_old_age_eligibility import ItalianOldAgeEligibilityError, assess_italian_old_age_eligibility, search_first_post_1996_alternative_eligibility_month, search_first_post_1996_ordinary_threshold_eligibility_month, search_first_pre_1996_ordinary_eligibility_month
 
 PACK = Path(__file__).resolve().parents[3] / "family-office-rules/italy/2026/inps-old-age-eligibility.json"
 def facts(**updates):
@@ -39,6 +39,13 @@ def ordinary_monthly_history(last_month="2026-09", eligible_month="2026-09", amo
         row["qualifying_contribution_unit"] = "years"
         row["documented_monthly_pension_amount"] = amount
         row["monthly_pension_amount_evidence"] = {"verified": True, "as_of_date": "2026-10-13", "valid_for_month": row["month"], "documented_monthly_pension_amount": amount, "source_refs": [f"pension-estimate-{row['month']}"]}
+    return rows
+
+def pre_1996_monthly_history(last_month="2026-09", eligible_month="2026-09"):
+    rows = ordinary_monthly_history(last_month, eligible_month)
+    for row in rows:
+        row.pop("documented_monthly_pension_amount")
+        row.pop("monthly_pension_amount_evidence")
     return rows
 
 class ItalianOldAgeEligibilityTest(unittest.TestCase):
@@ -107,6 +114,140 @@ class ItalianOldAgeEligibilityTest(unittest.TestCase):
         )
         value.update(updates)
         return value
+
+    def pre_1996_month_search_facts(self, **updates):
+        value = facts(
+            candidate_date=None,
+            date_of_birth="1959-09-15",
+            contribution_cohort="before_1996",
+            contribution_cohort_confirmed=True,
+            scope_evidence={"verified": True, "as_of_date": "2026-10-13", "coverage_from": "2026-01-01", "coverage_to": "2026-09-30", "source_refs": ["employment-record-1"]},
+            cessation_evidence={"verified": True, "cessation_date": "2026-01-01", "as_of_date": "2026-10-13", "source_refs": ["employer-separation-1"]},
+            contribution_evidence={"verified": True, "as_of_date": "2026-10-13", "period_end": "2026-09-30", "source_refs": ["contribution-statement-1"], "first_contribution_date": "1990-01-01"},
+        )
+        value.update(updates)
+        return value
+
+    def pre_1996_search(self, facts_value=None, history=None, pack=PACK, as_of="2026-10-13"):
+        return search_first_pre_1996_ordinary_eligibility_month(
+            facts_value or self.pre_1996_month_search_facts(),
+            history or pre_1996_monthly_history(), pack, as_of,
+        )
+
+    def test_pre_1996_month_search_returns_first_observed_month_without_amount_path(self):
+        result = self.pre_1996_search(history=pre_1996_monthly_history(eligible_month="2026-09"))
+        self.assertEqual((result["status"], result["path"], result["first_observed_eligible_month"]), ("assessed", "pre_1996_ordinary_fpld_employee", "2026-09"))
+        self.assertEqual(result["rule_pack_id"], "it.inps-old-age-eligibility.2026-2028.v2")
+        self.assertTrue(result["human_review_required"])
+        self.assertTrue(result["provenance_refs"]["rule_pack_source_ids"])
+        previous = pre_1996_monthly_history(eligible_month="2026-09")
+        previous[-1]["qualifying_contribution_years"] = "19.99"
+        no_month = self.pre_1996_search(history=previous)
+        self.assertIsNone(no_month["first_observed_eligible_month"])
+        self.assertIn("eligibility_not_found_in_observed_history", {gap["code"] for gap in no_month["data_gaps"]})
+        forbidden = {"exact_eligibility_day", "overall_pension_date", "recognition_date", "economic_effective_date", "pension_start_date", "pension_amount", "payer", "payment_date"}
+        self.assertTrue(forbidden.isdisjoint(result))
+
+    def test_pre_1996_month_search_binds_only_monthly_evidence_used_to_establish_first_month(self):
+        history = pre_1996_monthly_history(last_month="2026-10", eligible_month="2026-09")
+        facts_value = self.pre_1996_month_search_facts(
+            scope_evidence={"verified": True, "as_of_date": "2026-10-31", "coverage_from": "2026-01-01", "coverage_to": "2026-10-31", "source_refs": ["employment-record-1"]},
+            contribution_evidence={"verified": True, "as_of_date": "2026-10-31", "period_end": "2026-10-31", "source_refs": ["contribution-statement-1"], "first_contribution_date": "1990-01-01"},
+        )
+        result = self.pre_1996_search(facts_value, history, as_of="2026-10-31")
+        self.assertEqual(result["first_observed_eligible_month"], "2026-09")
+        self.assertEqual(
+            result["provenance_refs"]["monthly_observation_source_refs"],
+            {f"2026-{month:02d}": [f"statement-2026-{month:02d}"] for month in range(1, 10)},
+        )
+        self.assertNotIn("2026-10", result["provenance_refs"]["monthly_observation_source_refs"])
+
+        for row in history:
+            row["qualifying_contribution_years"] = "19.99"
+        no_month = self.pre_1996_search(facts_value, history, as_of="2026-10-31")
+        self.assertIsNone(no_month["first_observed_eligible_month"])
+        self.assertEqual(
+            no_month["provenance_refs"]["monthly_observation_source_refs"],
+            {f"2026-{month:02d}": [f"statement-2026-{month:02d}"] for month in range(1, 11)},
+        )
+
+    def test_pre_1996_month_search_binds_2026_2028_age_and_twenty_year_thresholds(self):
+        from datetime import date as Date, timedelta
+        for dob, last_month, as_of, expected in (
+            ("1959-09-15", "2026-09", "2026-10-13", "2026-09"),
+            ("1960-01-15", "2027-02", "2027-02-28", "2027-02"),
+            ("1961-01-15", "2028-04", "2028-04-30", "2028-04"),
+        ):
+            with self.subTest(as_of=as_of), tempfile.TemporaryDirectory() as directory:
+                pack = json.loads(PACK.read_text(encoding="utf-8"))
+                for source in pack["source_refs"]:
+                    source["retrieved_on"] = source["reviewed_on"] = as_of
+                    source["next_review_due"] = (Date.fromisoformat(as_of) + timedelta(days=90)).isoformat()
+                path = Path(directory) / "pack.json"
+                path.write_text(json.dumps(pack), encoding="utf-8")
+                value = self.pre_1996_month_search_facts(
+                    date_of_birth=dob,
+                    scope_evidence={"verified": True, "as_of_date": as_of, "coverage_from": "2026-01-01", "coverage_to": as_of, "source_refs": ["employment-record-1"]},
+                    cessation_evidence={"verified": True, "cessation_date": "2026-01-01", "as_of_date": as_of, "source_refs": ["employer-separation-1"]},
+                    contribution_evidence={"verified": True, "as_of_date": as_of, "period_end": as_of, "source_refs": ["contribution-statement-1"], "first_contribution_date": "1990-01-01"},
+                )
+                result = self.pre_1996_search(value, pre_1996_monthly_history(last_month, "2026-01"), path, as_of)
+                self.assertEqual(result["first_observed_eligible_month"], expected)
+
+    def test_pre_1996_month_search_rejects_incomplete_duplicate_out_of_order_partial_and_unconverted_history(self):
+        for mutation in ("incomplete", "duplicate", "out_of_order", "partial", "units", "nonmonotonic", "missing_source_refs"):
+            with self.subTest(mutation=mutation):
+                history = pre_1996_monthly_history()
+                if mutation == "incomplete":
+                    history.pop(4)
+                elif mutation == "duplicate":
+                    history.insert(4, dict(history[3]))
+                elif mutation == "out_of_order":
+                    history[2], history[3] = history[3], history[2]
+                elif mutation == "partial":
+                    history[4]["period_end"] = "2026-05-30"
+                elif mutation == "units":
+                    history[0]["original_contribution_units"] = ["weeks"]
+                elif mutation == "missing_source_refs":
+                    history[4]["source_refs"] = []
+                else:
+                    history[4]["qualifying_contribution_years"] = "18"
+                result = self.pre_1996_search(history=history)
+                self.assertIsNone(result["first_observed_eligible_month"])
+                self.assertIn("monthly_history_invalid_or_incomplete", {gap["code"] for gap in result["data_gaps"]})
+
+    def test_pre_1996_month_search_rejects_missing_evidence_unsupported_profiles_and_ambiguous_birth_dates(self):
+        cases = (
+            ({"scope_evidence": {"verified": True, "as_of_date": "2026-10-13", "coverage_from": "2026-02-01", "coverage_to": "2026-09-30", "source_refs": ["employment-record-1"]}}, "scope_evidence_does_not_cover_history"),
+            ({"cessation_evidence": {"verified": True, "cessation_date": "2026-01-01", "as_of_date": "2026-10-13", "source_refs": []}}, "employee_cessation_evidence_missing"),
+            ({"contribution_evidence": {"verified": True, "as_of_date": "2026-10-13", "period_end": "2026-09-30", "source_refs": [], "first_contribution_date": "1990-01-01"}}, "pre_1996_cohort_unconfirmed"),
+            ({"multiple_managements": True}, "multiple_managements_unsupported"),
+            ({"foreign_or_eu_aggregation": True}, "foreign_or_eu_aggregation_unsupported"),
+            ({"special_or_excluded_profile": True}, "special_or_excluded_profile_unsupported"),
+            ({"date_of_birth": "1959-09-30"}, "age_day_semantics_unsupported"),
+            ({"date_of_birth": "1960-02-29"}, "age_day_semantics_unsupported"),
+        )
+        for update, expected_gap in cases:
+            with self.subTest(expected_gap=expected_gap):
+                result = self.pre_1996_search(facts_value=self.pre_1996_month_search_facts(**update))
+                self.assertIsNone(result["first_observed_eligible_month"])
+                self.assertIn(expected_gap, {gap["code"] for gap in result["data_gaps"]})
+
+    def test_pre_1996_month_search_rejects_unsupported_years_and_stale_pack(self):
+        for as_of in ("2025-12-31", "2029-01-01"):
+            with self.subTest(as_of=as_of):
+                result = self.pre_1996_search(as_of=as_of)
+                self.assertIsNone(result["first_observed_eligible_month"])
+                self.assertIn("rule_pack_period_unsupported", {gap["code"] for gap in result["data_gaps"]})
+        with tempfile.TemporaryDirectory() as directory:
+            stale = json.loads(PACK.read_text(encoding="utf-8"))
+            for source in stale["source_refs"]:
+                source["next_review_due"] = "2026-10-01"
+            path = Path(directory) / "stale-pack.json"
+            path.write_text(json.dumps(stale), encoding="utf-8")
+            result = self.pre_1996_search(pack=path)
+        self.assertIsNone(result["first_observed_eligible_month"])
+        self.assertIn("rule_pack_unavailable_or_stale", {gap["code"] for gap in result["data_gaps"]})
 
     def test_ordinary_threshold_month_search_returns_exact_threshold_and_below_amount(self):
         result = search_first_post_1996_ordinary_threshold_eligibility_month(self.ordinary_month_search_facts(), ordinary_monthly_history(), PACK, "2026-10-13")

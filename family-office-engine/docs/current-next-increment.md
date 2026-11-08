@@ -4,9 +4,114 @@
 
 V4.14w-p/q/r/s/t/u sono chiusi nei rispettivi perimetri limitati. w-t prova currentness Part II e assenza IT/ES per territorio UE solo fino al 2026-11-01 incluso; dal 2026-11-02 resta `not_assessed + data_gaps`. Nessun mapping nazionale o parent closure e approvato.
 
-## Incremento corrente — V4.14w-v — Event-specific pension evidence and amount-basis contract
+## Incremento completato - V4.14b-a - Primo mese di eligibility italiano pre-1996, path-specific
 
-**Stato:** `blocked` - review finale del ciclo correttivo 2 NO-GO; budget di quattro eventi esaurito. V4.14/V4.15 restano bloccate.
+**Stato:** `done` nel solo perimetro path-specific approvato; V4.14 complessiva resta `blocked`.
+
+**Domanda utente:** qual ? il primo mese in cui il percorso ordinario italiano pre-1996 risulta supportato dalle evidenze disponibili?
+
+**Piano:** gate indipendente Sol/xhigh sulla ricerca mensile source-bound per il solo FPLD/AGO, coorte pre-1996, soglia ordinaria di 20 anni e pack 2026?2028. Riutilizzare la valutazione a data candidata gi? approvata; non introdurre conversioni o soglie nuove. Se GO, implementare servizio e test sintetici, poi review indipendente del diff.
+
+**Output previsto:** primo mese del solo percorso, oppure `null` con `data_gaps`; revisione umana obbligatoria, provenienza e limiti espliciti. Non ? una prima data pensionistica complessiva.
+
+**Fuori scope:** Spagna, coordinamento/pro-rata UE, altre gestioni, importi, riconoscimento, decorrenza economica, primo pagamento, dati personali e CLI utente.
+
+**Esito pre-implementazione (2026-11-08): LIMITED GO Sol/xhigh.** Autorizzato solo il primo mese osservato il cui ultimo giorno soddisfa lo screening; month-end e un checkpoint tecnico, non una data giuridica. Pack immutato `it.inps-old-age-eligibility.2026-2028.v2`; FPLD dipendenti, ordinario, singola gestione, pre-1996. Review statica, hash 4/4 iniziali/finali, nessun test.
+
+**Correzione provenance:** l?output lega ogni mese usato fino al primo mese qualificante ai relativi source_refs; esclude i mesi successivi dal supporto del risultato e include i riferimenti osservati nell?esito senza mese. La mancanza di riferimenti resta fail-closed.
+
+**Verifica implementazione:** test mirati 32/0/0/0; suite Engine completa 884/0/0/0. Review finale Sol/xhigh: LIMITED GO, hash 4/4 uguali inizio/fine. Roadmap audit, planner schema, guardrail e diff-check passano. Storia lacunosa, mese parziale, provenienza/unita ambigue, periodo non coperto, pack non fresco, data di nascita ambigua, deroga o profilo fuori scope producono solo `null + data_gaps`. Anche dopo un GO V4.14 resta `blocked` fino alla chiusura degli altri stream e gate.
+
+## Incremento completato - V4.14b-b - Gate source/exact-contract per primo hecho causante spagnolo
+
+**Stato:** `done` come audit con **NO-GO**; nessun Rules/Tests/Engine/runtime autorizzato. 7/7 hash stabili.
+
+La review ha individuato Knowledge come primo blocker: mancano percorsi RD 453/2022, prove actual/hypothetical, stato assicurativo e anchor, dettaglio giornaliero e copertura UE; Rules e servizio attuali non rappresentano il contratto v5/v8. Restano distinti soddisfacimento dei requisiti, hecho causante selezionabile, riconoscimento, decorrenza economica e pagamento. Currentness Annex VIII non verificata dal 2026-11-02. Fonti ufficiali: LGSS consolidata BOE, RD 453/2022, Seguridad Social e regolamenti UE 883/2004/987/2009. Nessun artefatto sottoposto a review ? stato modificato.
+
+## Nota di sequenza - riapertura V4.14b-c
+
+Il controllo completo della roadmap ha rilevato b-c `blocked`, predecessore piu antico ancora incompleto; b-d/e/f sono anch'essi bloccati e non eleggibili a valle. Il GO limitato b-g non chiude ne sblocca b-c. Riaperto b-c `in_progress` per review exact-hash della nota Knowledge aggiornata contro l'intero scope originario; nessuna semantica di Rules/Tests/Engine approvata.
+
+## Incremento completato - V4.14b-c - Spanish ordinary retirement source-bound Knowledge matrix
+
+**Stato:** `done` - GO Knowledge-only exact-hash b-c revalidation; hash `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`.
+
+## Incremento completato - V4.14b-d - Corrective source-bound Knowledge for Spanish first-hecho-causante contract
+
+**Stato:** `done` - GO Knowledge-only Sol/xhigh exact-hash sul proprio scope; SHA-256 `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`.
+
+**Domanda:** quali regole di fonte, date e percorso devono essere esplicitate in Knowledge per quale ragione il contratto spagnolo v5/v8 non confonda anno/mesi, hecho causante, transizioni e coordinamento UE?
+
+**Piano:** correggere esclusivamente la nota Knowledge secondo i finding puntuali b-c: perimetro RG ordinario, LGSS 205.1(b) anchor, tutti i rami RD 453/2022 e relativa transizione; distinguere i conteggi della guida amministrativa per 5.475 giorni e per la soglia anagrafica; tracciare il confine 01-05-2010 e il gate schema-specific Annex VIII Part II. Review indipendente Sol/xhigh sul file esatto.
+
+**Fuori scope:** Rules, Tests, Engine, workspace/dati personali, calcoli/date individuali, importi/pro-rata e matching/runtime UE.
+
+**Esito review:** NO-GO. Restano: perimetro RG non inequivocabile; date specifiche mancanti per art. 3.2(a); art. 4/tardiva domanda e LGSS 47.1 incompleti; riepilogo 2/15 contraddice l'anchor cessazione obbligo; guardrail v5 per cutoff, copertura continua, scenario versionato e stati no-candidate assenti. Il ciclo autorizzato ? esaurito; non sono state modificate Rules/Tests/Engine e nessun runtime ? autorizzato. V4.14 resta `blocked`.
+## Esito storico - V4.14b-d - Corrective source-bound Knowledge for Spanish first-hecho-causante contract
+
+**Stato:** `done` - GO Knowledge-only Sol/xhigh exact-hash sul proprio scope; SHA-256 `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`.
+
+## Incremento corrente - V4.14b-e - Spanish Knowledge contract reconciliation after b-d NO-GO
+
+**Stato:** `in_progress` - revalidation exact-hash sul proprio scope; il NO-GO storico resta registrato.
+
+**Domanda:** la nota Knowledge mantiene un confine RG ordinario inequivoco e rappresenta senza contraddizioni le date legali, gli anchor contributivi e i limiti probatori del contratto v5?
+
+**Piano:** singolo file Knowledge: delimitare regime e percorsi fuori scope; completare art.3.2(a), art.4 e LGSS 47.1; unificare il doppio anchor 2/15 in tutto il documento; aggiungere cutoff as_of, copertura continua per famiglia, scenario futuro versionato e stati no-candidate distinti. Review normativa indipendente exact-hash.
+
+**Fuori scope:** Rules, Tests, Engine, casi/dati personali, importi/pro-rata, calcoli e runtime UE.
+
+**Gate:** due eventi sostanziali al massimo per questo incremento (editor + reviewer). NO-GO/PENDING mantiene bloccata la catena; nessun passo a valle senza un gate GO esplicito.
+
+## Incremento corrente - V4.14b-e - Spanish Knowledge contract reconciliation after b-d NO-GO
+
+**Stato:** `in_progress` - revalidation exact-hash sul proprio scope; il NO-GO storico resta registrato.
+
+## Incremento bloccato - V4.14b-f - Spanish Knowledge temporal and source-provenance reconciliation
+
+**Stato:** `blocked` dopo review Sol/xhigh exact-hash NO-GO; SHA-256 esatto `A6C6F07513ADFB08DF16246CADECB97598AAAECBC7C1A922CBDC8A7CD1AEAE3`.
+
+**Piano:** correggere nella sola nota Knowledge i quattro finding b-e: actual.search_upper_bound <= as_of_date; validita rule pack per ogni data e scenario ipotetico versionato oltre validita; gerarchia fonte primaria/guidance; rinvio puntuale a ledger/catalogo Annex VIII con cutoff; lessico normativo dell'accesso da alta/assimilada.
+
+**Fuori scope:** Rules, Tests, Engine, file catalogo/ledger, matching/risultati UE, dati personali e runtime.
+
+**Gate:** singolo editor e review indipendente Sol/xhigh exact-hash. NO-GO/PENDING mantiene il parent bloccato.
+
+## Incremento bloccato - V4.14b-f - Spanish Knowledge temporal and source-provenance reconciliation
+
+**Stato:** `blocked` dopo review Sol/xhigh exact-hash NO-GO; SHA-256 esatto `A6C6F07513ADFB08DF16246CADECB97598AAAECBC7C1A922CBDC8A7CD1AEAE3`.
+
+Il review b-f ha mantenuto PASS su temporalità, ledger/Annex VIII e precedenti rilievi legali; resta un solo finding sulla gerarchia dell'autorità delle fonti: i link BOE consolidati erano sotto fonti normative ufficiali senza ruolo esplicito e mancavano i record di pubblicazione primaria diretta. Nessuna modifica a Rules, Tests, Engine o runtime.
+
+## Incremento bloccato - V4.14b-g - Spanish Knowledge source-authority hierarchy
+
+**Stato:** `selected` / `in_progress`; doc-only.
+
+**Piano:** aggiungere i record di pubblicazione ufficiale diretta per LGSS e RD 453/2022; etichettare i consolidati BOE come informativi e senza valore legale autonomo; distinguere la guida amministrativa Seguridad Social; rendere esplicito il ruolo dei link nella lista fonti e nella matrice; correggere l'intestazione `V4.14b-e` in `V4.14b-g`.
+
+**Fuori scope:** Rules, Tests, Engine, runtime, calcoli, reinterpretazione legale, dati personali e workspace.
+
+**Esito locale:** GO limitato Sol/xhigh exact-hash, SHA-256 `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`. La sequenza non consente di chiudere b-g o avanzare oltre: b-c e il predecessore piu antico ancora incompleto. Nessun GO e trasferito a b-c o ai parent.
+
+## Ultimo incremento completato - V4.14z-b-a - Art. 57 minimum evidence contract parent reconciliation
+
+**Stato:** `done` - GO LIMITED, solo specifica documentale/minimum-evidence v0.2.2; incremento 3/3.
+
+**Piano:** review normativa exact-hash della candidata documentale Art.57 v0.2.2 e versioni/evidenze successive. Riconciliare i NO-GO v0.2/v0.2.1: `supported_complete` non prova il perimetro completo; serve fonte source-bound `institution_scope_established`; l'ultimo Stato richiede prova dell'evento/condizioni, non ordinamento; distinguere istituzione competente e payer; c14n-v4/Annex VIII sono guardrail tecnici; gap non provati restano fail-closed.
+
+**Fuori scope:** runtime/Rules/calcoli/fixture individuali, workspace, mappature nazionali, payer o pagamento, currentness Annex VIII oltre 2026-11-01.
+
+**Gate:** review indipendente Sol/xhigh exact-hash. Timeout/PENDING o finding irrisolti mantengono V4.14z-b blocked. GO documentale non sblocca V4.14w o V4.14 complessiva.
+
+**Esiti precedenti 2026-11-08:** V4.14w-w GO + suite Engine 878/0/0/0; V4.14x-a GO LIMITED 4/4 finding, hash 9/9; schemi v0.4/v0.2 validi. Currentness oltre 2026-11-01 resta gap.
+
+**Esito V4.14z-b-a:** GO LIMITED su sei finding, 8/8 hash inizio/fine; `supported_complete` non basta, perimetro richiede fonte, oggetto coordinato comune non identico ai benefit nazionali, Last-State legato all?evento e mai all?ordine, date distinte, c14n/Annex come guardrail, gap fail-closed. Non chiude V4.14 e non approva runtime. L?ultimo locator OJ puntuale per Reg.988/2009 art.1(16) non ? stato verificato.
+
+**Blocco residuo:** V4.14 complessiva resta `blocked` per predecessori funzionali/territoriali non completati. ? stato autorizzato un nuovo ciclo; V4.14b-a ? il slice selezionato e V4.14 resta bloccata.
+
+## Incremento completato — V4.14w-v — Event-specific pension evidence and amount-basis contract
+
+**Stato:** `done` nel solo perimetro Knowledge/schema/test evidence-only; LIMITED GO exact-hash ricevuto. V4.14/V4.15 restano bloccate.
 
 **Gate exact-version intermedio 2026-11-08:** Sol/xhigh NO-GO sul primo candidato (6/6 hash corrispondenti). Finding: source identity/version/validità/transitional scope non collegate con l'evento e l'`as_of_date`; authority non vincolata per `not_applicable` e retroattività; `gross_documented` senza fonte e gap `unknown`/`mixed` non specifici; test avversari insufficienti. Un corrective pass è stato eseguito come evento 3/4.
 
@@ -29,6 +134,8 @@ Il precedente working ID `V4.14aa` collideva con l'alias storico di V4.14w-a; il
 **Corrective pass finale:** lo schema lega lo status esterno alle prove interne, rifiuta `transitional_branch_unknown` a ogni severità per scope risolti e impone versioni con almeno un carattere non whitespace. I test dimostrano accettazione dopo `valid_from` per eventi supportati e prove retroattive con `valid_to=null`.
 
 **Esito review finale ciclo 2 (evento 4/4): NO-GO.** Tutti i sei hash forniti corrispondono all'inizio e alla fine della review. Le correzioni normative del ciclo sono confermate, ma il test module ha rimosso le tre regressioni storiche del contratto v1 e nessun test Engine restante riferisce lo schema v1. Finding bloccante: mantenere i tre test v1 insieme ai 21 test v2. Test v2 21/0/0/0 e suite Engine 875/0/0/0; il risultato positivo dei test non supera il finding di copertura. Budget 4/4 esaurito; incremento 2/3 non selezionati. Serve nuova autorizzazione per una correzione e review.
+
+**Correzione bounded 2026-11-08:** le tre regressioni storiche v1 sono state ripristinate nello stesso modulo accanto alla suite v2; schema v1, Rules e runtime non sono stati modificati. Focused v1+v2 24/0/0/0; suite Engine completa 878/0/0/0 fuori sandbox; schema Draft 2020-12 e diff-check validi. Review Sol/xhigh exact-hash delegata: LIMITED GO ricevuto, 6/6 hash corrispondenti all'inizio e alla fine. Il GO è limitato a Knowledge/schema/test evidence-only; nessun Rules/runtime/consumer/calcolo e nessun incremento 2/3 selezionato.
 
 **Sequenza autorizzata:** 1/3 è V4.14w-v. Gli incrementi 2 e 3 saranno selezionati solo dopo verifica del gate e del predecessore; nessuna autorizzazione a saltare un NO-GO o ad abilitare calcoli individuali.
 
@@ -931,7 +1038,7 @@ Matrice operativa obbligatoria per `article_12_treatments[]` (i riferimenti sono
 | `article_12_5_equivalent_assignment` | Periodo equivalente concorrente attribuibile a uno Stato | Assegnare all'istituzione dello Stato di ultima assicurazione obbligatoria prima del periodo; se assente, a quella del primo assoggettamento obbligatorio successivo. |
 | `article_12_6_imprecise_timing_presumption` | Il momento di completamento di periodi di assicurazione/residenza non è determinabile precisamente | Presumere non sovrapposizione con periodi di assicurazione/residenza di altri Stati e tenerne conto solo se vantaggioso e ragionevolmente possibile. |
 
-Il record espone solo al root `contract_schema_version: "v0.16"` e `canonicalization_profile: "fo-art57-c14n-v3"`; il root non usa `schema_version`. Ogni segmento e trattamento espone localmente `canonicalization_profile` e `schema_version`, entrambi obbligatori e identici ai valori del root (`schema_version == contract_schema_version` e `canonicalization_profile` uguale al root); i nested non possono contenere `contract_schema_version`. Non è ammessa inheritance: campi mancanti, profilo/schema sconosciuto o non compatibile, o qualunque mismatch root/segment/treatment invalidano strutturalmente il contratto. I preimage JSON hanno chiavi fisse e nessun campo aggiuntivo: `segment_id` usa `{canonicalization_profile, parent_period_refs, schema_version, source_bounds[]}`; `treatment_id` usa `{assignment_target, canonicalization_profile, competing_period_refs, evidence_refs, participant_period_refs, resolution, rule, schema_version, segment_id}`. Gli array di ID sono unici e ordinati per byte UTF-8. Le chiavi sono i nomi ASCII del contratto e ordinate lessicograficamente per byte UTF-8; collisioni dopo normalizzazione NFC sono invalide. La serializzazione canonica scrive i caratteri Unicode NFC direttamente in UTF-8 (senza BOM), senza whitespace; `/` resta letterale; `"` e `\\` sono escaped; ogni carattere U+0000–U+001F è escaped esclusivamente come `\\u00xx` con cifre esadecimali minuscole. Null obbligatori espliciti, campi opzionali assenti omessi; interi decimali senza zeri iniziali, floating point vietato. SHA-256 dei byte UTF-8 restituisce `sha256:` + 64 cifre esadecimali minuscole. Gli ID sorgente sono immutabili. `source_bounds[]` contiene sempre le stesse chiavi `period_ref`, `native_start`, `native_end`, `native_duration`; ciascun campo temporale è oggetto tipizzato o null. Modalità `interval`: start ed end sono entrambi non-null e duration è null; modalità `duration`: start/end null e duration non-null; modalità `unresolved`: start/end null e duration ha `value:null`, `precision:unknown`, `data_gaps` non vuoto. Nessuna chiave è omessa. Per il preimage segmento, `source_bounds[]` deve corrispondere biunivocamente a `parent_period_refs[]`: `period_ref` unici, stessi riferimenti senza mancanti/eccedenti, e ordinamento crescente dei record per `period_ref` in byte UTF-8; una violazione invalida il segmento. Ogni `competing_period_ref` e `participant_period_ref` deve appartenere a `parent_period_refs[]` e avere una disposition nel segmento; `participant_period_refs[]` è il set ordinato di tutti e soli i periodi la cui disposition referenzia quel `treatment_id`. Il set deve coincidere esattamente con l'insieme dei `period_ref` delle disposition che lo referenziano; competitor è un sottoinsieme dei participant. Riferimenti esterni o senza disposition invalidano strutturalmente il trattamento. `segment_id` si calcola su tutti i periodi parent e sui rispettivi bound ordinati secondo tale regola. `treatment_id` include `assignment_target:null` per regole diverse da art. 12(5), mentre per art. 12(5) include l'ID di istituzione selezionato; `assignment_target` è anche presente come dato di input/evidenza nel trattamento e l'output `assigned_institution_ref` è derivato esclusivamente dal singolo trattamento art. 12(5) referenziato e validato. L'ordinamento serializza gli output e non crea priorità legali.
+Il record espone solo al root `contract_schema_version: "v0.16"` e `canonicalization_profile: "fo-art57-c14n-v3"`; il root non usa `schema_version`. Ogni segmento e trattamento espone localmente `canonicalization_profile` e `schema_version`, entrambi obbligatori e identici ai valori del root (`schema_version == contract_schema_version` e `canonicalization_profile` uguale al root); i nested non possono contenere `contract_schema_version`. Non è ammessa inheritance: campi mancanti, profilo/schema sconosciuto o non compatibile, o qualunque mismatch root/segment/treatment invalidano strutturalmente il contratto. I preimage JSON hanno chiavi fisse e nessun campo aggiuntivo: `segment_id` usa `{canonicalization_profile, parent_period_refs, schema_version, source_bounds[]}`; `treatment_id` usa `{assignment_target, canonicalization_profile, competing_period_refs, evidence_refs, participant_period_refs, resolution, rule, schema_version, segment_id}`. Gli array di ID sono unici e ordinati per byte UTF-8. Le chiavi sono i nomi ASCII del contratto e ordinate lessicograficamente per byte UTF-8; collisioni dopo normalizzazione NFC sono invalide. La serializzazione canonica scrive i caratteri Unicode NFC direttamente in UTF-8 (senza BOM), senza whitespace; `/` resta letterale; `"` e `\` sono escaped; ogni carattere U+0000–U+001F è escaped esclusivamente come `\\u00xx` con cifre esadecimali minuscole. Null obbligatori espliciti, campi opzionali assenti omessi; interi decimali senza zeri iniziali, floating point vietato. SHA-256 dei byte UTF-8 restituisce `sha256:` + 64 cifre esadecimali minuscole. Gli ID sorgente sono immutabili. `source_bounds[]` contiene sempre le stesse chiavi `period_ref`, `native_start`, `native_end`, `native_duration`; ciascun campo temporale è oggetto tipizzato o null. Modalità `interval`: start ed end sono entrambi non-null e duration è null; modalità `duration`: start/end null e duration non-null; modalità `unresolved`: start/end null e duration ha `value:null`, `precision:unknown`, `data_gaps` non vuoto. Nessuna chiave è omessa. Per il preimage segmento, `source_bounds[]` deve corrispondere biunivocamente a `parent_period_refs[]`: `period_ref` unici, stessi riferimenti senza mancanti/eccedenti, e ordinamento crescente dei record per `period_ref` in byte UTF-8; una violazione invalida il segmento. Ogni `competing_period_ref` e `participant_period_ref` deve appartenere a `parent_period_refs[]` e avere una disposition nel segmento; `participant_period_refs[]` è il set ordinato di tutti e soli i periodi la cui disposition referenzia quel `treatment_id`. Il set deve coincidere esattamente con l'insieme dei `period_ref` delle disposition che lo referenziano; competitor è un sottoinsieme dei participant. Riferimenti esterni o senza disposition invalidano strutturalmente il trattamento. `segment_id` si calcola su tutti i periodi parent e sui rispettivi bound ordinati secondo tale regola. `treatment_id` include `assignment_target:null` per regole diverse da art. 12(5), mentre per art. 12(5) include l'ID di istituzione selezionato; `assignment_target` è anche presente come dato di input/evidenza nel trattamento e l'output `assigned_institution_ref` è derivato esclusivamente dal singolo trattamento art. 12(5) referenziato e validato. L'ordinamento serializza gli output e non crea priorità legali.
 
 Vettore golden segmento (due parent, modalità interval per entrambi): bytes UTF-8 del preimage `{"canonicalization_profile":"fo-art57-c14n-v3","parent_period_refs":["period-a","period-v"],"schema_version":"v0.16","source_bounds":[{"native_duration":null,"native_end":{"precision":"day","unit":"date","value":"2026-01-30"},"native_start":{"precision":"day","unit":"date","value":"2026-01-01"},"period_ref":"period-a"},{"native_duration":null,"native_end":{"precision":"day","unit":"date","value":"2026-02-13"},"native_start":{"precision":"day","unit":"date","value":"2026-01-15"},"period_ref":"period-v"}]}` producono `segment_id=sha256:2403435838bbb67faa3036fa4985febd5eb662b24608867b0b726c8168fa2ce1`. Golden test per il serializer base: `{"a":1}` → `sha256:015abd7f5cc57a2dd94b7590f04ad8084273905ee33ec5cebeae62276a97f862`.
 
@@ -1338,14 +1445,13 @@ V4.15b — Source-bound RITA fund-stream intake and validation.
 `done`
 
 ## ID e titolo
-V4.14w-t - Annex VIII Part II post-snapshot currentness audit.
+V4.14b-e - Spanish Knowledge contract reconciliation after b-d NO-GO
 
 ## Stato
 
-`done`
+`in_progress`
 
-**Esito limitato:** Annex VIII Part II unchanged through 2026-11-01 inclusive (EU only); exact date 2026-11-07 remains a gap.
-
+**Gate attivo:** ottenere review indipendente exact-hash del candidato aggiornato sullo scope b-e: guardrail v5, gerarchia fonti, trace Annex VIII e terminologia LGSS; non trasferire i GO b-c/d/g. b-f/g restano downstream e non eleggibili.
 ### Historical note: V4.14w-j closure
 
 V4.14w-j è chiusa nel perimetro Knowledge v0.28 / Rules v7 esaminato exact-hash. Le review normative e tecniche sono GO; suite mirate 92/0/0/0 e suite Engine completa 836/0/0/0. Roadmap audit, planner schema, execution guardrails e diff-check passano.

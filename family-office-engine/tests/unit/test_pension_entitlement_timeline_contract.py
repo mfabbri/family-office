@@ -6,6 +6,7 @@ from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas/pension-entitlement-timeline-v2.schema.json"
+V1_SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas/pension-entitlement-timeline.schema.json"
 EVENT_NAMES = (
     "eligibility_date",
     "requirements_met_date",
@@ -373,6 +374,8 @@ class PensionEntitlementTimelineV2ContractTest(unittest.TestCase):
                         "data_gaps": [],
                     }
                     self.assert_invalid(value)
+
+
             with self.subTest(basis_state=basis_state, context="valid"):
                 value = snapshot()
                 value["pension_amount_basis"] = {
@@ -452,6 +455,57 @@ class PensionEntitlementTimelineV2ContractTest(unittest.TestCase):
         self.assert_invalid(value)
         value["pension_amount_basis"]["basis_state"] = "mixed"
         self.assert_invalid(value)
+
+
+def legacy_v1_event(status="not_assessed", value=None, refs=None, gaps=None):
+    return {
+        "status": status,
+        "date": value,
+        "source_refs": refs or [],
+        "data_gaps": gaps or ([{"code": "not_approved", "message": "No supported rule for this event."}] if status == "not_assessed" else []),
+    }
+
+
+def legacy_v1_snapshot():
+    return {
+        "schema_version": "pension-entitlement-timeline/v1",
+        "record_type": "PensionEntitlementTimeline",
+        "status": "not_assessed",
+        "member_id": "synthetic-member",
+        "as_of_date": "2026-10-11",
+        "events": {name: legacy_v1_event() for name in EVENT_NAMES},
+        "data_gaps": [{"code": "timeline_not_approved", "message": "The full timeline remains blocked pending independent normative approval."}],
+        "limitations": ["Contract only; no date, amount, stream or payment is inferred."],
+    }
+
+
+class PensionEntitlementTimelineV1RegressionTest(unittest.TestCase):
+    """Historical v1 contract regressions retained alongside the v2 candidate suite."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = json.loads(V1_SCHEMA_PATH.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(cls.schema)
+        cls.validator = Draft202012Validator(cls.schema, format_checker=FormatChecker())
+
+    def test_all_five_events_can_fail_closed_as_null_with_explicit_gaps(self):
+        self.validator.validate(legacy_v1_snapshot())
+
+    def test_supported_events_need_source_refs_and_distinct_dates_are_not_collapsed(self):
+        value = legacy_v1_snapshot()
+        value["status"] = "partial"
+        value["events"]["eligibility_date"] = legacy_v1_event("supported", "2026-01-01", ["official-source-1"])
+        value["events"]["requirements_met_date"] = legacy_v1_event("supported", "2026-02-01", ["verified-record-2"])
+        self.validator.validate(value)
+        value["events"]["economic_effective_date"] = legacy_v1_event("supported", "2026-03-01")
+        with self.assertRaises(ValidationError):
+            self.validator.validate(value)
+
+    def test_unknown_event_cannot_emit_a_date_or_omit_its_gap(self):
+        value = legacy_v1_snapshot()
+        value["events"]["first_cash_payment_date"] = legacy_v1_event("not_assessed", "2026-04-01")
+        with self.assertRaises(ValidationError):
+            self.validator.validate(value)
 
 
 if __name__ == "__main__":

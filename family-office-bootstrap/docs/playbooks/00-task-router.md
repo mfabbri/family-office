@@ -22,6 +22,12 @@ Classificare il task prima di esplorare il repository. La classe T0–T5 governa
 7. Aprire un solo playbook specifico, più testing/review se necessario.
 8. Aumentare classe, contesto, reasoning o modello solo quando emerge un trigger documentato.
 
+## Roadmap eligibility
+
+`roadmap_audit.py` verifica la cadenza di audit e la coerenza strutturale, ma non certifica che tutti i predecessori siano `done`. Prima di selezionare **e prima di chiudere** un incremento, enumerare gli incrementi precedenti della roadmap attiva e le dipendenze dichiarate, quindi confrontare il loro stato con roadmap, `current-next-increment.md` e planner. Se questi puntano a valle di un predecessore incompleto, riallinearli al predecessore piu' antico; la separabilita' tecnica non costituisce un'eccezione.
+
+Un GO locale chiude solo lo scope esaminato. Non usare il GO di un figlio o slice limitato per chiudere/sbloccare un parent. Dopo ogni verdetto ripetere il controllo della sequenza prima del passo seguente.
+
 ## Investment opportunity routing
 
 Usare `11-investment-opportunity.md` quando il task riguarda acquisto, gestione, finanziamento, noleggio, cash flow o confronto di asset produttivi, inclusi immobili, camper/veicoli, box, barche, fotovoltaico o piccole attività.

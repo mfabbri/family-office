@@ -484,8 +484,10 @@ Valutare con review normativa indipendente se il contratto documentale Art. 57 `
 
 ### V4.14w — Source-bound Art. 57 duration in the EU pension consumer
 
-**Stato:** `blocked`
-**Esito corrente:** suite Engine 774/0/0/0; review normativa finale evento 11 conclusa con **NO-GO**; budget autorizzato esaurito. Runtime non approvato.
+**Stato:** `done`
+**Perimetro di chiusura:** source-bound Art. 57 v0.17 esaminato; nessuna conclusione individuale, selezione payer o currentness oltre le date dimostrate.
+**Esito finale 2026-11-08:** Sol/xhigh exact-hash GO sui quattro finding parent; 10/10 hash verificati a inizio e fine. Suite Engine 878/0/0/0. Il NO-GO del 2026-10-17 e superato solo per questo pacchetto esatto.
+**Esito corrente:** superato dalla riconciliazione exact-hash GO del 2026-11-08 e suite Engine 878/0/0/0; nessuna approvazione di output individuali.
 **Tipo:** `functional`
 
 Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 57, eliminando il threshold fisso `spain_months < 12`. Ordine: Knowledge → Rules → Tests → Engine. Lo stato incompleto/ignoto resta `not_assessed + data_gaps`; separare eligibility, eccezione Art. 57, importo teorico, pro-rata e obbligo/pagatore. Mantenere `human_review_required: true`.
@@ -501,12 +503,14 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
   - **Secondo ciclo correttivo, review finale 2026-10-16 — NO-GO:** 39 test mirati OK; suite completa **770/0/0/0**. Il reviewer conferma i fix duration-mode/razionali e la fonte 988/2009, ma rileva ancora grammar/root binding c14n-v4 incompleti, set istituzionale Art. 57(3) non provato completo, risk/applicability dates e versione Annex non validate, `separate_payment_by_country: true` incondizionato e regressioni avverse insufficienti. La suite è verde ma non sostituisce il gate normativo. Eventi 5 e 6 esauriti; `in_progress`, runtime non approvato; ulteriore ciclo solo con nuova autorizzazione utente.
   - **NO-GO fallback 2026-10-17 e nuova autorizzazione:** suite completa 772/0/0/0; review evento 9 rileva P0 su grammar/transitorio v0.17 e records/completeness Art.57(3), P1 sul match Annex; conferma che il claim generale di pagamento separato è assente. Il successivo `procedi` autorizza solo eventi 10 (implementazione) e 11 (review normativa read-only, massimo 5 minuti). Scope: aderire ai campi gia definiti da v0.17/c14n-v4, aggiungere regressioni sintetiche, fermarsi su semantica nuova. Runtime non approvato.
   - **Ciclo eventi 10/11 concluso 2026-10-17 — NO-GO:** test mirati 127/127 e suite completa **774/0/0/0**; audit roadmap, schema planner, guardrail (11 eventi) e diff-check OK. Reviewer finale rileva P0: completezza istituzionale non fail-closed per record assente/null/mismatch; record Art.57(3) non legati probatoriamente allo stesso caso/beneficio coordinato né coerenti col root; `matched_scheme_entry` non verificata contro elenco Annex VIII versionato. P1: c14n-v4 valida solo il primo parent/bound. Confermati root/transitorio corretti, data autonomous-right legata al rischio e claim generale pagamento separato assente. V4.14w `blocked`, runtime non approvato.
+  - **Riconciliazione parent 2026-11-08:** i quattro finding sono chiusi dalla review V4.14w-w sui 10 hash immutati e dalla suite 878/0/0/0; nessuna inferenza individuale/payer autorizzata.
 
-### V4.14x — Art. 57(3) evidence-binding and Annex VIII Part 2 source audit
+### V4.14x - Art. 57(3) evidence-binding and Annex VIII Part 2 source audit
 
-**Stato:** `blocked`
+**Stato:** `done`
+**Esito limitato 2026-11-08:** V4.14x-a riconcilia i finding: 23 entry in 26 righe datate, binding Art.57(3) delimitato, c14n-v4 coerente, citazione Reg.988/2009 art.1(16) corretta. Currentness oltre 2026-11-01 e locator OJ puntuale per art.1(16) restano gap; nessuna conclusione individuale.
 **Tipo:** `audit`
-**Dipende da:** V4.14w (NO-GO, bloccato da binding non sufficientemente specificati).
+**Dipende da:** V4.14w e V4.14x-a (`done` nei rispettivi perimetri limitati); V4.14x source audit chiuso il 2026-11-08.
 **Obiettivo:** audit indipendente delle fonti primarie e specifica candidata per i binding probatori necessari prima di ogni implementazione Art. 57.
 **Scope:** versione e catena degli atti EUR-Lex per art. 57 e Allegato VIII parte 2; prova completa di match/non-match contro elenco versionato; relazione dei record nazionali allo stesso caso coordinato senza uguaglianza automatica degli ID nazionali; consistenza del record root; verifica di tutti i parent/bound nel segmento c14n-v4.
 **Fuori scope:** modifiche al runtime, rule pack eseguibili o calcoli; casi individuali/dati personali; GO di V4.14w o sblocco di V4.14a/V4.15.
@@ -514,6 +518,18 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
 - **Avvio 2026-10-17:** selezionato dopo il nuovo "procedi" dell'utente in applicazione della regola per blocchi di `roadmap-index.md`. Budget ordinario di due eventi: review fonti/read-only, redazione candidata bounded, review normativa exact-version finale.
 - **Evento 1 — findings bounded (2026-10-17):** il reviewer è rientrato dopo timeout; nessun GO o file modificato. Confermati il limite testuale dell'Art.57(3) (nessun ID tecnico prescritto), il flusso art.47(4)-(7) Reg.987/2009 e la catena Annex VIII rilevata: Reg.988/2009, 1244/2010, 1224/2012, 517/2013, 1372/2013 e 2017/492. Consolidato 883/2004 al 31-07-2019: 15 Stati/23 voci Part 2. Finding per Rules successivo: riferimento art.1(27) invece di art.1(16) Reg.988/2009 e versione catalogo 2010 senza scadenza. Candidato e scope residuo in `family-office-knowledge/international/eu-pension-art57-evidence-binding-audit-candidate-v0.18.md`; gli atti autentici e le 23 voci restano da riconciliare prima di un catalogo eseguibile.
 - **Evento 2/2 (2026-10-17) — NO-GO limitato:** sintesi normativa e catena atti verificate; la candidata v0.18 non materializza le 23 entry/sub-entry e il ledger per entry con date di efficacia, non completa il testo del §57(3), tratta l'ultima istituzione come ordine temporale senza definire la prova istituzionale, e contraddice cardinalità c14n 1 con test multi-posizione. UK/SEE/Svizzera post-Brexit restano fuori scope. Il finding Art.1(16) vs (27) è confermato. V4.14x non approva il contratto/runtime; il catalogo è demandato al nuovo V4.14y.
+
+### V4.14x-a - Annex VIII/Art. 57 source-audit reconciliation
+
+**Stato:** `done`
+**Tipo:** `audit`
+**Dipende da:** V4.14w (`done` nel perimetro source-bound exact-hash); V4.14y (catalogue v0.4 `done`), V4.14z/z-a/z-b/z-c (contratti/evidenze `done`).
+**Autorizzazione:** 2026-11-08, secondo dei tre incrementi autorizzati in sequenza.
+**Obiettivo:** riconciliare i finding NO-GO storici di V4.14x con catalogue v0.4, applicability evidence v0.2, candidate Art.57 v0.28 e review parent w-w; chiudere solo il deliverable fonte/contratto supportato e delimitare i gap correnti.
+**Scope:** review normativa read-only exact-hash della catena Annex VIII Part II e Reg. 883/2004/988/2009, completezza delle 23 voci source-ledger, binding documentale Art.57(3) senza ID software prescritto, prova per ultima istituzione, cardinalit? c14n-v4 e currentness provata fino al 2026-11-01.
+**Fuori scope:** mapping nazionale, match o risultati individuali; runtime/Rules/calcoli; currentness oltre 2026-11-01 (resta `not_assessed + data_gaps`); UK/SEE/CH.
+**Gate:** review indipendente Sol/xhigh sugli hash esatti di fonti e artefatti Knowledge/Rules; NO-GO/PENDING lascia x bloccato e richiede il micro-correttivo minimo.
+**Esito finale 2026-11-08 - GO LIMITED:** Sol/xhigh, 9/9 hash all inizio e fine; 4/4 finding GO. Chiude solo la riconciliazione source/contract, non abilita currentness oltre 2026-11-01, mapping nazionale, payer o risultati individuali. Residuo: locator OJ puntuale per Reg.988/2009 art.1(16) non verificato; resta la citazione atto/articolo ufficiale.
 
 ### V4.14y — Annex VIII Part 2 versioned catalogue and temporal ledger
 
@@ -557,9 +573,10 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
 
 ### V4.14z-b — Minimum technical contract for synthetic Art. 57 evidence binding
 
-**Stato:** `blocked`
+**Stato:** `done`
+**Perimetro di chiusura:** sola specifica documentale/minimum-evidence v0.2.2; nessuna approvazione runtime o output individuale.
 **Tipo:** `audit`
-**Dipende da:** V4.14z, V4.14z-a (`done`); V4.14w resta `blocked`.
+**Dipende da:** V4.14z/z-a (`done`); V4.14z-c (`done`, limited GO v0.2.2); V4.14w (`done` nel perimetro source-bound verificato).
 **Obiettivo:** definire il minimo contratto tecnico source-bound che consenta fixture sintetiche complete per il coordinamento Art. 57 senza presumere identificativi nazionali comuni, completezza dalla sola cardinalità o ordine di input.
 **Scope:** proposta architetturale per legame al claim coordinato, completezza del set istituzionale, semantica root, validazione di tutti i parent/bound c14n-v4 e casi adversariali; successivo controllo normativo exact-version.
 **Fuori scope:** cambi Rules/Engine o calcoli, dati personali/casi reali, classificazione eseguibile di schemi Annex VIII, sblocco automatico di V4.14w.
@@ -571,6 +588,18 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
   - **Esito review normativa:** NO-GO per approvare v0.1 come contratto probatorio completo. Coordinated benefit da definire come oggetto comune di coordinamento, non identità delle prestazioni nazionali. `attested_complete` richiede un criterio documentale verificabile (fascicolo/distribuzione contact institution, riscontri di invio, risposte/periodi, riconciliazione con claimant); possibili istituti o periodi irrisolti restano `not_assessed + data_gaps`. Per art. 57(3), attestare condizioni per ciascun istituto e sollievo di tutti; last-state non identifica da solo il payer, che richiede determinazione separata. Gli stati interni non sono attestazioni prescritte né prova legale sufficiente da soli. Annex VIII/c14n-v4 sono solo guardrail tecnici.
   - **Stop e prossimo prerequisito:** v0.2 con i chiarimenti e nuovo gate normativo exact-version; il budget di due deleghe sostanziali è esaurito, quindi occorre nuova autorizzazione prima di ogni ulteriore delega. Nessun runtime o fixture di calcolo in questo incremento.
 
+
+### V4.14z-b-a - Art. 57 minimum evidence contract parent reconciliation
+
+**Stato:** `done`
+**Tipo:** `audit`
+**Dipende da:** V4.14z-b (NO-GO storico su v0.1/v0.2.1); V4.14z-c (`done`, GO limitato sulla candidata documentale v0.2.2); V4.14w (`done` nel perimetro runtime source-bound verificato).
+**Autorizzazione:** 2026-11-08, terzo dei tre incrementi autorizzati in sequenza.
+**Obiettivo:** verificare se il contratto documentale v0.2.2 e gli artefatti esatti successivi risolvono i finding del parent V4.14z-b e permettono di chiudere la specifica.
+**Scope:** NO-GO storici v0.2/v0.2.1; oggetto coordinato come procedura, non identita delle prestazioni nazionali; `supported_complete` distinto da prova di perimetro completo; fonte source-bound per `institution_scope_established`; data rischio e data/evento ultima condizione soddisfatta; distinzione istituzione competente/payer; c14n-v4 e Annex VIII solo guardrail tecnici; fail-closed `not_assessed + data_gaps`.
+**Fuori scope:** modifiche Rules/runtime/calcoli o fixture individuali; workspace personale; currentness Annex VIII dopo 2026-11-01; determinazioni nazionali, payer, entitlement o pagamento.
+**Gate:** review indipendente Sol/xhigh exact-hash sulla candidata v0.2.2, Knowledge v0.18/v0.28, Rules v10 e decisioni; limited GO chiude soltanto la specifica documentale del parent, mai runtime o V4.14 complessiva.
+**Esito finale 2026-11-08 - GO LIMITED:** Sol/xhigh, sei finding risolti e 8/8 SHA256 verificati a inizio e fine. Chiude solo il contratto documentale/minimum-evidence v0.2.2; non trasferisce il GO di z-c e non approva runtime o V4.14. Currentness Annex VIII dopo 2026-11-01 resta `not_assessed + data_gaps`. Suite codice non rieseguita per questo audit read-only; suite Engine corrente 878/0/0/0 resta evidenza del precedente gate runtime.
 ### V4.14z-c — Evidence-bound Art. 57 v0.2 contract clarification
 
 **Stato:** `done`
@@ -591,6 +620,107 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
 - **Candidata v0.2.2:** in `docs/current-next-increment.md`, sezione “Contratto candidato v0.2.2 — correzione locale, gate pendente”. I verdetti v0.2 e v0.2.1 non si trasferiscono alla versione successiva.
 - **Stato gate:** GO limitato alla specifica documentale v0.2.2 da `fo_normative_reviewer` Sol/xhigh. Rimane un suggerimento redazionale non bloccante sulla confrontabilità temporale degli Stati candidati. Suite Engine completa **775 test, 0 failure, 0 errori, 0 skipped**; roadmap audit, schema planner, execution guardrails e `git diff --check` superati. Incremento chiuso come audit documentale, senza fixture/runtime e senza sblocco di V4.14w/V4.14.
 - **Riattivazione 2026-10-18:** dopo la candidata v0.2.2 con `institution_scope_established`, l'utente autorizza un solo ulteriore gate exact-version, entro il terzo evento di delega consentito. Scope strettamente read-only; nessun ulteriore ciclo autorizzato.
+
+### V4.14b-a — Italian pre-1996 first eligibility month, path-specific
+
+**Stato:** `done`
+**Tipo:** `functional`
+**Dipende da:** V4.14b (GO limitato sullo screening ordinario FPLD/AGO a data candidata, 2026–2028); V4.14k (NO-GO sul reducer complessivo, che non autorizza inferenze multi-paese).
+**Obiettivo:** aggiungere una ricerca del primo mese supportato per il solo percorso italiano ordinario pre-1996, riusando regole e provenienza già approvate.
+**Gate pre-implementazione (2026-11-08): LIMITED GO Sol/xhigh, hash 4/4 iniziali/finali.** E ammesso solo il primo mese osservato il cui month-end soddisfa lo screening; month-end e checkpoint tecnico, non data legale. Implementare con storia consecutiva chiusa a fine mese, source-bound e gap-aware.
+**Esito finale (2026-11-08): LIMITED GO Sol/xhigh, hash 4/4 identici a inizio/fine.** Provenance mensile legata al risultato; riferimenti fino al primo mese qualificante, mesi successivi esclusi. 32 test mirati e suite Engine completa 884/0/0/0; roadmap audit, schema planner, guardrails e diff-check passano. Chiude solo questo slice; V4.14 complessiva resta `blocked`.
+**Scope:** singola gestione FPLD/AGO confermata; coorte pre-1996; soglia ordinaria dei 20 anni; periodi 2026–2028 coperti dal pack; storia mensile source-bound e fail-closed; output path-specific con `human_review_required`, `data_gaps` e limiti.
+**Fuori scope:** Spagna, totalizzazione/pro-rata UE, altre gestioni o eccezioni, soglia economica e percorso a 71 anni, data complessiva, riconoscimento, decorrenza economica, importi, pagamento, CLI utente e workspace personale.
+**Done quando:** review normativa pre-implementazione e post-fix limitate al diff; test sintetici mirati e suite Engine con 0 failure/errori/skipped; V4.14 complessiva resta `blocked` finché gli altri stream/gap non sono chiusi.
+**Stop:** NO-GO, timeout, input storico incompleto, pack fuori validità o prova non source-bound mantengono questo slice `blocked`; non estendere il percorso.
+
+### V4.14b-b - Spanish first eligibility month exact-source and pre-implementation gate
+
+**Stato:** `done`
+**Esito audit:** **NO-GO**; nessun runtime autorizzato.
+**Tipo:** `audit`
+**Dipende da:** V4.14b/c, V4.14k, V4.14o, V4.14p-u e V4.14b-a (tutti `done` nei rispettivi perimetri documentali/path-specific).
+**Obiettivo:** determinare con fonti primarie correnti se il contratto v5 document-only consente un slice eseguibile ristretto per il primo hecho causante della pensione contributiva ordinaria spagnola nel solo Regimen General.
+**Scope:** review read-only exact-hash di Knowledge, rule pack, consumer e test esistenti; distinguere RD 453/2022, stato assicurativo, obbligo/cessazione, carenze LGSS, lower bound, granularita giornaliera e periodi UE; fissare input, output e data_gaps consentiti.
+**Fuori scope:** modifiche Knowledge/Rules/Tests/Engine, calcoli individuali, importi/pro-rata, riconoscimento, decorrenza, pagamento, regimi diversi e prima data complessiva IT/ES/UE.
+**Gate:** reviewer indipendente Sol/xhigh, verdict bounded e finding localizzabili. Nessuna implementazione prima di GO esplicito; NO-GO/PENDING mantiene V4.14 bloccata e seleziona solo il rimedio minimo nell'ordine autorizzato.
+**Autorizzazione:** 1/3 dei tre incrementi consecutivi autorizzati dall'utente il 2026-11-08.
+
+**Esito (2026-11-08): NO-GO Sol/xhigh exact-hash, 7/7 hash invariati.** Knowledge baseline non descrive percorsi RD 453/2022, stato/obbligo/cessazione, prova actual/hypothetical, granularità giornaliera o coordinamento UE. Rules collassa 205.1(b) a mesi sintetici; servizio è un estimator su anno/mese scelto dall'utente; i test non coprono i contratti v5/v8. EU/Annex VIII currentness resta gap dal 2026-11-02. La review ha distinto soddisfacimento dei requisiti, hecho causante selezionabile, riconoscimento, decorrenza economica e pagamento. Fonti: LGSS consolidata BOE, RD 453/2022, Seguridad Social, Reg. 883/2004 e 987/2009. Nessuna modifica ai sette artefatti esaminati.
+
+### V4.14b-c — Spanish ordinary retirement source-bound Knowledge matrix
+
+**Stato:** `done`
+**Riapertura:** predecessore piu antico incompleto; exact-hash revalidation del candidato Knowledge aggiornato.
+**Tipo:** `docs`
+**Dipende da:** V4.14b-b (`done`, audit NO-GO; remediation del primo blocker Knowledge), V4.14p-u (contratti documentali v5/v8), V4.14b-a (solo predecessor locale; nessuna semantica trasferita).
+**Obiettivo:** aggiornare la nota Knowledge spagnola con una matrice delle fonti e dei confini di validità per la ricerca del primo hecho causante del solo regime contributivo ordinario, rappresentando in modo esplicito i percorsi, le prove e le lacune.
+**Scope:** aggiornare esclusivamente `family-office-knowledge/international/spain-pension.md`; distinguere norma, guida amministrativa e guardrail software; vincolare le affermazioni a fonti ufficiali, intervalli di validità/transizione, prove effettive/ipotetiche, stato assicurativo e anchor, soglie per giorni/anni, periodi UE e loro limiti di currentness; separare predicate eligibility, hecho causante, riconoscimento, decorrenza economica e pagamento. Revisione umana obbligatoria.
+**Fuori scope:** Rules, test e Engine; stime o date individuali; importo/pro-rata; riconoscimento, decorrenza o pagamento; altri regimi e decisioni runtime.
+**Done quando:** fonti primarie e contratto v5/v8 reconciliati, gap e intervalli temporali espliciti, review documentale indipendente exact-hash GO, suite Engine completa 0 failure/errori/skipped, audit roadmap, planner schema, execution guardrails e diff-check validi. Un GO documentale non autorizza Rules o Engine.
+
+
+**Riapertura 2026-11-08:** l'audit completo della sequenza ha identificato b-c come predecessore piu antico incompleto. I successivi b-d/e/f/g non chiudono ne sbloccano b-c. Si riapre b-c per review indipendente exact-hash dell'intero scope originario sul candidato Knowledge aggiornato; Rules/Tests/Engine restano fuori scope.
+**Esito (2026-11-08): GO Knowledge-only Sol/xhigh exact-hash; SHA-256 start/end `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`. Tutti i criteri originari b-c verificati sul candidato stesso; nessun Rules/Tests/Engine/runtime approvato. Suite Engine completa 884/0/0/0 e governance valide. b-c chiuso; il successivo incompleto ? b-d.
+
+### V4.14b-d - Corrective source-bound Knowledge for Spanish first-hecho-causante contract
+
+**Stato:** `done`
+**Riapertura:** revalidation exact-hash del candidato Knowledge aggiornato dopo il GO autonomo b-c; confermare nel proprio scope la chiusura dei finding b-c, senza trasferire il verdetto.
+**Tipo:** `docs`
+**Dipende da:** V4.14b-c (`blocked`, NO-GO documentale Sol/xhigh exact-hash); correzione circoscritta dei finding del predecessore, senza passare a Rules.
+**Obiettivo:** chiudere in Knowledge le omissioni normative puntuali della review b-c e riallineare la nota al contratto documentale v5/v8 prima di ogni futura considerazione delle Rules.
+**Scope:** modificare solo `family-office-knowledge/international/spain-pension.md`; delimitare inequivocabilmente il solo Regimen General contributivo ordinario ed escludere partial/active/flexible/anticipata/demorada e altri regimi; specificare l'anchor alternativo di 205.1(b); descrivere ramo per ramo RD 453/2022 artt. 3.1, 3.2(a)-(e), 3.3, art. 4 e disposizione transitoria unica con date/termini; attribuire alla guida Seguridad Social 5.475 giorni dal 25-05-2010 e conversione 365/30,41666 per la sola soglia d'eta; aggiungere v8: confine 01-05-2010 e gate scheme-specific Annex VIII Part II, mantenendo currentness oltre 01-11-2026 come gap.
+**Fuori scope:** Rules, Tests, Engine, dati personali/workspace, calcoli o date individuali, amount/pro-rata, matching Annex VIII e qualsiasi runtime.
+**Done quando:** review normativa indipendente exact-hash senza finding materiale sulla matrice e suite Engine completa 0 failure/errori/skipped; roadmap audit, planner schema, guardrails e diff-check validi. Un GO documentale resta limitato a Knowledge e non rende eleggibili Rules senza un gate separato.
+**Autorizzazione:** incremento 3/3 dei tre incrementi consecutivi autorizzati dall'utente il 2026-11-08; corrective pass minimo sul blocker Knowledge, non incremento a valle.
+
+**Esito finale review (2026-11-08): NO-GO Sol/xhigh exact-hash.** SHA-256 Knowledge iniziale/finale `C7E152B5AE18F8DB1E25F38CA825E1D09EFEDCB5DBF22CB92CCD960F129CCD32` (immutato durante la review). Finding: il perimetro non ? inequivocabilmente limitato a RG e i casi RETA compaiono senza esclusione esplicita; mancano le date interne esatte art. 3.2(a); art. 4 non descrive i termini/retroattivit? e il caveat invito al pagamento LGSS 47.1; il riepilogo successivo contraddice l'anchor alternativo 2/15; i guardrail v5 per cutoff as_of, copertura continua, scenario versionato e stati no-candidate non sono recepiti. Nessun Rules/Tests/Engine/runtime approvato.
+
+
+**Revalidation finale (2026-11-08): GO Knowledge-only Sol/xhigh exact-hash sullo scope b-d; SHA-256 start/end `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`. Nessun runtime approvato.
+
+### V4.14b-e - Spanish Knowledge contract reconciliation after b-d NO-GO
+
+**Stato:** `in_progress`
+**Riapertura:** revalidation exact-hash del proprio scope sul candidato Knowledge aggiornato; il GO b-d non viene trasferito.
+**Tipo:** `docs`
+**Dipende da:** V4.14b-d (`done`, revalidation Sol/xhigh exact-hash GO Knowledge-only); b-e resta da verificare sul proprio scope.
+**Obiettivo:** rimuovere le contraddizioni e i finding residui della review b-d nella matrice Knowledge spagnola, senza promuovere regole eseguibili.
+**Scope:** delimitare il solo Regimen General contributivo ordinario e classificare ogni menzione RETA come fuori scope; completare tutte le date/termini RD 453/2022 art. 3.2(a) e art. 4/3.2(e), LGSS 47.1; riallineare ogni riepilogo 2-su-15 al doppio anchor normativo; recepire in Knowledge i guardrail v5 per `as_of_date`/cutoff, coverage continua per famiglia evidenziale, scenario futuro versionato e distinti stati `no_candidate_in_complete_range`/`no_candidate_in_complete_scenario`; nessuna semantica eseguibile.
+**Fuori scope:** Rules, Tests, Engine, calcoli/date individuali, dati workspace, Art.57/Annex VIII matching o risultato UE.
+**Done quando:** review indipendente Sol/xhigh exact-hash senza finding materiale sul solo artefatto Knowledge; suite Engine completa 0 failure/errori/skipped; planner schema, roadmap audit, execution guardrails e diff-check validi. GO solo documentale, nessun runtime.
+**Stop:** qualsiasi incertezza giuridica o review NO-GO lascia l'incremento bloccato e ferma il downstream.
+**Autorizzazione:** nuovo ciclo autorizzato dall'utente il 2026-11-08; incremento correttivo minimo dopo b-d, budget ordinario due eventi sostanziali (editor + reviewer), scope limitato alla nota Knowledge.
+
+**Esito review (2026-11-08): NO-GO Sol/xhigh exact-hash.** SHA-256 iniziale/finale A16147F7D5B674B2B29259A8634077150EE93A9E9033801EAA611D0160F8BFF6. Finding: regola v5 non esplicita actual upper bound <= as_of_date, validita del pack per ogni data e ipotesi di continuita versionata oltre validita; fonti amministrative restano classificate sotto fonti primarie; cutoff Annex VIII non rinvia a un ledger locale riproducibile; 'decorre da alta' confonde accesso e decorrenza economica. GO sugli altri punti legali, ma il finding documentale mantiene Knowledge bloccata e non autorizza Rules/Engine.
+
+### V4.14b-f - Spanish Knowledge temporal and source-provenance reconciliation
+
+**Stato:** `blocked`
+**Review:** NO-GO Sol/xhigh exact-hash; SHA-256 `A6C6F07513ADFB08DF16246CADECB97598AAAECBC7C1A922CBDC8A7CD1AEAE3`.
+**Tipo:** `docs`
+**Dipende da:** V4.14b-e (`blocked`, NO-GO Sol/xhigh); micro-incremento correttivo limitato ai quattro finding esatti.
+**Obiettivo:** rendere la nota Knowledge coerente con v5 sulla validita temporale, la gerarchia delle fonti e la provenienza Annex VIII, senza introdurre alcun esito normativo nuovo.
+**Scope:** in `family-office-knowledge/international/spain-pension.md`: esplicitare actual.search_upper_bound <= as_of_date, copertura del rule pack per ogni data nell'intervallo e uso esclusivamente ipotetico, con ipotesi di continuita esplicita/versionata, oltre la validita nota; separare fonti normative primarie da guide amministrative anche nelle intestazioni e celle tabellari; linkare il ledger locale eu-annex-viii-applicability-evidence-v0.2.json e catalogo source-ledger eu-annex-viii-part-2-catalogue-v0.4.json con identificatori e cutoff [2019-08-01, 2026-11-02); sostituire 'decorre da alta' con formulazione LGSS 'accesso da alta/assimilada senza obbligo di cotizzare'.
+**Fuori scope:** modifiche ai file JSON/Schema del catalogo, Rules, Tests, Engine, matching Annex VIII, conclusioni nazionali/UE o runtime.
+**Done quando:** review indipendente exact-hash senza finding materiale; suite Engine completa 0 failure/errori/skipped; schema planner, audit roadmap, guardrails e diff-check validi. Chiusura solo documentale.
+**Stop:** mismatch o provenienza insufficiente del ledger mantiene b-f blocked; nessun passo a Rules.
+**Autorizzazione:** prosecuzione del ciclo autorizzato dall'utente il 2026-11-08; incrementi subordinati a predecessori e gate indipendenti.
+
+### V4.14b-g - Spanish Knowledge source-authority hierarchy
+
+**Stato:** `blocked`
+**Blocco sequenza:** predecessore V4.14b-c incompleto; review locale GO limitato, non trasferito al parent.
+**Selezione:** `selected` (doc-only)
+**Tipo:** `docs`
+**Dipende da:** V4.14b-f (`blocked`, review NO-GO exact-hash sopra indicato); questo micro-incremento corregge esclusivamente il finding sulla gerarchia dell'autorità delle fonti.
+**Obiettivo:** separare i record di pubblicazione BOE ufficiale dai testi BOE consolidati informativi, rendendo esplicito il ruolo di ogni link nella lista fonti e nella matrice senza modificare l'analisi legale già approvata.
+**Scope:** solo `family-office-knowledge/international/spain-pension.md`; record diretti LGSS e RD 453/2022, etichette dei consolidati e della guida Seguridad Social, correzione dell'intestazione matrice a `V4.14b-g`.
+**Fuori scope:** Rules, Tests, Engine, runtime, calcoli, reinterpretazione legale, dati personali e workspace.
+**Done quando:** il finding source-authority è corretto e la review documentale può verificare i ruoli dei link; i PASS b-f restano invariati. Nessuna eleggibilità a valle o chiusura di V4.14.
+**Gate:** due eventi sostanziali al massimo (editor delegato e reviewer); qualsiasi NO-GO/PENDING mantiene b-g e il parent bloccati.
+**Esito locale (2026-11-08): GO limitato Sol/xhigh exact-hash, SHA-256 iniziale/finale `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`; source-authority corretto. b-g resta bloccato per ordine dei predecessori e non chiude b-f o b-c.
 
 ### V4.15 — Retirement bridge income composer
 
@@ -1023,7 +1153,7 @@ Chiudere la roadmap con un workflow end-to-end sintetico e un readiness report a
 
 ## V4.14w-v — Event-specific pension evidence and amount-basis contract
 
-**Stato operativo:** `blocked` (review finale ciclo 2 NO-GO; budget di quattro eventi esaurito; incrementi 2/3 non selezionati)
+**Stato operativo:** `done` nel solo perimetro Knowledge/schema/test evidence-only (LIMITED GO exact-hash); V4.14/V4.15 restano bloccate e incrementi 2/3 non selezionati.
 
 V4.15 non è eleggibile perché V4.14 resta bloccata. Questo incremento corregge il contratto source-bound separando i cinque eventi, le basi dell'importo e le lacune probatorie; non formula conclusioni individuali né abilita Rules/runtime.
 
@@ -1038,8 +1168,22 @@ V4.15 non è eleggibile perché V4.14 resta bloccata. Questo incremento corregge
 - Implementazione ciclo 2 candidata: test focused 20/0/0/0, suite Engine 874/0/0/0; schema Draft 2020-12 valido. Aggiunti test per intervallo half-open agli estremi e fuori intervallo (eventi e retroattività), versione vuota, gap transitorio bloccante e contesto fiscale richiesto per entrambi i net basis.
 - Review cycle 2 Sol/xhigh exact-hash NO-GO, 6/6 hash matched. Residui: outer `unknown` con prova inner `applicable` è accettato; uno scope risolto può mantenere `transitional_branch_unknown` come warning; `source_version=" "` passa; manca test positivo esplicito per `valid_to=null`.
 - Corrective finale ciclo 2: schema vincola outer/inner status, vieta `transitional_branch_unknown` a ogni severity per scope risolti, e `source_version` richiede un carattere non whitespace. Test focused 21/0/0/0, suite Engine 875/0/0/0. Review Sol/xhigh finale exact-hash (evento 4/4) NO-GO: 6/6 hash corrispondenti; il modulo test v2 ha rimosso le tre regressioni storiche v1 e non resta alcun test Engine che referenzi lo schema v1. Finding: ripristinare le tre regressioni v1 accanto ai test v2. Budget 4/4 esaurito; V4.14w-v `blocked`, incrementi 2/3 non selezionati, in attesa di nuova autorizzazione.
-- Gate di chiusura: focused contract/schema tests, suite Engine completa con 0 failure/error/skip se il contratto schema cambia, review indipendente Sol/xhigh sugli hash finali e controlli di governance. Il timeout non vale come verdetto. Il NO-GO finale ha rilevato regressioni v1 rimosse; ogni ulteriore fix/review richiede nuova autorizzazione.
+- Correzione bounded 2026-11-08: ripristinate le tre regressioni storiche v1 nello stesso modulo dei test v2; schema v1, Rules e runtime invariati. Focused v1+v2 24/0/0/0; suite Engine 878/0/0/0 fuori sandbox. Review Sol/xhigh exact-hash LIMITED GO, 6/6 hash verificati all'inizio e alla fine; approvazione limitata a Knowledge/schema/test evidence-only, nessun Rules/runtime/consumer/calcolo.
+- Gate di chiusura: focused contract/schema tests, suite Engine completa con 0 failure/error/skip se il contratto schema cambia, review indipendente Sol/xhigh sugli hash finali e controlli di governance. Il timeout non vale come verdetto. La correzione v1 è verificata e il LIMITED GO chiude solo questo slice evidence-only; nessun GO è trasferito a Rules/runtime o ai parent.
 - Nessun Rule Pack, calcolo o consumer/runtime è autorizzato prima di un GO normativo exact-version. V4.14 e V4.15 restano `blocked` finché i rispettivi predecessori non sono completati.
+
+### V4.14w-w — Art. 57 parent exact-version blocker reconciliation
+
+**Stato:** `done`
+**Esito:** Sol/xhigh exact-hash GO sui quattro finding; suite Engine 878/0/0/0.
+**Tipo:** `audit`
+**Dipende da:** V4.14w-v (`done`, LIMITED GO soltanto Knowledge/schema/test evidence-only); V4.14w resta `blocked` fino a questo audit.
+**Autorizzazione:** 2026-11-08, utente ha autorizzato i prossimi tre incrementi in ordine stretto. Questo è 1/3. Budget ordinario massimo due deleghe per incremento.
+**Obiettivo:** verificare se i successivi slice w-a…w-u risolvono i finding P0/P1 della review finale V4.14w del 2026-10-17 sul pacchetto Art.57.
+**Scope:** review read-only exact-hash di Rules v10, servizio pro-rata EU, servizio coordinamento, test pertinenti, catalogue Annex VIII v0.4 e relativa applicability evidence. Verificare completezza istituzionale fail-closed, binding allo stesso claim/root, match versionato Annex VIII, canonical validation di tutti i parent/bound.
+**Fuori scope:** modifiche runtime, Rules o calcoli; workspace personale; conclusioni individuali; chiusura V4.14 o trasferimento del LIMITED GO w-v.
+**Gate:** Sol/xhigh indipendente, hash corrispondenti a inizio/fine, verdict esatto con evidenza file/linea e gap residui. NO-GO/timeout mantiene il parent bloccato; il successivo slice deve essere il correttivo minimo del finding più antico. Nessun downstream oltre il predecessore incompleto.
+**Esito finale 2026-11-08:** GO sui quattro finding (completezza fail-closed, binding Art.57(3) allo stesso claim/root, matched_scheme_entry contro la versione Annex applicabile, c14n-v4 su parent/bound); 10/10 SHA256 corrispondenti a inizio/fine. Nessuna selezione payer o conclusione individuale. Suite Engine completa 878/0/0/0; nessun file runtime modificato in questo audit. w-w `done`; parent w `done` solo nel perimetro source-bound esaminato.
 
 ## Exit criteria V4B
 

@@ -1,171 +1,106 @@
 {
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
-  "status": "blocked",
-  "selected_at": "2026-11-08T12:40:00Z",
-  "updated_at": "2026-11-08T13:58:54Z",
+  "status": "in_progress",
+  "selected_at": "2026-11-08T21:46:30Z",
+  "updated_at": "2026-11-08T21:48:00Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-index.md",
       "section": "Algoritmo di selezione",
-      "reason": "V4.15 is blocked; the next eligible work must remove the oldest explicit V4.14 blocker without skipping the predecessor."
+      "reason": "b-c and b-d are done on their own exact-hash reviews; b-e is now the oldest incomplete predecessor, before b-f/g."
     },
     {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.14w-v contract remediation after limited NO-GO",
-      "reason": "The prior exact normative review listed bounded contract findings; this is the oldest blocker-removal increment."
+      "section": "V4.14b-e revalidation on the exact current Spanish Knowledge note",
+      "reason": "Reopen b-e and independently verify its original temporal, source, Annex VIII and LGSS wording findings; no inherited GO."
     },
     {
-      "path": "family-office-bootstrap/docs/playbooks/07-normative-change.md",
-      "section": "Evidence scope and consumer boundaries",
-      "reason": "This pension/timeline contract audit requires independent normative review before any executable change."
+      "path": "family-office-engine/docs/current-next-increment.md",
+      "section": "b-e contract reconciliation findings and scope",
+      "reason": "Current note has subsequent corrections; b-e status depends on its own exact review."
     }
   ],
   "increment": {
-    "id": "V4.14w-v-CONTRACT-REMEDIATION",
-    "title": "Event-specific pension evidence and amount-basis contract",
-    "objective": "Revise the pension timeline contract to define event-specific evidence, stable fail-closed gaps, a separate pension amount-basis structure, and the reviewed status of the existing v2 pack.",
+    "id": "V4.14b-e-SPANISH-KNOWLEDGE-CONTRACT-REVALIDATION",
+    "title": "Spanish Knowledge contract reconciliation revalidation",
+    "objective": "Independently revalidate the original b-e findings on the current exact Knowledge candidate; close b-e only on its own GO.",
     "scope": [
-      "Enforce event and retroactivity date coverage within [valid_from, valid_to) with deterministic tests.",
-      "Bind each resolved transition scope evidence to the same outer status and event; require no residual blocking transition gap.",
-      "Require tax jurisdiction and period for both net_documented and net_calculated.",
-      "Add adversarial regressions for each prior final-review finding.",
-      "Preserve evidence-only behavior, human review and v1 immutability; no Rules/runtime changes."
+      "Verify v5 actual.search_upper_bound <= as_of_date, complete-range rule-pack validity, versioned hypothetical continuity, continuous evidence family coverage, distinct no-candidate statuses and fail-closed data_gaps.",
+      "Verify legal publication versus informational BOE consolidation and administrative Seguridad Social guidance roles in headings, list and matrix.",
+      "Verify the local Annex VIII evidence ledger and catalogue IDs/digest, supported interval [2019-08-01, 2026-11-02), and gap from 2026-11-02; no national scheme or runtime inference.",
+      "Verify LGSS 205.1(b) alta/assimilada access terminology and both 2/15 anchors; scan whole note for contradictions."
     ],
     "out_of_scope": [
-      "Individual pension decisions, dates, amounts, entitlement, payment or recognition.",
-      "Changing Rule Packs, calculations, consumer behavior or Engine services.",
-      "Treating administrative schedules as individual payment evidence or converting gross to net."
+      "Any Knowledge changes during review.",
+      "Rules, Tests, Engine, runtime, individual legal conclusions, calculations and personal workspace data."
     ],
     "candidate_files": [
-      "family-office-engine/docs/current-next-increment.md",
-      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
-      "family-office-engine/tests/unit/test_pension_entitlement_timeline_contract.py",
-      "family-office-engine/schemas/pension-entitlement-timeline-v2.schema.json",
-      "family-office-engine/docs/decision-log.md",
-      "family-office-bootstrap/planning/current-work.json"
+      "family-office-knowledge/international/spain-pension.md",
+      "family-office-knowledge/international/eu-annex-viii-applicability-evidence-v0.2.json",
+      "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-v0.4.json"
     ],
-    "stop_condition": "Candidate must remain evidence-only, preserve fail-closed null plus stable gaps, and be reviewed on exact hashes. No downstream selection on timeout or NO-GO."
+    "stop_condition": "Any material b-e finding or pending review keeps b-e blocked; no b-f/g selection."
   },
   "verification": {
     "tests": [
-      "Cycle 2 focused v2 contract tests after final corrective: 21/0/0/0.",
-      "Cycle 2 full Engine unit suite after final corrective: 875/0/0/0.",
-      "Draft 2020-12 schema valid; planner schema/state valid; v1 unchanged; diff-check passed.",
-      "Final independent Sol/xhigh exact-hash review NO-GO (event 4/4): all six supplied hashes matched at start/end; three historical v1 contract regressions were removed and no Engine test now references the v1 schema."
+      "Full Engine suite: 884 tests, 0 failure, 0 errors, 0 skipped (rerun if implementation changes code or test behavior).",
+      "Planner JSON Schema validation.",
+      "Roadmap audit; execution guardrails; model-routing validation; git diff --check."
     ],
     "documentation_touchpoints": [
+      "family-office-knowledge/international/spain-pension.md",
       "family-office-engine/docs/current-next-increment.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-bootstrap/planning/current-work.json",
-      "family-office-bootstrap/docs/playbooks/02-model-routing.md",
-      "family-office-bootstrap/docs/playbooks/08-testing-and-review.md"
+      "family-office-engine/docs/decision-log.md",
+      "family-office-bootstrap/docs/playbooks/00-task-router.md",
+      "family-office-bootstrap/planning/README.md",
+      "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
+      "family-office-bootstrap/docs/playbooks/07-normative-change.md"
     ],
-    "result": "failed",
-    "notes": "Cycle 2 final Sol/xhigh review event 4/4 returned NO-GO with all six supplied hashes matched at start/end. The cycle 2 normative findings were resolved, but the test change removed all three historical v1 contract regressions; retain those alongside the 21 v2 tests. Focused v2 tests 21/0/0/0 and full Engine suite 875/0/0/0 do not waive this regression-coverage blocker. Four-event authorization exhausted; no downstream increment selected.",
+    "result": "pending",
+    "notes": "b-c and b-d have independent exact-hash GO on their own scopes, same Knowledge SHA256 F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9; full Engine suite 884/0/0/0 and governance pass. b-e is the next oldest incomplete predecessor; b-f/g remain downstream.",
     "task_envelope": {
       "mode": "normative-change",
       "risk_domain": "pension",
-      "objective": "Correct the pension timeline evidence contract within the prior review findings; preserve the explicit three-increment authorization and strict predecessor order.",
+      "objective": "Independent exact-hash revalidation of the original b-e Knowledge contract findings.",
       "repositories": [
-        "family-office-engine",
         "family-office-knowledge",
-        "family-office-bootstrap"
+        "family-office-engine"
       ],
       "read_set": [
-        "AGENTS.md",
-        "family-office-bootstrap/AGENTS.md",
-        "family-office-bootstrap/docs/playbooks/00-task-router.md",
-        "family-office-bootstrap/docs/playbooks/07-normative-change.md",
-        "family-office-engine/docs/roadmap/roadmap-index.md",
-        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-        "family-office-engine/docs/current-next-increment.md",
-        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
-        "family-office-engine/schemas/pension-entitlement-timeline.schema.json",
-        "family-office-engine/docs/decision-log.md"
+        "original b-e NO-GO and source review",
+        "current Spanish Knowledge note SHA256 F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9",
+        "v5 temporal contract, v8 Annex VIII evidence contract, local ledger/catalogue",
+        "official BOE publications/consolidation notices and Seguridad Social guidance"
       ],
       "write_set": [
+        "family-office-bootstrap/planning/current-work.json",
         "family-office-engine/docs/current-next-increment.md",
         "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
-        "family-office-engine/docs/decision-log.md",
-        "family-office-bootstrap/planning/current-work.json",
-        "family-office-engine/schemas/pension-entitlement-timeline-v2.schema.json",
-        "family-office-engine/tests/unit/test_pension_entitlement_timeline_contract.py"
+        "family-office-engine/docs/decision-log.md"
       ],
-      "test_command": "Focused schema and contract regressions; full Engine suite with 0 failure/error/skip if the JSON Schema contract changes; roadmap audit, planner validation, execution guardrails and diff-check.",
+      "test_command": "Full Engine suite 884/0/0/0; planner schema; roadmap audit; execution guardrails; model-routing validation; git diff --check.",
       "stop_conditions": [
-        "No personal data or individual pension conclusions.",
-        "No executable change before independent normative GO.",
-        "No unsupported legal semantics, individual data, calculations or Rule Pack edits.",
-        "Do not start increment 2 until exact-version normative review approves this candidate."
+        "material evidence/source mismatch",
+        "reviewer NO-GO/PENDING",
+        "any request to modify Rules/Tests/Engine or workspace data"
       ]
     }
   },
   "blockers": [
-    "Final cycle 2 exact-hash review NO-GO: historical v1 schema regression coverage was removed when the test module moved to v2; restore the three v1 regressions alongside the v2 suite.",
-    "The four-event authorization is exhausted. V4.14w-v and increments 2/3 remain blocked/unselected pending fresh user authorization; V4.14/V4.15 stay blocked."
+    "V4.14 parent remains blocked; no overall pension date authorized.",
+    "b-e is the oldest incomplete predecessor under review; b-f/g remain blocked downstream."
   ],
   "session_notes": [
-    "2026-11-01: w-l exact-hash Sol/xhigh NO-GO; source chain confirms Regulation 465/2012 Article 1(11) attribution, identifies the 2015 Romanian Annex XI-only corrigendum, and requires explicit Article 87a(1) ten-year/continuity/opt-out boundary semantics.",
-    "2026-11-01: w-i audit status reconciled to done as an audit activity with NO-GO; its findings remain open. Selected functional predecessor w-j in_progress; roadmap audit confirms it is eligible because w-i is done and w-j addresses its own blocked parent.",
-    "2026-11-01: full Engine suite 825/0/0/0; planner schema, execution guardrails, roadmap audit and diff-check pass. User authorized the next three increments in strict predecessor order; no parent is closed by this authorization.",
-    "2026-11-01: same Sol/xhigh reviewer issued bounded pre-implementation GO for v0.27/v6. Exact date contract is [2012-06-28, 2022-06-29): 2022-06-28 potentially applies; 2022-06-29 does not. The Article 87a branch returns only Title-II transition status/provenance, never Article 57/pension output.",
-    "2026-11-01: implementation v0.27/v6 and synthetic public boundary/unknown regressions present; complete Engine suite passed 828/0/0/0. Exact post-fix Sol/xhigh review returned NO-GO. Follow-up proposed corrections as immutable new Knowledge v0.28/Rules v7; second exact Sol/xhigh review approved the public Title-II input/output, three source roles, catalog metadata and date fields, and coherent boundary regressions. Implementation v0.28/v7 is present, but parent verification added the mandatory assertions that both boundary snapshots reach non-null calculated pro-rata and exposed `not_calculable`; focused suite is now 85 tests with one failure. The citation-index metadata regression has been added. Active corrective task is to fix the synthetic public fixture/consumer path until the reviewed regression passes, then rerun focused and full Engine suites and exact post-fix review.",
-    "2026-11-01: v0.27/v6 post-review NO-GO addressed with immutable v0.28/v7 after exact pre-review GO. Focused suite 86/0/0/0; complete Engine suite 830/0/0/0. Public-builder boundary test reaches calculated non-null pro-rata via a synthetic Article57 test double; only Title-II output changes across 2022-06-28/29; unknown Title-II remains not_assessed/gap without changing pension outputs. Normative Sol/xhigh and technical Terra/high post-fix reviews delegated; parent remains blocked until exact reviews and governance pass.",
-    "2026-11-01: exact Sol/xhigh post-fix review returned NO-GO on three fidelity blockers in v0.28/v7: Article 87a remains nested in Article57 policy/input; source-role allowlist and second loader validation are not exact; C-171/03 decision_date is mislabeled entry_into_force. The approved contract already requires independent Title-II policy, exact binding roles, and distinct date metadata; only implementation corrections are authorized, with no new legal semantics. Full suite 830/0/0/0 recorded; rerun after correction.",
-    "2026-11-01: exact post-fix normative review NO-GO: Article87a still appears inside Article57 policy/input; role-to-registry bindings not exact and second loader omits v7 validation; C-171 decision date mislabeled as entry_into_force. Independent technical review NO-GO additionally: malformed data_gaps is not fail-closed; binding shape/identity not exact; authority parity test cannot distinguish equal rank. All findings were implementation/test deviations from the approved v0.28/v7 contract; corrected without changing boundaries or historical versions.",
-    "2026-11-07: final focused Engine suites 90/0/0/0 and full Engine suite 834/0/0/0. Technical exact-hash follow-up GO; normative exact-hash follow-up NO-GO for public regression coverage of unknown causal flag and extra policy key rejection in both loaders. All 12 hashes matched; no new legal interpretation.",
-    "2026-11-07: user explicitly authorized three additional substantial events, capped at 21 total, for two test-only assertions, focused/full Engine suites and exact-version normative/technical follow-ups.",
-    "2026-11-07: prior 18-event corrective cycle archived; technical follow-up GO and normative follow-up test-only NO-GO preserved above. New user-authorized test-only cycle has a separate three-event budget.",
-    "2026-11-07: test-only extensions passed focused suites 92/0/0/0 and complete Engine 836/0/0/0; no runtime, rules, knowledge or legal semantics changed. Exact-hash normative and technical follow-ups requested.",
-    "2026-11-07: final normative exact-hash follow-up GO on the test-only package; all 12 hashes match. Technical exact-hash follow-up is pending.",
-    "2026-11-07: exact-hash normative and technical follow-ups both GO on the test-only v0.28/v7 package; all hashes match. Focused suites 92/0/0/0 and full Engine suite 836/0/0/0. Proceed to predecessor and closure governance checks; do not transfer the limited GO to blocked parents.",
-    "2026-11-07: V4.14w-j closed done after exact normative and technical GO, 92 focused and 836 full tests, and all governance gates. No parent closure or downstream selection.",
-    "2026-11-07: V4.14w-o selected after audit cadence check; read-only Annex VIII pre-implementation Sol/xhigh review delegated once. Exact hashes recorded in the increment section. No implementation authorized before a bounded GO; if GO, next user-authorized increment may use at most two ordinary delegation events.",
-    "2026-11-07: w-o completed with limited GO: 8/8 artifact hashes matched; approve only source_ledger_only exact-text per-entry half-open ledger; Rules v8 stays unavailable; no match/non-match. Reviewer flags primary OJ verification and DK-c ?after? vs ?on or after?. Full suite 841/0/0/0 and governance pass. User-authorized second increment w-p selected, default two-event limit.",
-    "2026-11-07: w-p implemented source_ledger_only Knowledge v0.2 catalogue, schema, and synthetic tests; Rules v8/runtime unchanged. Parent expanded date-boundary regression to each amendment date in the approved scope. Focused 4/0/0/0, full Engine 845/0/0/0, canonical digest/schema and governance pass. Exact 10-artifact Sol/xhigh post-fix review delegated as the second and final event; outcome pending.",
-    "2026-11-07: w-p exact Sol/xhigh review NO-GO on 10/10 exact hashes. Findings: historical SE-1 text fidelity and missing adverse schema/test cases (overlap/gap, duplicates, missing records/acts, CELEX/URI allowlist, mutation, temporal overrun, unresolved refs; scope_limitations optional). focused 4/0/0/0; full Engine 845/0/0/0. Default two-event cycle exhausted; waiting for explicit authorization before corrected-hash review.",
-    "Historical status retained: V4.14w-j completed for Knowledge v0.28/Rules v7, and V4.14w-n completed for payer-free Rules v8/validator; neither closed V4.14w/V4.14. See decision log for exact historical evidence and authorization chain.",
-    "2026-11-07: user authorized exactly one corrective pass on immutable v0.3 plus one exact Sol/xhigh review for the v0.2 NO-GO. Scope limited to SE-1 official text and adversarial schema/test coverage. Delegation budget total 4, two events consumed; no further cycle.",
-    "2026-11-07: v0.3 correction done; exact direct OJ text for SE-1 confirmed from 988/2009 and 1224/2012. Schema/test adverse coverage extended. Focused 7/0/0/0, full 848/0/0/0, governance green. One final review event pending (event 4/4).",
-    "2026-11-07: final v0.3 exact review NO-GO on 12/12 hashes: sole residual is SE-1 2009 OJ locator p.58 vs authentic p.57; p.58 begins Annex IX. Locator test must be entry/version-specific. focused 7/0/0/0; full 848/0/0/0; governance pass. Four-event authorization exhausted; await new permission.",
-    "2026-11-07: user authorized one final corrective pass and one exact-version review for the v0.3 SE-1 2009 locator NO-GO. Create v0.4; correct p.58 to p.57 and test exact locator per entry/version. Total budget now 6 with four prior events consumed; no further cycle.",
-    "2026-11-07: user requested reusable documentation from the long V4.14w-p session. Key learnings: exact-version review must hash every immutable dependency/baseline, a child artifact GO does not erase baseline drift; restore only to an already verified exact hash, re-review the unchanged candidate; new user authorization defines a distinct scoped cycle; trace only the active cycle and preserve prior results in decision log/notes.",
-    "2026-11-07: V4.14w-p state reconciliation closed the increment in the already reviewed source-ledger-only scope. Roadmap audit, planner schema, execution guardrails, JSON parse and diff-check passed; Engine full suite reproduced outside the restricted sandbox at 848/0/0/0. Blocked parents remain blocked and no downstream increment was selected.",
-    "2026-11-07: V4.14w-q bounded reviewer wait expired without a verdict. Review remains pending; no GO/NO-GO inferred, parent blockers preserved, and dependent increments not selected.",
-    "2026-11-07: V4.14w-q completed as an audit with limited pre-implementation GO on exact hashes 5/5. Annex ledger is text/version source only; safe assessment requires territorial/date evidence and national/institutional source binding. No runtime approval, positive match or parent closure. Selected w-r as increment 2/3.",
-    "2026-11-07: w-r deterministic implementation delegated to fo_implementer/Terra/medium after planner selection. Write set limited to new Knowledge contract/schema, Rules v9, Article 57 consumer and synthetic unit tests; parent owns roadmap/planner/decision log.",
-    "2026-11-07: user authorized the next three sequential increments in a distinct cycle; w-s resumed as increment 1/3. Previous timeout retained as historical, no verdict inferred.",
-    "2026-11-07: official EUR-Lex OJ review confirms Regulation (EU) 2026/2359 Annex I point 6 amends Annex VIII Part I only; no inference about complete post-2019 Part II currentness. Shared this distinction with the active w-s reviewer.",
-    "2026-11-07: user explicitly increased the maximum wait windows for the same w-s independent reviewer to five; resume same reviewer, no parallel vote or scope expansion.",
-    "2026-11-07: w-s exact-version review completed on resumed same reviewer after user increased wait windows to 5; limited GO, 8/8 hashes. No real scheme mapping or full post-2019 Part II chain approved.",
-    "2026-11-07: w-s closed with limited exact-version GO 8/8 hashes. Selected w-t as increment 2/3 to audit Part II currentness chain; no real mapping/runtime approval.",
-    "2026-11-07: initial spawn attempt hit open-thread cap; closed completed w-s reviewer and delegated w-t successfully to fo_normative_reviewer. No second reviewer or scope change.",
-    "2026-11-07: w-t reviewer closed after five 60-second bounded waits without verdict. Official source leads identified, but no complete Part II chain/currentness conclusion; w-t remains blocked/pending.",
-    "2026-11-07: w-t first reviewer attempt timed out after five waits. Parent located EUR-Lex history listing only 2019/1149 Articles 1/74a after snapshot and 2026/2359 Annex VIII Part I, effective 01-11-2026; current consolidated text remains dated 31-07-2019. Second/last reviewer event requested to verify table completeness, not as a vote.",
-    "2026-11-07: w-t final bounded Sol/xhigh exact source review: limited GO through 2026-11-01 inclusive; unresolved currentness from 2026-11-02 through 2026-11-07. w-t done as audit, no parent closure.",
-    "2026-11-07: w-u selected as increment 3/3 after roadmap audit passed. Route Terra/medium implementation; one subsequent Sol/xhigh exact-hash normative review. Maximum five bounded 60-second wait windows per explicit user request. Supported Part II absence interval ends 2026-11-01 inclusive; 2026-11-02 onward remains not_assessed/data_gap.",
-    "2026-11-07: w-u implementation returned after five bounded 60-second windows; focused new tests 2/0/0/0, pension module 67/0/0/0, complete Engine 855/0/0/0, v0.2 schema valid, v0.1/v0.4/v9 immutable hashes match. Event 2/2 delegated for exact-hash Sol/xhigh review; maximum five bounded 60-second waits. No verdict inferred yet.",
-    "2026-11-07: w-u exact-hash Sol/xhigh post-implementation verdict NO-GO, all 11/11 hashes match. Findings: v10 not_matched can clear Article 57 consumer blocker and enable pension outputs; v0.2 JSON Schema permits duplicate/ambiguous source registry while Engine is stricter; missing public builder non-emission boundary tests. Legal boundary through 2026-11-01 and immutable baselines confirmed. Five bounded waits used. Parent corrective work remains within w-u; any extra independent re-review exceeds default two-event budget and awaits explicit authorization.",
-    "2026-11-07: parent applied the bounded fixes for w-u review findings: Rules v10 now evidence-only in the public builder with no pension result/amount emission; v0.2 schema fixes exact source identities/order/roles/dates; public boundary non-emission tests and schema mutation tests added. Focused 69/0/0/0, full Engine 857/0/0/0, schema validates. First review package remains historical NO-GO; corrected exact hashes await independent review. w-u status blocked because the standard two-delegation-event budget is exhausted; one more review event needs explicit user authorization.",
-    "2026-11-07: user explicitly authorized one supplementary final exact-hash normative review of the corrected w-u candidate. Delegation budget set to three total events; event 3/3 is the final Sol/xhigh review, maximum five bounded 60-second waits, no code edits or additional retry authorized.",
-    "2026-11-07: final authorized event 3/3 exact-hash Sol/xhigh review returned LIMITED GO; 11/11 hashes verified twice and all three prior findings resolved. V4.14w-u completed as evidence-only, focused 69/0/0/0, full Engine 857/0/0/0, JSON Schema/governance pass. Parent V4.14w/V4.14 remain blocked; three-increment authorization exhausted, no downstream increment selected.",
-    "2026-11-07: new docs-only session to capture reusable lessons from V4.14w-u. Three concise playbook additions prepared; route to fo_docs_reviewer for a read-only consistency check. No runtime/test files changed.",
-    "2026-11-07: documented reusable V4.14w-u learnings in playbooks 03, 07 and 08. One bounded docs review returned no issue; diff-check, planner schema and execution guardrails pass. Documentation-only, no test suite run.",
-    "2026-11-08: Historical working label V4.14aa collides with an older alias for V4.14w-a; current remediation is renumbered V4.14w-v. User authorized the next three roadmap increments in strict order. Current increment is contract/schema evidence modeling only; exact normative GO is required before Rule Pack or runtime work.",
-    "2026-11-08: V4.14w-v implementation candidate integrated. Knowledge clarifies matrix GO does not approve pack v2/provenance; schema v2 and synthetic tests bind source evidence to each timeline event, separate decision/notification and payment-order/cash-availability, require human review and not_applicable scope evidence, and represent amount basis without value/formula. Focused 10/0/0/0; complete Engine 864/0/0/0; Draft 2020-12 valid; v1 unchanged. Exact-hash Sol/xhigh review is event 2/2 and must gate any increment 2 selection.",
-    "2026-11-08: initial v2 exact-hash review returned NO-GO on 6/6 hashes. One corrective implementation plus one final re-review are authorized by user request to extend attempts; budget hard-capped at 4 total events, then stop.",
-    "2026-11-08: corrective implementer Zeno thread returned not_found before editing assigned files; after releasing completed reviewer capacity, the same write set was accepted by replacement Russell. Count remains one corrective event (3/4).",
-    "2026-11-08: final Sol/xhigh review event 4/4 returned NO-GO after bounded 5-minute wait and a same-event 60-second status interval. All six candidate hashes match. V4.14w-v blocked; no new attempt, increment 2 or 3 selected; explicit new authorization is required.",
-    "2026-11-08: user gave fresh authorization to correct V4.14w-v final NO-GO and continue with increments 2/3. Reset routing trace for a new bounded cycle; historical 4/4 cycle preserved in decision log. Corrective findings: exact half-open interval containment for event/retroactive evidence; outer/inner transition status agreement and resolved gap clearing; net_documented tax jurisdiction/period; adversarial tests.",
-    "2026-11-08: final cycle 2 Sol/xhigh exact-hash review completed NO-GO, all six supplied hashes matched at start/end. Cycle 2 normative findings resolved; blocker is removal of the three historical v1 contract regressions and absence of any remaining Engine test referencing v1 schema. Focused 21/0/0/0 and full Engine 875/0/0/0; four-event authorization exhausted. No increment 2/3 selected.",
-    "2026-11-08: documented reusable lessons from the bounded V4.14w-v review cycles: multi-increment authorization preserves strict predecessor and per-cycle gates; adding a versioned contract must retain executable regression coverage for supported prior versions. Roadmap increment remains blocked on final NO-GO; this docs-only update does not consume another corrective/review event or authorize downstream work."
+    "User requested durable playbook updates from the long session; four workflow documents now include the corrections.",
+    "b-c and b-d are done Knowledge-only on their own exact-hash reviews; no GO transfers to other increments.",
+    "b-f/g remain blocked until b-e and any other predecessor gates close.",
+    "Il primo timebox bounded della review b-e ? scaduto; inviata una sola richiesta di stato/consegna. Nessun verdetto ancora ricevuto, quindi b-e resta in_progress e il gate ? review-pending."
   ],
   "next_action": {
     "mode": "review",
-    "description": "Await fresh user authorization to restore the three v1 regression tests alongside v2, rerun focused and full Engine suites, and obtain exact-hash review; keep increments 2/3 unselected until that gate passes."
+    "description": "Obtain independent Sol/xhigh exact-hash verdict on b-e findings; no downstream selection on timeout/NO-GO."
   },
   "routing": {
     "policy_version": "3.1",
@@ -174,86 +109,26 @@
     "agent": "fo_normative_reviewer",
     "model": "gpt-5.6-sol",
     "reasoning_effort": "xhigh",
-    "rationale": "Final normative review of temporal applicability, transition consistency and pension amount-basis contract after the single corrective pass.",
+    "rationale": "The candidate makes Spanish pension, source-authority and temporal-validity claims requiring independent normative review.",
     "trace": [
       {
-        "at": "2026-11-08T12:40:00Z",
-        "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Start the fresh user-authorized correction cycle for the oldest blocked V4.14w-v predecessor before any downstream increment."
-      },
-      {
-        "at": "2026-11-08T12:40:56Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Noether accepted the bounded v2 schema/test correction for half-open applicability, transition-status agreement, and net_documented tax context."
-      },
-      {
-        "at": "2026-11-08T12:46:06Z",
+        "at": "2026-11-08T21:46:30Z",
         "event": "selected",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-        "reason": "Select exact-hash normative review after implementation and full Engine suite for the resumed oldest predecessor."
+        "reason": "Reopen the oldest incomplete predecessor b-e for its own exact-hash review before b-f/g."
       },
       {
-        "at": "2026-11-08T12:47:42Z",
+        "at": "2026-11-08T21:47:00Z",
         "event": "delegated",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-        "reason": "Lovelace accepted independent exact-hash normative review of the corrected cycle 2 candidate; no consumer/runtime approval requested."
-      },
-      {
-        "at": "2026-11-08T12:55:23Z",
-        "event": "selected",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Select the single remaining V4.14w-v corrective event for cycle 2; final exact-hash review remains event 4/4."
-      },
-      {
-        "at": "2026-11-08T12:55:52Z",
-        "event": "delegated",
-        "tier": "medium",
-        "agent": "fo_implementer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "medium",
-        "reason": "Carver accepted the final corrective implementation write set for transition status, resolved gap codes, non-whitespace version ids, and null upper-bound positive tests."
-      },
-      {
-        "at": "2026-11-08T13:00:30Z",
-        "event": "selected",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Select final cycle-2 exact-hash review (event 4/4) after the corrections and full Engine suite; no downstream increment absent limited GO."
-      },
-      {
-        "at": "2026-11-08T13:00:33Z",
-        "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Pasteur accepted the final exact-hash normative review for cycle 2; event 4/4 is final."
+        "reason": "Independent exact-hash revalidation of b-e source, temporal, Annex VIII and LGSS findings on the current note."
       }
-    ],
-    "delegation_budget": {
-      "max_events": 4,
-      "authorization": "User renewed authorization on 2026-11-08 to correct the final NO-GO and proceed with remaining sequential increments.",
-      "scope": "V4.14w-v cycle 2 only: one implementation, one exact review, at most one corrective implementation, one final review.",
-      "blocker": "Final NO-GO: restore historical v1 contract regression coverage; four-event authorization exhausted."
-    }
+    ]
   }
 }
