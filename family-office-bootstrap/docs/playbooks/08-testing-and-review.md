@@ -37,6 +37,10 @@ Se una baseline immutabile deriva ma l'hash della versione già revisionata è n
 
 Suite mirate/complete concluse e hash corrispondenti sono evidenze necessarie, ma non annullano i finding del reviewer. Un GO limitato chiude soltanto l'ambito e gli artefatti nominati nel verdetto; non chiude il parent, non abilita runtime o disponibilità generale.
 
+### Migrazione di contratti versionati
+
+Quando si aggiunge una nuova versione di schema/contratto, mantenere eseguibili i test di regressione delle versioni ancora supportate accanto ai test della nuova versione. Il fatto che lo schema precedente sia byte-identico non dimostra che il suo comportamento continui a essere testato. Prima di chiudere, verificare che la suite referenzi esplicitamente ogni versione supportata e copra i suoi invarianti; se i test vengono sostituiti, documentare l'equivalenza e il motivo della rimozione.
+
 ## Integrazione dei test delegati
 
 - I test mirati o la suite di modulo eseguiti da un agent sono evidenza parziale. Il parent esegue la suite completa sul candidato integrato finale e registra comando, conteggio totale e `failure/error/skip`, che devono essere tutti zero.

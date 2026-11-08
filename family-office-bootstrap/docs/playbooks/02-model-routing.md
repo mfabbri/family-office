@@ -29,7 +29,7 @@ Il routing usa custom agent, non `[profiles.*]` project-local. Il parent `gpt-5.
 9. Registrare `delegated`, `escalated` o `fallback` nella trace prima di cambiare route.
 10. Non sostituire silenziosamente un modello non disponibile.
 
-Dopo un NO-GO, applicare soltanto correzioni bounded già autorizzate. Una nuova autorizzazione dell'utente apre un ciclo distinto e deve nominare versione, scope, blocker, budget massimo di eventi e condizione di stop; non è un'approvazione generale per retry o modifiche ulteriori. La trace corrente deve contenere solo il ciclo attivo. Finding ed esiti dei cicli precedenti restano invece conservati nel verification/decision log e non si sovrascrivono.
+Dopo un NO-GO, applicare soltanto correzioni bounded già autorizzate. Una nuova autorizzazione dell'utente apre un ciclo distinto e deve nominare versione, scope, blocker, budget massimo di eventi e condizione di stop; non è un'approvazione generale per retry o modifiche ulteriori. L'autorizzazione a una sequenza di più incrementi definisce l'ordine da tentare, ma non supera i gate: dopo ogni incremento verificare nuovamente predecessori e roadmap; un NO-GO o una review pending blocca i discendenti. Il budget di review/correzione è specifico per incremento e ciclo, non si trasferisce agli incrementi successivi. La trace corrente deve contenere solo il ciclo attivo. Finding ed esiti dei cicli precedenti restano invece conservati nel verification/decision log e non si sovrascrivono.
 
 ## Regole di risparmio token
 

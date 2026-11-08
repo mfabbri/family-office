@@ -1,88 +1,112 @@
 {
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
-  "status": "completed",
-  "selected_at": "2026-11-07T23:20:00Z",
-  "updated_at": "2026-11-07T23:27:00Z",
+  "status": "blocked",
+  "selected_at": "2026-11-08T12:40:00Z",
+  "updated_at": "2026-11-08T13:58:54Z",
   "roadmap_basis": [
     {
-      "path": "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
-      "section": "Capacity and bounded wait policy",
-      "reason": "Capture reusable delegation lessons exposed by the recent three-increment pension review: thread-cap handling, explicit wait windows and status on timeout."
+      "path": "family-office-engine/docs/roadmap/roadmap-index.md",
+      "section": "Algoritmo di selezione",
+      "reason": "V4.15 is blocked; the next eligible work must remove the oldest explicit V4.14 blocker without skipping the predecessor."
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "section": "V4.14w-v contract remediation after limited NO-GO",
+      "reason": "The prior exact normative review listed bounded contract findings; this is the oldest blocker-removal increment."
     },
     {
       "path": "family-office-bootstrap/docs/playbooks/07-normative-change.md",
       "section": "Evidence scope and consumer boundaries",
-      "reason": "Record fail-closed consumer and schema/runtime alignment lessons from the exact-hash NO-GO."
-    },
-    {
-      "path": "family-office-bootstrap/docs/playbooks/08-testing-and-review.md",
-      "section": "Delegated tests and public consumer coverage",
-      "reason": "Ensure parents rerun the integrated full suite and test public outputs for fail-closed contracts."
+      "reason": "This pension/timeline contract audit requires independent normative review before any executable change."
     }
   ],
   "increment": {
-    "id": "DOCS-SESSION-LEARNINGS-2026-11-07",
-    "title": "Document reusable session lessons in governance playbooks",
-    "objective": "Add concise, non-duplicative guidance to subagent, normative-change and testing/review playbooks based on the completed V4.14w-u cycle.",
+    "id": "V4.14w-v-CONTRACT-REMEDIATION",
+    "title": "Event-specific pension evidence and amount-basis contract",
+    "objective": "Revise the pension timeline contract to define event-specific evidence, stable fail-closed gaps, a separate pension amount-basis structure, and the reviewed status of the existing v2 pack.",
     "scope": [
-      "Clarify thread-cap cleanup, one delegated event versus bounded wait subwindows, timeout and late-result handling.",
-      "Require review of downstream consumer effects and parity between schema and runtime validation for normative evidence contracts.",
-      "Require parent-run full integrated suite and public-output regression coverage for fail-closed behavior."
+      "Enforce event and retroactivity date coverage within [valid_from, valid_to) with deterministic tests.",
+      "Bind each resolved transition scope evidence to the same outer status and event; require no residual blocking transition gap.",
+      "Require tax jurisdiction and period for both net_documented and net_calculated.",
+      "Add adversarial regressions for each prior final-review finding.",
+      "Preserve evidence-only behavior, human review and v1 immutability; no Rules/runtime changes."
     ],
     "out_of_scope": [
-      "Changing normative scope, repository delegation budgets or general default wait policy.",
-      "Changing code, rules, knowledge, roadmap status or test files."
+      "Individual pension decisions, dates, amounts, entitlement, payment or recognition.",
+      "Changing Rule Packs, calculations, consumer behavior or Engine services.",
+      "Treating administrative schedules as individual payment evidence or converting gross to net."
     ],
     "candidate_files": [
-      "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
-      "family-office-bootstrap/docs/playbooks/07-normative-change.md",
-      "family-office-bootstrap/docs/playbooks/08-testing-and-review.md"
+      "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+      "family-office-engine/tests/unit/test_pension_entitlement_timeline_contract.py",
+      "family-office-engine/schemas/pension-entitlement-timeline-v2.schema.json",
+      "family-office-engine/docs/decision-log.md",
+      "family-office-bootstrap/planning/current-work.json"
     ],
-    "stop_condition": "Keep additions bounded, consistent with existing default two-event and one-wait policies, and avoid recording task-specific legal dates or personal data."
+    "stop_condition": "Candidate must remain evidence-only, preserve fail-closed null plus stable gaps, and be reviewed on exact hashes. No downstream selection on timeout or NO-GO."
   },
   "verification": {
     "tests": [
-      "Documentation-only change: test suite not applicable.",
-      "Independent read-only docs review: no issue.",
-      "git diff --check passed.",
-      "Planner JSON Schema and execution guardrails passed."
+      "Cycle 2 focused v2 contract tests after final corrective: 21/0/0/0.",
+      "Cycle 2 full Engine unit suite after final corrective: 875/0/0/0.",
+      "Draft 2020-12 schema valid; planner schema/state valid; v1 unchanged; diff-check passed.",
+      "Final independent Sol/xhigh exact-hash review NO-GO (event 4/4): all six supplied hashes matched at start/end; three historical v1 contract regressions were removed and no Engine test now references the v1 schema."
     ],
     "documentation_touchpoints": [
-      "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
-      "family-office-bootstrap/docs/playbooks/07-normative-change.md",
+      "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "family-office-bootstrap/planning/current-work.json",
+      "family-office-bootstrap/docs/playbooks/02-model-routing.md",
       "family-office-bootstrap/docs/playbooks/08-testing-and-review.md"
     ],
-    "result": "passed",
-    "notes": "Three playbook additions capture thread-cap cleanup and bounded wait-window handling; evidence-only consumer boundaries plus schema/runtime parity; and parent-run integrated suite/public output regressions. They preserve one-wait and two-event defaults; five windows remains per-attempt user authorization only. Independent docs review: no issue. No runtime, Rules, Knowledge, roadmap or personal-data artifacts changed.",
+    "result": "failed",
+    "notes": "Cycle 2 final Sol/xhigh review event 4/4 returned NO-GO with all six supplied hashes matched at start/end. The cycle 2 normative findings were resolved, but the test change removed all three historical v1 contract regressions; retain those alongside the 21 v2 tests. Focused v2 tests 21/0/0/0 and full Engine suite 875/0/0/0 do not waive this regression-coverage blocker. Four-event authorization exhausted; no downstream increment selected.",
     "task_envelope": {
-      "mode": "docs-edit",
-      "risk_domain": "general",
-      "objective": "Improve reusable delegation, normative review and testing guidance without changing runtime behavior or general budgets.",
+      "mode": "normative-change",
+      "risk_domain": "pension",
+      "objective": "Correct the pension timeline evidence contract within the prior review findings; preserve the explicit three-increment authorization and strict predecessor order.",
       "repositories": [
+        "family-office-engine",
+        "family-office-knowledge",
         "family-office-bootstrap"
       ],
       "read_set": [
+        "AGENTS.md",
         "family-office-bootstrap/AGENTS.md",
-        "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
+        "family-office-bootstrap/docs/playbooks/00-task-router.md",
         "family-office-bootstrap/docs/playbooks/07-normative-change.md",
-        "family-office-bootstrap/docs/playbooks/08-testing-and-review.md",
-        "family-office-bootstrap/planning/README.md"
+        "family-office-engine/docs/roadmap/roadmap-index.md",
+        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+        "family-office-engine/docs/current-next-increment.md",
+        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+        "family-office-engine/schemas/pension-entitlement-timeline.schema.json",
+        "family-office-engine/docs/decision-log.md"
       ],
       "write_set": [
-        "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
-        "family-office-bootstrap/docs/playbooks/07-normative-change.md",
-        "family-office-bootstrap/docs/playbooks/08-testing-and-review.md"
+        "family-office-engine/docs/current-next-increment.md",
+        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+        "family-office-knowledge/pensions/pension-timeline-events-it-es-eu.md",
+        "family-office-engine/docs/decision-log.md",
+        "family-office-bootstrap/planning/current-work.json",
+        "family-office-engine/schemas/pension-entitlement-timeline-v2.schema.json",
+        "family-office-engine/tests/unit/test_pension_entitlement_timeline_contract.py"
       ],
-      "test_command": "Not applicable; documentation-only. Validate diff and governance artifacts.",
+      "test_command": "Focused schema and contract regressions; full Engine suite with 0 failure/error/skip if the JSON Schema contract changes; roadmap audit, planner validation, execution guardrails and diff-check.",
       "stop_conditions": [
-        "No task-specific dates or private data.",
-        "Do not change default wait/event limits.",
-        "No new review cycle if one concise docs review finds minor non-blocking suggestions; parent applies bounded cleanup."
+        "No personal data or individual pension conclusions.",
+        "No executable change before independent normative GO.",
+        "No unsupported legal semantics, individual data, calculations or Rule Pack edits.",
+        "Do not start increment 2 until exact-version normative review approves this candidate."
       ]
     }
   },
-  "blockers": [],
+  "blockers": [
+    "Final cycle 2 exact-hash review NO-GO: historical v1 schema regression coverage was removed when the test module moved to v2; restore the three v1 regressions alongside the v2 suite.",
+    "The four-event authorization is exhausted. V4.14w-v and increments 2/3 remain blocked/unselected pending fresh user authorization; V4.14/V4.15 stay blocked."
+  ],
   "session_notes": [
     "2026-11-01: w-l exact-hash Sol/xhigh NO-GO; source chain confirms Regulation 465/2012 Article 1(11) attribution, identifies the 2015 Romanian Annex XI-only corrigendum, and requires explicit Article 87a(1) ten-year/continuity/opt-out boundary semantics.",
     "2026-11-01: w-i audit status reconciled to done as an audit activity with NO-GO; its findings remain open. Selected functional predecessor w-j in_progress; roadmap audit confirms it is eligible because w-i is done and w-j addresses its own blocked parent.",
@@ -129,50 +153,107 @@
     "2026-11-07: user explicitly authorized one supplementary final exact-hash normative review of the corrected w-u candidate. Delegation budget set to three total events; event 3/3 is the final Sol/xhigh review, maximum five bounded 60-second waits, no code edits or additional retry authorized.",
     "2026-11-07: final authorized event 3/3 exact-hash Sol/xhigh review returned LIMITED GO; 11/11 hashes verified twice and all three prior findings resolved. V4.14w-u completed as evidence-only, focused 69/0/0/0, full Engine 857/0/0/0, JSON Schema/governance pass. Parent V4.14w/V4.14 remain blocked; three-increment authorization exhausted, no downstream increment selected.",
     "2026-11-07: new docs-only session to capture reusable lessons from V4.14w-u. Three concise playbook additions prepared; route to fo_docs_reviewer for a read-only consistency check. No runtime/test files changed.",
-    "2026-11-07: documented reusable V4.14w-u learnings in playbooks 03, 07 and 08. One bounded docs review returned no issue; diff-check, planner schema and execution guardrails pass. Documentation-only, no test suite run."
+    "2026-11-07: documented reusable V4.14w-u learnings in playbooks 03, 07 and 08. One bounded docs review returned no issue; diff-check, planner schema and execution guardrails pass. Documentation-only, no test suite run.",
+    "2026-11-08: Historical working label V4.14aa collides with an older alias for V4.14w-a; current remediation is renumbered V4.14w-v. User authorized the next three roadmap increments in strict order. Current increment is contract/schema evidence modeling only; exact normative GO is required before Rule Pack or runtime work.",
+    "2026-11-08: V4.14w-v implementation candidate integrated. Knowledge clarifies matrix GO does not approve pack v2/provenance; schema v2 and synthetic tests bind source evidence to each timeline event, separate decision/notification and payment-order/cash-availability, require human review and not_applicable scope evidence, and represent amount basis without value/formula. Focused 10/0/0/0; complete Engine 864/0/0/0; Draft 2020-12 valid; v1 unchanged. Exact-hash Sol/xhigh review is event 2/2 and must gate any increment 2 selection.",
+    "2026-11-08: initial v2 exact-hash review returned NO-GO on 6/6 hashes. One corrective implementation plus one final re-review are authorized by user request to extend attempts; budget hard-capped at 4 total events, then stop.",
+    "2026-11-08: corrective implementer Zeno thread returned not_found before editing assigned files; after releasing completed reviewer capacity, the same write set was accepted by replacement Russell. Count remains one corrective event (3/4).",
+    "2026-11-08: final Sol/xhigh review event 4/4 returned NO-GO after bounded 5-minute wait and a same-event 60-second status interval. All six candidate hashes match. V4.14w-v blocked; no new attempt, increment 2 or 3 selected; explicit new authorization is required.",
+    "2026-11-08: user gave fresh authorization to correct V4.14w-v final NO-GO and continue with increments 2/3. Reset routing trace for a new bounded cycle; historical 4/4 cycle preserved in decision log. Corrective findings: exact half-open interval containment for event/retroactive evidence; outer/inner transition status agreement and resolved gap clearing; net_documented tax jurisdiction/period; adversarial tests.",
+    "2026-11-08: final cycle 2 Sol/xhigh exact-hash review completed NO-GO, all six supplied hashes matched at start/end. Cycle 2 normative findings resolved; blocker is removal of the three historical v1 contract regressions and absence of any remaining Engine test referencing v1 schema. Focused 21/0/0/0 and full Engine 875/0/0/0; four-event authorization exhausted. No increment 2/3 selected.",
+    "2026-11-08: documented reusable lessons from the bounded V4.14w-v review cycles: multi-increment authorization preserves strict predecessor and per-cycle gates; adding a versioned contract must retain executable regression coverage for supported prior versions. Roadmap increment remains blocked on final NO-GO; this docs-only update does not consume another corrective/review event or authorize downstream work."
   ],
   "next_action": {
-    "mode": "recalculate",
-    "description": "Documentation task complete. Resume the next Family Office task only from the roadmap/planner after explicit user direction."
+    "mode": "review",
+    "description": "Await fresh user authorization to restore the three v1 regression tests alongside v2, rerun focused and full Engine suites, and obtain exact-hash review; keep increments 2/3 unselected until that gate passes."
   },
   "routing": {
     "policy_version": "3.1",
-    "tier": "low",
-    "task_class": "documentation",
-    "agent": "fo_docs_reviewer",
-    "model": "gpt-5.6-luna",
-    "reasoning_effort": "medium",
-    "rationale": "A bounded read-only consistency check can identify duplication or conflict with existing wait, event-budget and test policies.",
+    "tier": "critical",
+    "task_class": "normative",
+    "agent": "fo_normative_reviewer",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "rationale": "Final normative review of temporal applicability, transition consistency and pension amount-basis contract after the single corrective pass.",
     "trace": [
       {
-        "at": "2026-11-07T23:20:00Z",
+        "at": "2026-11-08T12:40:00Z",
         "event": "selected",
-        "tier": "low",
-        "agent": "fo_docs_reviewer",
-        "model": "gpt-5.6-luna",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
         "reasoning_effort": "medium",
-        "reason": "Select concise review of three playbook additions; verify they preserve the existing defaults and do not over-generalize the user-specific five-window authorization."
+        "reason": "Start the fresh user-authorized correction cycle for the oldest blocked V4.14w-v predecessor before any downstream increment."
       },
       {
-        "at": "2026-11-07T23:22:00Z",
+        "at": "2026-11-08T12:40:56Z",
         "event": "delegated",
-        "from_tier": "low",
-        "tier": "low",
-        "agent": "fo_docs_reviewer",
-        "model": "gpt-5.6-luna",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
         "reasoning_effort": "medium",
-        "reason": "Read-only check of the three playbook additions for duplication or conflict with existing budgets and testing gates."
+        "reason": "Noether accepted the bounded v2 schema/test correction for half-open applicability, transition-status agreement, and net_documented tax context."
       },
       {
-        "at": "2026-11-07T23:27:00Z",
-        "event": "reviewed",
-        "from_tier": "low",
-        "tier": "low",
-        "agent": "fo_docs_reviewer",
-        "model": "gpt-5.6-luna",
+        "at": "2026-11-08T12:46:06Z",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Select exact-hash normative review after implementation and full Engine suite for the resumed oldest predecessor."
+      },
+      {
+        "at": "2026-11-08T12:47:42Z",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Lovelace accepted independent exact-hash normative review of the corrected cycle 2 candidate; no consumer/runtime approval requested."
+      },
+      {
+        "at": "2026-11-08T12:55:23Z",
+        "event": "selected",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
         "reasoning_effort": "medium",
-        "reason": "Independent docs review returned no issue; diff-check and planner guardrails pass."
+        "reason": "Select the single remaining V4.14w-v corrective event for cycle 2; final exact-hash review remains event 4/4."
+      },
+      {
+        "at": "2026-11-08T12:55:52Z",
+        "event": "delegated",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Carver accepted the final corrective implementation write set for transition status, resolved gap codes, non-whitespace version ids, and null upper-bound positive tests."
+      },
+      {
+        "at": "2026-11-08T13:00:30Z",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Select final cycle-2 exact-hash review (event 4/4) after the corrections and full Engine suite; no downstream increment absent limited GO."
+      },
+      {
+        "at": "2026-11-08T13:00:33Z",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Pasteur accepted the final exact-hash normative review for cycle 2; event 4/4 is final."
       }
-    ]
+    ],
+    "delegation_budget": {
+      "max_events": 4,
+      "authorization": "User renewed authorization on 2026-11-08 to correct the final NO-GO and proceed with remaining sequential increments.",
+      "scope": "V4.14w-v cycle 2 only: one implementation, one exact review, at most one corrective implementation, one final review.",
+      "blocker": "Final NO-GO: restore historical v1 contract regression coverage; four-event authorization exhausted."
+    }
   }
 }

@@ -1,8 +1,18 @@
 # Eventi della timeline pensionistica IT/ES/UE — matrice di supporto (draft)
 
-**Verifica fonti:** 2026-10-12. **Stato:** matrice documentale con GO normativo limitato; non costituisce parere, regola eseguibile o approvazione della timeline V4.14. V4.14e ha ricevuto GO limitato esclusivamente sulla correttezza documentale della distinzione fonti e sulla registrazione dei gap italiani 2026-2028. Il pack eseguibile non è stato modificato né ricertificato.
+**Verifica fonti:** 2026-10-12. **Stato:** matrice documentale con GO normativo limitato; non costituisce parere, regola eseguibile o approvazione della timeline V4.14. Il GO limitato riguarda esclusivamente la matrice di supporto agli eventi (distinzione documentale delle fonti e registrazione dei gap italiani 2026-2028). Non riguarda il pack eseguibile v2 né la sua provenance: il pack non è stato modificato o ricertificato e la relativa provenance non è approvata dal reviewer indipendente. Non vi è quindi contraddizione tra il GO limitato della matrice e il limite del pack v2.
 
 Questa nota separa gli eventi del contratto `pension-entitlement-timeline/v1`. Le date dipendono dalla legislazione nazionale applicabile, dal regime, dalla domanda e dal provvedimento dell'ente. Sono distinti gli atti normativi vincolanti dalle fonti amministrative ufficiali e dalle evidenze individuali. Il coordinamento UE non crea una prestazione unica né sostituisce le decisioni degli enti nazionali. Una data non supportata resta `null` con `data_gaps`; cessazione dal lavoro e data candidata non sono proxy.
+
+## Contratto candidato v2 — solo evidenza, non approvato per uso eseguibile
+
+Lo schema `pension-entitlement-timeline/v2` è un candidato di contratto, non una regola o un risultato pensionistico. La v1 resta immutata. Ogni evidenza v2 è riferita a uno dei cinque eventi, include identificatore e digest della fonte, autorità, giurisdizione, atto/articolo, versione, intervallo di applicabilità, date di recupero/revisione e stato del ramo transitorio. Ogni evento `not_assessed` conserva data `null` e gap stabile; `not_applicable` richiede evidenza dello scope. Un evento supportato richiede evidenza del ruolo ammesso e non ammette gap residui.
+
+Per `official_recognition_date` serve evidenza della decisione individuale: una notifica prova la comunicazione e non sostituisce la decisione. `economic_effective_date` è distinto dalla data di riconoscimento; un eventuale effetto retroattivo deve avere prova con ruolo `retroactive_from_basis`. `first_cash_payment_date` richiede conferma della disponibilità effettiva presso il destinatario: ordine di pagamento o calendario amministrativo non sono prova di accredito. La separazione descrive il tipo di prova richiesto e non attribuisce alcuna data individuale.
+
+`pension_amount_basis` registra separatamente la classificazione lordo/netto e, per il netto, giurisdizione e periodo fiscale. Il campo non contiene un valore monetario né autorizza calcolo, conversione o confronto; uno stato `unknown` o `mixed` resta accompagnato dai gap. Il contratto impone `human_review_required=true`. Queste definizioni sono fail-closed e attendono review normativa indipendente exact-version prima di ogni uso downstream.
+
+Per il solo contratto v2, l'intervallo tecnico di applicabilità è rappresentato come half-open `[valid_from, valid_to)`; `valid_to=null` indica limite superiore aperto. La convenzione non determina la vigenza della fonte: i limiti e la copertura delle date dell'evento e `as_of_date` richiedono evidenza/versione applicabile e review. Un dato di copertura assente, incoerente o non verificato resta `unknown` con gap bloccante. Il JSON Schema controlla la forma, non autentica la fonte né verifica da solo tali attestazioni.
 
 ## Matrice provvisoria
 

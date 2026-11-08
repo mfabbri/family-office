@@ -1,8 +1,36 @@
 # Current Next Increment
 
-## Stato aggiornato - 2026-11-07
+## Stato aggiornato - 2026-11-08
 
 V4.14w-p/q/r/s/t/u sono chiusi nei rispettivi perimetri limitati. w-t prova currentness Part II e assenza IT/ES per territorio UE solo fino al 2026-11-01 incluso; dal 2026-11-02 resta `not_assessed + data_gaps`. Nessun mapping nazionale o parent closure e approvato.
+
+## Incremento corrente — V4.14w-v — Event-specific pension evidence and amount-basis contract
+
+**Stato:** `blocked` - review finale del ciclo correttivo 2 NO-GO; budget di quattro eventi esaurito. V4.14/V4.15 restano bloccate.
+
+**Gate exact-version intermedio 2026-11-08:** Sol/xhigh NO-GO sul primo candidato (6/6 hash corrispondenti). Finding: source identity/version/validità/transitional scope non collegate con l'evento e l'`as_of_date`; authority non vincolata per `not_applicable` e retroattività; `gross_documented` senza fonte e gap `unknown`/`mixed` non specifici; test avversari insufficienti. Un corrective pass è stato eseguito come evento 3/4.
+
+Il precedente working ID `V4.14aa` collideva con l'alias storico di V4.14w-a; il micro-incremento è rinumerato V4.14w-v. V4.15 resta ineleggibile finché V4.14 è bloccata. L'utente ha autorizzato tre incrementi consecutivi, ma ciascuno resta subordinato alla chiusura del predecessore e ai propri gate.
+
+**Obiettivo:** introdurre un contratto candidato v2 che leghi ogni evento a ruoli probatori e metadati specifici, chiarisca decisione/notifica, decorrenza/retroattività e ordine/accredito, separi la base importo pensionistico dagli eventi e renda deterministici gap e `not_applicable`. Nessun dato personale, importo o data individuale.
+
+**Piano:** Knowledge v2 + nuovo schema v2 e regressioni schema sintetiche, preservando v1. Nessuna modifica Rules/consumer/runtime in questo incremento. Implementazione v2 con prove per evento, metadati fonte/versione/applicabilità, gap stabili, stato transitorio, ramo retroattivo esplicito, decisione distinta dalla notifica, accredito distinto dall'ordine e base lordo/netto separata senza valori o formule. Dopo il diff, review indipendente Sol/xhigh sul set esatto; un GO limitato rende eleggibile la pianificazione dell'incremento 2, non chiude V4.14.
+
+**Corrective pass integrato:** provenienza, digest, autorità, versione, applicabilità, copertura evento/as-of e ramo transitorio sono registrati in oggetti strutturati; stati di copertura non risolti richiedono gap bloccanti. Il contratto e i test rifiutano autorità errata per `not_applicable`/retroattività, fonte lorda assente, gap d'importo non corrispondenti e disallineamenti di date/evento. Il JSON Schema dichiara che la validazione strutturale non autentica fonti o asserzioni di copertura; non c'è consumer/runtime abilitato.
+
+**Esito ciclo precedente Sol/xhigh exact-version (evento 4/4): NO-GO.** Tutti i 6 hash finali corrispondevano. Restavano: intervallo legale non verificato rispetto alla data evento/retroattività; contraddizione tra status di scope esterno e prove interne; `net_documented` senza giurisdizione/periodo; regressioni insufficienti per questi casi.
+
+**Nuovo ciclo autorizzato 2026-11-08:** l'utente ha autorizzato un ulteriore ciclo correttivo e ha chiesto di procedere con gli altri incrementi. Si riprende prima V4.14w-v (predecessore più antico), con budget massimo 4 eventi: correzione, review exact-hash, una correzione residua se necessaria, review finale. Nessun incremento 2/3 prima di un LIMITED GO e nuova verifica roadmap; nessun calcolo individuale o runtime.
+
+**Verifica ciclo precedente:** 15 test mirati e suite Engine completa 869/0/0/0; schema Draft 2020-12 valido; schema v1 immutato. I test verdi non hanno superato il NO-GO normativo. Nuovi test su intervalli, status transitorio e netto documentato sono richiesti nel ciclo corrente.
+
+**Review intermedia ciclo 2:** Sol/xhigh NO-GO exact-hash, 6/6 corrispondenti. Finding: `unknown` con prova interna `applicable`; gap transitorio ammesso come `warning` quando lo scope è risolto; `source_version` composto solo da spazi; mancava test positivo per upper bound aperto.
+
+**Corrective pass finale:** lo schema lega lo status esterno alle prove interne, rifiuta `transitional_branch_unknown` a ogni severità per scope risolti e impone versioni con almeno un carattere non whitespace. I test dimostrano accettazione dopo `valid_from` per eventi supportati e prove retroattive con `valid_to=null`.
+
+**Esito review finale ciclo 2 (evento 4/4): NO-GO.** Tutti i sei hash forniti corrispondono all'inizio e alla fine della review. Le correzioni normative del ciclo sono confermate, ma il test module ha rimosso le tre regressioni storiche del contratto v1 e nessun test Engine restante riferisce lo schema v1. Finding bloccante: mantenere i tre test v1 insieme ai 21 test v2. Test v2 21/0/0/0 e suite Engine 875/0/0/0; il risultato positivo dei test non supera il finding di copertura. Budget 4/4 esaurito; incremento 2/3 non selezionati. Serve nuova autorizzazione per una correzione e review.
+
+**Sequenza autorizzata:** 1/3 è V4.14w-v. Gli incrementi 2 e 3 saranno selezionati solo dopo verifica del gate e del predecessore; nessuna autorizzazione a saltare un NO-GO o ad abilitare calcoli individuali.
 
 ## Incremento completato 3/3 - V4.14w-u - Annex VIII Part II bounded currentness contract
 

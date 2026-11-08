@@ -1,0 +1,1518 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pension Entitlement Timeline Evidence Contract v2",
+  "description": "Candidate evidence contract only. It approves no individual date, entitlement, pension amount, Rule Pack, or runtime behavior. Evidence contents and PII remain in family-office-workspace; this contract holds only references, digests, and minimum provenance metadata. JSON Schema validates declared structure only: it neither authenticates source material nor verifies a digest, authority, version, legal applicability, scope, or coverage assertion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "status",
+    "member_id",
+    "as_of_date",
+    "human_review_required",
+    "events",
+    "pension_amount_basis",
+    "data_gaps",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pension-entitlement-timeline/v2"
+    },
+    "record_type": {
+      "const": "PensionEntitlementTimeline"
+    },
+    "status": {
+      "enum": [
+        "not_assessed",
+        "partial",
+        "blocked"
+      ]
+    },
+    "member_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "as_of_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "human_review_required": {
+      "const": true
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligibility_date",
+        "requirements_met_date",
+        "official_recognition_date",
+        "economic_effective_date",
+        "first_cash_payment_date"
+      ],
+      "properties": {
+        "eligibility_date": {
+          "$ref": "#/$defs/eligibility_event"
+        },
+        "requirements_met_date": {
+          "$ref": "#/$defs/requirements_event"
+        },
+        "official_recognition_date": {
+          "$ref": "#/$defs/recognition_event"
+        },
+        "economic_effective_date": {
+          "$ref": "#/$defs/effective_event"
+        },
+        "first_cash_payment_date": {
+          "$ref": "#/$defs/cash_event"
+        }
+      }
+    },
+    "pension_amount_basis": {
+      "$ref": "#/$defs/amount_basis"
+    },
+    "data_gaps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gap"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "severity"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "event_evidence_missing",
+            "source_authority_unverified",
+            "legal_applicability_unknown",
+            "source_version_missing",
+            "transitional_branch_unknown",
+            "decision_evidence_missing",
+            "economic_effective_evidence_missing",
+            "cash_availability_evidence_missing",
+            "administrative_schedule_not_individual_payment_evidence",
+            "amount_basis_unknown",
+            "amount_basis_mixed",
+            "tax_context_missing",
+            "provenance_reference_missing"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "blocking",
+            "warning"
+          ]
+        }
+      }
+    },
+    "source_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref",
+        "digest_sha256",
+        "source_authority",
+        "jurisdiction",
+        "act_identifier",
+        "article_identifier",
+        "source_version",
+        "legal_applicability",
+        "coverage_assessment",
+        "retrieved_on",
+        "reviewed_on"
+      ],
+      "properties": {
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest_sha256": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "source_authority": {
+          "enum": [
+            "primary_legislation",
+            "binding_implementing_act",
+            "official_administrative_guidance",
+            "individual_institutional_decision",
+            "individual_payment_evidence"
+          ]
+        },
+        "jurisdiction": {
+          "enum": [
+            "IT",
+            "ES",
+            "EU"
+          ]
+        },
+        "act_identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "article_identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_version": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "legal_applicability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "valid_from",
+            "valid_to",
+            "validity_status"
+          ],
+          "properties": {
+            "valid_from": {
+              "type": "string",
+              "format": "date"
+            },
+            "valid_to": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date"
+            },
+            "validity_status": {
+              "enum": [
+                "verified",
+                "bounded"
+              ]
+            }
+          }
+        },
+        "coverage_assessment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "coverage_status",
+            "event_date",
+            "event_date_coverage_status",
+            "as_of_date",
+            "as_of_date_coverage_status",
+            "assessed_on",
+            "data_gaps"
+          ],
+          "properties": {
+            "coverage_status": {
+              "enum": [
+                "covered",
+                "not_covered",
+                "unknown"
+              ]
+            },
+            "event_date_coverage_status": {
+              "enum": [
+                "covered",
+                "not_covered",
+                "unknown"
+              ]
+            },
+            "event_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "as_of_date_coverage_status": {
+              "enum": [
+                "covered",
+                "not_covered",
+                "unknown"
+              ]
+            },
+            "as_of_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "assessed_on": {
+              "type": "string",
+              "format": "date"
+            },
+            "data_gaps": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/gap"
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "coverage_status": {
+                    "const": "unknown"
+                  }
+                },
+                "required": [
+                  "coverage_status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "data_gaps": {
+                    "contains": {
+                      "properties": {
+                        "code": {
+                          "const": "legal_applicability_unknown"
+                        },
+                        "severity": {
+                          "const": "blocking"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "coverage_status": {
+                    "const": "covered"
+                  }
+                },
+                "required": [
+                  "coverage_status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "event_date_coverage_status": {
+                    "const": "covered"
+                  },
+                  "as_of_date_coverage_status": {
+                    "const": "covered"
+                  },
+                  "data_gaps": {
+                    "maxItems": 0
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "retrieved_on": {
+          "type": "string",
+          "format": "date"
+        },
+        "reviewed_on": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "transition_scope_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_provenance",
+        "scope"
+      ],
+      "properties": {
+        "source_provenance": {
+          "$ref": "#/$defs/source_provenance"
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scope_status",
+            "applies_to_event",
+            "transition_status"
+          ],
+          "properties": {
+            "scope_status": {
+              "const": "resolved"
+            },
+            "applies_to_event": {
+              "enum": [
+                "eligibility_date",
+                "requirements_met_date",
+                "official_recognition_date",
+                "economic_effective_date",
+                "first_cash_payment_date"
+              ]
+            },
+            "transition_status": {
+              "enum": [
+                "applicable",
+                "not_applicable"
+              ]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "properties": {
+            "source_provenance": {
+              "properties": {
+                "source_authority": {
+                  "enum": [
+                    "primary_legislation",
+                    "binding_implementing_act"
+                  ]
+                },
+                "coverage_assessment": {
+                  "properties": {
+                    "coverage_status": {
+                      "const": "covered"
+                    },
+                    "event_date_coverage_status": {
+                      "const": "covered"
+                    },
+                    "as_of_date_coverage_status": {
+                      "const": "covered"
+                    },
+                    "data_gaps": {
+                      "maxItems": 0
+                    }
+                  },
+                  "required": [
+                    "coverage_status",
+                    "event_date_coverage_status",
+                    "as_of_date_coverage_status",
+                    "data_gaps"
+                  ]
+                }
+              },
+              "required": [
+                "source_authority",
+                "coverage_assessment"
+              ]
+            }
+          },
+          "required": [
+            "source_provenance"
+          ]
+        }
+      ]
+    },
+    "transition_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "scope_evidence"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "applicable",
+            "not_applicable",
+            "unknown"
+          ]
+        },
+        "scope_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition_scope_evidence"
+          }
+        },
+        "data_gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gap"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "applicable"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "scope_evidence": {
+                "minItems": 1,
+                "items": {
+                  "properties": {
+                    "scope": {
+                      "properties": {
+                        "transition_status": {
+                          "const": "applicable"
+                        }
+                      },
+                      "required": [
+                        "transition_status"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "scope"
+                  ]
+                }
+              },
+              "data_gaps": {
+                "not": {
+                  "contains": {
+                    "properties": {
+                      "code": {
+                        "const": "transitional_branch_unknown"
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "not_applicable"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "scope_evidence": {
+                "minItems": 1,
+                "items": {
+                  "properties": {
+                    "scope": {
+                      "properties": {
+                        "transition_status": {
+                          "const": "not_applicable"
+                        }
+                      },
+                      "required": [
+                        "transition_status"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "scope"
+                  ]
+                }
+              },
+              "data_gaps": {
+                "not": {
+                  "contains": {
+                    "properties": {
+                      "code": {
+                        "const": "transitional_branch_unknown"
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unknown"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "data_gaps"
+            ],
+            "properties": {
+              "scope_evidence": {
+                "maxItems": 0
+              },
+              "data_gaps": {
+                "contains": {
+                  "properties": {
+                    "code": {
+                      "const": "transitional_branch_unknown"
+                    },
+                    "severity": {
+                      "const": "blocking"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "severity"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_ref",
+        "evidence_role",
+        "source_provenance",
+        "transition_scope"
+      ],
+      "properties": {
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_role": {
+          "enum": [
+            "eligibility_legal_basis",
+            "requirements_evidence",
+            "individual_decision",
+            "decision_notification",
+            "economic_effective_basis",
+            "retroactive_from_basis",
+            "payment_order",
+            "cash_availability_confirmation",
+            "non_applicability_scope"
+          ]
+        },
+        "source_provenance": {
+          "$ref": "#/$defs/source_provenance"
+        },
+        "transition_scope": {
+          "$ref": "#/$defs/transition_scope"
+        }
+      }
+    },
+    "base_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_kind",
+        "status",
+        "date",
+        "evidence",
+        "data_gaps"
+      ],
+      "properties": {
+        "event_kind": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "supported",
+            "not_assessed",
+            "not_applicable"
+          ]
+        },
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+        "data_gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gap"
+          }
+        },
+        "retroactivity_status": {
+          "enum": [
+            "not_assessed",
+            "not_retroactive",
+            "retroactive"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "supported"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "evidence": {
+                "minItems": 1,
+                "items": {
+                  "properties": {
+                    "source_provenance": {
+                      "properties": {
+                        "coverage_assessment": {
+                          "properties": {
+                            "coverage_status": {
+                              "const": "covered"
+                            },
+                            "event_date_coverage_status": {
+                              "const": "covered"
+                            },
+                            "as_of_date_coverage_status": {
+                              "const": "covered"
+                            },
+                            "data_gaps": {
+                              "maxItems": 0
+                            }
+                          },
+                          "required": [
+                            "coverage_status",
+                            "event_date_coverage_status",
+                            "as_of_date_coverage_status",
+                            "data_gaps"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "coverage_assessment"
+                      ]
+                    },
+                    "transition_scope": {
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "applicable",
+                            "not_applicable"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "source_provenance",
+                    "transition_scope"
+                  ]
+                }
+              },
+              "data_gaps": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "not_assessed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "date": {
+                "type": "null"
+              },
+              "data_gaps": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "not_applicable"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "date": {
+                "type": "null"
+              },
+              "data_gaps": {
+                "maxItems": 0
+              },
+              "evidence": {
+                "minItems": 1,
+                "contains": {
+                  "properties": {
+                    "evidence_role": {
+                      "const": "non_applicability_scope"
+                    },
+                    "transition_scope": {
+                      "properties": {
+                        "status": {
+                          "const": "not_applicable"
+                        },
+                        "scope_evidence": {
+                          "minItems": 1,
+                          "contains": {
+                            "properties": {
+                              "source_provenance": {
+                                "properties": {
+                                  "source_authority": {
+                                    "enum": [
+                                      "primary_legislation",
+                                      "binding_implementing_act"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "source_authority"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "source_provenance"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "scope_evidence"
+                      ]
+                    },
+                    "source_provenance": {
+                      "properties": {
+                        "source_authority": {
+                          "enum": [
+                            "primary_legislation",
+                            "binding_implementing_act"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_authority"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "evidence_role",
+                    "transition_scope",
+                    "source_provenance"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "supported"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "contains": {
+                  "properties": {
+                    "source_provenance": {
+                      "properties": {
+                        "coverage_assessment": {
+                          "properties": {
+                            "coverage_status": {
+                              "const": "covered"
+                            },
+                            "event_date_coverage_status": {
+                              "const": "covered"
+                            },
+                            "as_of_date_coverage_status": {
+                              "const": "covered"
+                            }
+                          },
+                          "required": [
+                            "coverage_status",
+                            "event_date_coverage_status",
+                            "as_of_date_coverage_status"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "coverage_assessment"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "source_provenance"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "eligibility_event": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base_event"
+        },
+        {
+          "properties": {
+            "event_kind": {
+              "const": "eligibility_date"
+            },
+            "evidence": {
+              "items": {
+                "properties": {
+                  "evidence_ref": {
+                    "pattern": "^eligibility_date:"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "supported"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "contains": {
+                  "properties": {
+                    "evidence_role": {
+                      "const": "eligibility_legal_basis"
+                    },
+                    "source_provenance": {
+                      "properties": {
+                        "source_authority": {
+                          "enum": [
+                            "primary_legislation",
+                            "binding_implementing_act"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_authority"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "evidence_role",
+                    "source_provenance"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "requirements_event": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base_event"
+        },
+        {
+          "properties": {
+            "event_kind": {
+              "const": "requirements_met_date"
+            },
+            "evidence": {
+              "items": {
+                "properties": {
+                  "evidence_ref": {
+                    "pattern": "^requirements_met_date:"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "supported"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "contains": {
+                  "properties": {
+                    "evidence_role": {
+                      "const": "requirements_evidence"
+                    },
+                    "source_provenance": {
+                      "properties": {
+                        "source_authority": {
+                          "enum": [
+                            "primary_legislation",
+                            "binding_implementing_act",
+                            "official_administrative_guidance"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_authority"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "evidence_role",
+                    "source_provenance"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "recognition_event": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base_event"
+        },
+        {
+          "properties": {
+            "event_kind": {
+              "const": "official_recognition_date"
+            },
+            "evidence": {
+              "items": {
+                "properties": {
+                  "evidence_ref": {
+                    "pattern": "^official_recognition_date:"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "supported"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "contains": {
+                  "properties": {
+                    "evidence_role": {
+                      "const": "individual_decision"
+                    },
+                    "source_provenance": {
+                      "properties": {
+                        "source_authority": {
+                          "const": "individual_institutional_decision"
+                        }
+                      },
+                      "required": [
+                        "source_authority"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "evidence_role",
+                    "source_provenance"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "effective_event": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base_event"
+        },
+        {
+          "properties": {
+            "event_kind": {
+              "const": "economic_effective_date"
+            },
+            "evidence": {
+              "items": {
+                "properties": {
+                  "evidence_ref": {
+                    "pattern": "^economic_effective_date:"
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "retroactivity_status"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "supported"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "contains": {
+                  "properties": {
+                    "evidence_role": {
+                      "const": "economic_effective_basis"
+                    },
+                    "source_provenance": {
+                      "properties": {
+                        "source_authority": {
+                          "enum": [
+                            "primary_legislation",
+                            "binding_implementing_act",
+                            "individual_institutional_decision"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_authority"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "evidence_role",
+                    "source_provenance"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "retroactivity_status": {
+                "const": "retroactive"
+              }
+            },
+            "required": [
+              "retroactivity_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "contains": {
+                  "properties": {
+                    "evidence_role": {
+                      "const": "retroactive_from_basis"
+                    },
+                    "source_provenance": {
+                      "properties": {
+                        "source_authority": {
+                          "enum": [
+                            "primary_legislation",
+                            "binding_implementing_act",
+                            "individual_institutional_decision"
+                          ]
+                        },
+                        "legal_applicability": {
+                          "properties": {
+                            "validity_status": {
+                              "enum": [
+                                "verified",
+                                "bounded"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "validity_status"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_authority",
+                        "legal_applicability"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "evidence_role",
+                    "source_provenance"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "cash_event": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base_event"
+        },
+        {
+          "properties": {
+            "event_kind": {
+              "const": "first_cash_payment_date"
+            },
+            "evidence": {
+              "items": {
+                "properties": {
+                  "evidence_ref": {
+                    "pattern": "^first_cash_payment_date:"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "supported"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "contains": {
+                  "properties": {
+                    "evidence_role": {
+                      "const": "cash_availability_confirmation"
+                    },
+                    "source_provenance": {
+                      "properties": {
+                        "source_authority": {
+                          "const": "individual_payment_evidence"
+                        }
+                      },
+                      "required": [
+                        "source_authority"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "evidence_role",
+                    "source_provenance"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "amount_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "No pension value or conversion formula is permitted.",
+      "required": [
+        "basis_state",
+        "tax_jurisdiction",
+        "tax_period",
+        "source_evidence",
+        "data_gaps"
+      ],
+      "properties": {
+        "basis_state": {
+          "enum": [
+            "gross_documented",
+            "net_documented",
+            "net_calculated",
+            "unknown",
+            "mixed"
+          ]
+        },
+        "tax_jurisdiction": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "IT",
+            "ES",
+            "EU",
+            null
+          ]
+        },
+        "tax_period": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9]{4}(-[0-9]{2})?$"
+        },
+        "source_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_provenance"
+          }
+        },
+        "data_gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gap"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "basis_state": {
+                "enum": [
+                  "gross_documented"
+                ]
+              }
+            },
+            "required": [
+              "basis_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "source_evidence": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "basis_state": {
+                "const": "net_documented"
+              }
+            },
+            "required": [
+              "basis_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "tax_jurisdiction": {
+                "type": "string"
+              },
+              "tax_period": {
+                "type": "string"
+              },
+              "source_evidence": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "basis_state": {
+                "const": "net_calculated"
+              }
+            },
+            "required": [
+              "basis_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "tax_jurisdiction": {
+                "type": "string"
+              },
+              "tax_period": {
+                "type": "string"
+              },
+              "source_evidence": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "basis_state": {
+                "enum": [
+                  "unknown"
+                ]
+              }
+            },
+            "required": [
+              "basis_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "data_gaps": {
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/gap"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "amount_basis_unknown"
+                        },
+                        "severity": {
+                          "const": "blocking"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    }
+                  ]
+                },
+                "contains": {
+                  "properties": {
+                    "code": {
+                      "const": "amount_basis_unknown"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "basis_state": {
+                "const": "mixed"
+              }
+            },
+            "required": [
+              "basis_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "data_gaps": {
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/gap"
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "amount_basis_mixed"
+                        },
+                        "severity": {
+                          "const": "blocking"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    }
+                  ]
+                },
+                "contains": {
+                  "properties": {
+                    "code": {
+                      "const": "amount_basis_mixed"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
