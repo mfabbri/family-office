@@ -17,6 +17,9 @@ Al gate di incremento o release l'intera suite del repository deve terminare con
 ### Windows e sandbox
 
 - Un errore di accesso ACL/temp imposto dal sandbox non è né un pass né una deroga al gate: la suite resta non verificata finché non viene eseguita. Se il comando è necessario e il blocco è attribuibile al sandbox, richiedere l'escalation/permesso previsto, poi eseguire la suite completa e registrare il conteggio reale. Non cambiare il percorso temporaneo o la semantica del test solo per aggirare il controllo; correggere invece il test quando la verifica equivalente multipiattaforma è parte del contratto.
+- Invocare esplicitamente il Python del venv Engine, ad esempio `& .\family-office-engine\.venv\Scripts\python.exe -m unittest discover -s tests\unit -p 'test_*.py'` dalla root Engine; non usare il Python globale per una suite che dipende dalle librerie del repository.
+- Quando output di sottoprocessi o cleanup temporanei è molto esteso, acquisire il log in un file temporaneo del run e riportare exit code e riepilogo del runner (`Ran`, failure, errori, skipped). Non confondere righe `ERROR` stampate intenzionalmente da uno scenario CLI con il risultato del runner; la suite passa solo se il processo termina con exit code 0 e il conteggio unittest è 0/0/0.
+- A fine run rimuovere soltanto la directory temporanea creata da quel run, dopo aver verificato il path assoluto e che resti nel workspace. Lasciare intatti temporanei e dati untracked preesistenti.
 
 ## Review proportionality
 

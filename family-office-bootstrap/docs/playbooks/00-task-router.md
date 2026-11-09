@@ -28,6 +28,15 @@ Classificare il task prima di esplorare il repository. La classe T0–T5 governa
 
 Un GO locale chiude solo lo scope esaminato. Non usare il GO di un figlio o slice limitato per chiudere/sbloccare un parent. Dopo ogni verdetto ripetere il controllo della sequenza prima del passo seguente.
 
+Per selezionare un suffisso di remediation, verificare che risolva il blocker del parent più antico e registrare la dipendenza esplicita. Se roadmap e decision log documentano un gate NO-GO ma lo stato del parent è ancora `in_progress`, riallineare lo stato a `blocked` nello stesso aggiornamento solo quando l'evidenza lo giustifica; non cambiare stato solo per far passare il validator. I validator strutturali non sostituiscono il controllo manuale dei predecessori.
+
+## Ambiente Windows e integrità dei file
+
+- Eseguire i test e i validator con il Python del repository (`family-office-engine/.venv/Scripts/python.exe`), così dipendenze e risultati sono riproducibili.
+- Se PowerShell o il sandbox negano ACL sui temporanei, leggere l'errore completo e distinguere il problema d'ambiente da un failure applicativo. Per la suite obbligatoria usare il percorso di escalation previsto; non cambiare il test o la sua directory temporanea per ottenere un falso pass.
+- Per modificare Markdown con accenti o caratteri non ASCII, preferire patch puntuali o scrittura con encoding UTF-8 esplicito. Evitare riscritture PowerShell dell'intero file senza encoding dichiarato; controllare il diff per `?` sostitutivi, BOM o righe alterate.
+- Non ripulire directory temporanee o file untracked preesistenti. Eliminare soltanto un temporaneo creato dal task corrente dopo averne verificato il percorso assoluto dentro il workspace.
+
 ## Investment opportunity routing
 
 Usare `11-investment-opportunity.md` quando il task riguarda acquisto, gestione, finanziamento, noleggio, cash flow o confronto di asset produttivi, inclusi immobili, camper/veicoli, box, barche, fotovoltaico o piccole attività.

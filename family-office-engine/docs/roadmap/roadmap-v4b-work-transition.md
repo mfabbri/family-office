@@ -682,7 +682,7 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
 
 ### V4.14b-e - Spanish Knowledge contract reconciliation after b-d NO-GO
 
-**Stato:** `in_progress`
+**Stato:** `done`
 **Riapertura:** revalidation exact-hash del proprio scope sul candidato Knowledge aggiornato; il GO b-d non viene trasferito.
 **Tipo:** `docs`
 **Dipende da:** V4.14b-d (`done`, revalidation Sol/xhigh exact-hash GO Knowledge-only); b-e resta da verificare sul proprio scope.
@@ -691,16 +691,18 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
 **Fuori scope:** Rules, Tests, Engine, calcoli/date individuali, dati workspace, Art.57/Annex VIII matching o risultato UE.
 **Done quando:** review indipendente Sol/xhigh exact-hash senza finding materiale sul solo artefatto Knowledge; suite Engine completa 0 failure/errori/skipped; planner schema, roadmap audit, execution guardrails e diff-check validi. GO solo documentale, nessun runtime.
 **Stop:** qualsiasi incertezza giuridica o review NO-GO lascia l'incremento bloccato e ferma il downstream.
+
+**Esito review finale (2026-11-09): LIMITED GO Sol/xhigh exact-hash.** I tre hash della candidata sono rimasti invariati all'inizio e alla fine. Il reviewer ha dato GO ai guardrail v5, alla gerarchia pubblicazione BOE primaria/consolidato informativo/guida Seguridad Social e alla terminologia LGSS 205.1(b) con i due anchor 2/15; LIMITED GO al solo tracciato Annex VIII, limitato a `[2019-08-01, 2026-11-02)` e con gap dal 2026-11-02. Nessuna modifica o approvazione di Rules, Tests, Engine, runtime, calcoli o conclusioni individuali. b-f/g restano subordinati ai propri gate.
 **Autorizzazione:** nuovo ciclo autorizzato dall'utente il 2026-11-08; incremento correttivo minimo dopo b-d, budget ordinario due eventi sostanziali (editor + reviewer), scope limitato alla nota Knowledge.
 
 **Esito review (2026-11-08): NO-GO Sol/xhigh exact-hash.** SHA-256 iniziale/finale A16147F7D5B674B2B29259A8634077150EE93A9E9033801EAA611D0160F8BFF6. Finding: regola v5 non esplicita actual upper bound <= as_of_date, validita del pack per ogni data e ipotesi di continuita versionata oltre validita; fonti amministrative restano classificate sotto fonti primarie; cutoff Annex VIII non rinvia a un ledger locale riproducibile; 'decorre da alta' confonde accesso e decorrenza economica. GO sugli altri punti legali, ma il finding documentale mantiene Knowledge bloccata e non autorizza Rules/Engine.
 
 ### V4.14b-f - Spanish Knowledge temporal and source-provenance reconciliation
 
-**Stato:** `blocked`
+**Stato:** `done`
 **Review:** NO-GO Sol/xhigh exact-hash; SHA-256 `A6C6F07513ADFB08DF16246CADECB97598AAAECBC7C1A922CBDC8A7CD1AEAE3`.
 **Tipo:** `docs`
-**Dipende da:** V4.14b-e (`blocked`, NO-GO Sol/xhigh); micro-incremento correttivo limitato ai quattro finding esatti.
+**Dipende da:** V4.14b-e (`done`, LIMITED GO Sol/xhigh exact-hash); revalidation b-f limitata alla candidata Knowledge aggiornata, senza trasferire il verdetto b-e.
 **Obiettivo:** rendere la nota Knowledge coerente con v5 sulla validita temporale, la gerarchia delle fonti e la provenienza Annex VIII, senza introdurre alcun esito normativo nuovo.
 **Scope:** in `family-office-knowledge/international/spain-pension.md`: esplicitare actual.search_upper_bound <= as_of_date, copertura del rule pack per ogni data nell'intervallo e uso esclusivamente ipotetico, con ipotesi di continuita esplicita/versionata, oltre la validita nota; separare fonti normative primarie da guide amministrative anche nelle intestazioni e celle tabellari; linkare il ledger locale eu-annex-viii-applicability-evidence-v0.2.json e catalogo source-ledger eu-annex-viii-part-2-catalogue-v0.4.json con identificatori e cutoff [2019-08-01, 2026-11-02); sostituire 'decorre da alta' con formulazione LGSS 'accesso da alta/assimilada senza obbligo di cotizzare'.
 **Fuori scope:** modifiche ai file JSON/Schema del catalogo, Rules, Tests, Engine, matching Annex VIII, conclusioni nazionali/UE o runtime.
@@ -708,19 +710,37 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
 **Stop:** mismatch o provenienza insufficiente del ledger mantiene b-f blocked; nessun passo a Rules.
 **Autorizzazione:** prosecuzione del ciclo autorizzato dall'utente il 2026-11-08; incrementi subordinati a predecessori e gate indipendenti.
 
+**Riapertura 2026-11-09:** selezionata la revalidation indipendente b-f dopo il LIMITED GO b-e e la correzione source-authority b-g. La prima review sul candidato SHA-256 `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9` ha dato NO-GO per un unico finding: il rule pack deve coprire ogni data del range completo dichiarato, non solo le date candidate. La nota è stata corretta; candidato finale SHA-256 `5CA74B4CBE4DA7EBB74F5CBED3673FA3429BD9A4FE93F513AD7544D35D504833`. Una review finale exact-hash è pendente. Nessun GO si trasferisce; b-g resta bloccato. L'utente ha autorizzato tre incrementi in sequenza.
+
+**Esito finale (2026-11-09): GO Sol/xhigh exact-hash** sul candidato `5CA74B4CBE4DA7EBB74F5CBED3673FA3429BD9A4FE93F513AD7544D35D504833`, hash identico a inizio/fine review. La regola di copertura del rule pack ora include ogni data dell'intervallo dichiarato completo e rende ogni lacuna `unknown + data_gaps`; gerarchia fonti, ledger Annex VIII e anchor LGSS confermati. Suite Engine 884/0/0/0. Nessuna ricertificazione di Rules/Tests/Engine/runtime; b-g resta subordinato al proprio gate.
+
 ### V4.14b-g - Spanish Knowledge source-authority hierarchy
 
-**Stato:** `blocked`
-**Blocco sequenza:** predecessore V4.14b-c incompleto; review locale GO limitato, non trasferito al parent.
+**Stato:** `done`
+**Blocco sequenza:** riaperto dopo chiusura b-f; il precedente LIMITED GO era bound a una versione Knowledge precedente.
 **Selezione:** `selected` (doc-only)
 **Tipo:** `docs`
-**Dipende da:** V4.14b-f (`blocked`, review NO-GO exact-hash sopra indicato); questo micro-incremento corregge esclusivamente il finding sulla gerarchia dell'autorità delle fonti.
+**Dipende da:** V4.14b-f (`done`, GO Sol/xhigh exact-hash sul proprio scope); b-g richiede un proprio gate sul candidato Knowledge aggiornato.
 **Obiettivo:** separare i record di pubblicazione BOE ufficiale dai testi BOE consolidati informativi, rendendo esplicito il ruolo di ogni link nella lista fonti e nella matrice senza modificare l'analisi legale già approvata.
 **Scope:** solo `family-office-knowledge/international/spain-pension.md`; record diretti LGSS e RD 453/2022, etichette dei consolidati e della guida Seguridad Social, correzione dell'intestazione matrice a `V4.14b-g`.
 **Fuori scope:** Rules, Tests, Engine, runtime, calcoli, reinterpretazione legale, dati personali e workspace.
 **Done quando:** il finding source-authority è corretto e la review documentale può verificare i ruoli dei link; i PASS b-f restano invariati. Nessuna eleggibilità a valle o chiusura di V4.14.
 **Gate:** due eventi sostanziali al massimo (editor delegato e reviewer); qualsiasi NO-GO/PENDING mantiene b-g e il parent bloccati.
-**Esito locale (2026-11-08): GO limitato Sol/xhigh exact-hash, SHA-256 iniziale/finale `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`; source-authority corretto. b-g resta bloccato per ordine dei predecessori e non chiude b-f o b-c.
+**Esito locale precedente (2026-11-08): LIMITED GO Sol/xhigh exact-hash** sul candidato SHA-256 `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9`; source-authority corretto. Non si trasferisce al candidato corrente `5CA74B4CBE4DA7EBB74F5CBED3673FA3429BD9A4FE93F513AD7544D35D504833`. **Riapertura 2026-11-09:** selezionata la revalidation esatta b-g come incremento 2/3 dopo verifica della sequenza. Review Sol/xhigh NO-GO sul candidato `5CA74B4CBE4DA7EBB74F5CBED3673FA3429BD9A4FE93F513AD7544D35D504833`: il locator nella sezione consolidati puntava alla pubblicazione originale `/453` anziché al consolidato informativo `/453/con`; gli altri controlli source-authority sono GO. L'utente ha autorizzato una sola correzione bounded. Review finale Sol/xhigh: GO esatto sull'hash `C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92` (inizio=fine), limitato al finding source-authority. Suite Engine completa rieseguita nel venv del repository: 884 test, 0 failure, 0 errori, 0 skipped. Roadmap audit, execution guardrails, model-routing validation e `git diff --check` passano. b-g è `done` nel proprio scope; V4.14 resta `in_progress` e V4.15 `blocked`, quindi non si seleziona un incremento a valle.
+
+### V4.14b-h - Spanish first eligibility month pre-implementation revalidation
+
+**Stato:** `in_progress`
+**Tipo:** `audit`
+**Autorizzazione:** terzo incremento della sequenza di tre autorizzata dall'utente.
+**Dipende da:** V4.14 (`blocked`, gate normativo completo NO-GO); V4.14b-g (`done`, GO limitato source-authority sul Knowledge esatto); V4.14b-b (`done`, audit precedente NO-GO che non autorizza runtime). Questo audit è il micro-incremento minimo per riesaminare il gate del parent dopo la correzione documentale.
+**Obiettivo:** riaprire in modo read-only il gate pre-implementazione b-b sul Knowledge spagnolo aggiornato e sui Rule Pack, consumer e test esistenti, per stabilire se esiste ora un slice path-specific eseguibile del primo mese/data di eleggibilità nel solo Régimen General ordinario.
+**Scope:** verifica exact-hash di Knowledge, `statutory-retirement-general.json`, consumer spagnolo, validator Rules e test; confrontare requisiti, data di nascita/coorte, granularità giornaliera, hecho causante e percorsi RD 453/2022, requisito contributivo LGSS 205.1(b), stato assicurativo/obbligo/cessazione, periodo del pack e limiti UE.
+**Fuori scope:** modifiche a Knowledge/Rules/Tests/Engine, nuovi calcoli individuali, importi/pro-rata, riconoscimento, decorrenza economica, pagamento, altri regimi o sblocco della timeline IT/ES/UE.
+**Done quando:** review indipendente Sol/xhigh sul set esatto di hash produce GO o NO-GO esplicito con evidenza per ogni finding; il verdetto determina se un successivo implementatore è autorizzabile. Nessun runtime prima di un GO.
+**Gate:** il timeout o PENDING lascia b-h `in_progress`; NO-GO registra il blocker minimo senza tentare una correzione non autorizzata; GO è limitato al contratto path-specific esaminato e non chiude V4.14.
+
+**Esito bounded 2026-11-09: PENDING.** Sol/xhigh ha confermato che i sette hash iniziali corrispondono, ma entro due finestre bounded non ha completato mappatura dei test, confronto delle fonti primarie per ogni ramo, regressioni mirate o controllo finale degli hash. L’ispezione preliminare segnala consumer/regole a granularità mese. Nessun file modificato e nessuna implementazione autorizzata; b-h resta `in_progress`, senza ulteriori retry.
 
 ### V4.15 — Retirement bridge income composer
 

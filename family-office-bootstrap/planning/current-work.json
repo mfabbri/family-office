@@ -2,77 +2,83 @@
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
   "status": "in_progress",
-  "selected_at": "2026-11-08T21:46:30Z",
-  "updated_at": "2026-11-08T21:48:00Z",
+  "selected_at": "2026-11-09T19:02:06Z",
+  "updated_at": "2026-11-09T19:55:00Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-index.md",
       "section": "Algoritmo di selezione",
-      "reason": "b-c and b-d are done on their own exact-hash reviews; b-e is now the oldest incomplete predecessor, before b-f/g."
+      "reason": "b-g done; V4.14 is blocked by its documented full-contract normative NO-GO, so b-h is the minimum registered remediation audit. V4.15 remains ineligible."
     },
     {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.14b-e revalidation on the exact current Spanish Knowledge note",
-      "reason": "Reopen b-e and independently verify its original temporal, source, Annex VIII and LGSS wording findings; no inherited GO."
+      "section": "V4.14b-h Spanish first eligibility month pre-implementation revalidation",
+      "reason": "Third increment of the user-authorized sequence; b-b had a NO-GO and b-g has now closed the Knowledge source-authority finding."
     },
     {
       "path": "family-office-engine/docs/current-next-increment.md",
-      "section": "b-e contract reconciliation findings and scope",
-      "reason": "Current note has subsequent corrections; b-e status depends on its own exact review."
+      "section": "b-h pre-implementation review and operational current increment",
+      "reason": "Read-only exact-hash gate; no implementation before explicit GO."
     }
   ],
   "increment": {
-    "id": "V4.14b-e-SPANISH-KNOWLEDGE-CONTRACT-REVALIDATION",
-    "title": "Spanish Knowledge contract reconciliation revalidation",
-    "objective": "Independently revalidate the original b-e findings on the current exact Knowledge candidate; close b-e only on its own GO.",
+    "id": "V4.14b-h-SPANISH-ELIGIBILITY-PREIMPLEMENTATION-REVALIDATION",
+    "title": "Spanish first eligibility month pre-implementation revalidation",
+    "objective": "Reassess the previous b-b NO-GO against the corrected exact Knowledge note and existing Spanish pension rules, consumer and tests; define if any path-specific implementation is supported.",
     "scope": [
-      "Verify v5 actual.search_upper_bound <= as_of_date, complete-range rule-pack validity, versioned hypothetical continuity, continuous evidence family coverage, distinct no-candidate statuses and fail-closed data_gaps.",
-      "Verify legal publication versus informational BOE consolidation and administrative Seguridad Social guidance roles in headings, list and matrix.",
-      "Verify the local Annex VIII evidence ledger and catalogue IDs/digest, supported interval [2019-08-01, 2026-11-02), and gap from 2026-11-02; no national scheme or runtime inference.",
-      "Verify LGSS 205.1(b) alta/assimilada access terminology and both 2/15 anchors; scan whole note for contradictions."
+      "Verify the Spanish Knowledge source and source-authority corrections on the exact candidate.",
+      "Compare LGSS 205.1(b), RD 453/2022 paths, age/contribution predicates, daily date granularity and insurance/contribution/cessation facts against the existing rule pack and consumer.",
+      "Determine supported input/output, legal period, fail-closed data_gaps and EU coordination boundary.",
+      "Return exact-hash normative GO/NO-GO/PENDING with file/line evidence.",
+      "This is the registered minimum audit slice addressing blocked parent V4.14; it does not select V4.15 or close the parent."
     ],
     "out_of_scope": [
-      "Any Knowledge changes during review.",
-      "Rules, Tests, Engine, runtime, individual legal conclusions, calculations and personal workspace data."
+      "Any Knowledge/Rules/Tests/Engine changes.",
+      "Individual entitlement, date, amount, pro-rata, recognition, economic effect or payment.",
+      "Other Spanish regimes or full IT/ES/EU timeline."
     ],
     "candidate_files": [
       "family-office-knowledge/international/spain-pension.md",
-      "family-office-knowledge/international/eu-annex-viii-applicability-evidence-v0.2.json",
-      "family-office-knowledge/international/eu-annex-viii-part-2-catalogue-v0.4.json"
+      "family-office-rules/spain/statutory-retirement-general.json",
+      "family-office-engine/src/family_office_engine/services/spanish_statutory_pension.py",
+      "family-office-engine/src/family_office_engine/services/spanish_pension_rules.py",
+      "family-office-engine/tests/unit/test_spanish_statutory_pension.py",
+      "family-office-engine/tests/unit/test_spanish_pension_rules.py",
+      "family-office-engine/tests/unit/test_spanish_pension.py"
     ],
-    "stop_condition": "Any material b-e finding or pending review keeps b-e blocked; no b-f/g selection."
+    "stop_condition": "NO-GO/PENDING or source mismatch leaves V4.14 blocked and authorizes no implementation; no downstream V4.15 selection."
   },
   "verification": {
     "tests": [
-      "Full Engine suite: 884 tests, 0 failure, 0 errors, 0 skipped (rerun if implementation changes code or test behavior).",
-      "Planner JSON Schema validation.",
+      "No code or rule changes; parent Engine suite previously passed 884/0/0/0 using repository venv on 2026-11-09.",
       "Roadmap audit; execution guardrails; model-routing validation; git diff --check."
     ],
     "documentation_touchpoints": [
-      "family-office-knowledge/international/spain-pension.md",
       "family-office-engine/docs/current-next-increment.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-engine/docs/decision-log.md",
-      "family-office-bootstrap/docs/playbooks/00-task-router.md",
-      "family-office-bootstrap/planning/README.md",
-      "family-office-bootstrap/docs/playbooks/03-subagent-policy.md",
-      "family-office-bootstrap/docs/playbooks/07-normative-change.md"
+      "family-office-engine/docs/decision-log.md"
     ],
     "result": "pending",
-    "notes": "b-c and b-d have independent exact-hash GO on their own scopes, same Knowledge SHA256 F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9; full Engine suite 884/0/0/0 and governance pass. b-e is the next oldest incomplete predecessor; b-f/g remain downstream.",
+    "notes": "The reviewer confirmed the seven initial hashes but returned PENDING after two bounded windows: full test mapping, official primary-source comparison for each branch, targeted regressions and final reviewer hash check were not completed. Preliminary inspection indicates month-granular rules/consumer. Parent independently rechecked all seven candidate hashes after the review; all remain unchanged. No files changed and no implementation is authorized; no further retry.",
     "task_envelope": {
       "mode": "normative-change",
       "risk_domain": "pension",
-      "objective": "Independent exact-hash revalidation of the original b-e Knowledge contract findings.",
+      "objective": "Independent exact-hash revalidation of Spanish first-eligibility-month readiness, source-backed Knowledge and existing rules/consumer/tests.",
       "repositories": [
         "family-office-knowledge",
+        "family-office-rules",
         "family-office-engine"
       ],
       "read_set": [
-        "original b-e NO-GO and source review",
-        "current Spanish Knowledge note SHA256 F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9",
-        "v5 temporal contract, v8 Annex VIII evidence contract, local ledger/catalogue",
-        "official BOE publications/consolidation notices and Seguridad Social guidance"
+        "SHA256 C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92 family-office-knowledge/international/spain-pension.md",
+        "SHA256 B63D9A8D8A3CA1C94BFED4A119864E495FABF437D7424E766DF09D7BF93260EF family-office-rules/spain/statutory-retirement-general.json",
+        "SHA256 A57B0EAACBD8B5DCB10ED195A1B09F94F4CC2F18C182C16271EA4056CF4197B6 family-office-engine/src/family_office_engine/services/spanish_statutory_pension.py",
+        "SHA256 6EDADA4A0EE4D74DCA7E5ADF79D92B1256196EE52D21A44A24D25D50260022AF family-office-engine/src/family_office_engine/services/spanish_pension_rules.py",
+        "SHA256 B31467BA2E40286978CB68BDA680368C9F5CFE3522A127B86079B501DE521EAC family-office-engine/tests/unit/test_spanish_statutory_pension.py",
+        "SHA256 C174CE62F74F462C764EED62A169F1517EFEA369CD3D3E7861134EA48FC2F3D8 family-office-engine/tests/unit/test_spanish_pension_rules.py",
+        "SHA256 3A3232878A3CA48883C48CEAB76B656882AB8F874E8EDFF53AB2B9EA9C7BFF8F family-office-engine/tests/unit/test_spanish_pension.py",
+        "V4.14b-b prior NO-GO findings",
+        "official BOE LGSS/RD 453/2022 and Seguridad Social guidance; EU coordination boundary"
       ],
       "write_set": [
         "family-office-bootstrap/planning/current-work.json",
@@ -80,27 +86,34 @@
         "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
         "family-office-engine/docs/decision-log.md"
       ],
-      "test_command": "Full Engine suite 884/0/0/0; planner schema; roadmap audit; execution guardrails; model-routing validation; git diff --check.",
+      "test_command": "No code changes in this audit; existing Engine suite last passed 884/0/0/0 on 2026-11-09. Re-run governance validators and diff-check.",
       "stop_conditions": [
-        "material evidence/source mismatch",
+        "any material normative/source mismatch",
         "reviewer NO-GO/PENDING",
-        "any request to modify Rules/Tests/Engine or workspace data"
+        "any need to modify Knowledge/Rules/Tests/Engine before a fresh GO"
       ]
     }
   },
   "blockers": [
-    "V4.14 parent remains blocked; no overall pension date authorized.",
-    "b-e is the oldest incomplete predecessor under review; b-f/g remain blocked downstream."
+    "b-h normative gate remains PENDING after its bounded review window; no implementation is authorized and V4.14/V4.15 remain blocked."
   ],
   "session_notes": [
     "User requested durable playbook updates from the long session; four workflow documents now include the corrections.",
     "b-c and b-d are done Knowledge-only on their own exact-hash reviews; no GO transfers to other increments.",
-    "b-f/g remain blocked until b-e and any other predecessor gates close.",
-    "Il primo timebox bounded della review b-e ? scaduto; inviata una sola richiesta di stato/consegna. Nessun verdetto ancora ricevuto, quindi b-e resta in_progress e il gate ? review-pending."
+    "b-f is the oldest incomplete predecessor; b-g remains downstream until b-f closes.",
+    "2026-11-09: b-e exact-hash review delivered LIMITED GO on its own scope; Engine suite rerun 884/0/0/0 using repository venv.",
+    "2026-11-09: selected b-f for independent exact-hash revalidation on Knowledge SHA256 F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9. User authorized the next three increments in roadmap order.",
+    "2026-11-09: b-f closed after bounded correction and final Sol/xhigh exact-hash GO; Engine suite 884/0/0/0 passed.",
+    "2026-11-09: b-g selected as increment 2 of 3; prior GO requires current-hash revalidation.",
+    "2026-11-09: b-g final delivery reported NO-GO: RD consolidated reference pointed to original `/453`, while consolidated text is `/453/con`. User explicitly authorized one bounded correction and final exact-hash review; prior b-g source-authority GO does not transfer to the current candidate.",
+    "2026-11-09: applied the one user-authorized b-g fix (RD 453/2022 consolidated URL /453/con); candidate SHA256 C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92; final exact-hash review requested, no further retry authorized.",
+    "2026-11-09: final b-g Sol/xhigh exact-hash review GO; start/end hash C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92. Full Engine suite rerun under approved elevated execution after sandbox temp ACL failure.",
+    "2026-11-09: b-g completed after final exact-hash GO and full 884/0/0/0 suite. The third requested increment is not selected: active V4.14 parent remains in_progress and V4.15 is blocked; roadmap sequence forbids downstream work before resolving the parent blocker.",
+    "2026-11-09: b-h reviewer returned PENDING after one 60s window and one bounded delivery request/final window. Seven initial hashes matched; reviewer did not complete full mapping/source audit/final hash check. Parent independently rechecked all seven hashes unchanged. No code changes and no further retry."
   ],
   "next_action": {
     "mode": "review",
-    "description": "Obtain independent Sol/xhigh exact-hash verdict on b-e findings; no downstream selection on timeout/NO-GO."
+    "description": "Keep b-h in_progress; do not implement or select downstream work unless a new user-authorized review cycle resolves the pending normative gate."
   },
   "routing": {
     "policy_version": "3.1",
@@ -109,25 +122,43 @@
     "agent": "fo_normative_reviewer",
     "model": "gpt-5.6-sol",
     "reasoning_effort": "xhigh",
-    "rationale": "The candidate makes Spanish pension, source-authority and temporal-validity claims requiring independent normative review.",
+    "rationale": "This gate determines legal-source and temporal validity for Spanish pension eligibility before any executable rule or timeline work.",
     "trace": [
       {
-        "at": "2026-11-08T21:46:30Z",
+        "at": "2026-11-09T19:40:00Z",
         "event": "selected",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-        "reason": "Reopen the oldest incomplete predecessor b-e for its own exact-hash review before b-f/g."
+        "reason": "Third authorized increment: re-open prior Spanish first-eligibility-month NO-GO after b-g closed source-authority corrections; exact-hash review precedes any implementation."
       },
       {
-        "at": "2026-11-08T21:47:00Z",
+        "at": "2026-11-09T19:48:00Z",
         "event": "delegated",
         "tier": "critical",
         "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
         "reasoning_effort": "xhigh",
-        "reason": "Independent exact-hash revalidation of b-e source, temporal, Annex VIII and LGSS findings on the current note."
+        "reason": "Independent read-only exact-hash revalidation of the prior b-b Spanish eligibility pre-implementation NO-GO after closure of b-g; seven candidate hashes verified before handoff."
+      },
+      {
+        "at": "2026-11-09T19:50:00Z",
+        "event": "escalated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Single bounded status/delivery request after the initial 60-second review window returned no verdict; one final bounded wait, then leave b-h pending."
+      },
+      {
+        "at": "2026-11-09T19:55:00Z",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "PENDING after two bounded windows; seven initial hashes matched, but full mapping, primary-source comparison and reviewer final hashes were not completed. No runtime GO."
       }
     ]
   }
