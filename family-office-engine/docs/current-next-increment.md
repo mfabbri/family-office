@@ -1,5 +1,14 @@
 # Current Next Increment
 
+> **Stato operativo corrente (14 novembre 2026):** V4.14w-z-b `in_progress`, V4.14 parent `blocked`.
+> Le due pre-review Sol/xhigh sul binding v11/v0.3 sono rimaste `PENDING`, non NO-GO.
+> In base alla nuova strategia (vedere `roadmap/v4.14-exit-contract.md`), il prossimo task è il binding tecnico fail-closed con test pubblici, mantenendo immutati Knowledge/Rules; review normativa aggiuntiva solo in presenza di cambi semantici.
+> Le note storiche riportate sotto non definiscono il prossimo incremento: fanno fede le sezioni canoniche `## ID e titolo` e `## Stato` e il planner.
+
+## Session closure - 2026-11-14
+
+V4.14b-h ? chiuso come audit con exact-hash NO-GO; b-i ? done con GO Knowledge-only. b-j ? done con LIMITED GO Sol/xhigh exact-hash (attempt 2/3); focused 33/58 e suite Engine 917, zero failure/errori/skipped. Il terzo incremento autorizzato b-k ? il prossimo: integrazione CLI question-first del controllo evidenze art.3.1, senza valutare diritto o importi. V4.14 resta blocked fino al suo gate integrato IT/ES/UE.
+
 ## Stato aggiornato - 2026-11-08
 
 V4.14w-p/q/r/s/t/u sono chiusi nei rispettivi perimetri limitati. w-t prova currentness Part II e assenza IT/ES per territorio UE solo fino al 2026-11-01 incluso; dal 2026-11-02 resta `not_assessed + data_gaps`. Nessun mapping nazionale o parent closure e approvato.
@@ -89,22 +98,45 @@ Il controllo completo della roadmap ha rilevato b-c `blocked`, predecessore piu 
 
 Il review b-f ha mantenuto PASS su temporalità, ledger/Annex VIII e precedenti rilievi legali; resta un solo finding sulla gerarchia dell'autorità delle fonti: i link BOE consolidati erano sotto fonti normative ufficiali senza ruolo esplicito e mancavano i record di pubblicazione primaria diretta. Nessuna modifica a Rules, Tests, Engine o runtime.
 
-## Incremento corrente - V4.14b-h - Spanish first eligibility month pre-implementation revalidation
+## Incremento esaminato - V4.14b-h - Spanish first eligibility month pre-implementation revalidation
 
-**Stato:** `in_progress` - audit pre-implementazione, terzo della sequenza autorizzata.
-**Piano:** review normativa read-only del Knowledge spagnolo aggiornato e del Rule Pack/consumer/test esistenti per verificare se i finding dell'audit b-b siano risolti e delimitare un eventuale slice path-specific implementabile. La review deve fissare requisiti, data e percorso; stato assicurativo/obbligo/cessazione; validità temporale e limiti UE. Nessun codice o regola viene modificato da questo audit.
-**Fuori scope:** modifiche Knowledge/Rules/Tests/Engine, diritto individuale, importi/pro-rata, riconoscimento, decorrenza, pagamento e regimi diversi.
-**Gate:** Sol/xhigh exact-hash su tutti i sette artefatti registrati nel planner. Il reviewer ha confermato i sette hash iniziali, ma l'esito finale è PENDING: entro due finestre bounded non ha completato mappatura test, fonti primarie per ciascun ramo o hash finali. Solo GO autorizza un successivo slice di implementazione; nessun runtime è autorizzato ora. V4.14 è `blocked` dal gate normativo completo NO-GO; b-h resta `in_progress` e non sono previsti altri retry.
+**Stato:** `blocked` - NO-GO; no implementation.
+**Piano:** one final exact-hash review of whether current Knowledge, Spanish rules, consumer and tests support a narrow first eligibility date/month for ordinary Regimen General only. Check the b-b findings: RD 453/2022 paths, LGSS 205.1(b) predicates, daily versus monthly granularity, actual/hypothetical periods, insurance/contribution/cessation facts, rule-pack validity and EU limits. No code or rule changes in this audit.
+**Fuori scope:** individual outcomes, amounts/pro-rata, recognition, economic effect, payment, other regimes, full IT/ES/EU timeline.
+**Gate:** fresh Sol/xhigh exact-hash review on 2026-11-14 returned NO-GO with 7/7 start/end hashes equal. The minimum blocker is an executable, versioned single-path RG contract with daily granularity, correct LGSS/RD 453/2022 anchor, insurance/contribution/cessation facts, currentness enforcement and UE-unknown gaps. No implementation is authorized; V4.14 and V4.15 remain `blocked`.
+
+## Incremento completato - V4.14b-i - Spanish statutory-source currentness reconciliation
+
+**Stato:** `done` - GO exact-hash Knowledge-only, attempt 3/3.
+**Piano:** reconcile LGSS/RDL 31/2026 primary sources, affected provisions and legal effective dates for ordinary RG eligibility and contribution-obligation anchors; Knowledge-only update; exact-hash Sol/xhigh gate.
+**Verifica:** Sol/xhigh confirms candidate SHA256 `33CCE3C2036B596611701E4BAF582FA6AB27F0D60045B9A98528E2A2CE501B55` unchanged; 18 focused tests and full Engine 884 + 372 subtests, zero failures/errors/skips. GO limited to Knowledge/currentness; no Rules/runtime recertification.
+
+## Incremento completato - V4.14b-j - Spanish ordinary RG daily eligibility contract
+
+**Stato:** `done` - LIMITED GO exact-hash Sol/xhigh, attempt 2/3; validator-only scope.
+**Scope:** una sola via ordinaria RG; input giornalieri source-bound, status e obbligo contributivo; anchor LGSS 205.1(b); distinzione RD 453/2022; validità pack e gaps fail-closed. Contract e regressioni sintetiche su transizioni 2026/2027, prima di qualsiasi runtime.
+**Strategia parent validata da fo_architect:** b-j ha ora LIMITED GO exact-hash; b-k ? formalmente attivo come integrazione CLI evidence-only. Solo dopo b-k si torna ai blocker source/contract IT/ES/UE e all?integrazione timeline Engine; la timeline pensionistica resta non implementata. V4.14 si chiude solo con GO indipendente sul pacchetto integrato e suite/governance verdi. Il piano completo e gli stop gate sono nella roadmap V4.14.
+
+## Incremento completato - V4.14b-k - Spanish ordinary RG evidence validator CLI integration
+
+## Incremento corrente - V4.14w-x - Annex VIII Part II exact-currentness reconciliation after 2026-11-01
+
+**Stato:** `in_progress` - audit normativo read-only, nessuna modifica agli artefatti Knowledge/Rules/Engine.
+**Obiettivo:** determinare se la currentness di Annex VIII Part II e l'assenza IT/ES possano essere supportate oltre 2026-11-01 da una catena completa di atti UE ufficiali.
+**Evidenza preliminare:** il contratto corrente e Rules v10 hanno limite half-open 2026-11-02; PE-CONS 29/26 va verificato per pubblicazione/efficacia e modifiche di Part II. L'assenza in Part II non autorizza mapping nazionali.
+**Gate:** review indipendente Sol/xhigh exact-hash sulla source chain; se manca una fonte OJ completa, mantenere `not_assessed + data_gaps` e fermare lo slice. Nessuna modifica prima del verdetto. V4.14 resta blocked.
+
+
+**Stato:** `done` - LIMITED GO Sol/xhigh exact-hash al tentativo finale 3/3; solo CLI evidence-only.
+**Obiettivo:** esporre il contratto evidence-only approvato tramite CLI question-first, con output leggibile, facts/data_gaps/limiti/prossima azione; eventuale salvataggio solo nel workspace.
+**Fuori scope:** esiti legali o finanziari individuali, calcolo, timeline IT/ES/UE e chiusura V4.14.
+**Gate:** CLI report-only; nessuna scrittura; output pensionistici `not_assessed`; focused 41 test + 81 subtest; suite Engine 925/0/0/0; Sol/xhigh LIMITED GO exact-hash finale su hash `main.py=21243EF05F72FC09B5C7F15DA3E7AB639573180C3DA495F6FFEEF8668043370D` e test `3CDB5D07234DD4DC9B4ED59EEF98079F3AFAC4F0DF4D8B85929039C049303E6C`; audit, schema, guardrail e diff-check passano. V4.14 resta blocked dal gate integrato IT/ES/UE.
 
 ## Ultimo incremento completato - V4.14b-g - Spanish Knowledge source-authority hierarchy revalidation
 
-**Stato:** `done` - GO limitato al finding source-authority, exact-hash.
-
-**Piano:** correggere il solo locator del RD 453/2022 nella sezione consolidati da `/453` (pubblicazione originale) a `/453/con` (testo consolidato informativo), quindi verificare sul candidato esatto che pubblicazioni dirette BOE, consolidati informativi e guida amministrativa Seguridad Social siano distinti in intestazioni, lista fonti e matrice. Il precedente LIMITED GO b-g era legato all'hash `F9DB40C8024EB2966FE41EE691939B2107022B0405D8B05097EFB556A06D62B9` e non viene trasferito.
-
-**Fuori scope:** Rules, Tests, Engine, runtime, calcoli, reinterpretazione legale, dati personali e workspace.
-
-**Gate:** review indipendente Sol/xhigh exact-hash ha restituito NO-GO sul candidato `5CA74B4CBE4DA7EBB74F5CBED3673FA3429BD9A4FE93F513AD7544D35D504833`: il locator consolidato puntava alla pubblicazione originale `/453` invece che a `/453/con`; gli altri controlli source-authority sono GO. Con autorizzazione utente, applicata una sola correzione. Review finale Sol/xhigh: GO sul nuovo hash esatto `C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92` (inizio=fine), limitato al finding source-authority. La suite completa è in riesecuzione dopo un errore di ACL temporanei nel sandbox; b-g resta in corso e il terzo incremento non è selezionabile finché la suite non termina con 0 failure/errori/skipped. b-f è chiuso sul proprio scope, V4.14 resta bloccata.
+**Stato:** `done` - limited GO on source-authority, exact hash.
+**Esito:** corrected the RD 453/2022 consolidated locator from `/453` (original publication) to `/453/con` (informational consolidated text). Sol/xhigh verified the exact candidate hash `C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92` unchanged at review start/end; the direct BOE publication records and Seguridad Social guidance labels also passed. Full Engine suite in repository venv: 884 tests, 0 failures, 0 errors, 0 skipped. Roadmap audit, guardrails, model-routing validation and diff-check passed.
+**Limiti:** no Rules/Tests/Engine/runtime recertification. V4.14 remains `blocked` by its full-contract gate; no downstream increment is eligible.
 
 ## Ultimo incremento completato - V4.14z-b-a - Art. 57 minimum evidence contract parent reconciliation
 
@@ -1458,13 +1490,13 @@ V4.15b — Source-bound RITA fund-stream intake and validation.
 `done`
 
 ## ID e titolo
-V4.14b-h - Spanish first eligibility month pre-implementation revalidation
+V4.14w-z-b - EU pension consumer compatibility with Rules v11 and Annex v0.3
 
 ## Stato
-
+`in_progress`
 `in_progress`
 
-**Gate attivo:** audit normativo read-only Sol/xhigh exact-hash del Knowledge spagnolo, rule pack, consumer, validator e test; b-b aveva prodotto NO-GO e nessun runtime è autorizzato prima di un nuovo GO. b-g è chiuso sul proprio scope; V4.14 resta `blocked` dal gate normativo completo NO-GO, V4.15 `blocked`.
+**Gate attivo w-z-b:** consumer EU pubblico per Rules v11 e Knowledge Annex v0.3. Prima review normativa exact-hash del contratto esistente; poi implementazione minima per caricare solo le versioni e i digest esplicitamente supportati, con regressioni pubbliche sintetiche. Vietate inferenze da `absence`/`not_matched` a scheme match, eligibility, payer, importi o pagamenti. V4.14 resta blocked.
 ### Historical note: V4.14w-j closure
 
 V4.14w-j è chiusa nel perimetro Knowledge v0.28 / Rules v7 esaminato exact-hash. Le review normative e tecniche sono GO; suite mirate 92/0/0/0 e suite Engine completa 836/0/0/0. Roadmap audit, planner schema, execution guardrails e diff-check passano.
@@ -1565,3 +1597,46 @@ V4.13 è chiusa il 2026-10-11 con GO limitato post-review e 131 test focalizzati
 **Checkpoint ripristino baseline (2026-11-07):** schema v0.3 ripristinato esattamente a C42BAC3F8547263105E62275F439ECC977E17C5E16DB0566071BCE85FE404C45. Focused 7/0/0/0, suite Engine 848/0/0/0; schema v0.3 e v0.4 validi. v0.2/v0.3/v0.4 e Rules/runtime hash allineati. Review finale exact-version del v0.4 invariato pendente; w-p resta in_progress.
 
 **Esito finale (2026-11-07):** Sol/xhigh GO limitato, 12/12 hash corrispondenti. Schema v0.3 ripristinato al digest storico C42BAC3F8547263105E62275F439ECC977E17C5E16DB0566071BCE85FE404C45; v0.4 immutato. Test mirati 7/0/0/0, suite Engine 848/0/0/0; governance verde. w-p ? chiuso solo per il ledger non decisionale. V4.14w e V4.14 restano bloccati; il GO non abilita matching o conclusioni individuali.
+
+
+### Esito finale V4.14b-k - review attempt 3/3
+
+Sol/xhigh LIMITED GO exact-hash finale, entrambi gli hash invariati. b-k e done nel solo perimetro CLI evidence-only. Focused 41/81; suite Engine 925 passed + 453 subtests, 0 failures/errors/skips; governance OK. V4.14 resta blocked sul gate integrato IT/ES/UE.
+
+
+### V4.14w-x chiusa - audit exact-currentness Annex VIII Part II
+
+Sol/xhigh LIMITED GO exact-hash; i quattro artefatti esaminati sono invariati. Regulation (EU) 2026/2359 modifica Annex VIII Part I, non Part II. La catena ufficiale enumerata supporta Part II invariata e assenza IT/ES fino al 2026-11-14 incluso: intervallo half-open `[2019-08-01, 2026-11-15)`. Il GO chiude solo l?audit documentale; non approva matching, eligibility o consumer.
+
+### Piano attivo V4.14w-y
+
+1. Aggiungere Knowledge evidence contract/schema v0.3 e Rules v11 versionati, senza modificare v0.2, v10 o il catalogo v0.4.
+2. Limitare la currentness a `[2019-08-01, 2026-11-15)`; dal 2026-11-15 mantenere `not_assessed + data_gaps`.
+3. Testare i confini 1/2 e 14/15 novembre, la modifica Part-I-only, gli atti successivi e che l?assenza IT/ES non implichi eligibility.
+4. Eseguire suite Engine completa 0/0/0, review normativa exact-hash e controlli di governance.
+5. Chiudere solo w-y; V4.14 resta bloccata fino all?integrazione deterministica della timeline IT/ES/UE e al relativo gate integrato.
+
+
+**Checkpoint w-y review:** LIMITED GO exact-hash per Knowledge v0.3/schema e Rules v11; tre finding circoscritti ai test sintetici (ramo OJ non isolato, helper hard-coded, boundary 2026-11-16 assente). Una correzione test-only e una review finale exact-hash restano necessarie; V4.14 rimane bloccata sul gate integrato.
+
+
+**Chiusura w-y:** LIMITED GO esatto sul contratto Knowledge v0.3/schema e Rules v11; dopo i tre fix circoscritti, LIMITED GO exact-hash anche sul test aggiornato. Focused 6 e suite Engine 931, con 0 failure/error/skip; governance verde. Il test ? sintetico e non certifica il runtime. Versioni v0.2/v10 e catalogo v0.4 invariati. Il parent V4.14 resta bloccato; il passo successivo deve affrontare il gate integrato di fonti/contratti e timeline IT/ES/UE, senza trasferire i GO limitati di w-y.
+
+
+### V4.14w-z - piano attivo
+
+Review normativa indipendente exact-hash del pacchetto integrato prima dell'implementazione: matrice dei cinque eventi; schema candidato `pension-entitlement-timeline/v2`; Rules pensionistici IT, ES e UE, incluso Rules v11; servizi deterministici e regressioni pertinenti. Il gate deve mostrare per ogni evento/giurisdizione fonti, periodo, limiti e output `null + data_gaps` quando mancano basi.
+
+Il verdetto autorizza soltanto il passaggio successivo dell'integrazione deterministica, non la chiusura V4.14. NO-GO/PENDING si chiude solo come audit e seleziona il correttivo minimo del finding pi? antico. Nessun dato personale o calcolo individuale.
+
+
+### Esito V4.14w-z e piano attivo w-z-a
+
+Il gate integrato Sol/xhigh ? NO-GO exact-hash 13/13. Il blocker pi? antico ? la Knowledge matrix: versione e data review non allineate ai pack attuali, nessuna matrice evento?percorso?ID/versione Rule Pack?intervallo?granularit?. Sequenza minima registrata: (a) versionare la matrice Knowledge, (b) collegare consumer EU a Rules v11/v0.3 con regressioni pubbliche, (c) implementare il validatore/builder deterministico pubblico per v2 e i cinque eventi. Nessuna timeline individuale fino al gate integrato.
+
+**w-z-a:** Knowledge-only, documento nuovo immutabile. Per ogni evento e IT/ES/UE indicare fonti/ruoli, pack e periodo, output attuale (screening, mese, validator-only o nessun consumer) e gap stabile; non promuovere screening o mese a data esatta. Richiedere review Sol/xhigh exact-hash e suite Engine completa prima di chiudere lo slice.
+
+
+### Esito V4.14w-z-a e prossimo predecessore
+
+V4.14w-z-a ? chiusa con LIMITED GO exact-hash sul solo evidence contract e sull?integrazione nel citation index. CLI 32 citazioni/29 documenti/31 contratti/16 gap; test mirati 7/7; suite Engine 931/0/0/0. Nessuna semantica eseguibile o data individuale ? approvata. Dopo audit roadmap, il prossimo predecessore eleggibile ? w-z-b: consumer pubblico collegato a Rules v11 e Knowledge Annex v0.3. Poi servir? w-z-c per il builder/validator v2; solo il gate integrato successivo potr? rivalutare la chiusura V4.14.

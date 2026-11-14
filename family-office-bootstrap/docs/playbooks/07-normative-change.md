@@ -1,8 +1,8 @@
 # Normative Change
 
-Classificazione minima T4. Usare fonti autorevoli e dichiarare data di verifica, giurisdizione e periodo d'imposta.
+Classificazione T4 quando cambia la semantica normativa; per un binding tecnico a pack immutati usare T1–T3. Quando è coinvolta una fonte legale, dichiarare data di verifica, giurisdizione e periodo d'imposta.
 
-## Flow obbligatorio
+## Flow obbligatorio per nuove regole o nuove interpretazioni
 
 ```text
 authoritative source
@@ -57,3 +57,11 @@ Il risultato numerico resta deterministico; il modello può spiegare, citare e c
 - Il GO va qualificato per artefatto e perimetro. Una review di Knowledge/documentazione non ricertifica rules, consumer o engine e non rimuove gap che il reviewer non ha esaminato.
 - Per le pensioni, distinguere sempre il mese/data di eligibility path-specific dai requisiti computazionalmente soddisfatti, dal riconoscimento amministrativo, dalla decorrenza economica e dal primo pagamento. Il primo non implica gli altri e non può essere presentato come "inizio pensione" o data complessiva quando altri rami/Paesi hanno gap.
 - Alla chiusura aggiornare insieme planner, `current-next-increment.md`, roadmap e decision log quando impattati; registrare il prossimo passo concreto e i gap residui, non chain-of-thought.
+
+## Separazione dei gate: il codice non è un parere legale
+
+Usare il flusso `Knowledge → Rules → Tests → Engine` solo quando **cambia la semantica** giuridica o il perimetro di validità. Per un nuovo consumer che collega senza mutare versioni già revisionate, usare il percorso tecnico `verifica identità e hash → implementazione fail-closed → regressioni pubbliche → review tecnica`. Il GO della versione sorgente non si trasferisce come certificazione del consumer, ma non si richiede una nuova interpretazione normativa per il solo binding.
+
+Una data futura non coperta da pack vigente produce `null/not_assessed + data_gaps`; una proiezione può usare regole correnti con scenario e ipotesi esplicite senza presentarsi come entitlement. `freshness/review_due` è controllo di ammissibilità della conclusione normativa, non un divieto di eseguire test sul software o scenari ipotetici chiaramente etichettati. Nessuna indeterminazione amministrativa viene sostituita da data inventata.
+
+Verificare trigger sostanziali: nuova norma, atto successivo rilevante, cambio fonte, nuovo periodo, modifica regola/calcolo, ampliamento verso output giuridico prima non autorizzato, dato individuale. Se il trigger esiste, riesame indipendente necessario. Se non esiste, registrare il motivo della decisione e la review tecnica. Ulteriore dettaglio: `12-dual-gate-and-convergence.md`.

@@ -65,6 +65,219 @@
     "specific_contribution_months_within_lookback": 24,
     "specific_contribution_lookback_months": 180
   },
+  "ordinary_rg_daily_contract": {
+    "contract_version": "rd453-article-3.1-domestic-filing/v1",
+    "status": "validator_only_not_individual_eligibility",
+    "valid_from": "2026-06-16",
+    "valid_to": "2026-11-15",
+    "reviewed_through": "2026-11-14",
+    "source_evidence_as_of": "2026-11-14",
+    "path": "RD_453_2022_ARTICLE_3_1",
+    "application": {
+      "must_be_actual": true,
+      "filing_scope": "domestic_only",
+      "required_fields": [
+        "candidate_date",
+        "authoritative_filing_date",
+        "filing_evidence_ref",
+        "filing_conflicting"
+      ],
+      "conflict_flag_required": true,
+      "window_months": 3,
+      "window_boundary": "inclusive",
+      "month_arithmetic": "codigo_civil_article_5_1_date_to_date_last_day_when_no_equivalent"
+    },
+    "ordinary_rg_scope": {
+      "required_evidence_ref": true,
+      "excluded_article_3_2_branches": [
+        "3.2.a",
+        "3.2.b",
+        "3.2.c",
+        "3.2.d",
+        "3.2.e"
+      ],
+      "generic_no_special_case_boolean_is_insufficient": true
+    },
+    "lgss_205_1_b": {
+      "anchor_status": "not_assessed_without_individual_status_obligation_and_cessation_evidence",
+      "source_provision": "Articulo 205.1(b)"
+    },
+    "excluded": [
+      "article_4_recognition_economic_effects_and_payment",
+      "eu_periods_aggregation_and_pro_rata",
+      "individual_pension_calculation",
+      "individual_eligibility_determination"
+    ],
+    "required_source_roles": [
+      "primary_publication",
+      "official_consolidated_consultation",
+      "primary_publication_currentness_delta"
+    ],
+    "human_review_required": true,
+    "validity_semantics": "half_open",
+    "minimum_candidate_date": "2022-06-16",
+    "article_3_2_exclusion_branches": [
+      "3.2.a",
+      "3.2.b",
+      "3.2.c",
+      "3.2.d",
+      "3.2.e"
+    ],
+    "generic_no_special_case_boolean_is_insufficient": true,
+    "article_3_2_exclusion_conflict_flag_required": true,
+    "article_3_3_exclusion": {
+      "source_provision": "Articulo 3.3",
+      "required_finding": "not_applicable",
+      "conflict_flag_required": true,
+      "required_evidence_ref": true
+    },
+    "required_source_provisions": {
+      "boe.rd-453-2022.official-publication": [
+        "Articulo 3.1",
+        "Articulo 3.2.a-e",
+        "Articulo 3.3",
+        "Disposicion transitoria unica",
+        "Disposicion final decima"
+      ],
+      "boe.codigo-civil.official-publication": [
+        "Articulo 5.1"
+      ],
+      "boe.lgss.rdl-8-2015.official-publication": [
+        "Articulos 165-166",
+        "Articulo 205.1(b)",
+        "Articulo 205.3",
+        "Articulo 144.4"
+      ],
+      "boe.lgss.rdl-8-2015.current-consolidated-2026-11-14": [
+        "Articulos 165-166",
+        "Articulo 205.1(b)",
+        "Articulo 205.3",
+        "Articulo 144.4"
+      ],
+      "boe.rdl-31-2026.official-publication": [
+        "Articulo primero.Dos (modifies LGSS 144.4)",
+        "Disposicion final cuarta.2"
+      ],
+      "boe.rdl-35-2026.official-publication": [
+        "Disposicion final tercera",
+        "Disposicion final decima"
+      ]
+    },
+    "required_source_ids": [
+      "boe.rd-453-2022.official-publication",
+      "boe.codigo-civil.official-publication",
+      "boe.lgss.rdl-8-2015.official-publication",
+      "boe.lgss.rdl-8-2015.current-consolidated-2026-11-14",
+      "boe.rdl-31-2026.official-publication",
+      "boe.rdl-35-2026.official-publication"
+    ],
+    "source_refs": [
+      {
+        "source_id": "boe.rd-453-2022.official-publication",
+        "title": "Real Decreto 453/2022, regulacion de la determinacion del hecho causante y de los efectos economicos de la pension de jubilacion",
+        "authority": "Agencia Estatal Boletin Oficial del Estado",
+        "jurisdiction": "ES",
+        "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2022-9850",
+        "retrieved_on": "2026-11-14",
+        "reviewed_on": "2026-11-14",
+        "next_review_due": "2027-02-12",
+        "provisions": [
+          "Articulo 3.1",
+          "Articulo 3.2.a-e",
+          "Articulo 3.3",
+          "Disposicion transitoria unica",
+          "Disposicion final decima"
+        ],
+        "source_role": "primary_publication"
+      },
+      {
+        "source_id": "boe.codigo-civil.official-publication",
+        "title": "Codigo Civil, articulo 5.1",
+        "authority": "Agencia Estatal Boletin Oficial del Estado",
+        "jurisdiction": "ES",
+        "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1889-4763",
+        "retrieved_on": "2026-11-14",
+        "reviewed_on": "2026-11-14",
+        "next_review_due": "2027-02-12",
+        "provisions": [
+          "Articulo 5.1"
+        ],
+        "source_role": "official_consolidated_consultation"
+      },
+      {
+        "source_id": "boe.rdl-31-2026.official-publication",
+        "title": "Real Decreto-ley 31/2026",
+        "authority": "Agencia Estatal Boletin Oficial del Estado",
+        "jurisdiction": "ES",
+        "url": "https://www.boe.es/eli/es/rdl/2026/10/20/31",
+        "retrieved_on": "2026-11-14",
+        "reviewed_on": "2026-11-14",
+        "next_review_due": "2027-02-12",
+        "provisions": [
+          "Articulo primero.Dos (modifies LGSS 144.4)",
+          "Disposicion final cuarta.2"
+        ],
+        "source_role": "primary_publication_currentness_delta"
+      },
+      {
+        "source_id": "boe.rdl-35-2026.official-publication",
+        "title": "Real Decreto-ley 35/2026",
+        "authority": "Agencia Estatal Boletin Oficial del Estado",
+        "jurisdiction": "ES",
+        "url": "https://www.boe.es/eli/es/rdl/2026/11/10/35",
+        "retrieved_on": "2026-11-14",
+        "reviewed_on": "2026-11-14",
+        "next_review_due": "2027-02-12",
+        "provisions": [
+          "Disposicion final tercera",
+          "Disposicion final decima"
+        ],
+        "source_role": "primary_publication_currentness_delta"
+      },
+      {
+        "source_id": "boe.lgss.rdl-8-2015.official-publication",
+        "title": "Real Decreto Legislativo 8/2015, publicacion oficial",
+        "authority": "Agencia Estatal Boletin Oficial del Estado",
+        "jurisdiction": "ES",
+        "url": "https://www.boe.es/boe/dias/2015/10/31/pdfs/BOE-A-2015-11724.pdf",
+        "retrieved_on": "2026-11-14",
+        "reviewed_on": "2026-11-14",
+        "next_review_due": "2027-02-12",
+        "provisions": [
+          "Articulos 165-166",
+          "Articulo 205.1(b)",
+          "Articulo 205.3",
+          "Articulo 144.4"
+        ],
+        "source_role": "primary_publication"
+      },
+      {
+        "source_id": "boe.lgss.rdl-8-2015.current-consolidated-2026-11-14",
+        "title": "Real Decreto Legislativo 8/2015, texto consolidado consultado al 2026-11-14",
+        "authority": "Agencia Estatal Boletin Oficial del Estado",
+        "jurisdiction": "ES",
+        "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724",
+        "retrieved_on": "2026-11-14",
+        "reviewed_on": "2026-11-14",
+        "next_review_due": "2027-02-12",
+        "provisions": [
+          "Articulos 165-166",
+          "Articulo 205.1(b)",
+          "Articulo 205.3",
+          "Articulo 144.4"
+        ],
+        "source_role": "official_consolidated_consultation"
+      }
+    ],
+    "required_source_roles_by_id": {
+      "boe.rd-453-2022.official-publication": "primary_publication",
+      "boe.codigo-civil.official-publication": "official_consolidated_consultation",
+      "boe.lgss.rdl-8-2015.official-publication": "primary_publication",
+      "boe.lgss.rdl-8-2015.current-consolidated-2026-11-14": "official_consolidated_consultation",
+      "boe.rdl-31-2026.official-publication": "primary_publication_currentness_delta",
+      "boe.rdl-35-2026.official-publication": "primary_publication_currentness_delta"
+    }
+  },
   "ordinary_retirement_age_schedule": [
     {
       "from_year": 2026,

@@ -19,3 +19,7 @@ La chiusura della sessione non implica il completamento dell'incremento: se revi
 - altre roadmap: cambia una dipendenza reale.
 
 Evitare aggiornamenti cosmetici ripetuti che aumentano diff e contesto senza valore operativo.
+
+## Anti-stallo e fonte canonica
+
+`current-next-increment.md` conserva lo storico ma espone in testa un riepilogo di stato attivo; l'identità canonica resta la coppia `## ID e titolo` + `## Stato` verificata da `roadmap_audit.py`. Un riepilogo storico non prevale sulla sezione canonica. Non aggiungere un altro micro-incremento per la stessa revisione senza nuovo finding/versione: preferire `human_review_required` e gate software separate. Applicare l'exit contract `family-office-engine/docs/roadmap/v4.14-exit-contract.md` senza rinumerare gli incrementi esistenti o cambiare a mano lo stato del parent.

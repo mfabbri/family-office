@@ -39,3 +39,11 @@ git diff --check
 ## Fallback
 
 Se un modello non è disponibile nel client/account, il fallback deve essere esplicito nel planner. Non reintrodurre profili project-local solo per gestire il fallback.
+
+## Audit best practices OpenAI — 2026-11-14
+
+Il documento OpenAI dell'11 settembre 2026 raccomanda AGENTS concisi e contestuali, skill con trigger specifici e progressive disclosure, meno itinerari di istruzioni, e autonomia con criteri di done osservabili. La patch `dual-gate-v4.14` applica questi principi ai playbook e alle tre skill, senza cambiare `.codex/config.toml` né i TOML degli agent: il validator v3.1 e la compatibilità con il client installato hanno priorità. Verificare con `codex --version` e con il catalogo modelli effettivamente disponibile prima di una futura migrazione GPT-6/Astra.
+
+Gli attuali `sandbox_mode = workspace-write`, `approval_policy = on-request` e `agents.max_concurrent_threads_per_session` risultano ancora opzioni riconosciute nella documentazione ufficiale Codex. Conservare i permessi restrittivi, i limiti di thread e gli hook revisionati; non impostare scorciatoie senza autorizzazione.
+
+Controllare eventuali conflitti tra le nuove regole di `AGENTS.md` e i file più specifici dei sottorepository. Per la release del consumer pensionistico distinguere output `software_ready` da `normative_ready`.

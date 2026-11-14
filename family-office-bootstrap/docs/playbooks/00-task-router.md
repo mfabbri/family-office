@@ -14,13 +14,21 @@ Classificare il task prima di esplorare il repository. La classe T0–T5 governa
 ## Procedura
 
 1. Identificare goal, output, vincoli e done-when.
-2. Assegnare una sola classe primaria; usare la più alta se il task attraversa più classi.
+2. Assegnare la classe al **cambiamento effettivo della fase**: toccare un consumer pensionistico senza modificare regole/interpretazioni è T1–T3 tecnico, non automaticamente T4. Per una nuova semantica pensionistica/fiscale usare T4 e gate specialistico.
 3. Applicare `01-context-budget.md`.
 4. Creare/aggiornare il task envelope in `../../planning/current-work.json`.
 5. Scegliere agent/modello con `02-model-routing.md` e `$family-office-model-router`.
 6. Registrare il routing prima della delega.
 7. Aprire un solo playbook specifico, più testing/review se necessario.
 8. Aumentare classe, contesto, reasoning o modello solo quando emerge un trigger documentato.
+
+## Ripresa dopo interruzione e uscita dal loop
+
+- Riprendere dal planner e dall'ultimo checkpoint verificabile in roadmap/current-next/decision log; la trascrizione della sessione non e' la fonte dello stato. Confrontare il worktree e gli hash registrati prima di ripetere test o review, preservando modifiche e file untracked preesistenti.
+- Se un reviewer o un incremento figlio si e' chiuso senza verdetto, mantenere `PENDING` e il parent aperto. Riprendere lo stesso thread e lo stesso candidato quando possibile; non creare un reviewer sostitutivo per ottenere un secondo esito sul medesimo tentativo.
+- Dopo un gate `LIMITED GO`, chiudere solo lo slice e rivalutare la sequenza dal predecessore incompleto piu' antico. Un child GO, una suite verde o una review documentale non sostituiscono il gate integrato richiesto dal parent.
+- Un NO-GO integrato deve diventare una sequenza finita di blocker ordinati, con dipendenze e criterio di uscita verificabile per ciascuno. Non riaprire audit su artefatti chiusi e immutati senza nuova evidenza o una dipendenza che ne richieda la revisione.
+- Fermare i retry quando termina il budget esplicito. Registrare nel planner l'ultimo esito, gli hash, il blocker residuo e una `next_action`; un nuovo ciclo richiede autorizzazione riferita a versione, ruolo, scope, tentativi e timebox.
 
 ## Roadmap eligibility
 
@@ -61,3 +69,7 @@ Escalare quando emerge almeno uno dei seguenti elementi:
 - leva finanziaria o fiscalità che cambia il ranking dell'investimento.
 
 Non escalare solo perché il repository è grande.
+
+## Precedenza della policy anti-loop (dal 2026-11-14)
+
+La sezione storica su review PENDING descrive la conservazione delle evidenze, **non** autorizza retry indefiniti né un blocco totale del software. Applicare `12-dual-gate-and-convergence.md`: classificare il diff per impatto semantico, separare Software Ready da Normative Ready, attribuire PENDING al solo output giuridico interessato. Dopo due tentativi senza consegna sul medesimo hash e sulla stessa domanda non creare nuovi reviewer; registrare `human_review_required`, proseguire con l'implementazione tecnica fail-closed soltanto se non modifica regole, non esercita un GO mancante e non produce decisioni non supportate. Ogni rilascio di conclusioni giuridiche rimane soggetto ai gate di loro competenza.

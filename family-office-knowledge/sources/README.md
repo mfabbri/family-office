@@ -4,6 +4,8 @@
 
 Le fonti mancanti o non ancora strutturate devono restare visibili come gap nell'indice; non aggiungere date, autorita' o stato per deduzione. Usare `source-template.md` per nuove fonti e seguire `knowledge -> rules -> tests -> engine` quando cambia il significato normativo.
 
+Il catalogo strutturato e' anche il punto di authoring per associare nuove fonti e documenti Knowledge: al momento non esiste un comando CLI che scriva queste associazioni. Ogni modifica va quindi validata con il builder dell'indice citazioni e con la regressione del corpus, mantenendo esplicite le finestre di validita' non verificate.
+
 ## Semantica temporale
 
 Nel catalogo `valid_from` e `valid_to` delimitano la finestra nella quale il progetto ha verificato la fonte come applicabile al relativo uso. Non rappresentano automaticamente le date giuridiche originarie di entrata in vigore o abrogazione. Quando la finestra verificata non e' disponibile, i campi restano `null` e il retrieval corrente deve escludere la fonte con stato `unknown_validity`.

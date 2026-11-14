@@ -85,3 +85,11 @@ Riportare soltanto:
 - risultato della suite completa al gate: failure/error/skip, tutti pari a 0;
 - rischi/gap residui;
 - stato roadmap, se applicabile.
+
+## Gate indipendenti e test proporzionati
+
+- **Software readiness**: validazione ID/version/hash/periodi, test mirati, regressioni del consumer pubblico, non-propagazione `not_assessed`/`not_matched`, privacy, suite completa con 0 failure/error/skip al gate di chiusura.
+- **Normative readiness (per conclusione)**: legge/fonte, percorso, periodo, fatti disponibili, review specialistica ex-version ove richiesta. `PENDING`/`NO-GO` vieta l'output normativo corrispondente, non l'esecuzione dei test o l'implementazione fail-closed di un binding già circoscritto.
+- **Scenario readiness**: un'ipotesi sul futuro può essere simulata solo se è riconoscibile come ipotesi, e non è presentata come requisito o decorrenza legalmente accertata.
+- Per modifiche a sola compatibilità non riaprire automaticamente una review normativa già terminata sul pack invariato. Riesaminare invece i test e il comportamento **del consumer**; escalation specialistica solo su trigger verificabile.
+- Evitare suite complete ripetute senza diff; manteniamo l'obbligo 0/0/0 per il gate finale e per le piattaforme dichiarate supportate. Non mascherare failure ambientali come pass.

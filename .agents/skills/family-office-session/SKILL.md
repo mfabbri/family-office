@@ -1,45 +1,14 @@
 ---
 name: family-office-session
-description: Avvia e chiude una sessione Family Office AI con contesto minimo, task envelope, roadmap audit e guardrail deterministici.
+description: Riprende un incremento Family Office AI dalla roadmap e chiude il lavoro con test, evidenze e gestione di blocker.
 ---
 
-# Family Office AI session
+# Sessione Family Office AI
 
-## Input minimo
+Se il task è sulla roadmap, leggi planner, indice roadmap, `current-next-increment.md` e la sola roadmap attiva. Se è un fix locale, leggi invece solo i file utili. Per selezionare incrementi esegui `roadmap_audit.py` e non saltare predecessori.
 
-Leggi:
+Registra un task envelope minimale (`objective`, `scope`, `write_set`, `test_command`, `stop_conditions`) nel planner; chiama `$family-office-model-router` **solo quando serve una delega**.
 
-1. `AGENTS.md`;
-2. `family-office-bootstrap/planning/current-work.json`;
-3. `family-office-engine/docs/current-next-increment.md`;
-4. solo la roadmap attiva e i contratti direttamente necessari.
+Implementa la minima modifica autorizzata, prova prima i test pertinenti, quindi la suite completa al gate di incremento. Conserva `null+data_gaps` per contenuti giuridicamente non valutabili. Distingui software readiness e normative readiness in base a `12-dual-gate-and-convergence.md`. Un reviewer in timeout non va rieseguito sul medesimo hash senza evidenza nuova.
 
-Prima di selezionare/implementare un incremento funzionale esegui `roadmap_audit.py`.
-
-## Task envelope
-
-Prima di modificare file registra nel planner:
-
-```yaml
-mode: discovery-lite | docs-edit | scoped-fix | feature-slice | quality-slice | normative-change | architecture-review
-risk_domain: general | privacy | tax | pension | financial | compliance
-objective: una frase verificabile
-repositories: []
-read_set: []
-write_set: []
-test_command: ""
-stop_conditions: []
-```
-
-Usa progressive disclosure e i limiti di `docs/playbooks/01-context-budget.md`.
-
-## Routing
-
-Dopo il task envelope usa `$family-office-model-router`. Il parent Luna/medium e'
-un router/controller e delega task medium/review/high/critical al custom agent previsto.
-
-## Chiusura
-
-Aggiorna planner, test/result e `next_action`. Aggiorna roadmap/current-next/decision log
-solo se la modifica li impatta semanticamente. Non anticipare un nuovo incremento solo
-per riempire il planner.
+Aggiorna roadmap, planner e decision log solo quando cambia la loro semantica; al gate esegui `validate-execution-guardrails.py`. Riporta done/blocked e prossima azione concreta. Non autoaprire l'incremento successivo prima di rispettare le dipendenze.

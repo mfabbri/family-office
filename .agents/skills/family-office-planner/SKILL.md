@@ -1,36 +1,12 @@
 ---
 name: family-office-planner
-description: Mantiene lo stato operativo persistente del micro-incremento senza sostituire roadmap, current-next-increment o stato verificabile del codice.
+description: Seleziona o riprende il micro-incremento Family Office AI e mantiene una sola fonte di stato operativo verificabile.
 ---
 
-# Family Office AI persistent planner
+# Planner persistente
 
-## Autorita'
+Fonti: `family-office-engine/docs/roadmap/roadmap-index.md` e roadmap attiva per ordine/stati; `family-office-engine/docs/current-next-increment.md` per piano corrente; `family-office-bootstrap/planning/current-work.json` per esecuzione/routing; codice+test per realtà implementativa.
 
-1. `roadmap-index.md`, roadmap attiva e decision log definiscono direzione e priorita';
-2. `current-next-increment.md` conserva il piano narrativo dell'incremento corrente;
-3. `planning/current-work.json` conserva lo stato operativo minimo e il routing;
-4. codice e test mostrano lo stato implementativo reale.
+Se planner è `selected`/`in_progress`, validalo contro codice e roadmap e riprendi; altrimenti ricalcola il predecessore più antico non completato. Non inferire `done` da un GO parziale o dai test verdi; `roadmap_audit.py` e i gate dell'incremento restano necessari.
 
-## Start
-
-1. Leggi `family-office-bootstrap/planning/current-work.json`.
-2. Se `selected` o `in_progress`, verifica repository, roadmap audit e stop condition.
-3. Se non e' piu' valido, marca `superseded` e ricalcola con l'algoritmo di `roadmap-index.md`.
-4. Se `uninitialized`, `completed` o `superseded`, seleziona un solo micro-incremento valido.
-5. Non inferire completion dal planner: verifica codice, test e documentazione.
-
-## Selection record
-
-Registra roadmap/section, obiettivo, scope/out-of-scope, file candidati, task envelope,
-test mirati, stop condition e routing iniziale.
-
-## Close
-
-- incompleto e valido: `in_progress` + `resume`;
-- bloccato: `blocked` + `review`/`recalculate`;
-- stop condition raggiunta e test accettabili: `completed` + `recalculate`;
-- invalidato: `superseded` + `recalculate`.
-
-Non salvare dati personali, risultati finanziari sensibili, chain-of-thought o telemetria
-provider nel planner.
+Per V4.14 distinguere blocker giuridico, implementazione tecnica fail-closed e simulazione di scenario secondo `12-dual-gate-and-convergence.md`. Dopo due review inconcludenti dello stesso pacchetto fermare i retry, registrare richiesta umana mirata, non aprire suffissi ciclici. Aggiorna solo i documenti di stato impattati; non registrare dati personali o chain-of-thought.

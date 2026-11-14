@@ -83,6 +83,11 @@ from family_office_engine.services.spanish_statutory_pension import (
     SpanishStatutoryPensionError,
     estimate_spanish_statutory_pension,
 )
+from family_office_engine.services.spanish_pension_rules import (
+    SpanishPensionRulesError,
+    load_rule_pack,
+    validate_ordinary_rg_daily_contract,
+)
 from family_office_engine.services.eu_pension_coordination import (
     EuPensionCoordinationError,
     coordinate_it_es_pensions,
@@ -1470,6 +1475,114 @@ def print_validate(status: Mapping[str, bool], environ: Mapping[str, str] | None
         path = resolve_repo(name, environ)
         state = "OK" if ok else "MISSING"
         print(f"{name}: {state} ({path})")
+
+
+def _yes_no_answer(prompt: str) -> bool:
+    return input(prompt).strip().lower() in {"y", "yes", "s", "si"}
+
+
+def _prompt_conflict_status(label: str) -> bool | None:
+    """Return False for explicitly non-conflicting, True for conflicting, and None for unknown."""
+    while True:
+        value = input(f"{label} [non-conflicting/conflicting/unknown]: ").strip().lower().replace("_", "-")
+        if value in {"non-conflicting", "no-conflict"}:
+            return False
+        if value == "conflicting":
+            return True
+        if value in {"", "unknown", "not-assessed"}:
+            return None
+        print("Value not recognized. Enter non-conflicting, conflicting, or unknown.")
+
+
+def run_pension_es_evidence_wizard(rule_pack_path: Path, as_of_date: str) -> int:
+    """Ask only for the approved ordinary-RG evidence contract; never save or assess a pension."""
+    print("Spanish ordinary RG evidence check: report only; no files are written.")
+    print("Question: Is the evidence for this documented ordinary Spanish RG application complete for the limited contract?")
+    assessment_date = input(f"Assessment date [{as_of_date}]: ").strip() or as_of_date
+    candidate_date = input("Documented candidate/application date (YYYY-MM-DD): ").strip()
+    filing_date = input("Authoritative Spanish filing date (YYYY-MM-DD): ").strip()
+    actual_application = _yes_no_answer("Is this an actual filing? [y/N]: ")
+    domestic_filing = _yes_no_answer("Is the filing domestic in Spain? [y/N]: ")
+    filing_evidence_ref = input("Filing evidence reference: ").strip()
+    filing_scope_evidence_ref = input("Domestic-filing scope evidence reference: ").strip()
+    filing_conflicting = _prompt_conflict_status("Filing evidence conflict status")
+    ordinary_rg = _yes_no_answer("Is ordinary RG scope documented? [y/N]: ")
+    ordinary_rg_ref = input("Ordinary RG scope evidence reference: ").strip()
+
+    exclusions: dict[str, dict[str, Any]] = {}
+    for branch in ("3.2.a", "3.2.b", "3.2.c", "3.2.d", "3.2.e"):
+        documented_not_applicable = _yes_no_answer(
+            f"Is RD 453/2022 art. {branch} documented as not applicable? [y/N]: "
+        )
+        conflicting = _prompt_conflict_status(f"Art. {branch} evidence conflict status")
+        evidence_ref = input(f"Art. {branch} evidence reference: ").strip()
+        exclusions[branch] = {
+            "provision": branch,
+            "finding": "not_applicable" if documented_not_applicable else "not_assessed",
+            "conflicting": conflicting,
+            "evidence_ref": evidence_ref,
+        }
+
+    article_3_3_not_applicable = _yes_no_answer(
+        "Is RD 453/2022 art. 3.3 documented as not applicable? [y/N]: "
+    )
+    article_3_3_conflicting = _prompt_conflict_status("Art. 3.3 evidence conflict status")
+    article_3_3_ref = input("Art. 3.3 evidence reference: ").strip()
+    eu_periods_status = input("EU/foreign periods status [none/unknown/present] (unknown): ").strip().lower() or "unknown"
+    eu_periods_ref = ""
+    if eu_periods_status == "none":
+        eu_periods_status = "none_proven"
+        eu_periods_ref = input("Evidence reference confirming no EU/foreign periods: ").strip()
+
+    evidence = {
+        "application_kind": "actual" if actual_application else "not_assessed",
+        "candidate_date": candidate_date,
+        "authoritative_filing_date": filing_date,
+        "filing_country": "ES" if domestic_filing else "not_assessed",
+        "filing_scope": "domestic" if domestic_filing else "not_assessed",
+        "international_filing": False if domestic_filing else None,
+        "filing_evidence_ref": filing_evidence_ref,
+        "filing_scope_evidence_ref": filing_scope_evidence_ref,
+        "filing_conflicting": filing_conflicting,
+        "ordinary_rg_scope": {
+            "assertion": "ordinary_rg" if ordinary_rg else "not_assessed",
+            "evidence_ref": ordinary_rg_ref,
+        },
+        "article_3_2_exclusions": exclusions,
+        "article_3_3_exclusion": {
+            "provision": "Articulo 3.3",
+            "finding": "not_applicable" if article_3_3_not_applicable else "not_assessed",
+            "conflicting": article_3_3_conflicting,
+            "evidence_ref": article_3_3_ref,
+        },
+        "eu_periods_status": eu_periods_status,
+    }
+    if eu_periods_ref:
+        evidence["eu_periods_evidence_ref"] = eu_periods_ref
+
+    rule_pack = load_rule_pack(rule_pack_path)
+    result = validate_ordinary_rg_daily_contract(rule_pack, evidence, assessment_date)
+    complete = result["contract_validation_status"] == "contract_valid"
+    print(f"evidence contract complete: {'yes' if complete else 'no'}")
+    print(f"assessment date: {assessment_date}")
+    print("assumptions:")
+    print("- Only the answers and evidence references entered in this session are considered; the referenced documents are not authenticated by this CLI.")
+    print("- The assessment date must match the source evidence cutoff; this contract does not infer a current result for another date.")
+    print("facts provided:")
+    print(f"- candidate/application date: {result['candidate_date'] or 'not documented'}")
+    print(f"- authoritative filing date: {result['authoritative_filing_date'] or 'not documented'}")
+    print("pension outcomes:")
+    for field in ("eligibility", "legal_status", "contribution_obligation", "lgss_205_1_b_anchor", "recognition", "economic_effect", "payment"):
+        print(f"- {field}: {result[field]}")
+    print(f"- hecho_causante: {result['hecho_causante']['status']}")
+    print("data_gaps:")
+    for gap in result["data_gaps"]:
+        print(f"- {gap['code']}: {gap['message']}")
+    print("limits:")
+    print("- This is an evidence-completeness check, not an eligibility, recognition, economic-effect, or payment assessment.")
+    print(f"human-review flag: {'required' if result['human_review_required'] else 'not required'}")
+    print("next action: document missing or conflicting evidence, or confirm it with the competent authority.")
+    return 0 if complete else 2
 
 
 def prepare_planning_goals_input(draft_path: Path, input_path: Path, overwrite: bool = False) -> dict[str, str]:
@@ -4477,6 +4590,21 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_pension_income_output(),
         help="Output pension income snapshot JSON path",
     )
+    pension_es_evidence_parser = subparsers.add_parser(
+        "pension-es-evidence",
+        help="Ask whether documented ordinary Spanish RG evidence is complete (report only)",
+    )
+    pension_es_evidence_parser.add_argument(
+        "--rule-pack",
+        type=Path,
+        default=default_spanish_statutory_pension_rule_pack(),
+        help="Approved Spanish statutory pension rule pack",
+    )
+    pension_es_evidence_parser.add_argument(
+        "--as-of-date",
+        default="2026-11-14",
+        help="Assessment date shown as the wizard default (YYYY-MM-DD)",
+    )
     expenses = subparsers.add_parser("expenses", help="Build expense planning snapshots")
     expenses_subparsers = expenses.add_subparsers(dest="expenses_command")
     lifecycle_expenses_parser = expenses_subparsers.add_parser(
@@ -7206,6 +7334,18 @@ def main(argv: list[str] | None = None) -> int:
             f"({args.output})"
         )
         return 0
+
+    if args.command == "pension-es-evidence":
+        try:
+            return run_pension_es_evidence_wizard(args.rule_pack, args.as_of_date)
+        except SpanishPensionRulesError as exc:
+            print(f"pension-es-evidence: ERROR ({exc})")
+            print("Next action: document evidence or confirm it with the competent authority.")
+            return 1
+        except (KeyboardInterrupt, EOFError):
+            print("pension-es-evidence: interrupted; no pension conclusion was produced.")
+            print("Next action: document evidence or confirm it with the competent authority.")
+            return 2
 
     if args.command == "investments" and args.investments_command == "import":
         try:

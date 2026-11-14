@@ -137,3 +137,7 @@ Questi requisiti valgono in tutte le roadmap e possono generare incrementi abili
 La roadmap V5 include inoltre, dopo V5.3 e prima di V5.4, il blocco deterministico V5.3a-V5.3h per `investment-opportunity/v1`, real estate a reddito, camper/rentable movable assets, financing/leverage, stress/opportunity cost e integrazione `wealth-strategy/v1`, con audit V5.3b e V5.3g per rispettare la cadenza di governance.
 
 La roadmap V5 non può essere usata per colmare capacità deterministiche mancanti. L'AI può classificare, pianificare, recuperare conoscenza e spiegare output, ma non deve inventare dati, aliquote, rendimenti, diritti pensionistici o risultati di scenario.
+
+## Regola integrativa di convergenza V4.14 (2026-11-14)
+
+Per la roadmap V4B applicare `family-office-engine/docs/roadmap/v4.14-exit-contract.md` e `family-office-bootstrap/docs/playbooks/12-dual-gate-and-convergence.md`. Il controllo dei predecessori è invariato; il lavoro tecnico interno al predecessore bloccato può procedere se non amplia conclusioni normative, non dichiara `done` il parent e non seleziona discendenti. Distinguere l'esito software del consumer dalla validità di ciascuna conclusione giuridica. Un reviewer che non produce un verdetto su due tentativi equivalenti richiede una decisione mirata, non un loop. Il gate V4.20 non deve riaprire implicitamente V5.3, perché questa roadmap risulta già `done`; eventuali nuovi incrementi V5 devono essere motivati come nuova roadmap/estensione.

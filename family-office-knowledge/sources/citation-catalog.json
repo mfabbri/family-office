@@ -426,6 +426,138 @@
       "valid_to": null,
       "verified_at": "2026-10-17",
       "source_status": "active"
+    },
+    {
+      "citation_id": "it.dl-201-2011.art24.original",
+      "title": "Decreto-legge 6 dicembre 2011, n. 201, article 24, original Official Gazette publication",
+      "issuer": "Gazzetta Ufficiale della Repubblica Italiana",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.gazzettaufficiale.it/eli/id/2011/12/06/011G0247/sg",
+      "official_reference": "D.L. 201/2011, art. 24, G.U. Serie Generale n. 284 del 06-12-2011",
+      "jurisdictions": [
+        "IT"
+      ],
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": "2011-12-06",
+      "verified_at": "2026-11-14",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "it.inps.circular-28-2026",
+      "title": "INPS Circular No. 28 of 16 March 2026, administrative guidance on 2026 pension requirements",
+      "issuer": "INPS",
+      "source_type": "official_guidance",
+      "authority_level": "official_guidance",
+      "url": "https://www.inps.it/it/it/inps-comunica/atti/circolari-messaggi-e-normativa/dettaglio.circolari-e-messaggi.2026.03.circolare-numero-28-del-16-03-2026_15199.html",
+      "official_reference": "INPS Circular No. 28/2026",
+      "jurisdictions": [
+        "IT"
+      ],
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": "2026-03-16",
+      "verified_at": "2026-11-14",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.lgss.rdl-8-2015.original",
+      "title": "Royal Legislative Decree 8/2015 approving the General Social Security Act, original BOE publication",
+      "issuer": "Boletin Oficial del Estado",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.boe.es/boe/dias/2015/10/31/pdfs/BOE-A-2015-11724.pdf",
+      "official_reference": "Real Decreto Legislativo 8/2015, BOE-A-2015-11724",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": "2015-10-31",
+      "verified_at": "2026-11-14",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.lgss.rdl-8-2015.consolidated-2026-11-14",
+      "title": "Informational consolidated BOE text of Royal Legislative Decree 8/2015, snapshot updated 11 November 2026",
+      "issuer": "Boletin Oficial del Estado",
+      "source_type": "consolidated_informational_text",
+      "authority_level": "institutional_guidance",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724",
+      "official_reference": "BOE-A-2015-11724 consolidated text; snapshot updated 2026-11-11 and consulted 2026-11-14",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age",
+        "source_currentness"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "verified_at": "2026-11-14",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.rd-453-2022.original",
+      "title": "Royal Decree 453/2022, original BOE publication",
+      "issuer": "Boletin Oficial del Estado",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.boe.es/eli/es/rd/2022/06/14/453",
+      "official_reference": "Real Decreto 453/2022, BOE-A-2022-9850",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "retirement_date",
+        "effective_date"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": "2022-06-15",
+      "verified_at": "2026-11-14",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "eu.regulation.2026-2359.annex-viii-part-i",
+      "title": "Commission Regulation (EU) 2026/2359 amending Annex VIII Part I only",
+      "issuer": "European Union",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://eur-lex.europa.eu/eli/reg/2026/2359/oj/eng",
+      "official_reference": "Commission Regulation (EU) 2026/2359; amendment to Annex VIII Part I",
+      "jurisdictions": [
+        "EU"
+      ],
+      "topics": [
+        "pensions",
+        "eu_coordination",
+        "annex_viii",
+        "source_currentness"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "verified_at": "2026-11-14",
+      "source_status": "active"
     }
   ],
   "documents": [
@@ -456,6 +588,7 @@
     {"document_id": "knowledge.international.eu-pension-art57-public-boundary-regressions-v0.23", "path": "international/eu-pension-art57-public-boundary-regressions-candidate-v0.23.md", "topics": ["pensions", "eu_coordination", "evidence_provenance"], "jurisdictions": ["EU", "IT", "ES"], "citation_ids": ["eu.regulation.883-2004.art57-annex-viii", "eu.regulation.987-2009.art47"]},
     {"document_id": "knowledge.international.eu-pension-art57-evidence-audit-v0.21", "path": "international/eu-pension-art57-evidence-binding-audit-candidate-v0.21.md", "topics": ["pensions", "eu_coordination", "evidence_provenance"], "jurisdictions": ["EU", "IT", "ES"], "citation_ids": ["eu.regulation.883-2004.art57-annex-viii", "eu.regulation.987-2009.art47", "eu.regulation.988-2009.annex-viii"]},
     {"document_id": "knowledge.international.eu-pension-art57-evidence-audit-v0.20", "path": "international/eu-pension-art57-evidence-binding-audit-candidate-v0.20.md", "topics": ["pensions", "eu_coordination", "evidence_provenance"], "jurisdictions": ["EU", "IT", "ES"], "citation_ids": ["eu.regulation.883-2004.art57-annex-viii", "eu.regulation.987-2009.art47", "eu.regulation.988-2009.annex-viii"]},
-    {"document_id": "knowledge.international.eu-annex-viii-part2-catalogue-candidate", "path": "international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md", "topics": ["pensions", "eu_coordination", "annex_viii", "source_catalogue"], "jurisdictions": ["EU"], "citation_ids": ["eu.regulation.883-2004.art57-annex-viii", "eu.regulation.988-2009.annex-viii", "eu.regulation.1244-2010.annex-viii", "eu.regulation.1224-2012.annex-viii", "eu.regulation.517-2013.annex-viii", "eu.regulation.1372-2013.annex-viii", "eu.regulation.2017-492.annex-viii"]}
+    {"document_id": "knowledge.international.eu-annex-viii-part2-catalogue-candidate", "path": "international/eu-annex-viii-part-2-catalogue-candidate-v0.1.md", "topics": ["pensions", "eu_coordination", "annex_viii", "source_catalogue"], "jurisdictions": ["EU"], "citation_ids": ["eu.regulation.883-2004.art57-annex-viii", "eu.regulation.988-2009.annex-viii", "eu.regulation.1244-2010.annex-viii", "eu.regulation.1224-2012.annex-viii", "eu.regulation.517-2013.annex-viii", "eu.regulation.1372-2013.annex-viii", "eu.regulation.2017-492.annex-viii"]},
+    {"document_id": "knowledge.pensions.timeline-source-matrix-v0.2", "path": "pensions/pension-timeline-source-matrix-v0.2.md", "topics": ["pensions", "eu_coordination", "cross_border", "pension_timeline", "evidence_provenance"], "jurisdictions": ["IT", "ES", "EU"], "citation_ids": ["it.dl-201-2011.art24.original", "it.inps.circular-28-2026", "es.lgss.rdl-8-2015.original", "es.lgss.rdl-8-2015.consolidated-2026-11-14", "es.rd-453-2022.original", "eu.regulation.883-2004", "eu.regulation.987-2009.art47", "eu.regulation.2026-2359.annex-viii-part-i"]}
   ]
 }

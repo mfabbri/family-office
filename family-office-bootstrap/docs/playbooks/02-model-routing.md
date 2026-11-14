@@ -19,7 +19,7 @@ Il routing usa custom agent, non `[profiles.*]` project-local. Il parent `gpt-5.
 ## Routing rules
 
 1. Creare il task envelope e registrarlo in `planning/current-work.json`.
-2. Se la fase richiede interpretazione/verifica normativa T4, usare Sol/xhigh prima di implementare.
+2. Se il diff **introduce o modifica** una regola, un periodo, una classificazione giuridica o una conclusione normativa T4, usare lo specialista normativo Sol/xhigh per il gate. Se collega **senza modificarli** pack/evidenze già revisionati a un consumer fail-closed, classificare la fase come implementazione tecnica T1–T3 con Terra/medium e reviewer tecnico; escalare al normativo soltanto su un trigger semantico concreto.
 3. Se la fase è finanziaria ma non introduce una nuova interpretazione normativa, usare `fo_financial_reviewer` Sol/high per formule, scenari e ranking.
 4. Se serve planning cross-module ma architettura e regole sono già decise, usare `fo_planner` Terra/medium.
 5. Implementare codice deterministico con `fo_implementer` Terra/medium quando regole e contratti sono definiti.
@@ -63,3 +63,9 @@ Usare solo identificatori completi:
 L'alias non suffissato `gpt-5.6` non deve apparire come valore `model` nella configurazione eseguibile.
 
 Se il client/account non espone il modello richiesto, registrare un evento `fallback` nel planner e usare un modello disponibile senza cambiare i contratti del task. Il fallback non deve essere silenzioso.
+
+## Modelli e semplicità (audit OpenAI 2026)
+
+Non introdurre nuovi nomi modello in `.codex/config.toml` finché non sono stati verificati disponibilità e schema del client Codex installato; il validator locale fissa attualmente la matrice v3.1 ai nomi gpt-5.6. Il criterio OpenAI 2026 è minimizzare istruzioni ridondanti e deleghe non necessarie; non forzare un subagent per un edit locale sicuro. Un aggiornamento a GPT-6/Astra richiede **migrazione separata**, con aggiornamento atomico di config, agent TOML, validator, skill e smoke della CLI.
+
+Una review tecnica di binding con Rules identiche non va promossa a una seconda review normativa solo per la parola "pension" nel nome del file. La matrice di impatto è in `12-dual-gate-and-convergence.md`.

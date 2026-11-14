@@ -1,6 +1,6 @@
 # Subagent Policy
 
-Il parent è un router/controller. La delega resta selettiva, ma è obbligatoria quando il model router assegna il lavoro sostanziale a Terra o Sol.
+Il parent coordina e conserva la responsabilità della consegna. La delega è selettiva: applicare la route dello **scope effettivo**, senza creare un reviewer normativo per ogni file previdenziale quando il contratto è già immutabile e la modifica è puramente tecnica.
 
 ## Default
 
@@ -45,6 +45,10 @@ La delega non può trasformare il parent in un osservatore passivo. Prima di del
 - Il completion report deve elencare separatamente codice runtime, test, documentazione e file preesistenti preservati; non basta dire “implementato” o “test verdi”.
 - Prima della chiusura eseguire `python planning/validate-execution-guardrails.py`; se fallisce, lo stato resta attivo o blocked e non si dichiara completato il lavoro.
 
+### Ripresa dopo interruzione
+
+- Se la sessione parent viene interrotta mentre il reviewer e' attivo, recuperare prima l'ID e lo stato dello stesso thread. `shutdown`, mancata notifica o timeout senza verdetto restano `PENDING`; non avviare un secondo reviewer sullo stesso candidato come sostituzione automatica. Un nuovo tentativo richiede nuova autorizzazione esplicita che identifichi versione/hash, ruolo specialistico, scope, numero di tentativi e timebox.
+
 ## Capacita e finestre di attesa
 
 - Prima dello spawn controllare il limite di thread: gli agenti completati ma ancora aperti consumano capacita. Chiudere i thread completati e non piu necessari; uno spawn fallito non e una delega e non consuma un evento.
@@ -77,3 +81,10 @@ Ogni subagent deve restituire:
 ## Token hygiene
 
 Le risposte dei subagent devono essere brevi e strutturate per poter essere incorporate senza riaprire il corpus. Il parent mantiene il contesto minimo necessario e usa progressive disclosure.
+
+## Prevenzione cicli di review senza progresso
+
+- Non riavviare review sul medesimo hash/scope dopo due tentativi senza verdetto. La domanda passa a `human_review_required` e il reviewer non è richiamato automaticamente.
+- Se il gate pendente riguarda solo una nuova interpretazione, bloccare quell'affermazione/feature; una modifica di binding **non semantica** può proseguire fino a `software_ready` con i suoi test, senza promuovere il risultato a `normative_ready`.
+- Un singolo reviewer indipendente mirato alla semantica alterata è preferibile a una catena di reviewer generici. Il parent non attende in polling oltre il budget.
+- Il budget già consumato resta nello storico: il planner di un **nuovo ciclo tecnico** può reimpostare `routing.trace` solo dopo che gli esiti storici siano conservati in `verification.notes` o decision log, e senza inventare nuovi GO.

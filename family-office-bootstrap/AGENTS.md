@@ -19,3 +19,7 @@ Il bootstrap governa metodo, playbook, planner e orchestrazione. Non contiene da
 - Aggiornare un documento di governance solo se la modifica ne cambia davvero il contenuto operativo.
 - Il log `planning/.runtime/model-routing.ndjson` è telemetria locale: non versionarlo.
 - Prima della chiusura eseguire `python planning/validate-execution-guardrails.py`; il gate controlla evidenze, review, blocker e budget deleghe.
+
+## Governance della convergenza
+
+Per lavori sul blocco V4.14 e per review ripetute leggere `docs/playbooks/12-dual-gate-and-convergence.md`. Le revisioni di compatibilità software di regole immutate non richiedono automaticamente una nuova pre-review giuridica. Mantenere separati esito software ed esito giuridico per output. Evitare di ripetere lo stesso gate senza un nuovo artefatto, fonte o finding sostanziale.

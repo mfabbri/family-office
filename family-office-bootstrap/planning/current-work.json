@@ -2,100 +2,98 @@
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
   "status": "in_progress",
-  "selected_at": "2026-11-09T19:02:06Z",
-  "updated_at": "2026-11-09T19:55:00Z",
+  "selected_at": "2026-11-14T21:18:00Z",
+  "updated_at": "2026-11-14T21:54:00Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-index.md",
-      "section": "Algoritmo di selezione",
-      "reason": "b-g done; V4.14 is blocked by its documented full-contract normative NO-GO, so b-h is the minimum registered remediation audit. V4.15 remains ineligible."
-    },
-    {
-      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.14b-h Spanish first eligibility month pre-implementation revalidation",
-      "reason": "Third increment of the user-authorized sequence; b-b had a NO-GO and b-g has now closed the Knowledge source-authority finding."
+      "section": "V4.14 sequence and predecessor rule",
+      "reason": "Oldest incomplete predecessor selected after w-z-a closure."
     },
     {
       "path": "family-office-engine/docs/current-next-increment.md",
-      "section": "b-h pre-implementation review and operational current increment",
-      "reason": "Read-only exact-hash gate; no implementation before explicit GO."
+      "section": "V4.14w-z-b active plan",
+      "reason": "Current implementation order and stop conditions."
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "section": "V4.14w-z-b",
+      "reason": "Active roadmap marks w-z-b in_progress after successful audit."
     }
   ],
   "increment": {
-    "id": "V4.14b-h-SPANISH-ELIGIBILITY-PREIMPLEMENTATION-REVALIDATION",
-    "title": "Spanish first eligibility month pre-implementation revalidation",
-    "objective": "Reassess the previous b-b NO-GO against the corrected exact Knowledge note and existing Spanish pension rules, consumer and tests; define if any path-specific implementation is supported.",
+    "id": "V4.14w-z-b-EU-CONSUMER-V11-ANNEX-V0.3",
+    "title": "EU pension consumer compatibility with Rules v11 and Annex v0.3",
+    "objective": "Update the public deterministic IT/ES/EU pension coordination consumer to accept Rule Pack v11 and its source-bound Annex VIII v0.3 evidence contract only when their exact contract identity, hashes and applicable period validate; preserve fail-closed non-inference.",
     "scope": [
-      "Verify the Spanish Knowledge source and source-authority corrections on the exact candidate.",
-      "Compare LGSS 205.1(b), RD 453/2022 paths, age/contribution predicates, daily date granularity and insurance/contribution/cessation facts against the existing rule pack and consumer.",
-      "Determine supported input/output, legal period, fail-closed data_gaps and EU coordination boundary.",
-      "Return exact-hash normative GO/NO-GO/PENDING with file/line evidence.",
-      "This is the registered minimum audit slice addressing blocked parent V4.14; it does not select V4.15 or close the parent."
+      "Preflight v9/v10/v11 and Annex v0.29/v0.3 source+digest+period identity; stop if any change in normative semantics or consumer decision surface.",
+      "Implement only technical fail-closed v11/v0.3 binding for public consumer; preserve v9/v10 behavior.",
+      "Run public API/builder regressions with synthetic valid/mismatch/out-of-period/not_assessed/not_matched evidence and no eligibility/amount/payment inference.",
+      "Independent technical review, full Engine suite and governance validators; normative review only on material semantics trigger."
     ],
     "out_of_scope": [
-      "Any Knowledge/Rules/Tests/Engine changes.",
-      "Individual entitlement, date, amount, pro-rata, recognition, economic effect or payment.",
-      "Other Spanish regimes or full IT/ES/EU timeline."
+      "Changes to pension law, Knowledge v0.3 or Rules v11 semantics.",
+      "Individual eligibility, entitlement, payment dates or pension amounts.",
+      "Personal data or timeline builder implementation (w-z-c)."
     ],
     "candidate_files": [
-      "family-office-knowledge/international/spain-pension.md",
-      "family-office-rules/spain/statutory-retirement-general.json",
-      "family-office-engine/src/family_office_engine/services/spanish_statutory_pension.py",
-      "family-office-engine/src/family_office_engine/services/spanish_pension_rules.py",
-      "family-office-engine/tests/unit/test_spanish_statutory_pension.py",
-      "family-office-engine/tests/unit/test_spanish_pension_rules.py",
-      "family-office-engine/tests/unit/test_spanish_pension.py"
+      "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
+      "family-office-engine/tests/unit/test_it_es_eu_pension_pro_rata.py",
+      "family-office-engine/tests/unit/test_annex_viii_applicability_contract.py",
+      "family-office-rules/cross-border/eu-pension-coordination-it-es-v11.json",
+      "family-office-knowledge/international/eu-annex-viii-applicability-evidence-v0.3.json",
+      "family-office-knowledge/international/eu-annex-viii-applicability-evidence-v0.3.schema.json"
     ],
-    "stop_condition": "NO-GO/PENDING or source mismatch leaves V4.14 blocked and authorizes no implementation; no downstream V4.15 selection."
+    "stop_condition": "A new legal rule/period or added eligibility/matching/payment inference requires scoped normative review; otherwise finish technical fail-closed binding with public regressions. No GO transferred from source-pack to consumer. Do not close V4.14 or select w-z-c prematurely."
   },
   "verification": {
     "tests": [
-      "No code or rule changes; parent Engine suite previously passed 884/0/0/0 using repository venv on 2026-11-09.",
-      "Roadmap audit; execution guardrails; model-routing validation; git diff --check."
+      "Run targeted v9/v10/v11 public consumer tests, then full Engine suite 0 failures/errors/skips.",
+      "Independent technical review on exact diff; scoped normative review only if source semantics/periods or decision claims change.",
+      "Run roadmap audit, planner schema/model routing/guardrails and diff-check."
     ],
     "documentation_touchpoints": [
-      "family-office-engine/docs/current-next-increment.md",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-engine/docs/decision-log.md"
+      "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/decision-log.md",
+      "family-office-bootstrap/planning/current-work.json"
     ],
     "result": "pending",
-    "notes": "The reviewer confirmed the seven initial hashes but returned PENDING after two bounded windows: full test mapping, official primary-source comparison for each branch, targeted regressions and final reviewer hash check were not completed. Preliminary inspection indicates month-granular rules/consumer. Parent independently rechecked all seven candidate hashes after the review; all remain unchanged. No files changed and no implementation is authorized; no further retry.",
+    "notes": "w-z-a closed LIMITED GO exact-hash; full Engine 931/0/0/0. The active predecessor is w-z-b. Existing service supports pack v9/v10 with contract v0.29; v11 also declares v0.29 but is not bound in ARTICLE_57_PACK_CONTRACTS. Normative review must establish whether this is an identity-only binding or needs a distinct contract before implementation. Parent V4.14 remains blocked. First Sol/xhigh pre-review agent returned no verdict after 90s and a final 60s window; it was stopped with no file changes. Exact candidate hashes remain as recorded. Do not implement until a specialist issues a pre-implementation verdict. One fresh independent bounded review is being attempted under the user-authorized extended window; if it also times out, retain w-z-b in_progress with review pending. The fresh independent reviewer also produced no verdict within its bounded 120s window and was stopped; no files changed. Normative pre-implementation gate remains PENDING, not NO-GO. No consumer implementation was made. Stop further retries in this session; resume only with a completed exact-hash Sol/xhigh pre-review. w-z-a remains done LIMITED GO; V4.14 remains blocked. | 2026-11-14 dual-gate governance migration: earlier two Sol/xhigh attempts remain historical PENDING; no verdict was inferred. Revised scope permits non-semantic technical binding with independent technical review and fail-closed public tests; semantic trigger still needs normative reviewer. Previous routing trace is recorded in original ZIP and in session notes above.",
     "task_envelope": {
-      "mode": "normative-change",
+      "mode": "feature-slice",
       "risk_domain": "pension",
-      "objective": "Independent exact-hash revalidation of Spanish first-eligibility-month readiness, source-backed Knowledge and existing rules/consumer/tests.",
+      "objective": "Technically integrate versioned EU coordination Rules v11 and Annex v0.3 into the public fail-closed consumer without expanding legal/pension conclusions.",
       "repositories": [
-        "family-office-knowledge",
+        "family-office-engine",
         "family-office-rules",
-        "family-office-engine"
+        "family-office-knowledge"
       ],
       "read_set": [
-        "SHA256 C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92 family-office-knowledge/international/spain-pension.md",
-        "SHA256 B63D9A8D8A3CA1C94BFED4A119864E495FABF437D7424E766DF09D7BF93260EF family-office-rules/spain/statutory-retirement-general.json",
-        "SHA256 A57B0EAACBD8B5DCB10ED195A1B09F94F4CC2F18C182C16271EA4056CF4197B6 family-office-engine/src/family_office_engine/services/spanish_statutory_pension.py",
-        "SHA256 6EDADA4A0EE4D74DCA7E5ADF79D92B1256196EE52D21A44A24D25D50260022AF family-office-engine/src/family_office_engine/services/spanish_pension_rules.py",
-        "SHA256 B31467BA2E40286978CB68BDA680368C9F5CFE3522A127B86079B501DE521EAC family-office-engine/tests/unit/test_spanish_statutory_pension.py",
-        "SHA256 C174CE62F74F462C764EED62A169F1517EFEA369CD3D3E7861134EA48FC2F3D8 family-office-engine/tests/unit/test_spanish_pension_rules.py",
-        "SHA256 3A3232878A3CA48883C48CEAB76B656882AB8F874E8EDFF53AB2B9EA9C7BFF8F family-office-engine/tests/unit/test_spanish_pension.py",
-        "V4.14b-b prior NO-GO findings",
-        "official BOE LGSS/RD 453/2022 and Seguridad Social guidance; EU coordination boundary"
+        "V4.14w-y Knowledge v0.3/Rules v11 limited-GO exact hashes",
+        "V4.14w-z integrated NO-GO findings",
+        "V4.14w-z-a source/event/granularity matrix v0.2 exact-hash LIMITED GO",
+        "existing public consumer v9/v10 contract validation and regressions"
       ],
       "write_set": [
-        "family-office-bootstrap/planning/current-work.json",
-        "family-office-engine/docs/current-next-increment.md",
+        "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
+        "family-office-engine/tests/unit/test_it_es_eu_pension_pro_rata.py",
+        "family-office-engine/tests/unit/test_annex_viii_applicability_contract.py",
         "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-        "family-office-engine/docs/decision-log.md"
+        "family-office-engine/docs/current-next-increment.md",
+        "family-office-engine/docs/decision-log.md",
+        "family-office-bootstrap/planning/current-work.json"
       ],
-      "test_command": "No code changes in this audit; existing Engine suite last passed 884/0/0/0 on 2026-11-09. Re-run governance validators and diff-check.",
+      "test_command": ".venv\\Scripts\\python.exe -m pytest focused public consumer tests; then full suite tests with 0 failures/errors/skips.",
       "stop_conditions": [
-        "any material normative/source mismatch",
-        "reviewer NO-GO/PENDING",
-        "any need to modify Knowledge/Rules/Tests/Engine before a fresh GO"
+        "Any normative semantic change or newly enabled entitlement/payer/amount/payment interpretation requires a distinct exact-hash specialist review.",
+        "Reject mismatch, unsupported time periods, not_assessed and not_matched with no unsupported inference.",
+        "Do not claim legal certainty, individual dates or permission to close V4.14 from this technical binding."
       ]
     }
   },
   "blockers": [
-    "b-h normative gate remains PENDING after its bounded review window; no implementation is authorized and V4.14/V4.15 remain blocked."
+    "V4.14 parent blocked: requires successful w-z-b public consumer, w-z-c timeline and integrated normative/output gate; old pre-review PENDING remains historical and cannot be called GO."
   ],
   "session_notes": [
     "User requested durable playbook updates from the long session; four workflow documents now include the corrections.",
@@ -109,56 +107,37 @@
     "2026-11-09: applied the one user-authorized b-g fix (RD 453/2022 consolidated URL /453/con); candidate SHA256 C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92; final exact-hash review requested, no further retry authorized.",
     "2026-11-09: final b-g Sol/xhigh exact-hash review GO; start/end hash C4EEAB52F00D4535153E924BD4DB6C3606B6D3169918F3C7579FD14D1497ED92. Full Engine suite rerun under approved elevated execution after sandbox temp ACL failure.",
     "2026-11-09: b-g completed after final exact-hash GO and full 884/0/0/0 suite. The third requested increment is not selected: active V4.14 parent remains in_progress and V4.15 is blocked; roadmap sequence forbids downstream work before resolving the parent blocker.",
-    "2026-11-09: b-h reviewer returned PENDING after one 60s window and one bounded delivery request/final window. Seven initial hashes matched; reviewer did not complete full mapping/source audit/final hash check. Parent independently rechecked all seven hashes unchanged. No code changes and no further retry."
+    "2026-11-09: b-h reviewer returned PENDING after one 60s window and one bounded delivery request/final window. Seven initial hashes matched; reviewer did not complete full mapping/source audit/final hash check. Parent independently rechecked all seven hashes unchanged. No code changes and no further retry.",
+    "2026-11-09: user authorized one last increment. Final b-h exact-hash review had two bounded 60s windows and one delivery request, then timed out; reviewer closed while running, no GO/NO-GO and no final reviewer hashes. No code changes.",
+    "2026-11-14: new user request authorizes autonomous completion of the next eligible roadmap increment; historical PENDING b-h is reopened only for one fresh bounded exact-hash normative gate, with implementation conditional on GO.",
+    "2026-11-14: w-x exact-source audit closed with LIMITED GO on the exact read-only scope. Part II unchanged through 2026-11-14 inclusive; half-open upper bound 2026-11-15. New w-y selected as the oldest eligible evidence-contract update; historical v0.2/v10 and catalogue v0.4 remain immutable; parent V4.14 blocked.",
+    "2026-11-14: w-y closed with final Sol/xhigh LIMITED GO for the source-bound EU applicability contract, focused 6 and full Engine 931/0/0/0. Recalculated sequence: next oldest parent blocker is the integrated IT/ES/EU five-event source/rules/schema/service contract before deterministic timeline implementation; selected w-z read-only exact-hash pre-implementation gate. V4.14 remains blocked.",
+    "2026-11-14: w-z integrated pre-implementation review NO-GO exact-hash 13/13. Oldest actionable gap is a versioned Knowledge matrix reconciling event?path?pack?period?output granularity. Selected w-z-a; after it the documented sequence is EU v11/v0.3 consumer public regression, then production v2 semantic validator/builder, then integrated exact-hash GO and parent closure.",
+    "2026-11-14: V4.14w-z-a catalog integration corrected the first full-suite failure; CLI 32 citations/29 docs/31 contracts/16 gaps, focused 7/7, full suite 931/0/0/0, governance passed. First exact-hash normative review PENDING (hashes stable, 15/15 rows and key source boundaries verified); user authorization extends one final bounded review continuation for two materiality questions.",
+    "2026-11-14: w-z-a closed after final Sol/xhigh LIMITED GO with exact start/end hashes; focused 7/7, full Engine 931/0/0/0, governance passed. Post-closure roadmap audit passed and selected w-z-b as the oldest incomplete parent predecessor. w-z-b begins with a normative exact-hash pre-review; no runtime edit until GO.",
+    "2026-11-14: w-z-b normative pre-review timed out in two bounded reviewer attempts (90+60s and 120s); both ended without verdict or file changes. State remains in_progress/PENDING, not NO-GO. No implementation until the required exact-hash specialist verdict arrives. Parent V4.14 remains blocked."
   ],
   "next_action": {
-    "mode": "review",
-    "description": "Keep b-h in_progress; do not implement or select downstream work unless a new user-authorized review cycle resolves the pending normative gate."
+    "mode": "resume",
+    "description": "Implement w-z-b technical v11/v0.3 consumer binding with fail-closed public regressions, without modifying the approved Knowledge/Rules semantics; review the actual diff technically, and escalate legal review only for a genuine new legal/period/output claim. Run full suite and governance gates; keep V4.14 blocked."
   },
   "routing": {
     "policy_version": "3.1",
-    "tier": "critical",
-    "task_class": "normative",
-    "agent": "fo_normative_reviewer",
-    "model": "gpt-5.6-sol",
-    "reasoning_effort": "xhigh",
-    "rationale": "This gate determines legal-source and temporal validity for Spanish pension eligibility before any executable rule or timeline work.",
+    "tier": "medium",
+    "task_class": "implementation",
+    "agent": "fo_implementer",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "medium",
+    "rationale": "New user-approved dual-gate governance: the exact Rules v11/Annex v0.3 source semantics remain immutable; this phase is a technical public consumer binding with fail-closed tests. Material normative changes must re-route to Sol/xhigh, not be inferred.",
     "trace": [
       {
-        "at": "2026-11-09T19:40:00Z",
+        "at": "2026-11-14T21:54:00Z",
         "event": "selected",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Third authorized increment: re-open prior Spanish first-eligibility-month NO-GO after b-g closed source-authority corrections; exact-hash review precedes any implementation."
-      },
-      {
-        "at": "2026-11-09T19:48:00Z",
-        "event": "delegated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Independent read-only exact-hash revalidation of the prior b-b Spanish eligibility pre-implementation NO-GO after closure of b-g; seven candidate hashes verified before handoff."
-      },
-      {
-        "at": "2026-11-09T19:50:00Z",
-        "event": "escalated",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "Single bounded status/delivery request after the initial 60-second review window returned no verdict; one final bounded wait, then leave b-h pending."
-      },
-      {
-        "at": "2026-11-09T19:55:00Z",
-        "event": "reviewed",
-        "tier": "critical",
-        "agent": "fo_normative_reviewer",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "xhigh",
-        "reason": "PENDING after two bounded windows; seven initial hashes matched, but full mapping, primary-source comparison and reviewer final hashes were not completed. No runtime GO."
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-5.6-terra",
+        "reasoning_effort": "medium",
+        "reason": "Governance migration only: classified next w-z-b phase as non-semantic technical consumer integration; no old review verdict promoted."
       }
     ]
   }

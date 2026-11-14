@@ -1,57 +1,31 @@
-# Family Office AI — Agent Map
+# Family Office AI — AGENTS.md (policy essenziale)
 
-Questo file deve restare breve. È una mappa, non un manuale completo.
+Missione: Family Office AI produce decisioni familiari spiegabili usando fatti tracciati, regole versionate e calcoli deterministici. L'AI non calcola imposte, pensioni, risultati finanziari o diritti individuali.
 
-## Regole invarianti
+## Invarianti non negoziabili
 
-- Non copiare dati personali fuori da `family-office-workspace/`.
-- Non usare LLM per calcoli fiscali, previdenziali o finanziari: usare servizi deterministici, rule pack e test.
-- Per cambi normativi seguire: `knowledge → rules → tests → engine`.
-- Fare la modifica minima verificabile; evitare refactor non richiesti.
-- Non rendere la modifica manuale di JSON il percorso operativo normale: per ogni capability utente preferire CLI con wizard, import, generatori o `prepare`; un JSON diretto e' ammesso solo quando strettamente necessario e con motivazione, guida e validazione locale.
-- Progettare la UX utente a partire da una domanda o decisione familiare, non dalla sequenza di comandi o dagli snapshot: mostrare fatti disponibili, assunzioni, `data_gaps`, limiti e prossima azione; lasciare JSON e comandi tecnici come infrastruttura.
-- Aggiornare test e documentazione solo quando realmente impattati.
-- Un incremento o release è completo solo se l'intera suite del repository termina con esattamente 0 failure, 0 errori e 0 test skipped. I failure si correggono nel codice oppure, con evidenza contrattuale che l'aspettativa è errata, nel test; non si waivano come out-of-scope. Gli skip vanno sostituiti da test eseguibili equivalenti sulle piattaforme supportate.
-- Se la suite del repository non può essere eseguita o non raggiunge quel risultato, lo stato resta `in_progress` o `blocked`, mai `done`.
-- Non dichiarare completato un incremento senza verifiche riproducibili.
-- Non saltare predecessori: prima di selezionare o chiudere un incremento, verificare l'intera sequenza precedente della roadmap attiva e le sue dipendenze. Se un predecessore è `planned`, `in_progress` o `blocked`, il lavoro funzionale/audit a valle non è eleggibile; selezionare il predecessore più antico incompleto o il micro-incremento minimo che ne rimuove il blocco, registrando la dipendenza. Un GO limitato di uno slice successivo non chiude né sblocca il parent.
-- Non salvare chain-of-thought nel planner o nei log di routing.
-- La delega non sostituisce l'esecuzione: il parent deve mantenere attivo il percorso critico, limitare le attese a finestre bounded, evitare polling indefinito e dichiarare subito timeout, fallback o blocker con evidenze.
+- Dati personali solo in `family-office-workspace/`; niente dati identificativi in repository software, log e fixture.
+- Per **nuove** regole o nuove interpretazioni legali: fonte ufficiale → Knowledge → Rules versionate → test sintetici → Engine; review normativa indipendente con ambito, versione, hash e periodo.
+- Per modifiche **tecniche a contratti normativi già approvati**: implementare e testare senza riaprire automaticamente l'interpretazione; riesame normativo solo con trigger sostanziale documentato. Vedere `12-dual-gate-and-convergence.md`.
+- Output distinguono sempre fatto, ipotesi/proiezione, dato sconosciuto, `data_gaps` e determinazione amministrativa effettiva. `null`/`not_assessed` non è un diritto negato né un valore stimato.
+- Nessun bypass dei guardrail di hash, fonte, temporalità, privacy, AML/KYC e non-inferenza; non trasformare assenza/`not_matched` in eligibility, importo o pagamento.
+- Mai chiudere un incremento funzionale o release senza test riproducibili. Al gate finale la suite completa sul sistema supportato deve avere 0 failure, 0 errori, 0 skipped; esiti limitati non chiudono parent o discendenti.
+- Non saltare predecessori incompleti nella roadmap attiva. È lecito completare preparazioni tecniche indipendenti senza dichiarare chiusi i gate o sbloccare i discendenti.
+- Nessun commit/push, accesso a dati reali, modifica di ambienti esterni o operazione irreversibile senza autorizzazione pertinente.
+- Evitare la modifica manuale di JSON per gli utenti ordinari: preferire wizard, import o `prepare` con validazione.
+- Ogni capability deve partire da una domanda o decisione familiare e mostrare output, assunzioni, provenance e prossima azione.
+- Per asset produttivi e opportunità di investimento consultare `11-investment-opportunity.md` quando pertinente.
 
-## Avvio a contesto ridotto
+## Caricamento selettivo
 
-1. Leggere `family-office-bootstrap/docs/playbooks/00-task-router.md`.
-2. Leggere `family-office-bootstrap/planning/current-work.json`.
-3. Se il planner contiene un incremento `selected` o `in_progress`, verificare che sia ancora coerente con roadmap e repository; altrimenti ricalcolare il prossimo incremento con `roadmap-index.md`.
-   Non avanzare oltre un predecessore incompleto, anche se il task a valle appare separabile o ha un GO locale.
-4. Classificare il task da T0 a T5 e produrre il task envelope previsto dai playbook.
-5. Applicare la skill `$family-office-model-router` e registrare nel planner tier, agent, modello, reasoning e motivazione prima della delega.
-6. Il parent `gpt-5.6-luna` / `medium` è un router/controller: task medium/review/high/critical vanno delegati al custom agent previsto, non assorbiti silenziosamente dal parent.
-7. Per lavoro di roadmap leggere inizialmente soltanto:
-   - `family-office-engine/docs/roadmap/roadmap-index.md`;
-   - `family-office-engine/docs/current-next-increment.md`;
-   - la sola roadmap attiva.
-8. Prima di selezionare o implementare il prossimo incremento eseguire
-   `python family-office-engine/src/family_office_engine/governance/roadmap_audit.py`;
-   un errore blocca gli incrementi funzionali finché la cadenza audit non è ripristinata.
-9. Consultare decision log, long-term roadmap o altre roadmap solo in presenza di una dipendenza concreta.
-10. Prima di chiudere una sessione eseguire `python family-office-bootstrap/planning/validate-execution-guardrails.py`; un errore impedisce di dichiarare completato l'incremento.
+- Task minimo (typo/fix locale): leggi solo i file interessati; usa test mirati. Niente lettura obbligatoria dell'intera governance.
+- Lavoro di roadmap: `family-office-bootstrap/planning/current-work.json`, `family-office-engine/docs/roadmap/roadmap-index.md`, `family-office-engine/docs/current-next-increment.md` e solo roadmap attiva. Esegui `roadmap_audit.py` prima di selezione/chiusura.
+- Routing e delega: `$family-office-model-router`, `00-task-router.md`, `02-model-routing.md`, `03-subagent-policy.md` **solo quando servono**. La classificazione dipende da ciò che cambia, non dalla materia menzionata.
+- Lavoro normativo: `07-normative-change.md`; lavoro su blocchi, prerequisiti, pensioni future o review inconcludenti: `12-dual-gate-and-convergence.md`.
+- Non impostare l'intero processo come attesa di un reviewer. L'implementatore lavora sugli artefatti già approvati; in caso di review senza verdetto registrare PENDING e terminare il tentativo, senza nuovi retry impliciti.
 
-## Routing modelli
+## Criterio di done
 
-Policy: `family-office-bootstrap/docs/playbooks/02-model-routing.md`.
-Planner persistente: `family-office-bootstrap/planning/README.md`.
+Prima di dichiarare `done`, mostra file modificati, comportamento osservabile, test mirati/integrati, suite completa al gate, limiti normativi, gap e decisione sullo stato roadmap. Verifica `family-office-bootstrap/planning/validate-execution-guardrails.py` al gate; non chiamare un timeout GO/NO-GO.
 
-## Playbook
-
-Indice: `family-office-bootstrap/docs/playbooks/README.md`.
-
-Per investimenti in asset produttivi (immobili a reddito, camper/veicoli noleggiabili, financing, leverage, cash flow, opportunity cost) usare `family-office-bootstrap/docs/playbooks/11-investment-opportunity.md` e trattare il task come T4 quando cambia semantica finanziaria o fiscale.
-
-## Repository locali
-
-- `family-office-engine/AGENTS.md`
-- `family-office-rules/AGENTS.md`
-- `family-office-knowledge/AGENTS.md`
-
-Le istruzioni più vicine al file modificato prevalgono per il relativo ambito.
+Istruzioni specializzate: `family-office-engine/AGENTS.md`, `family-office-rules/AGENTS.md`, `family-office-knowledge/AGENTS.md` prevalgono per il rispettivo sottoalbero.

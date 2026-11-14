@@ -21,13 +21,17 @@ Non copre:
 
 - BOE, Real Decreto Legislativo 8/2015, **pubblicazione ufficiale primaria**: https://www.boe.es/boe/dias/2015/10/31/pdfs/BOE-A-2015-11724.pdf.
 - BOE, Real Decreto 453/2022, **pubblicazione ufficiale primaria**: https://www.boe.es/diario_boe/txt.php?id=BOE-A-2022-9850.
+- BOE, Real Decreto-ley 31/2026, de 20 de octubre, **pubblicazione ufficiale primaria**, pubblicato il 2026-10-21: https://www.boe.es/eli/es/rdl/2026/10/20/31. Il locator canonico della modifica a LGSS 144.4 è **Articulo primero.Dos (modifies LGSS 144.4)**; quello degli effetti differiti è **Disposicion final cuarta.2**. La DF4.1 ne fissa l'entrata in vigore al 2026-10-21; la DT1 si applica ai processi di incapacità temporanea iniziati a partire da tale data, inclusa. Gli effetti differiti della DF4.2 sono distinti: LGSS 190.1-3, 191.2 e 191.5, 192.1-2 dal 2026-10-23; 61.2 dal 2026-11-01; 144.4, 169.1(a), 171, 172 e 173.1 dal 2026-12-01; 309.1 dal 2027-01-01. Con efficacia generale modifica inoltre LGSS 221.2, 224.1-2, nuovo 318(h), DA 1.1-2, DT 13.2-3; sopprime DA 40; rinumera DA 62-63; aggiunge DA 64 e DT 48.
+- BOE, Real Decreto-ley 35/2026, de 10 de noviembre, **pubblicazione ufficiale primaria**, pubblicato il 2026-11-11 ed entrato in vigore il 2026-11-12: https://www.boe.es/eli/es/rdl/2026/11/10/35. La DF3 modifica LGSS art. 71.1(h); la DF10 differisce al 2027-01-01 gli effetti dell'art. 5 e della DF1. È una modifica informativa/gestionale e questo audit non la tratta come modifica dei requisiti LGSS 205.1(b) o del fatto causante RD 453/2022.
 
 ### Testi consolidati BOE (consultazione informativa; senza valore legale autonomo)
 
 I link seguenti sono **solo consultazioni informative e non hanno valore legale autonomo**; devono essere verificati contro la pubblicazione ufficiale primaria, gli atti modificativi e le rispettive decorrenze.
 
+Verifica currentness effettuata il 2026-11-14: il consolidato LGSS restituito riporta come ultima modifica pubblicata il 2026-11-11. Sono stati riconciliati in via documentale RDL 31/2026 e RDL 35/2026 per le disposizioni elencate sopra. RDL 31/2026 art. 144.4 produce effetti dal 2026-12-01 e riguarda la continuazione dell'obbligo contributivo in specifiche situazioni: il suo impatto sullo status/anchor di una persona resta `unknown + data_gaps` finché periodo e condizione non sono provati. Questa nota non aggiorna automaticamente il rule pack o il consumer.
 
-- BOE, Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social, testo consolidato consultato il 2026-11-08 (consolidato aggiornato al 2026-10-21): https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724. Il testo consolidato BOE è strumento informativo; la fonte legale è la pubblicazione ufficiale, da verificare insieme all'atto modificativo ufficiale e alla sua decorrenza.
+
+- BOE, Real Decreto Legislativo 8/2015, texto refundido de la Ley General de la Seguridad Social, testo consolidato consultato il 2026-11-14 (consolidato aggiornato al 2026-11-11): https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724. Il testo consolidato BOE è strumento informativo; la fonte legale è la pubblicazione ufficiale, da verificare insieme agli atti modificativi ufficiali e alle rispettive decorrenze.
 - BOE, Real Decreto 453/2022, artt. 1-4 e disposizione transitoria unica, testo consolidato consultato il 2026-11-08: https://www.boe.es/eli/es/rd/2022/06/14/453/con.
 - BOE, Real Decreto 84/1996, art. 46.4(c), testo consolidato consultato il 2026-11-08: https://www.boe.es/eli/es/rd/1996/01/26/84/con.
 - BOE, LGSS artt. 205 e 210 e disposizioni transitorie settima, nona e quadragesima; per la soglia ordinaria 2026 la DT settima indica 65 anni con almeno 38 anni e 3 mesi, altrimenti 66 anni e 10 mesi. La stessa tabella fissa dal 2027 65 anni con almeno 38 anni e 6 mesi, altrimenti 67 anni.
@@ -45,7 +49,7 @@ Il calendario di pagamento o il numero di mensilità non prova la data di ricono
 
 ## Matrice source-bound V4.14b-g (non eseguibile)
 
-Consultazione documentale: 2026-11-08. I link BOE nelle righe sono testi consolidati per consultazione informativa, senza valore legale autonomo; le pubblicazioni ufficiali primarie sono indicate nella sezione fonti. La matrice descrive il contratto documentale per una futura verifica umana; non produce una data pensionistica, non sceglie un percorso e non autorizza Rules, Tests o Engine.
+Consultazione documentale aggiornata: 2026-11-14 per la currentness LGSS e gli atti RDL 31/2026/RDL 35/2026; la consultazione degli altri riferimenti resta alle date riportate nella sezione fonti. I link BOE nelle righe sono testi consolidati per consultazione informativa, senza valore legale autonomo; le pubblicazioni ufficiali primarie sono indicate nella sezione fonti. La matrice descrive il contratto documentale per una futura verifica umana; non produce una data pensionistica, non sceglie un percorso e non autorizza Rules, Tests o Engine.
 
 **Etichetta di riga BOE:** in ogni riga che contiene un link `boe.es` il link è un **testo consolidato BOE — consultazione informativa, senza valore legale autonomo**; il corrispondente record di pubblicazione ufficiale primaria è quello indicato nella sottosezione dedicata. I link `seg-social.es` sono **guida amministrativa**, non fonte statutaria.
 
@@ -79,6 +83,18 @@ Il supporto documentato è esattamente l'intervallo half-open `[2019-08-01, 2026
 Unknowns minimi: regime/gestione, stato alta-assimilata-non alta, cessazione e obbligo contributivo, data e via del hecho causante, anni/mesi/giorni e qualificazione, domanda/riconoscimento, effetti economici/pagamento, periodi UE e currentness oltre il 2026-11-01.
 
 ## Requisiti ordinari codificati nel baseline
+
+## Contratto limitato V4.14b-j — art. 3.1 RD 453/2022 (validator-only)
+
+Questo slice è limitato alla via generale dell'art. 3.1, Régimen General ordinario, e alla sola verifica strutturale/evidenziale del contratto. La finestra della data candidata è **`[2026-06-16, 2026-11-15)`**, riesaminata fino al 2026-11-14. Il cutoff separato di evidenza delle fonti è **`source_evidence_as_of: 2026-11-14`**: `as_of_date` deve essere esattamente quella data, non può precedere le fonti recuperate e riesaminate il 2026-11-14 né superare `reviewed_through`. Questo consente di verificare una candidata storica con fonti correnti riesaminate a tale cutoff, senza retrodatare la conoscenza delle fonti. Una data candidata fuori dalla finestra è `unknown` con `data_gaps`; una candidata anteriore al 2022-06-16 è inoltre incompatibile con il limite temporale della disposizione transitoria unica RD 453/2022 per questa via.
+
+Le fonti e i ruoli sono: RD 453/2022, pubblicazione BOE primaria, art. 3.1, art. 3.2(a-e), **art. 3.3**, disposizione transitoria unica e disposizione finale decima; [Código Civil, art. 5.1, consultazione BOE](https://www.boe.es/buscar/act.php?id=BOE-A-1889-4763), per il computo da data a data e, se nel mese di scadenza manca il giorno equivalente, l'ultimo giorno del mese; LGSS art. 205.1(b), pubblicazione primaria e consolidato BOE informativo; RDL 31/2026 (**Articulo primero.Dos (modifies LGSS 144.4)** e **Disposicion final cuarta.2**) e RDL 35/2026, pubblicazioni BOE primarie, come delta di currentness. Il consolidato e la consultazione del Código Civil non sostituiscono le pubblicazioni normative applicabili.
+
+Il record richiede una domanda **effettivamente presentata in Spagna**, la data candidata indicata e una data di deposito autorevole con riferimento probatorio. Una domanda internazionale è esclusa da questo contratto: il relativo termine non è inferito. La data candidata deve cadere, inclusivamente, entro tre mesi calendariali prima o dopo il deposito, applicando l'art. 5.1 del Código Civil. La data candidata non viene mai emessa come `hecho_causante` di una persona: l'output conserva `hecho_causante: not_assessed`. La prova deve dichiarare esplicitamente `filing_conflicting: false`; ciascuna esclusione art. 3.2 deve dichiarare `conflicting: false`. Valori mancanti, non booleani o true producono `unknown` + `data_gaps`.
+
+L'ambito RG ordinario e la non-applicabilità di **ciascun** ramo art. 3.2(a), (b), (c), (d) ed (e) richiedono prove individuali separate. Anche l'art. 3.3 è un ramo separato: riguarda lavoro mantenuto senza interruzione secondo LGSS 214 e domanda nei tre mesi immediatamente precedenti; è fuori dallo slice art. 3.1 e richiede prova esplicita `not_applicable`, `conflicting: false` e riferimento probatorio. Un booleano generico “nessun caso speciale” non basta. Prova mancante, applicabile o confliggente su una qualunque esclusione, sul deposito o sull'ambito RG dà `unknown` + `data_gaps` e `human_review_required: true`.
+
+L'anchor LGSS 205.1(b) resta `not_assessed` senza evidenza individuale distinta di status, obbligo contributivo e, dove pertinente, data di cessazione dell'obbligo. Il contratto non calcola anzianità, requisito 2-su-15, eligibility individuale, importi, riconoscimento, effetti economici o pagamento. Periodi UE, aggregazione e pro-rata restano fuori scope e generano un gap se presentati. RDL 31/2026 e RDL 35/2026 non sono usati per dedurre status o obligation individuali: nelle relative transizioni giornaliere l'evidenza mancante rimane un gap.
 
 L'articolo 205 richiede, per la pensione ordinaria nel Régimen General:
 
