@@ -1,3 +1,4 @@
+import hashlib
 import json
 from datetime import date
 from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_UP, localcontext
@@ -7,6 +8,10 @@ from typing import Any
 from family_office_engine.governance.pension_source_freshness import (
     PensionSourceFreshnessError,
     require_fresh_pension_rule_pack,
+)
+from family_office_engine.services.pension_timeline_source_gate import (
+    PACK_REGISTRY as TIMELINE_PACK_REGISTRY,
+    select_eu_pension_rule_pack,
 )
 
 SCHEMA_VERSION = "eu-pension-coordination-it-es/v1"
@@ -18,6 +23,8 @@ ARTICLE_57_PACK_CONTRACTS = {
     "eu.it-es.pension-coordination.2026.v6": "v0.27",
     "eu.it-es.pension-coordination.2026.v7": "v0.28",
     "eu.it-es.pension-coordination.2026.v8": "v0.28",
+    "eu.it-es.pension-coordination.2026.v11.1.1": "v0.29",
+    "eu.it-es.pension-coordination.2026.v12.1.1": "v0.29",
 }
 
 
@@ -31,10 +38,26 @@ def coordinate_it_es_pensions(
     rule_pack_path: Path,
     output_path: Path,
     italian_contribution_months: int | None = None,
+    *,
+    eu_rule_selection: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    rule_pack = load_rule_pack(rule_pack_path)
+    if rule_pack["rule_pack_id"] in TIMELINE_PACK_REGISTRY:
+        selection = None
+        if isinstance(eu_rule_selection, dict):
+            selection = select_eu_pension_rule_pack(
+                member_state=eu_rule_selection.get("member_state"),
+                applicable_date=eu_rule_selection.get("applicable_date"),
+                right_acquisition_date=eu_rule_selection.get("right_acquisition_date"),
+                contingency_date=eu_rule_selection.get("contingency_date"),
+                transition_classification=eu_rule_selection.get("transition_classification"),
+                pre_application_periods=eu_rule_selection.get("pre_application_periods"),
+                rules_root=rule_pack_path.parent,
+            )
+        return _write_snapshot(_candidate_evidence_only_snapshot(rule_pack, rule_pack_path, selection), output_path)
+
     inps = _read_json(inps_snapshot_path, "INPS pension snapshot")
     spanish = _read_json(spanish_pension_snapshot_path, "Spanish statutory pension snapshot")
-    rule_pack = load_rule_pack(rule_pack_path)
     _validate_snapshot_schema(inps, "inps-pension/v1", "INPS pension")
     _validate_snapshot_schema(spanish, "spanish-statutory-pension/v1", "Spanish statutory pension")
 
@@ -111,6 +134,15 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
         raise EuPensionCoordinationError(f"Unsupported EU pension coordination rule pack schema: {data['schema_version']}")
     if set(data["jurisdictions"]) != {"IT", "ES", "EU"}:
         raise EuPensionCoordinationError("EU pension coordination jurisdictions must be IT, ES and EU")
+    candidate_spec = TIMELINE_PACK_REGISTRY.get(data["rule_pack_id"])
+    if candidate_spec is not None:
+        if hashlib.sha256(rule_pack_path.read_bytes()).hexdigest() != candidate_spec["sha256"]:
+            raise EuPensionCoordinationError("Candidate EU rule pack digest does not match the reviewed selector registry.")
+        if (
+            data.get("valid_from") != candidate_spec["valid_from"].isoformat()
+            or data.get("valid_to") != candidate_spec["valid_to"].isoformat()
+        ):
+            raise EuPensionCoordinationError("Candidate EU rule pack period does not match the reviewed selector registry.")
     valid_from = _candidate_month(data["valid_from"])
     valid_to = _candidate_month(data["valid_to"])
     if valid_from is None or valid_to is None or valid_from > valid_to:
@@ -127,8 +159,8 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     if not isinstance(article_57, dict):
         raise EuPensionCoordinationError("EU pension coordination rule pack must define article_57_source_bound")
     contract_version = article_57.get("contract_schema_version")
-    if contract_version not in {"v0.25", "v0.26", "v0.27", "v0.28"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
-        raise EuPensionCoordinationError("EU pension coordination Article 57 contract must be v0.25, v0.26, v0.27 or v0.28 with fo-art57-c14n-v4")
+    if contract_version not in {"v0.25", "v0.26", "v0.27", "v0.28", "v0.29"} or article_57.get("canonicalization_profile") != "fo-art57-c14n-v4":
+        raise EuPensionCoordinationError("EU pension coordination Article 57 contract must be v0.25, v0.26, v0.27 or v0.28; v0.29 is accepted only for exact registered candidate packs with fo-art57-c14n-v4")
     if ARTICLE_57_PACK_CONTRACTS.get(data["rule_pack_id"]) != contract_version:
         raise EuPensionCoordinationError("EU pension coordination Article 57 contract identity does not match its selected pack.")
     if contract_version == "v0.25" and ("transition_source_registry" in article_57 or "normative_source_registry" in data):
@@ -156,15 +188,58 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
     if article_57.get("human_review_required") is not True:
         raise EuPensionCoordinationError("EU pension coordination Article 57 contract must require human review")
     annex_policy = article_57.get("annex_viii_part_2")
-    if not isinstance(annex_policy, dict) or not isinstance(annex_policy.get("applicable_annex_part_2_version"), str) or not annex_policy.get("applicable_annex_part_2_version"):
+    if data["rule_pack_id"] not in TIMELINE_PACK_REGISTRY and (not isinstance(annex_policy, dict) or not isinstance(annex_policy.get("applicable_annex_part_2_version"), str) or not annex_policy.get("applicable_annex_part_2_version")):
         raise EuPensionCoordinationError("EU pension coordination Article 57 Annex VIII applicability version is required")
-    if not _iso_date(annex_policy.get("applicable_annex_part_2_valid_from")) or (annex_policy.get("applicable_annex_part_2_valid_to") is not None and not _iso_date(annex_policy.get("applicable_annex_part_2_valid_to"))):
+    if data["rule_pack_id"] not in TIMELINE_PACK_REGISTRY and (not _iso_date(annex_policy.get("applicable_annex_part_2_valid_from")) or (annex_policy.get("applicable_annex_part_2_valid_to") is not None and not _iso_date(annex_policy.get("applicable_annex_part_2_valid_to")))):
         raise EuPensionCoordinationError("EU pension coordination Article 57 Annex VIII validity dates must be ISO dates")
     if not isinstance(data["pro_rata_method"].get("overlap_policy"), dict):
         raise EuPensionCoordinationError("EU pension coordination rule pack must define overlap_policy")
     if not isinstance(data["limitations"], list) or not data["limitations"]:
         raise EuPensionCoordinationError("EU pension coordination rule pack must contain limitations")
     return data
+
+
+def _candidate_evidence_only_snapshot(
+    rule_pack: dict[str, Any], rule_pack_path: Path, selection: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Persist only selector metadata; candidate packs never reach pension calculations."""
+    pack_id = rule_pack["rule_pack_id"]
+    spec = TIMELINE_PACK_REGISTRY[pack_id]
+    matches = (
+        isinstance(selection, dict)
+        and selection.get("status") == "candidate_selected"
+        and selection.get("rule_pack_id") == pack_id
+        and selection.get("digest_sha256") == spec["sha256"]
+    )
+    if matches:
+        gaps = [{"code": "consumer_output_not_assessed", "message": "The source selector matched the candidate pack; this coordination consumer does not assess individual pensions.", "severity": "blocking"}]
+    elif isinstance(selection, dict):
+        gaps = selection.get("data_gaps") or [{"code": "source_version_missing", "message": "The selector result does not match the supplied candidate pack.", "severity": "blocking"}]
+    else:
+        gaps = [{"code": "legal_applicability_unknown", "message": "Externally established Article 87b timing and classification are required before selecting the EU candidate pack.", "severity": "blocking"}]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "record_type": RECORD_TYPE,
+        "status": "partial",
+        "rule_pack": {
+            "path": str(rule_pack_path) if matches else None,
+            "rule_pack_id": pack_id if matches else None,
+            "schema_version": rule_pack["schema_version"] if matches else None,
+            "sha256": spec["sha256"] if matches else None,
+            "valid_from": spec["valid_from"].isoformat() if matches else None,
+            "valid_to": spec["valid_to"].isoformat() if matches else None,
+            "source_refs": rule_pack["source_refs"] if matches else [],
+            "limitations": rule_pack["limitations"] if matches else [],
+        },
+        "sources": {"italy": {"path": None, "schema_version": None}, "spain": {"path": None, "schema_version": None}},
+        "coordination_principles": rule_pack["coordination_principles"] if matches else {},
+        "period_summary": {"status": "not_assessed"},
+        "national_entitlements": [{"country": country, "status": "not_assessed", "amount": None} for country in ("IT", "ES")],
+        "pro_rata_diagnostics": {"status": "not_assessed", "countries": []},
+        "data_gaps": gaps,
+        "warnings": [{"code": "human_review_required", "message": "No individual entitlement, date, payer, or amount is assessed."}],
+        "notes": "Candidate pack selection metadata only; all pension outcomes remain not_assessed.",
+    }
 
 
 def _validate_v7_title_ii_policy(data: dict[str, Any]) -> None:

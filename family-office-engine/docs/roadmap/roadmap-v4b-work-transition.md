@@ -1134,7 +1134,7 @@ Esito: LIMITED GO exact-hash Sol/xhigh sul candidato corretto; 11/11 hash verifi
 
 ### V4.16 — Monthly decumulation and sequence-risk simulation
 
-**Stato:** `planned`
+**Stato:** `in_progress`
 **Tipo:** `functional`
 
 Eseguire il bilancio mensile household e il decumulo per bucket, prima deterministico e poi con stress stochastic separato.
@@ -1333,7 +1333,7 @@ V4.14w-j è chiusa nel perimetro Knowledge v0.28 / Rules v7 con suite Engine com
 
 ### V4.14w-z-b - EU pension consumer compatibility with Rules v11 and Annex v0.3
 
-**Stato:** `in_progress`
+**Stato:** `done`
 **Tipo:** `functional`
 **Dipende da:** V4.14w-z-a (`done`, LIMITED GO sul mapping fonti/eventi); V4.14w-y (`done`, LIMITED GO su Knowledge v0.3 e Rules v11).
 **Obiettivo:** collegare il consumer pubblico di coordinamento pensionistico al Rules v11 e al contratto Annex VIII v0.3, mantenendo il comportamento deterministico e source-bound.
@@ -1341,6 +1341,142 @@ V4.14w-j è chiusa nel perimetro Knowledge v0.28 / Rules v7 con suite Engine com
 **Fuori scope:** timeline individuale, date pensionistiche esatte, calcoli pensionistici o modifica di fonti/Rules senza un gate normativo.
 **Done quando:** consumer CLI/API carica i contratti v11/v0.3 solo con hash e finestra applicabili; regressioni pubbliche verificano output fail-closed e nessuna inferenza; suite Engine completa 0/0/0, review indipendente e governance verdi. V4.14 resta bloccata fino al successivo builder/validator v2 integrato.
 
+**Esito 2026-11-14: DONE tecnico, LIMITED GO sul solo consumer.** Il loader collega Rules v11 al contratto Article 57 v0.29 e all’Annex VIII v0.3 con identità, registry, digest e intervallo half-open esatti `[2019-08-01, 2026-11-15)`. Il builder pubblico resta evidence-only: restituisce `blocked_missing_inputs`, `not_assessed`, `data_gaps` e importi `null`, senza inferire eligibility, entitlement, payer o pagamento. Regressioni mirate 78/0/0/0 con 257 subtest; suite Engine 934/0/0/0 con 463 subtest; review tecnica indipendente PASS. Knowledge v0.3, Rules v11 e catalogue v0.4 non sono stati modificati. Nessun GO normativo è trasferito al runtime; V4.14 resta `blocked` e w-z-c resta successivo.
+
 ## Addendum di uscita dal loop — 2026-11-14 (nessun GO retroattivo)
 
-Il blocco operativo di V4.14w-z-b è classificato come implementazione tecnica di binding **se e solo se** non cambia semantica di Rules v11/Knowledge v0.3 e non autorizza nuovi output giuridici. La review normativa preliminare rimasta PENDING dopo due tentativi non è GO né NO-GO; i tentativi restano nello storico e non vanno reiterati sul medesimo hash senza nuovo motivo. Il consumer deve mantenere rejection fail-closed finché binding esatto, periodi, hash, fonte e regressioni pubbliche non risultano validati. Per il piano tecnico e la gestione dei gate usare `v4.14-exit-contract.md`. V4.14 rimane `blocked`; V4.14w-z-b rimane `in_progress` finché non passa i done-when originali e la review necessaria del comportamento pubblico; V4.14w-z-c rimane successivo e non selezionabile in anticipo. Nessun entitlement o pagamento futuro può essere dedotto dal semplice binding.
+Il blocco operativo di V4.14w-z-b è stato chiuso nel solo perimetro tecnico descritto sopra. La review normativa preliminare rimasta PENDING dopo due tentativi non è GO né NO-GO e resta nello storico; non è stata reiterata sul medesimo hash. Per il piano tecnico e la gestione dei gate resta applicabile `v4.14-exit-contract.md`. V4.14 rimane `blocked`; V4.14w-z-c è il successivo lavoro documentato ma non è stato implementato o selezionato in anticipo. Nessun entitlement o pagamento futuro può essere dedotto dal semplice binding.
+
+### V4.14w-z-c - Deterministic pension entitlement timeline v2 validator/builder
+
+**Stato:** `done`
+**Tipo:** `functional`
+**Dipende da:** V4.14w-z-b (`done`, consumer evidence-only); V4.14w-z-a (`done`, mapping eventi/fonti).
+
+Implementare il producer tecnico del contratto candidato `pension-entitlement-timeline/v2`. Il servizio deve validare la forma JSON Schema e i vincoli semantici già dichiarati dal contratto, quindi serializzare uno snapshot riproducibile senza calcolare o inferire date, diritti, importi, decorrenze o pagamenti.
+
+- Output: cinque eventi separati, provenance source-bound conservata, `null` e `data_gaps` per ogni ramo non valutabile, `human_review_required=true`.
+- Test: snapshot completamente non valutato, evento supportato con copertura coerente, mismatch evento/data, intervallo half-open, source-ref/digest, confinamento workspace, date future, gap bloccanti e conservazione dell'amount basis senza valori monetari.
+- Fuori scope: nuove fonti o regole, modifica di Knowledge/Rules, dati personali, timeline individuale, integrazione optimizer/bridge e rimozione del blocker del journey completo.
+- Done quando: validator/builder e regressioni mirate passano; suite Engine completa e guardrail hanno 0 failure/errori/skipped; la documentazione distingue readiness software da readiness normativa e V4.14 resta `blocked`.
+
+**Nota di gate:** questo incremento è tecnico e non trasferisce i GO limitati di Knowledge/Rules al contratto normativo integrato. Ogni modifica semantica o nuova conclusione richiede un nuovo exact-hash review scoped.
+
+**Esito tecnico 2026-11-15: DONE tecnico, review indipendente PASS.** Il validator vincola primary/transition evidence per `not_applicable` e tutte le fonti dell'amount basis alla copertura dello snapshot: `as_of_date` coincidente, stati covered e nessun gap. Nessuna modifica a schema, Knowledge, Rules o semantica normativa. Regressioni mirate 40/40 con 21 subtest; suite Engine 950/0/0/0 con 465 subtest, eseguita nel contesto supportato dopo failure ACL/temp dell'esecuzione sandbox. Il reviewer indipendente ha confermato PASS sul diff corretto e ripetuto i mirati 40/40. Audit roadmap, execution guardrails, schema planner e diff-check superati. w-z-c è `done` solo nel perimetro tecnico. V4.14 resta `blocked`; il successivo gate integrato esatto è ancora necessario.
+
+### V4.14w-z-d - Integrated IT/ES/EU normative source-to-event parent gate
+
+**Stato:** `done`
+**Tipo:** `audit`
+**Dipende da:** V4.14w-z-c (`done`, validator/builder tecnico); V4.14w-z-b (`done`, consumer EU v11/v0.3); V4.14w-z-a (`done`, matrice eventi/fonti).
+
+**Obiettivo:** una review normativa indipendente exact-hash del pacchetto IT/ES/UE per stabilire gli output ammissibili per evento e giurisdizione, i periodi coperti, le prove richieste e i gap che devono restare `null + data_gaps`, prima di collegare i consumer al timeline v2.
+
+**Scope:** sola lettura del manifest [`v4.14w-z-d-review-manifest.md`](v4.14w-z-d-review-manifest.md), dei 27 artefatti a hash elencati e delle fonti ufficiali collegate. Verificare coerenza tra fonte/autorità, periodo legale, periodo pack, Knowledge, Rules, Annex VIII v0.3/catalogue v0.4, servizi pubblici e schema timeline v2; rendere espliciti i limiti su eligibility, requisiti, riconoscimento, decorrenza e pagamento.
+
+**Fuori scope:** modifiche a legge, Knowledge, Rules, schema, servizio o dati personali; inferenze individuali; chiusura automatica di V4.14. Un GO autorizza solo la pianificazione del runtime integrato successivo, non il parent.
+
+**Done quando:** verdetto Sol/xhigh exact-hash con hash iniziali/finali, tabella dei cinque eventi × IT/ES/UE, granularità supportata, periodi, evidenze, gap e blocker ordinati; audit roadmap, planner schema, guardrails e diff-check verdi. Se manca un verdetto, resta `PENDING` e non parte il runtime.
+
+**Gate operativo:** il nuovo tentativo normativo richiede autorizzazione esplicita dell'utente per questo reviewer, scope e bundle exact-hash; il precedente consenso alla review tecnica w-z-c non si trasferisce. Timebox proposto: 120s + una finestra finale 120s.
+
+**Esito 2026-11-15: audit chiuso con NO-GO exact-hash, 27/27 hash iniziali/finali corrispondenti.** Il reviewer Sol/xhigh ha rilevato 0/15 combinazioni evento/giurisdizione che supportano una data non-null; timeline v2 resta fail-closed. Blocchi: Normattiva classificata `primary_legislation` nel pack IT in conflitto con la matrice; periodo ES e Annex EU verificati solo fino al 2026-11-14 con intervallo half-open che termina il 2026-11-15; tracce Knowledge EU/ES non allineate a Rules v11/Article 57 v0.29/Annex v0.3; il consumer pubblico `eu_pension_coordination.py` non supporta ancora v11/v0.3. Il NO-GO chiude solo questo audit e non trasferisce autorizzazione a un candidato con hash diversi. V4.14 resta `blocked`.
+
+### V4.14w-z-e - Versioned authority, source freshness and pack reconciliation
+
+**Stato:** `done`
+**Tipo:** `functional`
+**Dipende da:** V4.14w-z-d (`done`, audit NO-GO con blocker puntuali); V4.14w-z-a (`done`, matrice eventi/fonti); V4.14w-y (`done`, Knowledge/Rules EU v11 scoped).
+**Classificazione del gate:** T4 normativo: fonti ufficiali ? Knowledge versionata ? Rules versionate ? test sintetici ? Engine; manifest immutabile e review normativa indipendente sul nuovo hash.
+
+**Obiettivo:** correggere e versionare la catena fonte-autorita-periodo per i contratti IT/ES/EU, preservando le versioni storiche e le conclusioni fail-closed.
+
+**Scope:** verificare le fonti ufficiali alla data di review; distinguere pubblicazione ufficiale, consolidamento e guidance; riallineare Knowledge/Rules ai pack effettivi e dichiarare intervalli half-open espliciti. Includere il contratto Art. 87b(1)-(3) separato dalle date applicative Art. 91, la matrice/Rules/citazioni corrette, un selector deterministico pubblico ma non attivato per il pack UE, e una facade non valutativa per tutti i 15 rami evento?giurisdizione. Aggiungere regressioni su transizioni, hash, confini, fail-closed e output `null + data_gaps`.
+
+**Fuori scope:** attivazione del selector nel consumer ordinario, selezione automatica `latest`, default routing, CLI/user flow, integrazione end-to-end del timeline, date individuali, eligibility, riconoscimento, decorrenza, importi, payer o pagamento; widening di output senza fonte e gate Knowledge ? Rules ? test ? Engine.
+
+**Done quando:** candidato versionato con fonti ufficiali e hash; selector/facade pubblici non attivati e fail-closed, coperti da test sintetici per i due confini, condizioni transitorie, drift e 15 rami; test mirati, suite Engine completa 0/0/0 e governance verdi; GO normativo exact-hash sul nuovo manifest. Il NO-GO/PENDING chiude solo l'audit, mantiene w-z-e `in_progress` e non abilita w-z-f.
+
+**Confine verso w-z-f:** la facade dell'incremento ? un seam di verifica che restituisce solo identificativo/digest del pack candidato o `not_assessed`, pi? eventi null/gap. w-z-f adotta il selector nel consumer produttivo, gestisce compatibilit?/migrazione e collega timeline/tool/CLI solo dopo GO w-z-e.
+
+### V4.14w-z-f - Public EU consumer compatibility with reconciled contract
+
+**Stato:** `done`
+**Tipo:** `functional`
+**Dipende da:** V4.14w-z-e (`done`, contratti source-bound reconciliati); V4.14w-z-b (`done`, binding precedente limitato).
+**Classificazione del gate:** T1–T3 tecnico finché i pack approvati restano immutati e ogni output giuridico non supportato resta fail-closed; ogni nuovo output o interpretazione torna a T4.
+
+**Obiettivo:** rendere coerenti i consumer pubblici EU con le versioni approvate di Rules/Knowledge, mantenendo output evidence-only e fail-closed. Non avviare prima dell?exact-hash GO di w-z-e.
+
+**Done quando:** regressioni pubbliche coprono tutte le versioni/digest/periodi approvati e drift, senza inferenze; review tecnica indipendente, suite Engine 0/0/0 e governance verde. Ogni modifica di interpretazione riapre il gate normativo specifico.
+
+
+**Correzione NO-GO w-z-e (2026-11-15):** la review autorizzata sul manifest `ED26EC952C75AE53247A6C78DBCBFDD9CD2276D1625A6E25FBEEC96232EEAFEB` ha restituito NO-GO exact-hash, 17/17 hash iniziali/finali. La Regulation (EU) 2026/2359, pubblicata il 2026-10-27, ? adottata; l'Art. 50(2) sostituito si applica dal 2026-11-01 in base alle disposizioni finali di applicazione/transizione. Il v0.3 che la classificava come proposta/non operativa ? errato; Rules v11 non rappresentava il confine. Ulteriore finding: `boe.codigo-civil.official-publication` identificava una consultazione consolidata BOE. Remediation versionata in corso: Knowledge matrix v0.4, EU Rules v11.1 valido fino al 2026-10-31 e v12 dal 2026-11-01 limitato all'Art. 50(2), ES Rules v3 con ID esplicito. v0.3/v11/ES v2 preservati; 15 rami restano `null + data_gaps`. w-z-e resta `in_progress` in attesa di test, governance e nuova autorizzazione per il manifest v0.4; w-z-f e parent restano bloccati.
+
+**Verifica tecnica candidato w-z-e v0.4 (2026-11-15):** test mirati 12/12; suite Engine completa 955 passed + 465 subtests, 0 failure/error/skipped; roadmap audit OK; execution guardrails OK. Il planner ? stato corretto secondo il proprio JSON Schema. Manifest [`v4.14w-z-e-review-manifest-v0.4.md`](v4.14w-z-e-review-manifest-v0.4.md) congelato su 21 artefatti, SHA-256 `DE4091530F1373EFC1AE4F139BE06CD38BC310E4BB0D8593C504E73C11DAC35F`; il digest del manifest va comunicato per richiedere autorizzazione specifica. Stato w-z-e `in_progress` / review `pending`, non GO.
+
+
+**Second exact-hash NO-GO w-z-e (2026-11-15):** review del manifest v0.4 completata entro la finestra autorizzata di 300 secondi, 21/21 hash iniziali/finali stabili, nessun file modificato dal reviewer. Art. 87b(1)-(3) governa le transizioni; Art. 91 fornisce le date di applicazione. La candidatura non specifica i periodi anteriori, le contingenze anteriori n? il criterio di selezione; i test non esercitano selector/consumer pubblico n? tutti i 15 rami runtime. Il catalogo usa l'identificativo ristretto Annex VIII per l'intero atto e presenta citation references duplicate; la nota UE non raccorda v11.1. Stato w-z-e resta `in_progress`, review NO-GO; v11.1/v12, Knowledge, catalogo e regressioni da correggere. Il runtime w-z-f resta ineligible fino a GO; parent V4.14 `blocked`, output `null + data_gaps`. Nessun retry automatico sul medesimo hash.
+
+
+**Preparazione v0.5 dopo NO-GO (2026-11-15):** Rules v12.1 distingue Art. 87b(1)-(3) da Art. 91(3)(1)(b) e richiede timing/classificazione esterni; selector/facade pubblico resta non attivato e restituisce solo pack candidato/digest oppure `not_assessed`, con tutti i cinque eventi ? tre giurisdizioni null + gap. Citation catalog usa ID canonico dell'atto e alias storico normalizzato; Knowledge separa v11.1 e v12.1. Test mirati 20 passed + 5 subtests; Engine 963 passed + 470 subtests, 0 failure/error/skipped. La suite non attiva la decisione individuale n? la compatibilit? del consumer ordinario. GO normativo sul nuovo manifest e fresh authorization richiesti; w-z-e resta `in_progress`, w-z-f `planned/ineligible`, V4.14 `blocked`.
+
+**v0.5 exact-hash NO-GO (2026-11-15):** the authorized review of manifest `B794BB4430487CDF588202B8BFE3B33765F3144B6C4D61D6648DF50D5A080365` returned NO-GO with 25/25 initial/final hashes stable and no reviewer edits. Findings: v11.1 successor did not identify v12.1; Knowledge matrix retained ES v2/EU v11 as current and stale self-version wording; Spain Knowledge did not reconcile candidate v3/source ID; 15-branch regression supplied positive selection only to EU. The v0.5 manifest remains a historical NO-GO record and will not be retried.
+
+**v0.6 exact-hash NO-GO (2026-11-15):** authorized 300-second review on manifest `6C266B31E104463F606C34842EE82F062B863179D075DA6664B8BF7D35D3CD8D`; reviewer elapsed ~163 seconds, 28/28 initial/final hashes matched, no reviewer edits. One blocker: `pension-timeline-events-it-es-eu.md` first called v0.3 the current proposed matrix and later called v0.6 current. Reviewer required a regression over all active Knowledge notes for exactly one current matrix reference. Other inspected legal/source/linkage/selector points were confirmed. Reviewer?s independent focused invocation failed import because its package path was missing; no retry was made. The local pre-correction tests had already passed; that reviewer runner issue is not a code failure or approval.
+
+**v0.7 exact-hash NO-GO (2026-11-15):** authorized review on manifest `3A141EDEAEBF3053B9CD6820EEC9071389845094DE50D14BEDD42F2FCC1B3965`; 29/29 initial/final hashes matched, no reviewer edits. Findings: EU v11.1.1 issuer had mojibake; manifest anchor corrupted `C?digo Civil`; history wording did not separately mark each of v0.3/v0.4/v0.5 historical; tests lacked exact UTF-8 and replacement-character checks. Other legal transition, adjacent pack, selector and 15-branch questions were confirmed. Reviewer test attempt hit sandbox TempDirectory PermissionErrors; no retry, no inference.
+
+**v0.8 exact-hash NO-GO (2026-11-15):** authorized review on manifest `7DA013ACF19AABDA356CEEB10BF6CAEC2104DB2CE0A0B6686613E6BAB1A67FB6`; 30/30 initial/final hashes matched, no reviewer edits. Residual question-mark corruption remained in the canonical current-reference line, matrix v0.6 heading/body, Spain note and manifest title. The currentness test matched a regex but did not assert the exact sentence or scan every active note for corruption markers. Reviewer confirmed legal transition, pack linkage, source identity and 15-branch selector behavior; its test runner was not rerun.
+
+**v0.9 bounded correction and verification (2026-11-15):** corrected all cited active Knowledge text; the timeline-events note now has one exact canonical current-matrix sentence. Regression checks the full sentence, explicit historical v0.3/v0.4/v0.5 labels, and scans all four active notes for question marks outside URLs, mojibake and replacement characters. Focused 23 passed + 7 subtests; full Engine 966 passed + 472 subtests, 0 failures/errors/skips. Roadmap audit, planner schema, execution guardrails and diff check pass. Manifest [`v4.14w-z-e-review-manifest-v0.9.md`](v4.14w-z-e-review-manifest-v0.9.md) SHA-256 `883DF37FBA2926804AD36E6E4E7D6455D53DA02FE4C044D08460D52BCEEF0256`, 31/31 hashes verified. w-z-e remains `in_progress` pending fresh exact-hash authorization/review; w-z-f and V4.14 remain blocked. All 15 outputs remain `not_assessed`, null date/payer/amount and blocking `data_gaps`.
+
+
+**v0.9 exact-hash normative review outcome (2026-11-15): LIMITED GO.** Reviewer Bohr verified manifest SHA-256 `883DF37FBA2926804AD36E6E4E7D6455D53DA02FE4C044D08460D52BCEEF0256` and all 31 listed file hashes at initial/final enumeration; manifest hash remained identical. Review duration between complete enumerations: 148.076 seconds. GO is limited to the source/version selector contract. Official EUR-Lex transition, adjacent v11.1.1/v12.1.1 periods, BOE source identity, UTF-8/currentness regressions, selector, and all 15 null+gap branches were confirmed. Reviewer reran 17 source-gate/reconciliation tests successfully; six citation-index tests could not create sandbox temp directories, so complete-suite evidence was reviewed from the recorded supported local run (966 passed + 472 subtests, zero failures/errors/skips), not independently reproduced. Reviewer modified no files. w-z-e is `done` within its declared scope only; this does not activate consumers or approve individual determinations. w-z-f is now eligible and selected; parent V4.14 remains `blocked`, and every output remains `not_assessed`/null with blocking `data_gaps`.
+
+
+**V4.14w-z-f implementation checkpoint (2026-11-15):** the public pro-rata and coordination services now accept only the two exact registered candidates through the approved selector, before reading individual snapshots or entering calculation paths. Missing, malformed, out-of-period or cross-pack selection returns null pack identity/period and blocking gaps; matching selection exposes only exact pack ID, digest and top-level validity interval, with all individual outcomes not assessed and no amount. Legacy defaults remain v8; no CLI, wizard, latest fallback, Rules, Knowledge or selector changes. Focused verification: 106 passed + 267 subtests; complete Engine suite: 975 passed + 480 subtests, zero failures/errors/skips. Governance passes; independent technical review remains pending. w-z-f stays `in_progress`, V4.14 `blocked`.
+
+
+**w-z-f first technical review NO-GO (2026-11-15):** reviewer verified all three submitted source/test hashes at start/end. One high finding: pro-rata candidate snapshot returned `not_calculable` for the individual outcome instead of `not_assessed`, and the regression asserted only a null amount. Both consumers otherwise passed the static boundary review: selection precedes individual reads/calculations, exact digest/period is pinned, output is persisted, and CLI/default/selector/Rules/Knowledge remain unchanged. Correct the state and assert it explicitly; w-z-f stays `in_progress`.
+
+
+**w-z-f corrective fix (2026-11-15):** candidate pro-rata output now uses `not_assessed`; the legacy v10/v11 evidence-only status remains unchanged. Regressions assert status plus null amounts for missing, matching and cross-pack selection, and persisted output. Focused suite 106 passed + 267 subtests; full Engine suite 975 passed + 480 subtests, zero failures/errors/skips. One final exact-file technical review and governance recheck remain; w-z-f stays `in_progress`, V4.14 `blocked`.
+
+
+**w-z-f final review resumption (2026-11-15):** the final technical reviewer agent terminated on the platform usage limit before issuing a verdict. This is `PENDING`, not PASS/NO-GO. All three frozen consumer/test hashes were rechecked unchanged; after the user asked to resume and the reported usage-limit reset time passed, one final read-only review was reauthorized on the same files/scope. w-z-f remains `in_progress`; V4.14 remains `blocked`.
+
+
+**w-z-f final technical review PASS (2026-11-15):** reviewer Faraday confirmed the corrected `not_assessed` status and all fail-closed boundaries on unchanged hashes: pro-rata `166cc5aa91e7d2a5d6fea8cee6f8db0be127419dab98d1ace42f35f8dc30f33a`, coordination `bd7fa6234cad20d695db6682ec575660524ce62a8f573396fa356262ca6b5484`, regression `a6ddb725d3eb86d07064487600bfbc3477d5dbfd6f38147fa9d92d305c0a33de`. Focused 106+267 and full Engine 975+480 passed, zero failures/errors/skips; roadmap, planner schema, guardrails and diff-check pass. w-z-f is `done` within evidence-only compatibility scope; parent V4.14 remains `blocked` pending a fresh integrated source-to-event exit gate.
+
+### V4.14w-z-g - Integrated exact-hash parent exit gate
+
+**Stato:** `done`
+**Esito:** audit completed with exact-hash NO-GO; parent V4.14 remains blocked.
+**Tipo:** `audit`
+**Dipende da:** V4.14w-z-e (`done`, source/version selector contract LIMITED GO); V4.14w-z-f (`done`, public consumer evidence-only compatibility PASS); V4.14w-z-d (closed historical NO-GO audit).
+**Obiettivo:** re-evaluate the integrated five-event IT/ES/EU contract against current official sources, exact Knowledge/Rules versions, selector, public consumers and timeline v2; determine whether V4.14 exit criteria are satisfied without inferring individual outcomes.
+**Scope:** prepare an immutable exact-hash bundle of the current source-to-event chain and evidence; independently review all 15 event/jurisdiction branches, half-open periods, pack selection, source freshness, runtime compatibility, privacy, provenance and `not_assessed/null + data_gaps`; verify whether the documented w-z-d findings are resolved and whether any supported outputs are substantiated.
+**Out of scope:** new legal interpretation, changing Knowledge/Rules/Engine behavior, individual facts, eligibility, recognition, effective dates, payer, amounts or payments. Any substantive source/rule change returns through Knowledge -> Rules -> tests -> Engine and a new review.
+**Done when:** exact-hash independent normative review returns GO, NO-GO or PENDING with exact hashes and findings recorded. A NO-GO/PENDING keeps parent V4.14 blocked and selects only its bounded corrective prerequisite; no same-hash retries.
+
+**w-z-g frozen review candidate (2026-11-15):** manifest [`v4.14w-z-g-integrated-review-manifest-v0.1.md`](v4.14w-z-g-integrated-review-manifest-v0.1.md), SHA-256 `6CA692F535154FBB2BBA3C7C341D42529A983C9A1784462CD1AF2C5306FD7F78`, 48 files. Reviewer Fermat verified 48/48 hashes initially and finally, no edits, exact-hash NO-GO after 203.293 seconds.
+
+**w-z-g exact-hash NO-GO (2026-11-15):** the current facade is tested independently but there is no integrated producer connecting the reviewed source gate and IT/ES/EU service evidence to timeline v2. Only exact pack metadata is supported; all 15 branches correctly remain `not_assessed`, null date/payer/amount, with blocking gaps. Historical w-z-d blockers for Italian authority, Spanish currentness, Knowledge/Rules alignment and EU consumer compatibility are resolved; positive event-date support remains 0/15. EU pack dates are stored last-day-inclusive and need explicit half-open normalization in the integration regression. Privacy/provenance and fail-closed behavior pass. V4.14 stays blocked. The oldest prerequisite is one bounded technical integration plus public regressions for all 15 paths, pack ID/digest/period, half-open boundaries, evidence-role separation, drift/conflict/path/digest rejection and downstream null propagation. No same-hash review retry. A new technical cycle requires explicit scope-specific authorization before any code change.
+
+
+### V4.14w-z-h - Source-bound timeline producer integration
+
+**Stato:** `blocked`
+**Tipo:** `functional`
+**Dipende da:** V4.14w-z-g (`done` as a completed audit with exact-hash NO-GO; V4.14 itself remains blocked).
+**Obiettivo:** connect the reviewed source gate and existing deterministic IT/ES/EU service outputs to the public timeline-v2 producer, preserving evidence roles and fail-closed output.
+**Scope:** architecture review first; implement one deterministic public producer; exercise all 15 event/jurisdiction paths; normalize candidate `valid_to` to half-open boundaries at the adapter boundary; test exact pack ID/digest/period, source drift/conflict/path/digest rejection, event evidence separation and null propagation through EU consumers and pension-income outputs.
+**Out of scope:** edits to Knowledge/Rules or timeline-v2 schema, new legal interpretation, individual facts, eligibility/recognition/effective/payment conclusions, amounts, workspace personal data, CLI activation or a second remediation cycle.
+**Stop condition:** any need to change a legal claim/rule/schema, any unsupported date or amount becoming visible, inability to prove positive public-path reachability before adverse mutations, failed/skipped tests, or technical/normative NO-GO/PENDING; then keep V4.14 blocked and end this authorized cycle.
+**Done when:** producer and public synthetic regressions pass; complete Engine suite has zero failures/errors/skips; planner/roadmap/guardrails pass; exact changed bundle receives one technical review and one new-version normative gate, each within one 300-second window. A PASS closes only w-z-h; V4.14 remains blocked unless its original exit conditions are independently shown satisfied.
+
+**w-z-h architecture checkpoint:** conditional GO for a standalone adapter `pension_entitlement_timeline_producer.py`. Keep source selector, existing services, and v2 builder responsibilities unchanged; assess 15 branches internally and aggregate into the five public v2 events. IT service v2/current-candidate v3 mismatch, missing loaded-time ES digest, v2 jurisdiction aggregation, and separate domestic pension-income path remain explicit fail-closed limits. No legal/source/schema changes are authorized.
+**w-z-h exact-hash candidate freeze:** manifest [`v4.14w-z-h-producer-review-manifest-v0.1.md`](v4.14w-z-h-producer-review-manifest-v0.1.md), SHA-256 `9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF`, 53 files, all hashes verified. Focused 9/8/24/16/9/4 and complete Engine 984, zero failures/errors/skips. One technical review is active; normative review follows only on PASS and unchanged bytes.
+
+**w-z-h technical exact-hash NO-GO (2026-11-15):** Reviewer Turing found a high selector-provenance defect: the producer accepts caller-constructed `candidate_selected` mappings and does not bind or verify temporal selector inputs/result. Its tests used the same fabricated mapping, so source-to-producer provenance was unproven. All 53/53 hashes matched at initial/final enumeration on manifest `9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF`; reviewer made no edits; review duration about 102 seconds. All event dates/amounts remain null, but EU source binding cannot be trusted. Under the authorized stop condition, no normative review or further correction is started. w-z-h and parent V4.14 remain blocked pending a new scope-specific authorization for a bounded provenance correction and new-version review.

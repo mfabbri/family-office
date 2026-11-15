@@ -74,3 +74,13 @@ Fonti: [decreto 6 dicembre 2011](https://www.gazzettaufficiale.it/atto/vediMenuH
 - Un provvedimento e una prova di pagamento sono evidenze del soggetto/ente e del periodo specifici. Non sono sintetizzabili da età, contributi, decorrenza teorica o calendario generale.
 - La presente verifica web è puntuale; il freshness gate locale già esistente non monitora automaticamente i siti. Occorre la review periodica e anticipata prevista da V4.14c.
 - Nessun calcolo di importo, entitlement, data o stream è introdotto. La timeline V4.14 resta `blocked` finché un review gate indipendente non approva un perimetro eseguibile preciso.
+
+## Raccordo candidate V4.14w-z-e (2026-11-15)
+
+**Nota storica (2026-11-15):** il raccordo Knowledge v0.3 descritto qui in precedenza è superato dalla matrice v0.6; ogni riferimento a v0.3 in questa sezione è storico. Il Rule pack italiano v2 e il precedente framing della provenance restano storici; il candidate v3 separa pubblicazione Gazzetta, conversione con L. 214/2011 e consultazione informativa Normattiva. Il candidate v3 resta pending exact-hash normative review. Tutte le 15 combinazioni evento/giurisdizione restano `null + data_gaps`, e V4.14 resta blocked.
+
+
+**Riferimento corrente della matrice (2026-11-15):** `pension-timeline-source-matrix-v0.6.md` e' il solo riferimento versionato corrente per fonti, periodi e supporto dei 15 rami.
+La matrice v0.3 è storica.
+La matrice v0.4 è storica.
+La matrice v0.5 è storica. La matrice v0.6 resta candidata e in attesa di review exact-hash. Tutti gli eventi restano `null + data_gaps`.

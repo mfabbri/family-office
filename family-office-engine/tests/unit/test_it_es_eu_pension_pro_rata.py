@@ -24,6 +24,7 @@ RULE_PACK_V7 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pe
 RULE_PACK_V8 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v8.json"
 RULE_PACK_V9 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v9.json"
 RULE_PACK_V10 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v10.json"
+RULE_PACK_V11 = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / "eu-pension-coordination-it-es-v11.json"
 ANNEX_VIII_APPLICABILITY_V02 = REPOSITORY_ROOT / "family-office-knowledge" / "international" / "eu-annex-viii-applicability-evidence-v0.2.json"
 ANNEX_VIII_APPLICABILITY_V02_SCHEMA = REPOSITORY_ROOT / "family-office-knowledge" / "international" / "eu-annex-viii-applicability-evidence-v0.2.schema.json"
 
@@ -285,6 +286,65 @@ class ItEsEuPensionProRataTest(unittest.TestCase):
                 else:
                     self.assertNotIn("annex_viii_currentness_outside_verified_interval", gap_codes)
                 self.assertNotIn("ordinary_article_52", json.dumps(snapshot))
+
+    def test_v11_loader_binds_annex_v03_contract_and_exact_rule_identity(self):
+        policy = load_rule_pack(RULE_PACK_V11)["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+        self.assertEqual(policy["contract_schema_version"], "v0.3")
+        self.assertEqual(policy["knowledge_contract"]["contract_id"], "eu-annex-viii-part-2-applicability-evidence-v0.3")
+        self.assertEqual(policy["source_registry"][1]["valid_to"], "2026-11-15")
+        self.assertEqual(load_rule_pack(RULE_PACK_V11)["rule_pack_id"], "eu.it-es.pension-coordination.2026.v11")
+
+    def test_v11_public_builder_is_evidence_only_and_half_open_at_2026_11_15(self):
+        for assessment_date, outside in (
+            ("2019-07-31", True),
+            ("2019-08-01", False),
+            ("2026-11-14", False),
+            ("2026-11-15", True),
+            ("2026-11-16", True),
+        ):
+            with self.subTest(assessment_date=assessment_date):
+                payload = _input([_period("IT", "2000-01-01", "2019-12-31"), _period("ES", "2020-01-01", "2026-11-30")])
+                assessment = _article_57_v028(False, False, False, assessment_date=assessment_date)
+                assessment["contract_schema_version"] = "v0.29"
+                assessment["annex_viii_part_2_applicability"] = {"assessment_result": "not_assessed"}
+                payload["article_57_assessment"] = assessment
+
+                input_path = REPOSITORY_ROOT / "family-office-engine" / ".codex-v11-input.json"
+                output_path = REPOSITORY_ROOT / "family-office-engine" / ".codex-v11-output.json"
+                try:
+                    input_path.write_text(json.dumps(payload), encoding="utf-8")
+                    snapshot = build_it_es_eu_pension_pro_rata(input_path, RULE_PACK_V11, output_path)
+                finally:
+                    input_path.unlink(missing_ok=True)
+                    output_path.unlink(missing_ok=True)
+
+                self.assertEqual(snapshot["status"], "blocked_missing_inputs")
+                self.assertEqual(snapshot["article_57"]["national_eligibility_status"], "not_assessed")
+                self.assertEqual(snapshot["article_57"]["national_payment_obligation_status"], "not_assessed")
+                self.assertIsNone(snapshot["spanish_theoretical_pension"]["amounts"])
+                self.assertIsNone(snapshot["spanish_pro_rata_pension"]["amounts"])
+                gap_codes = {gap["code"] for gap in snapshot["data_gaps"]}
+                self.assertIn("annex_viii_evidence_only_rule_pack", gap_codes)
+                self.assertEqual("annex_viii_currentness_outside_verified_interval" in gap_codes, outside)
+                self.assertNotIn("ordinary_article_52", json.dumps(snapshot).lower())
+
+    def test_v11_loader_rejects_contract_digest_or_registry_drift(self):
+        pack = json.loads(RULE_PACK_V11.read_text(encoding="utf-8"))
+        policy = pack["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+        for mutation in ("digest", "registry"):
+            candidate = deepcopy(pack)
+            policy = candidate["pro_rata_method"]["article_57_source_bound"]["annex_viii_part_2"]
+            if mutation == "digest":
+                policy["knowledge_contract"]["sha256"] = "0" * 64
+            else:
+                policy["source_registry"][1]["valid_to"] = "2026-11-16"
+            path = REPOSITORY_ROOT / "family-office-rules" / "cross-border" / ".codex-v11-mutated-rules.json"
+            try:
+                path.write_text(json.dumps(candidate), encoding="utf-8")
+                with self.assertRaisesRegex(ItEsEuPensionProRataError, "v11 Rule pack Annex VIII"):
+                    load_rule_pack(path)
+            finally:
+                path.unlink(missing_ok=True)
 
     def test_v8_policy_is_payer_free_and_requires_all_concerned_relief(self):
         multi = load_rule_pack(RULE_PACK_V8)["pro_rata_method"]["article_57_source_bound"]["multi_institution"]

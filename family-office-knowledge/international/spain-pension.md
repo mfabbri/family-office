@@ -80,6 +80,10 @@ La riproduzione locale del confine v8 usa esclusivamente questi artefatti di evi
 
 Il supporto documentato è esattamente l'intervallo half-open `[2019-08-01, 2026-11-02)`, con gap a partire dal `2026-11-02`. Gli artefatti sono source evidence e non dimostrano applicabilità a uno schema nazionale concreto né autorizzano Rules, Tests, Engine o runtime.
 
+### Riferimento corrente V4.14 — Annex VIII Part II (2026-11-14)
+
+Il blocco v0.2 precedente è una fotografia storica fino al 2026-11-01. Per la matrice timeline corrente, il contratto vigente nel corpus è `eu-annex-viii-part-2-applicability-evidence-v0.3`, `verified_through: 2026-11-14`, con intervallo half-open `[2019-08-01, 2026-11-15)`. Rules EU v11 lega questo contratto e Article 57 v0.29; il collegamento è solo evidence-only. La fonte BOE consolidata resta informativa e non sostituisce le pubblicazioni originali e i delta normativi elencati sopra. Oltre il cutoff 2026-11-14 mantenere `not_assessed + data_gaps`; nessuna applicabilità nazionale, eligibility, riconoscimento o data di pagamento è dedotta.
+
 Unknowns minimi: regime/gestione, stato alta-assimilata-non alta, cessazione e obbligo contributivo, data e via del hecho causante, anni/mesi/giorni e qualificazione, domanda/riconoscimento, effetti economici/pagamento, periodi UE e currentness oltre il 2026-11-01.
 
 ## Requisiti ordinari codificati nel baseline
@@ -131,3 +135,8 @@ Le pensioni ordinarie del Régimen General sono corrisposte in 14 paghe annue: d
 ## Uso operativo
 
 Questa nota alimenta `family-office-rules/spain/statutory-retirement-general.json`, rule pack tecnico non ufficiale. Il motore deve citare sempre fonte, schema, stato e limitazioni e deve bloccare i calcoli futuri quando una regola necessaria non e' ancora codificata.
+
+
+## Raccordo Rules candidato V4.14w-z-e (2026-11-15)
+
+La baseline Rules `es.seguridad-social.statutory-retirement.general.2026-baseline.v2` resta il riferimento storico/preesistente del consumer. Il candidato `...v3` corregge l'identificatore della fonte BOE consolidata in `boe.codigo-civil.article-5.1.consolidated-consultation`, preservando la distinzione dalla pubblicazione primaria e senza aggiungere semantica di entitlement. Il candidato v3 e la matrice Knowledge v0.6 sono in attesa di review normativa exact-hash; fino al GO il contratto non autorizza output individuali.

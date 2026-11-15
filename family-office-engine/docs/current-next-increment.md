@@ -1,8 +1,8 @@
 # Current Next Increment
 
-> **Stato operativo corrente (14 novembre 2026):** V4.14w-z-b `in_progress`, V4.14 parent `blocked`.
-> Le due pre-review Sol/xhigh sul binding v11/v0.3 sono rimaste `PENDING`, non NO-GO.
-> In base alla nuova strategia (vedere `roadmap/v4.14-exit-contract.md`), il prossimo task è il binding tecnico fail-closed con test pubblici, mantenendo immutati Knowledge/Rules; review normativa aggiuntiva solo in presenza di cambi semantici.
+> **Current operational state (2026-11-15):** w-z-e is `done` with source/version selector LIMITED GO; w-z-f is `done` with technical PASS. w-z-g is a completed audit with NO-GO. w-z-h implemented a fail-closed source-bound producer and passed 984 Engine tests, but its exact-hash technical review returned NO-GO on forgeable selector provenance (manifest `9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF`, 53/53 hashes stable). V4.14 remains blocked; the current w-z-h cycle is exhausted and awaits a new scope-specific authorization.
+> Le due pre-review Sol/xhigh sul binding v11/v0.3 restano `PENDING` storiche, non GO e non NO-GO; non sono state riaperte.
+> w-z-c ha superato review tecnica indipendente sul diff corretto. w-z-d ha rilevato blocchi di autorità, freshness, versioni Knowledge e compatibilità consumer. Il PASS tecnico non chiude V4.14.
 > Le note storiche riportate sotto non definiscono il prossimo incremento: fanno fede le sezioni canoniche `## ID e titolo` e `## Stato` e il planner.
 
 ## Session closure - 2026-11-14
@@ -76,7 +76,7 @@ Il controllo completo della roadmap ha rilevato b-c `blocked`, predecessore piu 
 
 ## Incremento completato - V4.14b-e - Spanish Knowledge contract reconciliation after b-d NO-GO
 
-`done`
+`in_progress`
 
 ## Incremento completato - V4.14b-f - Spanish Knowledge temporal and source-provenance reconciliation
 
@@ -1481,9 +1481,86 @@ La matrice verificata con limiti/gap è in `family-office-knowledge/pensions/pen
 
 ## Stato operativo increment corrente
 
+## Completamento incremento precedente
+
+V4.14w-z-c — Deterministic pension entitlement timeline v2 validator/builder
+
+**Stato w-z-c:** `done`
+**Tipo:** `functional`
+
+### Domanda familiare
+
+Quali evidenze source-bound sono già presenti per ciascuno dei cinque eventi della timeline, e quali restano da verificare prima di una decisione amministrativa?
+
+### Piano e task envelope
+
+- **Obiettivo:** validare e serializzare il contratto candidato `pension-entitlement-timeline/v2` senza derivare alcuna data o importo.
+- **Scope:** servizio Engine, test sintetici del builder/validator, documentazione di stato e decision log; input/output JSON solo come riferimenti e metadati di provenance, con dati personali ammessi esclusivamente nel workspace.
+- **Fuori scope:** nuove fonti o regole, modifica di Knowledge/Rules, accesso al workspace reale, integrazione optimizer/bridge, eleggibilità individuale, riconoscimento, decorrenza, primo pagamento e importi.
+- **Write set:** `family-office-engine/src/family_office_engine/services/pension_entitlement_timeline.py`, test unitari dedicati, roadmap, questo documento, decision log e planner.
+- **Test command:** `.venv\Scripts\python.exe -m pytest tests/unit/test_pension_entitlement_timeline_builder.py tests/unit/test_pension_entitlement_timeline_contract.py` seguito dalla suite Engine completa.
+- **Stop conditions:** schema o semantica v2 non validabile; evidenza con gap bloccanti marcata supportata; data/evento o copertura fuori intervallo half-open; qualsiasi richiesta di calcolo o nuova interpretazione normativa.
+
+### Output, assunzioni, provenance e prossima azione
+
+- **Output:** snapshot v2 validato oppure `blocked`/`not_assessed` con `null` e `data_gaps` già dichiarati dall'input.
+- **Assunzioni:** riferimenti e digest sono verificati contro file sintetici nel workspace; la validazione non autentica il contenuto legale né sostituisce la review umana.
+- **Provenance:** ogni evidenza supportata conserva riferimento, digest, autorità, giurisdizione, versione e intervallo di applicabilità; nessun testo sorgente viene copiato nel repository.
+- **Prossima azione:** se il gate tecnico passa, mantenere V4.14 bloccata e preparare soltanto il successivo gate integrato exact-hash; non selezionare downstream prima della chiusura documentata.
+
+### Esito tecnico w-z-c — 2026-11-15
+
+Il validator/builder deterministico `pension_entitlement_timeline.py` vincola le prove `not_applicable` e le fonti dell'amount basis alla copertura dello snapshot: `as_of_date` coincidente, stati di copertura `covered` e nessun data gap. I finding P1/P2 della review precedente sono corretti senza modificare schema, Knowledge, Rules o semantica normativa. Test mirati: 40 passed, 21 subtest; suite Engine: 950 passed, 465 subtest, zero failure/errori/skipped. Il reviewer tecnico indipendente ha restituito PASS sul diff esatto e ha ripetuto i mirati. Audit roadmap, guardrail, schema planner e diff-check superati. w-z-c è `done` solo nel perimetro tecnico; V4.14 resta `blocked` fino al gate integrato.
+
+## Completamento incremento precedente: V4.14w-z-f
+
+**Stato:** `done` nel solo perimetro evidence-only public consumer compatibility. Final technical review PASS sul diff exact-hash; reviewer confirmed all previous fail-closed boundaries and `not_assessed` output status. Hash: pro-rata `166cc5aa91e7d2a5d6fea8cee6f8db0be127419dab98d1ace42f35f8dc30f33a`, coordination `bd7fa6234cad20d695db6682ec575660524ce62a8f573396fa356262ca6b5484`, regression `a6ddb725d3eb86d07064487600bfbc3477d5dbfd6f38147fa9d92d305c0a33de`. Focused suite 106 passed +267 subtests; complete Engine 975 passed +480 subtests, 0 failure/error/skip. No CLI/default/latest activation or new legal output. V4.14 remains `blocked`.
+
+## ID e titolo
+
+V4.14w-z-h - Source-bound timeline producer integration
+
+## Stato
+
+`blocked`
+
+**Tipo:** `functional`
+**Dipendenza:** V4.14w-z-g is `done` as an audit with exact-hash NO-GO; w-z-h is the single authorized bounded remediation.
+
+### Domanda familiare
+
+Can the deterministic producer connect source-bound IT/ES/EU evidence to the five-event timeline while preserving unknowns as null and blocking gaps?
+
+### Piano e task envelope
+
+- **Obiettivo:** implement one public source-bound producer that links existing source-gate and country/EU service outputs to timeline v2 without deriving event dates or amounts.
+- **Scope:** architecture review; all 15 event/jurisdiction paths; exact candidate ID, digest and period; half-open `valid_to` normalization; evidence-role separation; source drift/conflict/path/digest failure; downstream null propagation.
+- **Fuori scope:** Knowledge/Rules/schema changes, new legal interpretation, personal facts, individual legal outcomes, amounts, payments, personal workspace access and CLI activation.
+- **Test:** reachable positive synthetic setup before each adverse mutation; focused producer/source-gate/timeline/consumer/pension-income tests; full Engine suite with 0 failures/errors/skips; roadmap audit, planner schema, guardrails and diff-check.
+- **Review:** one independent technical review and one exact-new-version normative review, each at most 300 seconds; no retries on the same hash.
+- **Stop condition:** semantic/rule/schema change required, unsupported result propagation, failed/skipped tests, or NO-GO/PENDING; keep V4.14 blocked and end the cycle.
+- **Architecture:** conditional GO for a standalone producer and internal 15-branch assessment aggregated to five v2 events. Preserve selector/service/builder ownership and schema. Current IT pack-version mismatch, absent ES loaded-time digest, jurisdiction aggregation and global pension-income path remain explicit limits.
+- **Esito tecnico:** NO-GO exact-hash; 53/53 files match at start/end. The producer trusts a caller-constructed selector mapping without proving selector execution or binding temporal inputs. Baseline tests repeated that shape and missed the boundary.
+- **Verifiche:** 984 Engine tests pass, 0 failures/errors/skips; focused producer 9, source gate 8, v2 contract 24, builder 16, consumer compatibility 9, income 4; governance green. These do not cure the provenance finding.
+- **Prossima azione:** await fresh authorization for a bounded selector-provenance correction and one new-version technical gate. The normative gate was not run because the technical gate returned NO-GO. No same-hash retry.
+
 ## ID e titolo legacy
 
 V4.15b — Source-bound RITA fund-stream intake and validation.
+
+### Gate precedente chiuso: V4.14w-z-e
+
+**Stato:** `done` nel solo perimetro del contratto source/version selector non attivato, dopo LIMITED GO exact-hash v0.9. SHA-256 manifest `883DF37FBA2926804AD36E6E4E7D6455D53DA02FE4C044D08460D52BCEEF0256`; reviewer ha attestato 31/31 hash iniziali/finali e nessuna modifica. 17 test mirati source-gate/reconciliation passati dal reviewer; i sei test citation-index non sono stati riproducibili nel sandbox del reviewer per errore di creazione directory temporanee. Evidenza locale supportata gi? registrata: focused 23 + 7 subtest e Engine 966 + 472 subtest, 0 failure/error/skip. Nessun consumer ? stato attivato e nessuna determinazione individuale approvata.
+
+## Piano attivo V4.14w-z-f
+
+- **Domanda:** i consumer pubblici EU selezionano e vincolano le versioni Rules/Knowledge approvate in modo riproducibile, senza fallback o inferenze?
+- **Obiettivo:** adottare nel consumer pubblico il selector approvato da w-z-e, mantenendo compatibilit? evidence-only e fail-closed sui pack/digest/periodi v11.1.1 e v12.1.1.
+- **Scope:** individuare consumer pubblici e call sites; integrare il selector per versioni e digest approvati; regressioni per entrambi i periodi, confini, drift e input mancanti; review tecnica indipendente e suite Engine completa.
+- **Fuori scope:** nuove interpretazioni, widening dell'output, date individuali, eligibility, riconoscimento, decorrenza, importi, payer o pagamenti; `latest` o fallback permissivi; dati personali. Ogni semantica normativa nuova torna a T4 exact-hash.
+- **Stop condition:** mismatch del contratto approvato, consumer che produce output giuridici non coperti, regressione di `null + data_gaps`, suite o review tecnica non conclusiva.
+- **Write set:** consumer EU pubblico, test unitari/integrati pertinenti, roadmap, current-next, decision log e planner.
+- **Test command:** focused tests per consumer/selector, poi suite completa `family-office-engine`; governance roadmap, planner schema, guardrails e diff-check al gate.
 
 ## Stato legacy
 
@@ -1493,10 +1570,9 @@ V4.15b — Source-bound RITA fund-stream intake and validation.
 V4.14w-z-b - EU pension consumer compatibility with Rules v11 and Annex v0.3
 
 ## Stato
-`in_progress`
-`in_progress`
+`done`
 
-**Gate attivo w-z-b:** consumer EU pubblico per Rules v11 e Knowledge Annex v0.3. Prima review normativa exact-hash del contratto esistente; poi implementazione minima per caricare solo le versioni e i digest esplicitamente supportati, con regressioni pubbliche sintetiche. Vietate inferenze da `absence`/`not_matched` a scheme match, eligibility, payer, importi o pagamenti. V4.14 resta blocked.
+**Esito w-z-b:** binding tecnico completato con loader exact-hash per Rules v11/Article 57 v0.29 e Annex VIII v0.3, finestra `[2019-08-01, 2026-11-15)`, output pubblico evidence-only e fail-closed. Test mirati 78/0/0/0 + 257 subtest; suite Engine 934/0/0/0 + 463 subtest; review tecnica indipendente PASS. Knowledge/Rules approvati invariati; nessun GO normativo o timeline individuale. V4.14 resta blocked. Il successivo lavoro documentato è w-z-c, non implementato o selezionato in questa sessione.
 ### Historical note: V4.14w-j closure
 
 V4.14w-j è chiusa nel perimetro Knowledge v0.28 / Rules v7 esaminato exact-hash. Le review normative e tecniche sono GO; suite mirate 92/0/0/0 e suite Engine completa 836/0/0/0. Roadmap audit, planner schema, execution guardrails e diff-check passano.
@@ -1640,3 +1716,21 @@ Il gate integrato Sol/xhigh ? NO-GO exact-hash 13/13. Il blocker pi? antico ? la
 ### Esito V4.14w-z-a e prossimo predecessore
 
 V4.14w-z-a ? chiusa con LIMITED GO exact-hash sul solo evidence contract e sull?integrazione nel citation index. CLI 32 citazioni/29 documenti/31 contratti/16 gap; test mirati 7/7; suite Engine 931/0/0/0. Nessuna semantica eseguibile o data individuale ? approvata. Dopo audit roadmap, il prossimo predecessore eleggibile ? w-z-b: consumer pubblico collegato a Rules v11 e Knowledge Annex v0.3. Poi servir? w-z-c per il builder/validator v2; solo il gate integrato successivo potr? rivalutare la chiusura V4.14.
+
+### w-z-e verification and review status - 2026-11-15
+
+Candidate artifacts: Knowledge matrix v0.3, Italian Rules v3, updated citation catalog and source/version references. Historical matrix v0.2 and Rules v2 remain unchanged. All 15 event/jurisdiction rows remain `null + data_gaps`. Focused tests: 10 passed. Supported full Engine suite: 953 passed, 465 subtests, 0 failures, 0 errors, 0 skipped.
+
+The exact candidate is frozen in [`v4.14w-z-e-review-manifest.md`](roadmap/v4.14w-z-e-review-manifest.md), SHA-256 `ED26EC952C75AE53247A6C78DBCBFDD9CD2276D1625A6E25FBEEC96232EEAFEB`. Both authorized Sol/xhigh review attempts ended PENDING after their 120s + final 120s windows, without verdict or reviewer-attested final hashes. Local verification confirms 17/17 hashes still match; this is not a review verdict. The review budget is exhausted: `human_review_required`, no further automatic retry. w-z-e is blocked; w-z-f and the parent gate remain blocked by predecessor order.
+
+
+**Review resumption (2026-11-15):** the previous thread had no rollout and could not be resumed. The user authorized another review; fresh final thread `01a1df87-2a74-73b3-ad7e-70f5158dcf71` is now active on the unchanged manifest `ED26EC952C75AE53247A6C78DBCBFDD9CD2276D1625A6E25FBEEC96232EEAFEB` and same scope/timebox. No further retry after this attempt.
+
+
+**Final review outcome (2026-11-15):** fresh authorized thread `01a1df87-2a74-73b3-ad7e-70f5158dcf71` ended PENDING after both windows. No verdict or reviewer-attested final hashes. Parent local hash check 17/17 matches manifest `ED26EC952C75AE53247A6C78DBCBFDD9CD2276D1625A6E25FBEEC96232EEAFEB`, which is not a review result. `human_review_required`; no further automatic review.
+
+
+**Authorized review retry (2026-11-15):** user authorized one additional attempt on unchanged manifest `ED26EC952C75AE53247A6C78DBCBFDD9CD2276D1625A6E25FBEEC96232EEAFEB`, same scope, with a single 300-second total timeout. If unresolved, no further retry.
+### w-z-h candidate verification checkpoint
+
+Manifest [`v4.14w-z-h-producer-review-manifest-v0.1.md`](roadmap/v4.14w-z-h-producer-review-manifest-v0.1.md), SHA-256 `9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF`, 53 files; 53/53 hashes match. Focused producer/source-gate/timeline/consumer/income tests passed; full Engine suite 984 tests, zero failures/errors/skips. Technical review is active on this exact candidate. Domestic IT/ES pack bindings remain fail-closed; V4.14 stays blocked.
