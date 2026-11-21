@@ -1,6 +1,6 @@
 # Current Next Increment
 
-> **Current operational state (2026-11-21):** w-z-e is `done` with source/version selector LIMITED GO; w-z-f is `done` with technical PASS. w-z-g is a completed audit with NO-GO. w-z-h v0.3 is `done` within its bounded producer/gap-provenance scope after technical PASS and normative LIMITED GO exact-hash. The historical v0.1/v0.2 NO-GOs remain recorded. Domestic IT/ES binding gaps and the original integrated exit criteria remain unresolved; V4.14 is still blocked. No downstream increment is opened by this scoped closure.
+> V4.15d and V4.15 are done after Windows gate 20261121-172042-e7ace2d1. V4.15e is current for the JSON CLI. V4.14 is blocked and V4.16 is planned.
 > Le due pre-review Sol/xhigh sul binding v11/v0.3 restano `PENDING` storiche, non GO e non NO-GO; non sono state riaperte.
 > w-z-c ha superato review tecnica indipendente sul diff corretto. w-z-d ha rilevato blocchi di autorità, freshness, versioni Knowledge e compatibilità consumer. Il PASS tecnico non chiude V4.14.
 > Le note storiche riportate sotto non definiscono il prossimo incremento: fanno fede le sezioni canoniche `## ID e titolo` e `## Stato` e il planner.
@@ -1881,10 +1881,18 @@ Review normativa exact-hash NO-GO sul manifest `v4.14w-z-n-heavy-work-alternativ
 
 Il limite dei tre incrementi autorizzati ? raggiunto. Non si seleziona una nuova versione n? si attiva Engine senza una nuova autorizzazione. Se ripreso, correggere la tabella Knowledge e aggiungere una regressione che rigetti la congiunzione, quindi generare nuovi hash e richiedere una review indipendente.
 
+## V4.15d and V4.15 checkpoint
+
+Windows gate 20261121-172042-e7ace2d1, 2026-11-21 17:20 UTC: Rules v6 6/6, citation index 7/7, Engine 1008/1008, zero failures/errors/skips. Service, golden tests and selector regression predate the run. The audit confirms the ADR scope and the non-promotion of hypothetical pensions. V4.15d and V4.15 are done within the financial projection scope.
+
 ## ID e titolo
-V4.14w-z-n - Correggere le alternative del D.Lgs. 67/2011
+V4.15e - Retirement bridge JSON CLI
 
 ## Stato
-`blocked`
+`in_progress`
 
-Nota al gate: nel working tree e' presente un manifest w-z-n v0.2 non revisionato, con hash distinti e suite Linux non verde; resta draft non attivo e non modifica il NO-GO v0.1 o lo stato `blocked`.
+Compare work at 100%, 60% and 0% using the existing projection service. Accept JSON assumptions, provide a synthetic sample and write the scenario JSON. Run CLI and selector regressions, then the complete Windows gate on this revision.
+
+V4.15e implements the JSON CLI using the existing projection service. Nine targeted tests and seven subtests passed. The fo.exe smoke run with the synthetic sample returned final available assets of 11000.00, 10200.00 and 9000.00 for 100%, 60% and 0% work. The complete Windows gate for the CLI revision is pending.
+
+Windows full gate: `.\family-office-bootstrap\planning\run-v414-windows-gate.ps1 -RepoRoot (Get-Location).Path -FullSuite`.

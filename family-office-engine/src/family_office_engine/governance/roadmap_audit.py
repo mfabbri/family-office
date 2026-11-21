@@ -16,6 +16,11 @@ HEADER_RE = re.compile(
 )
 STATUS_RE = re.compile(r"^\*\*Stato:\*\*\s+`(?P<value>[^`]+)`\s*$")
 KIND_RE = re.compile(r"^\*\*Tipo:\*\*\s+`(?P<value>[^`]+)`\s*$")
+INDEPENDENT_FINANCIAL_RE = re.compile(
+    r"^-?\s*(?:\*\*)?Percorso finanziario indipendente:(?:\*\*)?\s+`(?P<value>[^`]+)`\s*$"
+)
+DEPENDENCIES_RE = re.compile(r"^-?\s*(?:\*\*)?Dipende da:(?:\*\*)?\s+(?P<value>.+)$")
+DEPENDENCY_ID_RE = re.compile(r"V\d+(?:\.\d+)*(?:[a-z](?:-[a-z])*)?")
 CURRENT_STATUS_RE = re.compile(r"^`(?P<value>[^`]+)`\s*$")
 CURRENT_ID_RE = re.compile(
     rf"^(?P<increment_id>{INCREMENT_ID_PATTERN})\s+[-\u2013\u2014]\s+.+$"
@@ -36,6 +41,8 @@ class RoadmapIncrement:
     status: str
     kind: str
     line_number: int
+    independent_financial_adr: str | None = None
+    dependencies: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -79,6 +86,15 @@ def parse_roadmap(path: Path) -> list[RoadmapIncrement]:
             section, STATUS_RE, "Stato", increment_id, path
         )
         kind = _single_metadata_value(section, KIND_RE, "Tipo", increment_id, path)
+        independent_matches = [INDEPENDENT_FINANCIAL_RE.match(line) for line in section]
+        independent_matches = [match for match in independent_matches if match]
+        if len(independent_matches) > 1:
+            raise RoadmapAuditCadenceError(
+                f"Increment {increment_id} has multiple independent-financial ADR declarations."
+            )
+        dependency_matches = [DEPENDENCIES_RE.match(line) for line in section]
+        dependency_matches = [match for match in dependency_matches if match]
+        dependencies = tuple(DEPENDENCY_ID_RE.findall(dependency_matches[0].group("value"))) if dependency_matches else ()
         if status not in ALLOWED_STATUSES:
             raise RoadmapAuditCadenceError(
                 f"Increment {increment_id} has unsupported status {status!r}."
@@ -94,6 +110,8 @@ def parse_roadmap(path: Path) -> list[RoadmapIncrement]:
                 status=status,
                 kind=kind,
                 line_number=start + 1,
+                independent_financial_adr=(independent_matches[0].group("value") if independent_matches else None),
+                dependencies=dependencies,
             )
         )
     return increments
@@ -128,7 +146,7 @@ def validate_audit_cadence(
             f"Current increment {current.increment_id} has status {current.status!r} "
             f"in {current_increment_path} and {roadmap_current.status!r} in the roadmap."
         )
-    validate_predecessor_order(increments, roadmap_current)
+    validate_predecessor_order(increments, roadmap_current, roadmap_path=roadmap_path)
 
     last_audit_index: int | None = None
     for index, increment in enumerate(increments):
@@ -169,7 +187,10 @@ def validate_audit_cadence(
 
 
 def validate_predecessor_order(
-    increments: list[RoadmapIncrement], current: RoadmapIncrement
+    increments: list[RoadmapIncrement],
+    current: RoadmapIncrement,
+    *,
+    roadmap_path: Path | None = None,
 ) -> None:
     """Reject selecting functional/audit work past an unfinished predecessor.
 
@@ -179,6 +200,49 @@ def validate_predecessor_order(
     if current.status not in {"planned", "in_progress"}:
         return
     if current.kind not in {"functional", "audit"}:
+        return
+
+    if current.independent_financial_adr is not None:
+        # Narrow exception for an ADR-authorized financial projection. It only
+        # bypasses unrelated earlier blockers after validating the explicit ADR
+        # and every declared prerequisite. Entitlement outputs retain their
+        # own legal gates and cannot use this path.
+        allowed_kinds = {"V4.15": "functional", "V4.15d": "audit", "V4.15e": "functional"}
+        if allowed_kinds.get(current.increment_id) != current.kind:
+            raise RoadmapAuditCadenceError(
+                f"Independent financial path is not authorized for {current.increment_id}."
+            )
+        if roadmap_path is None or not (roadmap_path.parent / current.independent_financial_adr).is_file():
+            raise RoadmapAuditCadenceError(
+                f"Independent financial path for {current.increment_id} requires its accepted ADR."
+            )
+        if not current.dependencies:
+            raise RoadmapAuditCadenceError(
+                f"Independent financial path for {current.increment_id} must declare prerequisites."
+            )
+        by_id = {increment.increment_id: increment for increment in increments}
+        if current.increment_id == "V4.15e":
+            if current.independent_financial_adr != (
+                "../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md"
+            ) or set(current.dependencies) != {"V4.15", "V4.15d"}:
+                raise RoadmapAuditCadenceError("V4.15e requires the projection ADR and both bridge prerequisites.")
+            for prerequisite in ("V4.15", "V4.15d"):
+                if prerequisite not in by_id or by_id[prerequisite].status != "done":
+                    raise RoadmapAuditCadenceError(f"Cannot select V4.15e: {prerequisite} must be done.")
+            return
+        if roadmap_path is not None:
+            prior_roadmap_name = "roadmap-v4-wealth-planning.md"
+            prior_roadmap_path = roadmap_path.parent / prior_roadmap_name
+            if _indexed_roadmap_is_done(roadmap_path.parent / "roadmap-index.md", prior_roadmap_name) and prior_roadmap_path.is_file():
+                by_id.update({item.increment_id: item for item in parse_roadmap(prior_roadmap_path)})
+        for dependency_id in current.dependencies:
+            dependency = by_id.get(dependency_id)
+            if dependency is None or dependency.status not in {"done", "deferred"}:
+                status = dependency.status if dependency else "missing"
+                raise RoadmapAuditCadenceError(
+                    f"Cannot select {current.increment_id}: declared financial prerequisite "
+                    f"{dependency_id} is {status!r}."
+                )
         return
 
     current_release, current_suffix = _increment_order_key(current.increment_id)
@@ -212,6 +276,16 @@ def validate_predecessor_order(
             f"{predecessor.increment_id} is {predecessor.status!r}; "
             "resolve the earliest unfinished predecessor first."
         )
+
+
+def _indexed_roadmap_is_done(index_path: Path, roadmap_name: str) -> bool:
+    if not index_path.is_file():
+        return False
+    for line in index_path.read_text(encoding="utf-8").splitlines():
+        match = ROADMAP_INDEX_ROW_RE.match(line)
+        if match and Path(match.group("path")).name == roadmap_name:
+            return match.group("status") == "done"
+    return False
 
 
 def _increment_order_key(increment_id: str) -> tuple[tuple[int, ...], tuple[str, ...]]:

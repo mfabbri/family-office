@@ -3,8 +3,9 @@ import calendar
 import hashlib
 import json
 import os
+import sys
 from datetime import date
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import Decimal, DecimalException, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -211,6 +212,7 @@ from family_office_engine.services.work_exit_feasibility import (
     WorkExitFeasibilityError,
     build_work_exit_feasibility,
 )
+from family_office_engine.services.retirement_bridge_projection import build_retirement_bridge_projection
 from family_office_engine.services.work_transition_readiness import (
     WorkTransitionReadinessError,
     build_work_transition_readiness,
@@ -6410,6 +6412,17 @@ def build_parser() -> argparse.ArgumentParser:
     planning_work_exit_wizard_parser.add_argument("--readiness-input", type=Path, default=default_work_transition_readiness_input())
     planning_work_exit_wizard_parser.add_argument("--readiness-output", type=Path, default=default_work_transition_readiness_output())
     planning_work_exit_wizard_parser.add_argument("--overwrite", action="store_true", help="Resume or revise an existing private draft")
+    retirement_bridge_parser = planning_subparsers.add_parser(
+        "retirement-bridge", help="Compare monthly finances at 100%, 60% and 0% work"
+    )
+    retirement_bridge_commands = retirement_bridge_parser.add_subparsers(
+        dest="retirement_bridge_command", required=True
+    )
+    bridge_simulate = retirement_bridge_commands.add_parser(
+        "simulate", help="Project the three work scenarios from declared JSON assumptions"
+    )
+    bridge_simulate.add_argument("--input", required=True, type=Path, help="Projection assumptions JSON file")
+    bridge_simulate.add_argument("--output", required=True, type=Path, help="Path for a new projection JSON file")
     planning_work_transition_parser = planning_subparsers.add_parser(
         "work-transition",
         help="Prepare phased work-transition planning inputs",
@@ -6908,6 +6921,29 @@ def build_parser() -> argparse.ArgumentParser:
         default=default_retirement_report_output(),
     )
     return parser
+
+
+def _simulate_retirement_bridge(input_path: Path, output_path: Path) -> int:
+    try:
+        assumptions = json.loads(input_path.read_text(encoding="utf-8-sig"))
+        projection = build_retirement_bridge_projection(assumptions)
+    except (OSError, ValueError, DecimalException) as exc:
+        print(f"Retirement bridge input error: {exc}. Check --input against the synthetic example.", file=sys.stderr)
+        return 1
+
+    payload = json.dumps(projection, indent=2, ensure_ascii=False) + "\n"
+    try:
+        with output_path.open("x", encoding="utf-8") as output:
+            output.write(payload)
+    except FileExistsError:
+        print("Retirement bridge output already exists. Choose a new --output path.", file=sys.stderr)
+        return 1
+    except OSError as exc:
+        print(f"Retirement bridge output error: {exc}. Choose a writable directory.", file=sys.stderr)
+        return 1
+
+    print(f"Saved 100%, 60% and 0% scenario projections to {output_path}. Review assumptions and data_gaps in the JSON.")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -9171,6 +9207,9 @@ def main(argv: list[str] | None = None) -> int:
             f"({args.output})"
         )
         return 0
+
+    if args.command == "planning" and args.planning_command == "retirement-bridge":
+        return _simulate_retirement_bridge(args.input, args.output)
 
     if (
         args.command == "planning"

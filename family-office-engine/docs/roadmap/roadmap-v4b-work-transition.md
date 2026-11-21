@@ -786,19 +786,22 @@ Implementare nel consumer UE il contratto source-bound v0.17 per la durata Art. 
 
 ### V4.15 — Retirement bridge income composer
 
-**Stato:** `blocked`
+**Stato:** `done`
 **Tipo:** `functional`
 
-Comporre gli stream che finanziano il periodo tra riduzione/cessazione e pensioni.
+Implementare un bridge finanziario mensile come `scenario_projection`, inizialmente con dati sintetici, per confrontare lavoro al 100%, 60% e 0%. `pension_entitlement` resta un flusso separato: solo fatti verificati possono essere marcati verificati; pensioni ipotetiche restano input di scenario.
 
-- Dipende da: V4.14a, V4.14 (timeline pensionistica sbloccata), V4.2, V4.3 e RITA V2 source-bound.
-- Repository: `engine`, `rules`, `workspace`.
-- Output: `retirement-bridge-timeline/v1`.
-- Stream: reddito proprio residuo, coniuge, affitti, RITA, pensioni gia' attive, liquidita'/asset withdrawals e altri flussi espliciti.
-- Test: RITA con start/end, asset vincolato, reddito coniuge, affitto, gap di eleggibilita', doppio conteggio.
-- Done quando: il bridge e' una timeline mensile di stream con disponibilita' e trattamento gross/net espliciti.
+- Dipende da: V4.2, V4.3, V4.5.
+- Percorso finanziario indipendente: `../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md`
+- V4.14 e V4.14a non sono prerequisiti per il calcolo finanziario ipotetico; ogni stream pensionistico dichiarato come fatto verificato mantiene i propri gate.
+- Repository: `engine`.
+- Output: `retirement-bridge-projection/v1`.
+- Input: as-of month, projection months, available opening assets, household spending, full-time net work-income assumption, annual inflation/return assumptions, optional hypothetical pension amount/start month with explicit tag and provenance.
+- Output: monthly net income, expenses, net cashflow, requested/actual asset withdrawals, shortfall, residual available assets and bridge funding need for work fractions 100%/60%/0%; assumptions, provenance and `data_gaps`; entitlement fields remain `null`/`not_assessed` unless separately source-bound and verified. No tax is calculated; income is supplied net as an assumption.
+- Test: golden monthly arithmetic for three work scenarios; explicit inflation/return assumptions; hypothetical pension timing; negative test preventing scenario inputs from populating verified entitlement fields.
+- Done quando: scenario output is reproducible and clearly separated from verified entitlement; targeted and full Engine suite pass 0/0/0 and governance validators pass.
 
-Bloccata: l'audit V4.14a ha rilevato lacune source-bound su entitlement/payment e basi gross/net; V4.14 resta bloccata e il contratto RITA disponibile e' `rita-options/v1`, che produce soltanto opzioni lorde teoriche senza accettazione/schedule individuale. Il GO documentale V4.14z-c non rimuove questi prerequisiti.
+I confini della simulazione e le dipendenze sono definiti da [ADR 2026-11-21](../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md). RITA attestata o stream pensionistici verificati non sono inclusi dal primo slice; le loro lacune non bloccano il confronto sintetico.
 
 ### V4.15a — RITA V2 source and retirement-bridge readiness audit
 
@@ -1134,12 +1137,12 @@ Esito: LIMITED GO exact-hash Sol/xhigh sul candidato corretto; 11/11 hash verifi
 
 ### V4.16 — Monthly decumulation and sequence-risk simulation
 
-**Stato:** `in_progress`
+**Stato:** `planned`
 **Tipo:** `functional`
 
 Eseguire il bilancio mensile household e il decumulo per bucket, prima deterministico e poi con stress stochastic separato.
 
-- Dipende da: V4.15, V4.3, V4.5.
+- Dipende da: V4.15e (CLI scenario projection), V4.15, V4.3, V4.5. Legal entitlement facts are optional inputs and retain V4.14/source-bound gates.
 - Repository: `engine`.
 - Output: `work-transition-simulation/v1`.
 - Metriche: shortfall mensile, prelievi, reserve months, depletion, terminal wealth, tax/cost drag supportato, P05/P50/P95 e success probability per stress.
@@ -1211,7 +1214,7 @@ Chiudere la roadmap con un workflow end-to-end sintetico e un readiness report a
 - Output: `work-transition-plan/v1`, comando breve `fo planning work-transition plan` e golden scenario sintetico.
 - Golden path: full-time → part-time → cessazione → RITA/patrimonio → pensione ES → pensione INPS, con spouse income e stress avverso.
 - Test: end-to-end, lineage, data gaps, Windows/Linux, reproducibility, no personal data nelle fixture.
-- Done quando: il comando produce le tre date, piano per fasi, bridge, pension start dates, metriche di rischio, motivi delle candidate scartate e blocker; il gate V4B → V5 e' verificato e, nello stesso aggiornamento di governance, `roadmap-v4b-work-transition.md` passa a `done`, V5 torna `in_progress` e `current-next-increment.md` viene posizionato su V5.3.
+- Done quando: il comando produce le tre opzioni 100%/60%/0%, piano per fasi, bridge, metriche di rischio, motivi delle candidate scartate e blocker; quando le date di entitlement non sono verificate, le espone come `null + data_gaps` e può comunque mostrare la proiezione finanziaria esplicitamente ipotetica. Le date di entitlement possono essere emesse solo con verifica source-bound. Il gate V4B → V5 è verificato e, nello stesso aggiornamento di governance, `roadmap-v4b-work-transition.md` passa a `done`, V5 torna `in_progress` e `current-next-increment.md` viene posizionato su V5.3.
 
 ## V4.14w-v — Event-specific pension evidence and amount-basis contract
 
@@ -1575,7 +1578,7 @@ Perimetro chiuso: tecnico source-attested soltanto; parent V4.14 resta `blocked`
 
 ### V4.14w-z-n - Correggere le alternative del D.Lgs. 67/2011
 
-**Stato:** `blocked`
+**Stato:** `done`
 **Tipo:** `functional`
 **Dipende da:** w-z-m (`done` come review exact-hash NO-GO; v5 non attivato).
 **Obiettivo:** registrare la catena primaria che modifica il D.Lgs. 67/2011 art.1(2), modellare i periodi come alternative e correggere i metadati temporali della circolare INPS.
@@ -1584,4 +1587,41 @@ Perimetro chiuso: tecnico source-attested soltanto; parent V4.14 resta `blocked`
 **Done quando:** suite mirata e completa senza failure/error/skip; audit, guardrail e diff-check passano; review normativa indipendente exact-hash PASS sul bundle nuovo.
 **Stop rule:** NO-GO/PENDING, hash drift, test non verde o divergenza fonte-guidance ferma w-z-n; nessun retry stesso hash o downstream.
 
-**Review normativa esatta (2026-11-21):** NO-GO, 14/14 hash iniziali e finali. La catena primaria legge 232/2016 art.1(206)(b), `any_of` in Rules v6, esclusione dei periodi totalmente figurativi e riferimenti INPS 66a7/67/66a7 sono stati confermati. Finding residuo: Knowledge v0.4 contiene una contraddizione interna; la tabella del ramo faticoso/pesante richiede ancora congiuntamente 7/10 e meta' della vita, mentre la sezione normativa li descrive come alternativi. Il test v6 verifica la presenza della frase corretta ma non intercetta la riga contraddittoria. v6 e' non attivo. Una correzione con nuova versione/hash eccede l'autorizzazione di tre incrementi, quindi w-z-n resta `blocked` in attesa di nuova autorizzazione.
+**Review normativa esatta v0.1 (2026-11-21):** NO-GO, 14/14 hash iniziali/finali. La tabella Knowledge v0.4 contraddiceva la prosa e `any_of`; nessun GO per quel candidato.
+
+**Consolidamento autorizzato v0.2 (2026-11-21):** il candidato esistente corregge la tabella, il test asserisce la cella e il manifest `16073C82BC20F0596E81B65BEDB9CDA65DC754807ED7C7F3ED2245674D4F65C3` verifica 14/14 hash. Review indipendente GO limitato al finding corretto; nessun nuovo riesame IT/ES/UE. Il gate Windows `run-v414-windows-gate.ps1 -FullSuite` ha prodotto Rules v6 6/6, citation index 7/7, Engine 1004/1004, 0 failure/error/skip (evidence `planning/.runtime/test-gate/20261121-164816-e8af8f49/summary.json`). `w-z-n` e' `done` solo nel proprio scope. Rules v6 resta un candidate non attivato dal runtime; nessuna determinazione individuale e' autorizzata.
+
+
+### w-z-n v0.2 - remediation autorizzata e gate (2026-11-21)
+
+L'utente ha autorizzato una sola remediation circoscritta, separata dal precedente budget di tre incrementi: riuso del candidato v0.2 presente, una review normativa indipendente limitata al finding della cella tabellare e verifiche tecniche. Il manifest `16073C82BC20F0596E81B65BEDB9CDA65DC754807ED7C7F3ED2245674D4F65C3` ha 14/14 hash corrispondenti. Review indipendente GO limitato: tabella e prosa Knowledge v0.4 concordano, Rules v6 mantiene `any_of`, il test asserisce la cella; nessuna nuova review IT/ES/UE. Gate Windows registrato in `planning/.runtime/test-gate/20261121-164816-e8af8f49/summary.json`: Rules v6 6/6, citation index 7/7, Engine 1004/1004; 0 failure/error/skip. `w-z-n` e' `done` nel proprio scope documentale/Rules candidate/tests e nell'approvazione limitata. Non attiva Rules v6 nel runtime e non determina diritti individuali. Il parent V4.14 resta `blocked` per il gate integrato di timeline e conclusioni IT/ES/UE ancora non dimostrate.
+
+### V4.15d - Audit tecnico/architetturale dopo il gate integrato V4.14
+
+**Stato:** `done`
+**Tipo:** `audit`
+**Dipende da:** V4.2, V4.3, V4.5, V4.14w-z-n (`done` nel proprio scope).
+**Percorso finanziario indipendente:** `../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md`
+**Scope:** audit di cadenza obbligatorio dopo quattro incrementi funzionali (w-z-k..n); verifica la separazione entitlement/projection, i confini del nuovo slice V4.15, la nuova eccezione del selettore e la coerenza test/documentazione.
+**Done quando:** test mirati e suite Engine Windows sul tree corrente 0/0/0; test selettore dimostra il solo bypass ADR e rifiuta prerequisiti incompleti; execution guardrails, routing, roadmap audit e diff-check passano.
+
+### ADR and first scenario slice (2026-11-21)
+
+Accepted decision in `docs/adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md`: `pension_entitlement` retains source-bound gates; `scenario_projection` may model explicit deterministic assumptions without promoting them to facts. For financial projection only, V4.15 dependencies are V4.2/V4.3/V4.5; V4.14 remains mandatory for legal conclusions, but not for explicitly hypothetical simulations. V4.16 is `planned` pending V4.15.
+
+Before the external Windows gate, V4.15 candidate code implemented a synthetic first service for 100%/60%/0%, monthly cashflows, available assets, funding need without work income, and a separated hypothetical pension input; 3 focused tests pass. A full suite on the current tree has not run: PowerShell runner blocked by `AuthorizationManager`, direct temporary-directory preflight fails `WinError 5`; the roadmap-audit unit tests also hit temp ACL failures. Cadence requires audit V4.15d before V4.15 can resume; V4.15 was held until the audit and Windows suite passed 0/0/0. See the closure below.
+
+### V4.15e - Retirement bridge JSON CLI
+
+**Stato:** `in_progress`
+**Tipo:** `functional`
+**Dipende da:** V4.15d (`done`) e V4.15 (`done`).
+**Percorso finanziario indipendente:** `../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md`
+**Obiettivo:** esporre la proiezione deterministica tramite comando `fo planning retirement-bridge simulate --input <synthetic.json> --output <result.json>`; input e output JSON validati, riepilogo dei tre scenari, assunzioni e data gaps espliciti.
+**Test:** golden CLI sintetico, stesso input produce output semanticamente identico, input/schema errati danno prossimo passo utile, nessuna promozione a entitlement; documentare una fixture/demo sintetica e PowerShell invocation.
+**Done quando:** l'operatore può eseguire la simulazione senza chiamare API Python interne; il risultato mantiene `pension_entitlement` not_assessed/null per importi ipotetici.
+
+
+Windows gate 20261121-172042-e7ace2d1, 2026-11-21 17:20 UTC: Rules v6 6/6, citation index 7/7, Engine 1008/1008, zero failures/errors/skips. Service, golden tests and selector regression predate the run. The audit confirms the ADR scope and the non-promotion of hypothetical pensions. V4.15d and V4.15 are done within the financial projection scope.
+
+V4.15e implements the JSON CLI using the existing projection service. Nine targeted tests and seven subtests passed. The fo.exe smoke run with the synthetic sample returned final available assets of 11000.00, 10200.00 and 9000.00 for 100%, 60% and 0% work. The complete Windows gate for the CLI revision is pending.

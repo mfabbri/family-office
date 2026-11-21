@@ -1,3 +1,4 @@
+from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -6,11 +7,36 @@ from family_office_engine.governance.roadmap_audit import (
     RoadmapAuditCadenceError,
     active_roadmap_path,
     default_paths,
+    parse_roadmap,
     validate_audit_cadence,
+    validate_predecessor_order,
 )
 
 
 class RoadmapAuditCadenceTest(unittest.TestCase):
+    def test_bridge_cli_requires_both_completed_predecessors(self) -> None:
+        roadmap_path, _ = default_paths()
+        increments = parse_roadmap(roadmap_path.parent / "roadmap-v4b-work-transition.md")
+        current = replace(
+            next(item for item in increments if item.increment_id == "V4.15e"),
+            status="in_progress",
+        )
+        roadmap_path = roadmap_path.parent / "roadmap-v4b-work-transition.md"
+        validate_predecessor_order(increments, current, roadmap_path=roadmap_path)
+        for prerequisite in ("V4.15", "V4.15d"):
+            for status in ("blocked", "deferred"):
+                with self.subTest(prerequisite=prerequisite, status=status):
+                    items = [
+                        replace(item, status=status) if item.increment_id == prerequisite else item
+                        for item in increments
+                    ]
+                    with self.assertRaisesRegex(RoadmapAuditCadenceError, "must be done"):
+                        validate_predecessor_order(items, current, roadmap_path=roadmap_path)
+        with self.assertRaisesRegex(RoadmapAuditCadenceError, "not authorized"):
+            validate_predecessor_order(
+                increments, replace(current, increment_id="V4.16"), roadmap_path=roadmap_path
+            )
+
     def test_repository_roadmap_and_current_increment_are_consistent(self) -> None:
         roadmap_path, current_path = default_paths()
 
@@ -198,6 +224,39 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
             "Cannot select V4.15c: predecessor V4.14 is 'blocked'",
         ):
             self._validate(entries, "V4.15c", "planned")
+
+    def test_adr_scoped_financial_path_can_bypass_unrelated_blocker_but_checks_dependencies(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            roadmap_path = root / "docs" / "roadmap" / "roadmap.md"
+            roadmap_path.parent.mkdir(parents=True)
+            adr = root / "docs" / "adr" / "scenario.md"
+            adr.parent.mkdir(parents=True)
+            adr.write_text("Accepted ADR\n", encoding="utf-8")
+            roadmap_path.write_text(
+                "# Roadmap\n\n"
+                "### V4.14 - Legal parent\n\n**Stato:** `blocked`\n**Tipo:** `functional`\n\n"
+                "### V4.2 - Wealth model\n\n**Stato:** `done`\n**Tipo:** `functional`\n\n"
+                "### V4.3 - Household cashflow\n\n**Stato:** `done`\n**Tipo:** `functional`\n\n"
+                "### V4.5 - Lifecycle model\n\n**Stato:** `done`\n**Tipo:** `functional`\n\n"
+                "### V4.15 - Financial projection\n\n**Stato:** `in_progress`\n**Tipo:** `functional`\n"
+                "**Dipende da:** V4.2, V4.3, V4.5.\n"
+                "**Percorso finanziario indipendente:** `../adr/scenario.md`\n",
+                encoding="utf-8",
+            )
+            current_path = root / "current.md"
+            current_path.write_text(self._current("V4.15", "in_progress"), encoding="utf-8")
+
+            report = validate_audit_cadence(roadmap_path, current_path)
+
+            self.assertEqual("V4.15", report.current_increment_id)
+
+            roadmap_path.write_text(roadmap_path.read_text(encoding="utf-8").replace(
+                "### V4.5 - Lifecycle model\n\n**Stato:** `done`",
+                "### V4.5 - Lifecycle model\n\n**Stato:** `blocked`",
+            ), encoding="utf-8")
+            with self.assertRaisesRegex(RoadmapAuditCadenceError, "financial prerequisite V4.5 is 'blocked'"):
+                validate_audit_cadence(roadmap_path, current_path)
 
     def test_downstream_audit_cannot_skip_in_progress_predecessor(self) -> None:
         entries = [

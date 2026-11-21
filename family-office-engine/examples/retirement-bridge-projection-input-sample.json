@@ -1,0 +1,14 @@
+{
+  "schema_version": "retirement-bridge-projection/v1",
+  "household_id": "synthetic_household",
+  "as_of_month": "2026-11",
+  "months": 1,
+  "assumptions": {
+    "opening_available_assets": "10000.00",
+    "monthly_household_spending": "1000.00",
+    "monthly_full_time_net_income": "2000.00",
+    "annual_inflation_rate": "0",
+    "annual_return_rate": "0",
+    "provenance": "synthetic_cli_example"
+  }
+}

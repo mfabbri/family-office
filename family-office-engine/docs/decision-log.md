@@ -797,3 +797,45 @@ Reviewer verified manifest C6269E2845E09FD45AE018E5C15BF0A9CCF2FA10D05757AE4DFF8
 ## 2026-11-21 - Unreviewed w-z-n v0.2 draft found during commit preparation
 
 A v0.2 manifest with SHA-256 16073C82BC20F0596E81B65BEDB9CDA65DC754807ED7C7F3ED2245674D4F65C3 was present in the working tree. It describes a targeted Knowledge v0.4 table correction and a regression assertion; its report records focused 6+7 passes and 4 environment-specific failures in a 1004-test Linux suite. It has no independent normative review and no GO. Preserve as a non-active draft only; reviewed v0.1 NO-GO remains authoritative, w-z-n remains blocked, and no fourth increment is selected.
+
+
+## 2026-11-21 - Fresh authorization: bounded w-z-n v0.2 remediation
+
+The user explicitly authorized one corrective intervention, separate from the historically exhausted three-increment budget: verify and, if already correct, reuse manifest v0.2; perform one independent normative review limited to the table-row finding and its substantive dependencies; run requested technical checks. Historical NO-GO v0.1 and three prior increments remain unchanged. No further suffix, retry, downstream increment or runtime activation is authorized. V4.14 remains blocked unless its integrated gates are separately met.
+
+
+## 2026-11-21 - w-z-n v0.2 limited normative GO; technical gate blocked
+
+The existing v0.2 candidate was reused unchanged. Its manifest SHA-256 is `16073C82BC20F0596E81B65BEDB9CDA65DC754807ED7C7F3ED2245674D4F65C3`; all 14 hashes match initially and finally. One independent `fo_normative_reviewer` returned GO limited to the modified Knowledge table-cell finding and its material source dependencies: row 43 uses ?oppure?, Rules v6 retains `any_of`, and the regression asserts the exact table cell. No broader IT/ES/EU review was repeated. Rules v6 focused tests: 6 passed. Citation index: 1 passed, 6 failed with Windows `WinError 5` creating/cleaning temporary directories, reproduced with workspace TEMP. Full Engine suite: 348 passed, 763 failed, 16 errors, 337 subtests passed, predominantly temp ACL failures; therefore the full gate is not green and w-z-n is not closed. No further review/retry/suffix or downstream increment is authorized. V4.14 remains blocked.
+
+**Architecture proposal (decision required before implementation):** create an explicitly financial `scenario_projection` track for retirement bridge and work-transition comparisons. Its input contract should accept user-selected dates, work-income trajectories, contribution/capital assumptions and return/inflation sensitivities as declared assumptions; deterministic engine code computes cash flows and ranges. Keep a separate pension-evidence adapter that supplies only `verified_as_of` facts under approved source-bound rules. Future eligibility, pension amounts, recognition, effective dates and payment remain `null + data_gaps` unless verified; scenario outputs must label assumptions, provenance, sensitivity and next review action and must never be consumed as entitlement. Add independent scenario golden tests and a negative integration test proving projected pension values cannot populate verified benefit fields. Treat any V4.15-V4.20 dependency changes as a separate proposed roadmap decision; do not apply them in this remediation.
+
+## 2026-11-21 - ADR: pension entitlement vs scenario projection
+
+Accepted ADR `ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md` under explicit user authorization. The V4.14 legal gates remain mandatory for verified eligibility, recognition, effective dates, amounts and payment. V4.15 financial projection is separately allowed to depend on V4.2/V4.3/V4.5; hypothetical inputs remain scenario assumptions with provenance and gaps. V4.16 is planned pending V4.15.
+
+V4.14w-z-n is done only within its bounded candidate scope: exact v0.2 manifest and 14/14 hashes, limited independent normative GO, and existing supported Windows gate evidence (Rules v6 6/6, citation 7/7, Engine 1004/1004; 0 failures/errors/skips). V4.14 parent remains blocked because integrated source-bound IT/ES/EU pension-event conclusions and their exact legal reviews are not satisfied.
+
+V4.15 first slice implemented deterministic monthly 100%/60%/0% work comparison with synthetic inputs, available assets, no-work funding need, optional hypothetical pension separated from entitlement, and explicit gaps. Targeted tests 3/3 pass. Full suite on the current tree remains pending: PowerShell runner execution was denied by AuthorizationManager and direct temp preflight failed WinError 5. V4.15 remains in_progress; no closure without a current-tree 0/0/0 suite.
+
+## 2026-11-21 - V4.15d cadence audit selected
+
+Roadmap audit found the code audit due after four functional increments since V4.14w-z-j (w-z-k through w-z-n). Under the ADR-scoped exception, current is V4.15d audit; V4.15 is held `blocked` until the audit and current-tree full suite pass. The initial V4.15 candidate service and 3 targeted tests are present, but do not constitute a closed functional increment. `run-v414-windows-gate.ps1 -FullSuite` invocation was denied by local PowerShell AuthorizationManager; a direct preflight attempt failed with WinError 5 on temp creation. No further test retry this turn. V4.16 remains planned. The remaining action is one supported full-suite run with current files; only 0/0/0 plus audit/governance PASS closes V4.15d and permits V4.15 to resume.
+
+Readiness split recorded: `software_ready` is partial for bounded timeline slices, but integrated parent readiness is not established; `normative_ready` remains pending for integrated source-bound IT/ES/EU conclusions and their applicable exact reviews; `scenario_ready` is design/candidate only until the current-tree suite and V4.15d audit pass. Unverified pension events stay null with data gaps in both timelines and projections.
+
+## 2026-11-21 - External gate verified; projection contract completed, gate invalidated by scoped edits
+
+Latest Windows run `20261121-171218-11396f05` reports Rules v6 6/6, citation index 7/7, Engine 1008/1008, zero failures/errors/skips. The full suite count is 4 higher than the preceding 1004 run and matches the 3 bridge tests plus 1 selector regression; all relevant source/test timestamps precede the run. Therefore it covered the prior bridge and audit-selector implementation.
+
+Functional audit confirms the ADR split, external dependencies V4.2/V4.3/V4.5, and no entitlement promotion path in V4.15. However, the service and its tests were then edited to explicitly return net income, expenses, net cashflow, requested and actual withdrawal, residual assets, and bridge funding need. Per gate policy, the 171218 suite no longer certifies the current tree. Targeted bridge tests pass 3/3. V4.15d remains in_progress and V4.15 blocked pending one supported Windows full-suite 0/0/0 run on current files. No normative re-review is needed.
+
+No CLI exists. Planned V4.15e is the next increment after V4.15: a question-first `fo planning retirement-bridge simulate --input <synthetic.json> --output <result.json>` command. V4.16 is explicitly dependent on V4.15e and V4.15 and remains planned.
+
+
+## 2026-11-21 - V4.15d and V4.15 closure
+
+Windows gate 20261121-172042-e7ace2d1, 2026-11-21 17:20 UTC: Rules v6 6/6, citation index 7/7, Engine 1008/1008, zero failures/errors/skips. Service, golden tests and selector regression predate the run. The audit confirms the ADR scope and the non-promotion of hypothetical pensions. V4.15d and V4.15 are done within the financial projection scope.
+Evidence: `family-office-bootstrap/planning/.runtime/test-gate/20261121-172042-e7ace2d1/summary.json`. V4.15e is selected under the explicit user authorization for a CLI adapter to the approved financial projection.
+
+V4.15e implements the JSON CLI using the existing projection service. Nine targeted tests and seven subtests passed. The fo.exe smoke run with the synthetic sample returned final available assets of 11000.00, 10200.00 and 9000.00 for 100%, 60% and 0% work. The complete Windows gate for the CLI revision is pending.
