@@ -271,7 +271,10 @@
       ],
       "properties": {
         "policy_version": {
-          "const": "3.1"
+          "enum": [
+            "3.1",
+            "4.0"
+          ]
         },
         "tier": {
           "enum": [
@@ -305,14 +308,19 @@
             "fo_architect",
             "fo_normative_reviewer",
             "fo_planner",
-            "fo_financial_reviewer"
+            "fo_financial_reviewer",
+            "fo_normative_escalation"
           ]
         },
         "model": {
           "enum": [
             "gpt-5.6-luna",
             "gpt-5.6-terra",
-            "gpt-5.6-sol"
+            "gpt-5.6-sol",
+            "gpt-6-luna",
+            "gpt-6.1-terra",
+            "gpt-6.2-sol",
+            "gpt-6.2-astra"
           ]
         },
         "reasoning_effort": {
@@ -330,7 +338,12 @@
         "delegation_budget": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["max_events", "authorization", "scope", "blocker"],
+          "required": [
+            "max_events",
+            "authorization",
+            "scope",
+            "blocker"
+          ],
           "properties": {
             "max_events": {
               "type": "integer",
@@ -402,14 +415,19 @@
                   "fo_normative_reviewer",
                   "fo_planner",
                   "fo_financial_reviewer",
-                  "parent"
+                  "parent",
+                  "fo_normative_escalation"
                 ]
               },
               "model": {
                 "enum": [
                   "gpt-5.6-luna",
                   "gpt-5.6-terra",
-                  "gpt-5.6-sol"
+                  "gpt-5.6-sol",
+                  "gpt-6-luna",
+                  "gpt-6.1-terra",
+                  "gpt-6.2-sol",
+                  "gpt-6.2-astra"
                 ]
               },
               "reasoning_effort": {

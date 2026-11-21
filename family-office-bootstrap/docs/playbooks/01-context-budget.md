@@ -35,3 +35,11 @@ Ordine preferito:
 ## Stop condition
 
 Se il task può essere completato e verificato con il contesto corrente, smettere di esplorare.
+
+## Budget adattivo v4.0
+
+- Avviare con: 1 domanda, 1 diff/contratto, fino a 3 simboli/percorsi e 1 test mirato. Lo schema completo e le vecchie review si leggono solo per trovare una contraddizione dimostrata.
+- Per ogni fase annotare brevemente `input utili / evidenza nuova / prossimo test / stop`. Due espansioni di contesto senza nuova evidenza => stop o ri-scoping.
+- Se il difetto e' in una tabella, non aprire l'intero corpus IT/ES/UE per giustificare una stringa: fonte gia' pinned, regola immutata e test di regressione sono sufficienti come lavoro tecnico; il gate normativo rimane indipendente e circoscritto.
+- Separare budget token *osservati* (JSONL Codex o Usage UI) da numero di deleghe previsto. Report `planning/report-token-usage.py`: analisi offline senza prompt e senza listini inventati.
+- Compaction e checkpoint solo quando servono: salvare ID/hashes/finding, evitare ripetere output di comandi e non richiedere al modello di riassumere file immutati a ogni fase.

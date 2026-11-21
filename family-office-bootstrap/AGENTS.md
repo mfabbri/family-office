@@ -23,3 +23,7 @@ Il bootstrap governa metodo, playbook, planner e orchestrazione. Non contiene da
 ## Governance della convergenza
 
 Per lavori sul blocco V4.14 e per review ripetute leggere `docs/playbooks/12-dual-gate-and-convergence.md`. Le revisioni di compatibilità software di regole immutate non richiedono automaticamente una nuova pre-review giuridica. Mantenere separati esito software ed esito giuridico per output. Evitare di ripetere lo stesso gate senza un nuovo artefatto, fonte o finding sostanziale.
+
+## Budget e migrazione modelli v4.0
+
+Il routing attivo per nuovi task e' in `02-model-routing.md` v4.0; lo storico del planner gia' bloccato resta con policy 3.1 senza alterare esiti passati. Prima di aprire nuove review usare il test del diff e degli hash; raccogliere solo conteggi reali Codex `turn.completed.usage` tramite `planning/report-token-usage.py`. Un run che non produce nuova evidenza non autorizza ulteriori suffissi di roadmap.

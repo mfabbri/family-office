@@ -8,6 +8,17 @@ PACK = Path(__file__).resolve().parents[3] / "family-office-rules/italy/2026/inp
 def facts(**updates):
     value = {"candidate_date": "2026-10-10", "date_of_birth": "1959-10-10", "date_of_birth_verified": True, "date_of_birth_source_refs": ["identity-record-1"], "contribution_cohort": "before_1996", "contribution_cohort_confirmed": True, "ordinary_single_management_profile_confirmed": True, "scope_evidence": {"verified": True, "as_of_date": "2026-10-10", "coverage_from": "2026-01-01", "coverage_to": "2026-10-10", "source_refs": ["employment-record-1"]}, "management": "FPLD", "management_confirmed": True, "employment_category": "employee", "multiple_managements": False, "foreign_or_eu_aggregation": False, "special_or_excluded_profile": False, "cessation_confirmed": True, "cessation_evidence": {"verified": True, "cessation_date": "2026-10-10", "as_of_date": "2026-10-10", "source_refs": ["employer-separation-1"]}, "contribution_evidence": {"as_of_date": "2026-10-10", "period_end": "2026-10-10", "verified": True, "source_refs": ["contribution-statement-1"], "first_contribution_date": "1990-01-01", "qualifying_contribution_years": "20", "effective_contribution_years_excluding_figurative": "20"}}
     value.update(updates)
+    candidate = value.get("candidate_date")
+    if ("adjustment_profile_evidence" not in updates and isinstance(candidate, str)
+            and candidate[:4] in {"2027", "2028"}):
+        value["adjustment_profile_evidence"] = {
+            "verified": True,
+            "classification": "no_qualifying_exception",
+            "as_of_date": candidate,
+            "coverage_from": candidate,
+            "coverage_to": candidate,
+            "source_refs": ["synthetic-profile-assessment-1"],
+        }
     if "contribution_cohort" in updates and "contribution_evidence" not in updates:
         value["contribution_evidence"] = {**value["contribution_evidence"], "first_contribution_date": "2000-01-01" if updates["contribution_cohort"] == "on_or_after_1996" else "1990-01-01"}
     if isinstance(updates.get("contribution_evidence"), dict):
@@ -99,6 +110,42 @@ class ItalianOldAgeEligibilityTest(unittest.TestCase):
         self.assertEqual(self.assess(candidate_date="2027-11-10", date_of_birth="1960-10-10")["result"], "eligible")
         self.assertEqual(self.assess(candidate_date="2028-01-10", date_of_birth="1960-10-10")["result"], "eligible")
 
+    def test_adjusted_age_screen_requires_source_attested_profile_evidence(self):
+        candidate = "2027-11-10"
+        valid = {
+            "verified": True,
+            "classification": "no_qualifying_exception",
+            "as_of_date": candidate,
+            "coverage_from": "2027-01-01",
+            "coverage_to": candidate,
+            "source_refs": ["synthetic-profile-assessment-1"],
+        }
+        self.assertEqual(
+            self.assess(candidate_date=candidate, date_of_birth="1960-10-10", adjustment_profile_evidence=valid)["result"],
+            "eligible",
+        )
+        invalid_cases = (
+            None,
+            {**valid, "verified": False},
+            {**valid, "classification": "qualifying_exception"},
+            {**valid, "as_of_date": "2027-11-11"},
+            {**valid, "coverage_to": "2027-11-09"},
+            {**valid, "source_refs": []},
+        )
+        for evidence in invalid_cases:
+            with self.subTest(evidence=evidence):
+                result = self.assess(
+                    candidate_date=candidate,
+                    date_of_birth="1960-10-10",
+                    special_or_excluded_profile=False,
+                    adjustment_profile_evidence=evidence,
+                )
+                self.assertEqual(result["status"], "not_assessed")
+                self.assertIn(
+                    "adjustment_profile_evidence_missing_or_unverified",
+                    {gap["code"] for gap in result["data_gaps"]},
+                )
+
     def test_path_specific_month_search_uses_complete_monthly_source_bound_history(self):
         value = self.month_search_facts()
         result = search_first_post_1996_alternative_eligibility_month(value, monthly_history(), PACK, "2026-10-13")
@@ -129,8 +176,18 @@ class ItalianOldAgeEligibilityTest(unittest.TestCase):
         return value
 
     def pre_1996_search(self, facts_value=None, history=None, pack=PACK, as_of="2026-10-13"):
+        facts_value = facts_value or self.pre_1996_month_search_facts()
+        if as_of[:4] in {"2027", "2028"} and "adjustment_profile_evidence" not in facts_value:
+            facts_value["adjustment_profile_evidence"] = {
+                "verified": True,
+                "classification": "no_qualifying_exception",
+                "as_of_date": as_of,
+                "coverage_from": "2026-01-01",
+                "coverage_to": as_of,
+                "source_refs": ["synthetic-profile-assessment-1"],
+            }
         return search_first_pre_1996_ordinary_eligibility_month(
-            facts_value or self.pre_1996_month_search_facts(),
+            facts_value,
             history or pre_1996_monthly_history(), pack, as_of,
         )
 
@@ -301,6 +358,7 @@ class ItalianOldAgeEligibilityTest(unittest.TestCase):
                 path = Path(directory) / "pack.json"
                 path.write_text(json.dumps(pack), encoding="utf-8")
                 value = self.ordinary_month_search_facts(date_of_birth=dob, scope_evidence={"verified": True, "as_of_date": as_of, "coverage_from": "2026-01-01", "coverage_to": as_of, "source_refs": ["employment-record-1"]}, cessation_evidence={"verified": True, "cessation_date": "2026-01-01", "as_of_date": "2026-01-01", "source_refs": ["employer-separation-1"]}, contribution_evidence={"verified": True, "as_of_date": as_of, "period_end": as_of, "source_refs": ["contribution-statement-1"], "first_contribution_date": "2000-01-01"})
+                value["adjustment_profile_evidence"] = {"verified": True, "classification": "no_qualifying_exception", "as_of_date": as_of, "coverage_from": "2026-01-01", "coverage_to": as_of, "source_refs": ["synthetic-profile-assessment-1"]}
                 history = ordinary_monthly_history(last_month=last_month, eligible_month=eligible_month)
                 for row in history:
                     row["monthly_pension_amount_evidence"]["as_of_date"] = as_of
@@ -308,6 +366,44 @@ class ItalianOldAgeEligibilityTest(unittest.TestCase):
                 self.assertEqual(result["status"], "not_assessed")
                 self.assertIsNone(result["first_eligible_month"])
                 self.assertIn("monthly_social_allowance_threshold_not_source_bound", {item["code"] for item in result["data_gaps"]})
+
+    def test_month_search_requires_adjustment_profile_coverage_for_entire_observed_history(self):
+        from datetime import date as Date, timedelta
+        as_of = "2027-02-28"
+        with tempfile.TemporaryDirectory() as directory:
+            pack = json.loads(PACK.read_text(encoding="utf-8"))
+            for source in pack["source_refs"]:
+                source["retrieved_on"] = source["reviewed_on"] = as_of
+                source["next_review_due"] = (Date.fromisoformat(as_of) + timedelta(days=90)).isoformat()
+            path = Path(directory) / "pack.json"
+            path.write_text(json.dumps(pack), encoding="utf-8")
+
+            post_1996 = self.month_search_facts(
+                date_of_birth="1956-01-15",
+                scope_evidence={"verified": True, "as_of_date": as_of, "coverage_from": "2026-01-01", "coverage_to": as_of, "source_refs": ["employment-record-1"]},
+                cessation_evidence={"verified": True, "cessation_date": "2026-01-01", "as_of_date": as_of, "source_refs": ["employer-separation-1"]},
+                contribution_evidence={"verified": True, "as_of_date": as_of, "period_end": as_of, "source_refs": ["contribution-statement-1"], "first_contribution_date": "2000-01-01"},
+                adjustment_profile_evidence={"verified": True, "classification": "no_qualifying_exception", "as_of_date": as_of, "coverage_from": as_of, "coverage_to": as_of, "source_refs": ["synthetic-profile-assessment-1"]},
+            )
+            post_result = search_first_post_1996_alternative_eligibility_month(
+                post_1996, monthly_history(last_month="2027-02", eligible_month="2026-01"), path, as_of,
+            )
+            self.assertEqual(post_result["status"], "not_assessed")
+            self.assertIsNone(post_result["first_eligible_month"])
+            self.assertIn("adjustment_profile_evidence_missing_or_unverified", {gap["code"] for gap in post_result["data_gaps"]})
+
+            pre_1996 = self.pre_1996_month_search_facts(
+                scope_evidence={"verified": True, "as_of_date": as_of, "coverage_from": "2026-01-01", "coverage_to": as_of, "source_refs": ["employment-record-1"]},
+                cessation_evidence={"verified": True, "cessation_date": "2026-01-01", "as_of_date": as_of, "source_refs": ["employer-separation-1"]},
+                contribution_evidence={"verified": True, "as_of_date": as_of, "period_end": as_of, "source_refs": ["contribution-statement-1"], "first_contribution_date": "1990-01-01"},
+                adjustment_profile_evidence={"verified": True, "classification": "no_qualifying_exception", "as_of_date": as_of, "coverage_from": "2026-02-01", "coverage_to": as_of, "source_refs": ["synthetic-profile-assessment-1"]},
+            )
+            pre_result = search_first_pre_1996_ordinary_eligibility_month(
+                pre_1996, pre_1996_monthly_history(last_month="2027-02", eligible_month="2026-01"), path, as_of,
+            )
+            self.assertEqual(pre_result["status"], "not_assessed")
+            self.assertIsNone(pre_result["first_observed_eligible_month"])
+            self.assertIn("adjustment_profile_evidence_missing_or_unverified", {gap["code"] for gap in pre_result["data_gaps"]})
 
     def test_ordinary_threshold_month_search_fails_closed_for_history_scope_cessation_and_freshness_dates(self):
         history = ordinary_monthly_history()
@@ -417,6 +513,7 @@ class ItalianOldAgeEligibilityTest(unittest.TestCase):
                 pack_path.write_text(json.dumps(pack), encoding="utf-8")
                 history = monthly_history(last_month=last_month, eligible_month="2026-01")
                 value = self.month_search_facts(date_of_birth=dob, scope_evidence={"verified": True, "as_of_date": as_of, "coverage_from": "2026-01-01", "coverage_to": as_of, "source_refs": ["employment-record-1"]}, cessation_evidence={"verified": True, "cessation_date": "2026-01-01", "as_of_date": as_of, "source_refs": ["employer-separation-1"]}, contribution_evidence={"verified": True, "as_of_date": as_of, "period_end": as_of, "source_refs": ["contribution-statement-1"], "first_contribution_date": "2000-01-01"})
+                value["adjustment_profile_evidence"] = {"verified": True, "classification": "no_qualifying_exception", "as_of_date": as_of, "coverage_from": "2026-01-01", "coverage_to": as_of, "source_refs": ["synthetic-profile-assessment-1"]}
                 result = search_first_post_1996_alternative_eligibility_month(value, history, pack_path, as_of)
                 self.assertEqual(result["first_eligible_month"], expected)
 

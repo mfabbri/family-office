@@ -33,3 +33,7 @@ Prompt sessione: `../agent-session-prompt.md`.
 ## Principio fondamentale
 
 Non leggere un documento perché esiste. Leggerlo solo perché il router, il planner o un'evidenza concreta lo rende necessario. Non aumentare reasoning o numero di agenti finché non è stato ridotto il contesto al minimo necessario.
+
+## Migrazione routing v4.0
+
+Il modello eseguibile non e' piu' fissato a GPT-5.6. Leggere **solo** `02-model-routing.md` quando serve decidere una delega. Una review legale con modello piu' costoso non compensa un contratto ambiguo o la mancanza di test; prima occorre delimitare lo scope. La vecchia route nel planner bloccato e' storica fino al prossimo ciclo autorizzato.

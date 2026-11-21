@@ -93,3 +93,7 @@ Riportare soltanto:
 - **Scenario readiness**: un'ipotesi sul futuro può essere simulata solo se è riconoscibile come ipotesi, e non è presentata come requisito o decorrenza legalmente accertata.
 - Per modifiche a sola compatibilità non riaprire automaticamente una review normativa già terminata sul pack invariato. Riesaminare invece i test e il comportamento **del consumer**; escalation specialistica solo su trigger verificabile.
 - Evitare suite complete ripetute senza diff; manteniamo l'obbligo 0/0/0 per il gate finale e per le piattaforme dichiarate supportate. Non mascherare failure ambientali come pass.
+
+## Test anti-loop v4.0
+
+Prima di chiamare un reviewer generare una matrice di massimo 5 righe: `(claim, file/line, fonte primaria/versione, test, atteso)`. Il reviewer deve verificare la modifica anziche' rigenerare un audit globale. In un NO-GO, catturare un test che riproduce il finding; vietato un nuovo reviewer sullo stesso hash senza una nuova domanda/versone autorizzata. Il costo dei test mirati e' quasi sempre inferiore a un nuovo turno di ragionamento; suite completa **una sola volta** al gate Windows/supportato, senza deroghe a 0 failure/error/skip.

@@ -49,3 +49,7 @@ Per incrementi esposti all'utente tramite CLI:
 ## Contratto di completamento per incrementi che consumano regole versionate
 
 Classificare gli effetti: (A) solo codice/API/test; (B) semantica normativa; (C) semantica finanziaria. Per A, usare gate software con test pubblici fail-closed, senza aprire una nuova interpretazione giuridica se il pack immutato ha già una review valida. Per B usare anche Knowledge→Rules→Tests→Engine e gate giuridico esatto; per C usare review matematica. Lo stato `software_ready` è evidenza intermedia e non equivale a `done` di una capability vincolata a gate normativi integrati. La ripetizione del medesimo blocker senza nuovo finding è escalation umana, non un nuovo suffisso automatico della roadmap.
+
+## Budget operativo v4.0
+
+Prima di creare un nuovo suffisso, cercare un finding univoco e riproducibile. Se non c'e' un delta reale rispetto all'hash del candidato, non consumare un altro reviewer. Preferire patch in-place dell'incremento gia' autorizzato quando e' consentito dai gate; se l'autorizzazione e' esaurita, consegnare un candidate patch con test e marcare la review PENDING. Il consumo reale token non e' misurabile dai log di routing: per Codex usare un export JSONL con `report-token-usage.py`, per Work la Usage UI.

@@ -1,71 +1,59 @@
-# Model routing
+# Model routing v4.0 — 21 novembre 2026
 
-Obiettivo: usare il modello meno costoso compatibile con rischio, fase e contratto del task, senza sacrificare i reviewer specialistici del Family Office AI.
+## Goal
 
-Il routing usa custom agent, non `[profiles.*]` project-local. Il parent `gpt-5.6-luna` / `medium` classifica, delega e sintetizza; non assorbe silenziosamente lavoro medium/review/high/critical.
+Minimizzare consumo di contesto, reasoning e deleghe **per risultato osservabile**. Evitare il falso risparmio che genera dieci review su uno stesso difetto. La selezione parte dal diff e dalla domanda decisionale, non dalle parole `pensione`, `fisco` o dalla dimensione del repository.
 
-| Tier | Agent | Model | Reasoning | Uso tipico |
-|---|---|---|---:|---|
-| low | `fo_explorer` | `gpt-5.6-luna` | low | discovery bounded/read-only |
-| low | `fo_docs_reviewer` | `gpt-5.6-luna` | medium | review documentale/contratti |
-| low | `fo_docs_editor` | `gpt-5.6-luna` | medium | docs/planner/config agent |
-| medium | `fo_planner` | `gpt-5.6-terra` | medium | planning cross-module con architettura già decisa |
-| medium | `fo_implementer` | `gpt-5.6-terra` | medium | implementazione T1–T3 entro contratti definiti |
-| review | `fo_reviewer` | `gpt-5.6-terra` | high | quality gate, regressioni, privacy/provenance |
-| high | `fo_architect` | `gpt-5.6-sol` | high | architettura, migrazioni, trade-off |
-| high | `fo_financial_reviewer` | `gpt-5.6-sol` | high | IRR/NPV/DSCR, leverage, cash-flow, scenario assumptions, opportunity cost |
-| critical | `fo_normative_reviewer` | `gpt-5.6-sol` | xhigh | fiscalità, pensioni, RW/IVAFE/IVIE, successione, AML/CRS/DAC, compliance |
+## Modelli disponibili e uso proposto
 
-## Routing rules
+| Tier | Custom agent | Modello Codex | Reasoning | Quando |
+|---|---|---|---|---|
+| controller | parent | `gpt-6-luna` | low | Smista, esegue step locali minimi, produce evidenze e riepilogo |
+| low | `fo_explorer` | `gpt-6-luna` | low | Discovery read-only mirata, solo se evita lavoro duplicato |
+| low | `fo_docs_reviewer` | `gpt-6-luna` | low | Coerenza documentale circoscritta |
+| low | `fo_docs_editor` | `gpt-6-luna` | medium | Correzione docs/testo/asset di governance |
+| medium | `fo_planner` | `gpt-6.1-terra` | medium | Piano di implementazione entro architettura definita |
+| medium | `fo_implementer` | `gpt-6.2-sol` | medium | Implementazione code/test deterministica |
+| review | `fo_reviewer` | `gpt-6.2-sol` | medium | Review tecnica indipendente, rischio e regressioni |
+| high | `fo_architect` | `gpt-6.2-astra` | medium | Solo trade-off architetturali non risolti |
+| high | `fo_financial_reviewer` | `gpt-6.2-sol` | high | Nuova formula, semantica cash flow, rischio economico |
+| critical | `fo_normative_reviewer` | `gpt-6.2-sol` | high | Nuova interpretazione legale *materiale*, esatta e delimitata |
+| critical escalation | `fo_normative_escalation` | `gpt-6.2-astra` | high | Una sola controversia primaria irrisolta con motivazione, budget e autorizzazione |
 
-1. Creare il task envelope e registrarlo in `planning/current-work.json`.
-2. Se il diff **introduce o modifica** una regola, un periodo, una classificazione giuridica o una conclusione normativa T4, usare lo specialista normativo Sol/xhigh per il gate. Se collega **senza modificarli** pack/evidenze già revisionati a un consumer fail-closed, classificare la fase come implementazione tecnica T1–T3 con Terra/medium e reviewer tecnico; escalare al normativo soltanto su un trigger semantico concreto.
-3. Se la fase è finanziaria ma non introduce una nuova interpretazione normativa, usare `fo_financial_reviewer` Sol/high per formule, scenari e ranking.
-4. Se serve planning cross-module ma architettura e regole sono già decise, usare `fo_planner` Terra/medium.
-5. Implementare codice deterministico con `fo_implementer` Terra/medium quando regole e contratti sono definiti.
-6. Usare `fo_reviewer` Terra/high per review indipendente T3 o quality/audit.
-7. Usare `fo_architect` Sol/high per architettura/migrazione, non per semplici modifiche di codice.
-8. Per T4, dopo implementazione Terra, tornare al reviewer specialistico appropriato quando il playbook richiede un gate indipendente.
-9. Registrare `delegated`, `escalated` o `fallback` nella trace prima di cambiare route.
-10. Non sostituire silenziosamente un modello non disponibile.
+Lo specialista storico `fo_retirement_transition_reviewer`, se utilizzato direttamente, impiega `gpt-6.2-sol/high` ed e' soggetto allo stesso gate indipendente. Non e' una delega obbligatoria in aggiunta ai reviewer sopra.
 
-Dopo un NO-GO, applicare soltanto correzioni bounded già autorizzate. Una nuova autorizzazione dell'utente apre un ciclo distinto e deve nominare versione, scope, blocker, budget massimo di eventi e condizione di stop; non è un'approvazione generale per retry o modifiche ulteriori. L'autorizzazione a una sequenza di più incrementi definisce l'ordine da tentare, ma non supera i gate: dopo ogni incremento verificare nuovamente predecessori e roadmap; un NO-GO o una review pending blocca i discendenti. Il budget di review/correzione è specifico per incremento e ciclo, non si trasferisce agli incrementi successivi. La trace corrente deve contenere solo il ciclo attivo. Finding ed esiti dei cicli precedenti restano invece conservati nel verification/decision log e non si sovrascrivono.
+**GPT-6.2 Sol/Astra** sono stati annunciati il 17 novembre 2026. Il menu dell'utente dimostra disponibilita' nel suo ambiente Work/Codex; **non garantisce** disponibilita' dello stesso slug nel suo CLI locale e non indica il costo reale. Verificare `codex --version` e il model picker del client prima del primo run. Nessun fallback silenzioso; registrare la scelta nel planner. I prezzi API e i limiti Work/Codex sono sistemi differenti.
 
-## Regole di risparmio token
+## Routing in 7 passaggi
 
-1. Ridurre prima contesto e reasoning, poi cambiare modello.
-2. Luna deve restituire sintesi, non dump di file o log.
-3. Un subagent deve sostituire una lettura/esplorazione costosa del parent, non duplicarla.
-4. Preferire un singolo reviewer specializzato a più reviewer generici.
-5. Non usare Sol per typo, listing, boilerplate, test già localizzati o documentazione meccanica.
-6. Non aumentare reasoning per compensare requisiti ambigui: chiarire il contratto o leggere l'evidenza mancante.
-7. `xhigh` è riservato al reviewer normativo critico; la matematica finanziaria ordinaria resta Sol/high e deterministica nei servizi/test.
+1. Identificare una modifica, un risultato verificabile, massimo 3 file/aree iniziali e un test di entrata. Se basta un edit locale, **nessuna delega**.
+2. Leggere soltanto file, schema e test connessi, usando `01-context-budget.md`.
+3. Classificare la fase reale: T0 editoriale, T1–T3 software, T4 finanziario o normativo **solo se cambia la semantica**, T5 trade-off.
+4. Preferire una sola route attiva, il minimo effort utile e un output bounded (finding + riferimenti + esito).
+5. Richiedere reviewer normativo solo per legge/periodo/eligibility/claim nuove o cambiate; binding del pack immutato => review tecnica.
+6. Elevare a Astra solo se **un punto sostanziale** non puo' essere risolto con fonte primaria e test mirati; una review indipendente non puo' essere sostituita da auto-approvazione.
+7. Registrare `routing` (`policy_version: 4.0`) e gli eventi reali. La trace storica v3.1 del planner bloccato non va riscritta retroattivamente.
 
-## Trigger per Sol/xhigh
+## Budget anti-loop e gestione uso
 
-Usare `fo_normative_reviewer` / xhigh solo se almeno uno è vero:
+- Budget default: 0 subagent per T0/T1 locale; al massimo 1 implementer + 1 reviewer dove necessario; 3 thread possibili, ma **mai lanciare tutti per default**.
+- PIANO: <= 12 righe, RISULTATO reviewer: <= 12 righe / 5 finding, salvo evidenza critica. Nessuna chain-of-thought, dump file, log completo.
+- All'inizio confrontare candidati, diff e hash esistenti. No nuove consultazioni se `(hash, scope, finding, period)` non cambia.
+- Primo NO-GO: una remediation circoscritta + test di regressione. Secondo finding diverso: **analizzare il modello di gate e la granularita'** prima di creare un suffisso. Niente loop automatici fino a GO.
+- Timebox e budget in planner su versione/esatto hash. Senza verdetto: PENDING, non auto-riprovare.
+- Rivedere budget ogni 2 turni di ricerca/decisione o quando non cambia il diff. A budget esaurito: checkpoint e blocker, non un altro agente.
+- Ridurre **contesto prima di modello**: `rg`, range selettivi, output `--quiet`, registrare summary verificabile, compaction prima di saturazione. Non condensare né modificare le evidenze legali immutabili.
+- Report token da `codex exec --json` tramite `python family-office-bootstrap/planning/report-token-usage.py <run.ndjson>`: conta solo `turn.completed.usage` senza stampare prompt. Il log hook `model-routing.ndjson` traccia modelli/ruoli ma **non** spesa token.
+- Per Work/Desktop non inferire token da messaggi o numero di chiamate: verificare il consumo dall'interfaccia **Settings → Usage**. Per API, prezzi e cache vanno valutati sulla fatturazione reale, non su stime fisse nel router.
 
-- interpretazione normativa con più letture plausibili e impatto materiale;
-- validità temporale/transitoria della norma non ovvia;
-- fiscalità, pensioni, monitoraggio fiscale o successione cambiano materialmente il risultato;
-- obblighi AML/CRS/DAC o altre regole di compliance richiedono una decisione interpretativa.
+## Fallback e schema
 
-Per nuove formule finanziarie o cambi di semantica IRR/NPV/DSCR usare prima `fo_financial_reviewer` Sol/high; escalare al reviewer normativo solo se il problema è anche legale/fiscale.
+Il validator `planning/validate-codex-model-routing.py` verifica `.codex/config.toml`, TOML agent, schema e piano. Accetta route `3.1` **soltanto** se l'incremento storico e' `blocked`, per non falsificare review gia' attestate. Alla prima nuova selezione, aprire route `4.0` con una nuova trace e mantenere lo storico nel decision log. Mai cambiare il modello del reviewer di una review conclusa; mai invocare Astra normativo senza autorizzazione esplicita per `versione/hash/scope/budget`.
 
-## Compatibility e fallback
+## Fonti di policy (accesso pubblico al 2026-11-21)
 
-Usare solo identificatori completi:
-
-- `gpt-5.6-luna`
-- `gpt-5.6-terra`
-- `gpt-5.6-sol`
-
-L'alias non suffissato `gpt-5.6` non deve apparire come valore `model` nella configurazione eseguibile.
-
-Se il client/account non espone il modello richiesto, registrare un evento `fallback` nel planner e usare un modello disponibile senza cambiare i contratti del task. Il fallback non deve essere silenzioso.
-
-## Modelli e semplicità (audit OpenAI 2026)
-
-Non introdurre nuovi nomi modello in `.codex/config.toml` finché non sono stati verificati disponibilità e schema del client Codex installato; il validator locale fissa attualmente la matrice v3.1 ai nomi gpt-5.6. Il criterio OpenAI 2026 è minimizzare istruzioni ridondanti e deleghe non necessarie; non forzare un subagent per un edit locale sicuro. Un aggiornamento a GPT-6/Astra richiede **migrazione separata**, con aggiornamento atomico di config, agent TOML, validator, skill e smoke della CLI.
-
-Una review tecnica di binding con Rules identiche non va promossa a una seconda review normativa solo per la parola "pension" nel nome del file. La matrice di impatto è in `12-dual-gate-and-convergence.md`.
+- OpenAI, 2026-11-17: https://developers.openai.com/api/docs/changelog (GPT-6.2 Sol/Astra)
+- OpenAI, Work/Codex: https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex
+- OpenAI, usage/reasoning: https://help.openai.com/en/articles/20001516-managing-usage-with-gpt-6-astra-in-work-and-codex
+- OpenAI, skill routing/compaction: https://developers.openai.com/blog/skills-shell-tips
+- OpenAI, Codex non-interactive JSONL: https://learn.chatgpt.com/docs/non-interactive-mode

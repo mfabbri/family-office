@@ -1,16 +1,18 @@
 ---
 name: family-office-model-router
-description: Seleziona lo specialista in base alla semantica modificata; usa per routing e deleghe Codex Family Office AI.
+description: Usa per selezionare uno specialista Codex SOLO quando un task Family Office richiede delega; non usare per singolo edit locale o domande senza impatto sul repository. Output un routing motivato con budget, scope e done-when.
 ---
 
-# Model router
+# Family Office model router v4.0
 
-Leggi `family-office-bootstrap/docs/playbooks/02-model-routing.md` **solo se occorre delegare**. Riusa la configurazione Codex v3.1 esistente, verificata dalla CLI del progetto; non migrare a modelli non disponibili sulla sola base della documentazione.
+Leggi il solo `family-office-bootstrap/docs/playbooks/02-model-routing.md` se occorre delegare. Classifica **il diff**, non il dominio nominale. Nessun reviewer legale su documentazione previdenziale immutata.
 
-- Change tecnico in loader, API o test, con pack immutati: `fo_implementer` Terra/medium, reviewer tecnico `fo_reviewer` se integrazione sensibile.
-- Nuova semantica normativa, fonti, periodi o entitlement: `fo_normative_reviewer` Sol/xhigh; review esatta, non auto-approvazione.
-- Nuove formule finanziarie: `fo_financial_reviewer` Sol/high.
-- Design cross-module non deciso: `fo_architect` Sol/high.
-- Fix documentale limitato: `fo_docs_editor` Luna/medium; discovery `fo_explorer` Luna/low.
+- T0/T1 locale: parent `gpt-6-luna/low` e test mirato, senza agent.
+- Discovery: `fo_explorer` Luna/low. Docs: `fo_docs_editor` Luna/medium.
+- Pianificazione: `fo_planner` Terra/medium. Runtime: `fo_implementer` GPT-6.2 Sol/medium.
+- Review indipendente di API e contratti: `fo_reviewer` GPT-6.2 Sol/medium.
+- Nuova formula: `fo_financial_reviewer` Sol/high.
+- Nuova interpretazione normativa: `fo_normative_reviewer` Sol/high, source/version/scope esatti.
+- Solo conflitto sostanziale dimostrato: `fo_normative_escalation` Astra/high con budget esplicito; architettura irrisolta: `fo_architect` Astra/medium.
 
-Classifica il diff, non il dominio nominale del file. Registra routing intenzionale nel planner prima della delega. Bounded review, nessun polling o retry senza cambiamento materiale; vedi `12-dual-gate-and-convergence.md`. Non salvare chain-of-thought.
+Non chiamare il router per una tabella testuale, un listing o un pack gia' validato che non cambia semantica. Restituisci agente, modello, effort, 1 frase di motivo, files/test e condizione di arresto. Un evento PENDING o timeout non autorizza un nuovo spawn. Misura uso reale con `report-token-usage.py` solo da JSONL Codex, mai inventare conteggi dai log hook.

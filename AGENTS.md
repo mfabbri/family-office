@@ -29,3 +29,9 @@ Missione: Family Office AI produce decisioni familiari spiegabili usando fatti t
 Prima di dichiarare `done`, mostra file modificati, comportamento osservabile, test mirati/integrati, suite completa al gate, limiti normativi, gap e decisione sullo stato roadmap. Verifica `family-office-bootstrap/planning/validate-execution-guardrails.py` al gate; non chiamare un timeout GO/NO-GO.
 
 Istruzioni specializzate: `family-office-engine/AGENTS.md`, `family-office-rules/AGENTS.md`, `family-office-knowledge/AGENTS.md` prevalgono per il rispettivo sottoalbero.
+
+## Routing e convergenza v4.0
+
+Il runtime Codex utilizza `gpt-6-luna/low` per il parent; i nuovi specialisti e i relativi budget sono in `family-office-bootstrap/docs/playbooks/02-model-routing.md`. Il routing `3.1` nella trace del V4.14 bloccato e' **storico**, non una scelta attiva per nuovi incrementi. Ridurre prima il contesto, poi effort/deleghe, e misurare token soltanto da telemetria reale (non da hook che loggano solo modelli).
+
+Per le review senza nuova evidenza: no re-audit integrale; documento `hash + finding + acceptance test`, una remediation bounded, una review limitata e stop se il gate non converge. Un'ipotesi finanziaria future-dated puo' essere simulata come `scenario_projection` senza trasformarsi in diritto pensionistico verificato. Nessun cambio silenzioso degli stati storici o dei requisiti legali.

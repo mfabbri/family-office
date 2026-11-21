@@ -1,51 +1,19 @@
-# Model routing policy v3.1
+# Model routing policy v4.0 — 2026-11-21
 
-Data: 2026-08-30
+- Parent: `gpt-6-luna/low`; nessuna delega se il task e' risolvibile localmente.
+- Explorer/docs: `gpt-6-luna/low` o medium per editing effettivo.
+- Planner: `gpt-6.1-terra/medium`.
+- Implementazione + review tecnica: `gpt-6.2-sol/medium` con **agenti indipendenti**, mai reviewer che approva il proprio codice.
+- Finanziario: `gpt-6.2-sol/high` per nuova semantica numerica.
+- Normativo: `gpt-6.2-sol/high` solo su nuove fonti/condizioni/validita' materiale.
+- Escalation: `gpt-6.2-astra/high` per controversia giuridica primaria delimitata e autorizzata; `fo_architect` Astra/medium per trade-off reali.
 
-## Obiettivo
+La matrice eseguibile e i trigger sono in `playbooks/02-model-routing.md`; il protocollo anti-loop in `playbooks/12-dual-gate-and-convergence.md`. Preservare l'identita' esatta di fonti/Rules/Knowledge. Il gate software non convalida il diritto previdenziale.
 
-Routing Codex multi-model reale, proporzionato al rischio e verificabile, con due livelli:
+## Audit effettivo e usage
 
-- decisione intenzionale versionata nel planner;
-- modello effettivamente eseguito registrato localmente dagli hook.
-
-| Tier | Agent | Modello | Reasoning | Responsabilità |
-|---|---|---|---|---|
-| router | parent | Luna | medium | classificare, delegare, sintetizzare |
-| low | fo_explorer | Luna | low | discovery read-only |
-| low | fo_docs_reviewer | Luna | medium | review documentale read-only |
-| low | fo_docs_editor | Luna | medium | docs/planner/config agent |
-| medium | fo_planner | Terra | medium | planning cross-module delimitato |
-| medium | fo_implementer | Terra | medium | codice e micro-feature deterministiche |
-| review | fo_reviewer | Terra | high | quality/regressioni/privacy/provenance |
-| high | fo_architect | Sol | high | architettura/migrazioni/trade-off |
-| high | fo_financial_reviewer | Sol | high | matematica finanziaria/leverage/cash-flow |
-| critical | fo_normative_reviewer | Sol | xhigh | fiscalità/pensioni/compliance |
-
-## Regola T4
-
-Separare il gate finanziario dal gate normativo:
-
-- `fo_financial_reviewer` verifica formule, tempi dei flussi, leverage, scenari e opportunity cost;
-- `fo_normative_reviewer` verifica fonti, giurisdizione, validità temporale, fiscalità/previdenza/compliance;
-- i calcoli numerici restano deterministici e versionati;
-- l'implementazione avviene con Terra dopo che contratti e regole sono chiari.
-
-## Audit runtime
-
-Gli hook `SessionStart`, `SubagentStart` e `SubagentStop` registrano sessione, evento, model slug, agent type/id e permission mode in:
-
-```text
-family-office-bootstrap/planning/.runtime/model-routing.ndjson
-```
-
-Il file non viene versionato e non contiene chain-of-thought.
-
-## Guardrail
-
-- nessun `[profiles.*]` project-local;
-- mai usare l'alias eseguibile non suffissato `gpt-5.6`;
-- nessuna escalation dovuta alla sola dimensione del repository;
-- ogni fallback/escalation è esplicito nel planner;
-- i playbook funzionali esistenti, inclusi investment opportunity e work-transition, restano autoritativi;
-- nessun modello sostituisce rule pack e test per risultati fiscali, pensionistici o finanziari.
+- `.codex/hooks/model-routing-audit.py` -> `.runtime/model-routing.ndjson`: **solo traccia della selezione**, non conteggio token.
+- `planning/report-token-usage.py`: totale input/cached/output/reasoning da export Codex `--json`; nessun prezzo presunto e nessun prompt mostrato.
+- UI Work/Codex Settings > Usage per reale quota piano. Prezzi API soltanto se si usa una API key.
+- Pianificazione budget: massimo 2 deleghe sostanziali per task, un solo reviewer per finding, nessun polling infinito, controllo del diff prima di nuova review.
+- Non salvare chain-of-thought, contenuti personali o trascrizioni sensibili nel repository.

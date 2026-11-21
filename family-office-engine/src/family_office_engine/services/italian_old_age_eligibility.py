@@ -23,8 +23,8 @@ def assess_italian_old_age_eligibility(
 ) -> dict[str, Any]:
     """Assess only ordinary FPLD/AGO employee paths; never calculate amounts or a timeline."""
     pack = _load_pack(rule_pack_path, as_of_date)
-    gaps = _scope_gaps(facts, pack["supported_scope"])
     candidate = _date(facts.get("candidate_date"))
+    gaps = _scope_gaps(facts, pack["supported_scope"], candidate_date=candidate)
     birth = _date(facts.get("date_of_birth"))
     evidence = facts.get("contribution_evidence")
     if candidate is None:
@@ -165,7 +165,10 @@ def search_first_post_1996_alternative_eligibility_month(
             "limitations": ["First eligible month within observed history and the 2026-2028 pack only; no future contribution is projected."],
         }
     pack = _load_pack(rule_pack_path, search_as_of)
-    gaps = _scope_gaps(facts, pack["supported_scope"])
+    gaps = _scope_gaps(
+        facts, pack["supported_scope"], candidate_date=search_as_of,
+        require_full_scope_coverage=True,
+    )
     birth = _date(facts.get("date_of_birth"))
     if birth is None or facts.get("date_of_birth_verified") is not True or not _source_refs(facts.get("date_of_birth_source_refs")):
         gaps.append(_gap("date_of_birth_missing_or_unverified", "A verified, source-bound ISO date of birth is required."))
@@ -586,7 +589,10 @@ def _pre_1996_month_search_not_assessed(
 
 
 def _monthly_search_common_gaps(facts: dict[str, Any], pack: dict[str, Any], search_as_of: date) -> list[dict[str, str]]:
-    gaps = _scope_gaps(facts, pack["supported_scope"])
+    gaps = _scope_gaps(
+        facts, pack["supported_scope"], candidate_date=search_as_of,
+        require_full_scope_coverage=True,
+    )
     birth = _date(facts.get("date_of_birth"))
     if birth is None or facts.get("date_of_birth_verified") is not True or not _source_refs(facts.get("date_of_birth_source_refs")):
         gaps.append(_gap("date_of_birth_missing_or_unverified", "A verified, source-bound ISO date of birth is required."))
@@ -845,7 +851,10 @@ def _load_pack(path: Path, as_of_date: str | date | None) -> dict[str, Any]:
     return pack
 
 
-def _scope_gaps(facts: dict[str, Any], supported_scope: dict[str, Any]) -> list[dict[str, str]]:
+def _scope_gaps(
+    facts: dict[str, Any], supported_scope: dict[str, Any], *, candidate_date: date | None = None,
+    require_full_scope_coverage: bool = False,
+) -> list[dict[str, str]]:
     gaps = []
     scope_evidence = facts.get("scope_evidence")
     if (not isinstance(scope_evidence, dict) or scope_evidence.get("verified") is not True
@@ -864,6 +873,30 @@ def _scope_gaps(facts: dict[str, Any], supported_scope: dict[str, Any]) -> list[
     for field, code in (("multiple_managements", "multiple_managements_unsupported"), ("foreign_or_eu_aggregation", "foreign_or_eu_aggregation_unsupported"), ("special_or_excluded_profile", "special_or_excluded_profile_unsupported")):
         if facts.get(field) is not False:
             gaps.append(_gap(code, "This profile must be explicitly confirmed absent; unknown is outside the approved scope."))
+    candidate = candidate_date or _date(facts.get("candidate_date"))
+    if candidate is not None and candidate.year in (2027, 2028):
+        profile_evidence = facts.get("adjustment_profile_evidence")
+        evidence_as_of = _date(profile_evidence.get("as_of_date")) if isinstance(profile_evidence, dict) else None
+        coverage_from = _date(profile_evidence.get("coverage_from")) if isinstance(profile_evidence, dict) else None
+        coverage_to = _date(profile_evidence.get("coverage_to")) if isinstance(profile_evidence, dict) else None
+        required_coverage_from = date(2026, 1, 1) if require_full_scope_coverage else candidate
+        evidence_valid = (
+            isinstance(profile_evidence, dict)
+            and profile_evidence.get("verified") is True
+            and profile_evidence.get("classification") == "no_qualifying_exception"
+            and evidence_as_of is not None
+            and evidence_as_of <= candidate
+            and coverage_from is not None
+            and coverage_to is not None
+            and coverage_from <= required_coverage_from
+            and candidate <= coverage_to
+            and _source_refs(profile_evidence.get("source_refs"))
+        )
+        if not evidence_valid:
+            gaps.append(_gap(
+                "adjustment_profile_evidence_missing_or_unverified",
+                "The 2027-2028 adjusted-age screen requires externally assessed, verified profile evidence covering the candidate date and the full observed search history; a boolean alone is insufficient.",
+            ))
     return gaps
 
 

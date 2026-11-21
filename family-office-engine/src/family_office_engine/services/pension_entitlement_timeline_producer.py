@@ -23,6 +23,7 @@ from family_office_engine.services.pension_timeline_source_gate import (
     PACK_REGISTRY,
     TRANSITION_CLASSES,
     evaluate_pension_timeline_source_branch,
+    select_eu_pension_rule_pack,
 )
 
 
@@ -53,17 +54,35 @@ DOMESTIC_PACK_REGISTRY: dict[str, dict[str, str]] = {
 
 
 @dataclass(frozen=True)
+class EUPensionRuleSelectionInputs:
+    """Externally established temporal facts consumed by the reviewed selector.
+
+    These inputs are not a selector result and do not establish eligibility.
+    The producer executes the selector itself and never accepts a caller-built
+    ``candidate_selected`` mapping.
+    """
+
+    member_state: str | None
+    applicable_date: str | None
+    right_acquisition_date: str | None
+    contingency_date: str | None
+    transition_classification: str | None
+    pre_application_periods: str | None
+
+
+@dataclass(frozen=True)
 class PublicPensionEvidenceBundle:
     """In-memory outputs and source paths supplied by deterministic services.
 
     ``service_snapshots`` keys are IT, ES, EU_COORDINATION, and EU_PRO_RATA.
-    Rule-pack paths identify the exact files passed to those services. No
-    snapshot or personal fact is written by this module.
+    Rule-pack paths identify the exact files passed to those services. EU
+    temporal selector inputs are explicit; the selector output is always
+    recomputed internally. No snapshot or personal fact is written here.
     """
 
     service_snapshots: Mapping[str, Mapping[str, Any] | None] = field(default_factory=dict)
     rule_pack_paths: Mapping[str, Path | str] = field(default_factory=dict)
-    eu_rule_selection: Mapping[str, Any] | None = None
+    eu_selector_inputs: EUPensionRuleSelectionInputs | None = None
 
 
 @dataclass(frozen=True)
@@ -108,33 +127,40 @@ def map_public_service_branches(
     if not isinstance(evidence_bundle, PublicPensionEvidenceBundle):
         raise TypeError("evidence_bundle must be PublicPensionEvidenceBundle")
     root = rules_root.resolve()
+    eu_selection = _run_eu_selector(evidence_bundle, root)
     bindings = {
         "IT": _domestic_binding("IT", evidence_bundle, root),
         "ES": _domestic_binding("ES", evidence_bundle, root),
-        "EU": _eu_binding(evidence_bundle, root),
+        "EU": _eu_binding(evidence_bundle, root, eu_selection),
     }
     assessments: list[BranchAssessment] = []
     for event in EVENTS:
         for jurisdiction in JURISDICTIONS:
             binding = bindings[jurisdiction]
-            selection = evidence_bundle.eu_rule_selection if jurisdiction == "EU" else None
+            selection = eu_selection if jurisdiction == "EU" else None
             source_result = evaluate_pension_timeline_source_branch(
                 event=event,
                 jurisdiction=jurisdiction,
                 rule_selection=selection,
             )
-            if not binding["verified"]:
+            selector_gap = _selector_gap(selection) if jurisdiction == "EU" else None
+            if selector_gap is not None:
+                code = selector_gap["code"]
+                message = selector_gap["message"]
+            elif not binding["verified"]:
                 code = "source_version_missing"
+                message = binding["reason"]
             elif source_result["data_gaps"][0]["code"] != "event_evidence_missing":
                 code = source_result["data_gaps"][0]["code"]
+                message = source_result["data_gaps"][0]["message"]
             else:
                 # A verified pack is not event evidence. Individual evidence is
                 # still absent, so every event remains not_assessed.
                 code = "event_evidence_missing"
-            message = (
-                f"{event} for {jurisdiction} remains not_assessed: "
-                f"{binding['reason'] if not binding['verified'] else 'event-specific primary evidence is absent.'}"
-            )
+                message = (
+                    f"{event} for {jurisdiction} remains not_assessed: "
+                    "event-specific primary evidence is absent."
+                )
             assessments.append(
                 BranchAssessment(
                     event=event,
@@ -152,6 +178,20 @@ def map_public_service_branches(
                 )
             )
     return tuple(assessments)
+
+
+def _selector_gap(selection: Mapping[str, Any]) -> dict[str, str] | None:
+    """Keep temporal/legal selection gaps distinct from source binding gaps."""
+    if selection.get("status") == "candidate_selected":
+        return None
+    gaps = selection.get("data_gaps")
+    if not isinstance(gaps, list) or not gaps or not isinstance(gaps[0], Mapping):
+        return None
+    code = gaps[0].get("code")
+    message = gaps[0].get("message")
+    if not isinstance(code, str) or not isinstance(message, str):
+        return None
+    return {"code": code, "message": message, "severity": "blocking"}
 
 
 def produce_source_bound_pension_timeline(
@@ -242,8 +282,40 @@ def _domestic_binding(
     return _verify_pack_file(expected_path, spec, rules_root)
 
 
-def _eu_binding(bundle: PublicPensionEvidenceBundle, rules_root: Path) -> dict[str, Any]:
-    selection = bundle.eu_rule_selection
+def _run_eu_selector(
+    bundle: PublicPensionEvidenceBundle, rules_root: Path
+) -> dict[str, Any]:
+    inputs = bundle.eu_selector_inputs
+    if not isinstance(inputs, EUPensionRuleSelectionInputs):
+        return {
+            "status": "not_assessed",
+            "rule_pack_id": None,
+            "digest_sha256": None,
+            "transition_classification": None,
+            "activation_allowed": False,
+            "human_review_required": True,
+            "data_gaps": [{
+                "code": "legal_applicability_unknown",
+                "message": "Explicit EU temporal selector inputs are missing.",
+                "severity": "blocking",
+            }],
+        }
+    return select_eu_pension_rule_pack(
+        member_state=inputs.member_state,
+        applicable_date=inputs.applicable_date,
+        right_acquisition_date=inputs.right_acquisition_date,
+        contingency_date=inputs.contingency_date,
+        transition_classification=inputs.transition_classification,
+        pre_application_periods=inputs.pre_application_periods,
+        rules_root=rules_root / "cross-border",
+    )
+
+
+def _eu_binding(
+    bundle: PublicPensionEvidenceBundle,
+    rules_root: Path,
+    selection: Mapping[str, Any],
+) -> dict[str, Any]:
     if not isinstance(selection, Mapping) or selection.get("status") != "candidate_selected":
         return _missing_binding("the EU source selector did not select an exact candidate")
     pack_id = selection.get("rule_pack_id")

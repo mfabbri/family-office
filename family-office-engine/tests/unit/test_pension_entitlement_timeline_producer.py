@@ -11,27 +11,25 @@ from family_office_engine.services.pension_timeline_source_gate import (
     JURISDICTIONS,
     PACK_REGISTRY,
 )
-from family_office_engine.services.eu_pension_coordination import coordinate_it_es_pensions
-from family_office_engine.services.it_es_eu_pension_pro_rata import build_it_es_eu_pension_pro_rata
-from family_office_engine.services.pension_timeline_source_gate import select_eu_pension_rule_pack
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 RULES_ROOT = REPOSITORY_ROOT / "family-office-rules"
-TIMELINE_DIRECTORY = REPOSITORY_ROOT / "family-office-workspace"
 
 
-def _selection(pack_id: str) -> dict[str, object]:
-    spec = PACK_REGISTRY[pack_id]
-    return {
-        "status": "candidate_selected",
-        "rule_pack_id": pack_id,
-        "digest_sha256": spec["sha256"],
-        "transition_classification": "acquired_before_application_date" if pack_id.endswith("v11.1.1") else "post_application_contingency",
-        "activation_allowed": False,
-        "human_review_required": True,
-        "data_gaps": [],
-    }
+def _selector_inputs(pack_id: str) -> producer.EUPensionRuleSelectionInputs:
+    before_application = pack_id.endswith("v11.1.1")
+    transition_day = "2026-10-31" if before_application else "2026-11-01"
+    return producer.EUPensionRuleSelectionInputs(
+        member_state="IT",
+        applicable_date="2026-11-01",
+        right_acquisition_date=transition_day,
+        contingency_date=transition_day,
+        transition_classification=(
+            "acquired_before_application_date" if before_application else "post_application_contingency"
+        ),
+        pre_application_periods="none",
+    )
 
 
 def _candidate_bundle(pack_id: str) -> producer.PublicPensionEvidenceBundle:
@@ -86,7 +84,7 @@ def _candidate_bundle(pack_id: str) -> producer.PublicPensionEvidenceBundle:
     return producer.PublicPensionEvidenceBundle(
         service_snapshots=services,
         rule_pack_paths={"IT": it_path, "ES": es_path, "EU": eu_path},
-        eu_rule_selection=_selection(pack_id),
+        eu_selector_inputs=_selector_inputs(pack_id),
     )
 
 
@@ -133,7 +131,7 @@ class PensionEntitlementTimelineProducerTest(unittest.TestCase):
             producer.PublicPensionEvidenceBundle(
                 service_snapshots=snapshots,
                 rule_pack_paths=bundle.rule_pack_paths,
-                eu_rule_selection=bundle.eu_rule_selection,
+                eu_selector_inputs=bundle.eu_selector_inputs,
             )
         )
         italian = [branch for branch in branches if branch.jurisdiction == "IT"]
@@ -158,7 +156,7 @@ class PensionEntitlementTimelineProducerTest(unittest.TestCase):
             producer.PublicPensionEvidenceBundle(
                 service_snapshots=snapshots,
                 rule_pack_paths=paths,
-                eu_rule_selection=bundle.eu_rule_selection,
+                eu_selector_inputs=bundle.eu_selector_inputs,
             )
         )
         spanish = [branch for branch in branches if branch.jurisdiction == "ES"]
@@ -192,11 +190,73 @@ class PensionEntitlementTimelineProducerTest(unittest.TestCase):
                 self.assertEqual("2026-11-01" if pack_id.endswith("v11.1.1") else "2027-01-01", eu[0].valid_to_exclusive)
                 self.assertTrue(all(branch.status == "not_assessed" and branch.date is None for branch in eu))
 
+    def test_public_producer_executes_selector_and_rejects_forged_result_argument(self):
+        bundle = _candidate_bundle("eu.it-es.pension-coordination.2026.v12.1.1")
+        with patch.object(
+            producer,
+            "select_eu_pension_rule_pack",
+            wraps=producer.select_eu_pension_rule_pack,
+        ) as selector:
+            producer.map_public_service_branches(bundle)
+        selector.assert_called_once_with(
+            member_state="IT",
+            applicable_date="2026-11-01",
+            right_acquisition_date="2026-11-01",
+            contingency_date="2026-11-01",
+            transition_classification="post_application_contingency",
+            pre_application_periods="none",
+            rules_root=RULES_ROOT / "cross-border",
+        )
+        with self.assertRaisesRegex(TypeError, "unexpected keyword argument"):
+            producer.PublicPensionEvidenceBundle(
+                service_snapshots=bundle.service_snapshots,
+                rule_pack_paths=bundle.rule_pack_paths,
+                eu_rule_selection={
+                    "status": "candidate_selected",
+                    "rule_pack_id": "eu.it-es.pension-coordination.2026.v12.1.1",
+                },
+            )
+
+    def test_missing_or_conflicting_temporal_inputs_fail_closed(self):
+        valid = _selector_inputs("eu.it-es.pension-coordination.2026.v12.1.1")
+        cases = {
+            "missing": (
+                None,
+                "legal_applicability_unknown",
+                "Explicit EU temporal selector inputs are missing.",
+            ),
+            "transition conflicts with dates": (
+                producer.EUPensionRuleSelectionInputs(
+                    **{**valid.__dict__, "transition_classification": "acquired_before_application_date"}
+                ),
+                "transitional_branch_unknown",
+                "Transition classification conflicts with the supplied dates.",
+            ),
+            "invalid applicable date": (
+                producer.EUPensionRuleSelectionInputs(**{**valid.__dict__, "applicable_date": "2026-11-1"}),
+                "legal_applicability_unknown",
+                "A required legal date is invalid.",
+            ),
+        }
+        for label, (inputs, expected_code, expected_message) in cases.items():
+            with self.subTest(case=label):
+                bundle = _candidate_bundle("eu.it-es.pension-coordination.2026.v12.1.1")
+                changed = producer.PublicPensionEvidenceBundle(
+                    service_snapshots=bundle.service_snapshots,
+                    rule_pack_paths=bundle.rule_pack_paths,
+                    eu_selector_inputs=inputs,
+                )
+                eu = [branch for branch in producer.map_public_service_branches(changed) if branch.jurisdiction == "EU"]
+                self.assertTrue(all(branch.data_gaps[0]["code"] == expected_code for branch in eu))
+                self.assertTrue(all(branch.data_gaps[0]["message"] == expected_message for branch in eu))
+                self.assertTrue(all(branch.date is None and branch.amount is None for branch in eu))
+
     def test_cross_pack_and_metadata_mismatches_fail_closed(self):
         bundle = _candidate_bundle("eu.it-es.pension-coordination.2026.v12.1.1")
         bad_cases = {
-            "wrong selector digest": ("selection", {**bundle.eu_rule_selection, "digest_sha256": "0" * 64}),
-            "transition pack conflict": ("selection", {**bundle.eu_rule_selection, "transition_classification": "acquired_before_application_date"}),
+            "transition pack conflict": ("selector_inputs", producer.EUPensionRuleSelectionInputs(
+                **{**bundle.eu_selector_inputs.__dict__, "transition_classification": "acquired_before_application_date"}
+            )),
             "wrong consumer digest": ("consumer_digest", "0" * 64),
             "wrong consumer path": ("consumer_path", str(RULES_ROOT.parent / "outside.json")),
             "cross-pack consumer": ("cross_pack", "eu.it-es.pension-coordination.2026.v11.1.1"),
@@ -205,9 +265,9 @@ class PensionEntitlementTimelineProducerTest(unittest.TestCase):
         for label, (kind, value) in bad_cases.items():
             with self.subTest(case=label):
                 snapshots = {key: dict(item) if isinstance(item, dict) else item for key, item in bundle.service_snapshots.items()}
-                selection = bundle.eu_rule_selection
-                if kind == "selection":
-                    selection = value
+                selector_inputs = bundle.eu_selector_inputs
+                if kind == "selector_inputs":
+                    selector_inputs = value
                 elif kind == "consumer_digest":
                     meta = dict(snapshots["EU_PRO_RATA"]["rule_pack"])
                     meta["sha256"] = value
@@ -234,10 +294,11 @@ class PensionEntitlementTimelineProducerTest(unittest.TestCase):
                 changed = producer.PublicPensionEvidenceBundle(
                     service_snapshots=snapshots,
                     rule_pack_paths=bundle.rule_pack_paths,
-                    eu_rule_selection=selection,
+                    eu_selector_inputs=selector_inputs,
                 )
                 eu = [branch for branch in producer.map_public_service_branches(changed) if branch.jurisdiction == "EU"]
-                self.assertTrue(all(branch.data_gaps[0]["code"] == "source_version_missing" for branch in eu))
+                expected_gap = "transitional_branch_unknown" if kind == "selector_inputs" else "source_version_missing"
+                self.assertTrue(all(branch.data_gaps[0]["code"] == expected_gap for branch in eu))
                 self.assertTrue(all(branch.date is None and branch.amount is None for branch in eu))
 
     def test_canonical_path_escape_and_source_drift_fail_closed(self):
@@ -245,7 +306,7 @@ class PensionEntitlementTimelineProducerTest(unittest.TestCase):
         escaped = producer.PublicPensionEvidenceBundle(
             service_snapshots=bundle.service_snapshots,
             rule_pack_paths={**bundle.rule_pack_paths, "EU": RULES_ROOT.parent / "outside.json"},
-            eu_rule_selection=bundle.eu_rule_selection,
+            eu_selector_inputs=bundle.eu_selector_inputs,
         )
         escaped_eu = [branch for branch in producer.map_public_service_branches(escaped) if branch.jurisdiction == "EU"]
         self.assertTrue(all(branch.data_gaps[0]["code"] == "source_version_missing" for branch in escaped_eu))
@@ -255,48 +316,19 @@ class PensionEntitlementTimelineProducerTest(unittest.TestCase):
         self.assertTrue(all(branch.data_gaps[0]["code"] == "source_version_missing" for branch in drifted_eu))
 
     def test_eu_evidence_only_snapshot_does_not_create_income_stream(self):
-        coordination_path = TIMELINE_DIRECTORY / "synthetic-eu-coordination.json"
-        pro_rata_path = TIMELINE_DIRECTORY / "synthetic-eu-pro-rata.json"
-        input_path = TIMELINE_DIRECTORY / "synthetic-eu-input.json"
-        output_path = TIMELINE_DIRECTORY / "synthetic-pension-income.json"
+        coordination_path = Path("synthetic-eu-coordination.json")
+        output_path = Path("synthetic-pension-income.json")
         original_read_text = Path.read_text
         from family_office_engine.services.pension_income import compose_pension_income
         for pack_id in PACK_REGISTRY:
             with self.subTest(pack_id=pack_id):
-                pack_path = RULES_ROOT / "cross-border" / PACK_REGISTRY[pack_id]["path"]
-                before_application = pack_id.endswith("v11.1.1")
-                selection_inputs = {
-                    "member_state": "IT",
-                    "applicable_date": "2026-11-01",
-                    "right_acquisition_date": "2026-10-31" if before_application else "2026-11-01",
-                    "contingency_date": "2026-10-31" if before_application else "2026-11-01",
-                    "transition_classification": "acquired_before_application_date" if before_application else "post_application_contingency",
-                    "pre_application_periods": "none",
-                }
-                selection = select_eu_pension_rule_pack(**selection_inputs, rules_root=pack_path.parent)
-                self.assertEqual(pack_id, selection["rule_pack_id"])
-                with patch.object(Path, "write_text"), patch.object(Path, "mkdir"):
-                    coordination_snapshot = coordinate_it_es_pensions(
-                        TIMELINE_DIRECTORY / "synthetic-inps.json",
-                        TIMELINE_DIRECTORY / "synthetic-spanish.json",
-                        pack_path,
-                        coordination_path,
-                        eu_rule_selection=selection_inputs,
-                    )
-                    pro_rata_snapshot = build_it_es_eu_pension_pro_rata(
-                        input_path,
-                        pack_path,
-                        pro_rata_path,
-                        eu_rule_selection=selection_inputs,
-                    )
                 bundle = _candidate_bundle(pack_id)
                 snapshots = dict(bundle.service_snapshots)
-                snapshots["EU_COORDINATION"] = coordination_snapshot
-                snapshots["EU_PRO_RATA"] = pro_rata_snapshot
+                coordination_snapshot = snapshots["EU_COORDINATION"]
                 bundle = producer.PublicPensionEvidenceBundle(
                     service_snapshots=snapshots,
                     rule_pack_paths=bundle.rule_pack_paths,
-                    eu_rule_selection=selection,
+                    eu_selector_inputs=bundle.eu_selector_inputs,
                 )
                 timeline = producer.produce_source_bound_pension_timeline(
                     member_id="synthetic-member",

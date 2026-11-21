@@ -1,6 +1,6 @@
 # Current Next Increment
 
-> **Current operational state (2026-11-15):** w-z-e is `done` with source/version selector LIMITED GO; w-z-f is `done` with technical PASS. w-z-g is a completed audit with NO-GO. w-z-h implemented a fail-closed source-bound producer and passed 984 Engine tests, but its exact-hash technical review returned NO-GO on forgeable selector provenance (manifest `9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF`, 53/53 hashes stable). V4.14 remains blocked; the current w-z-h cycle is exhausted and awaits a new scope-specific authorization.
+> **Current operational state (2026-11-21):** w-z-e is `done` with source/version selector LIMITED GO; w-z-f is `done` with technical PASS. w-z-g is a completed audit with NO-GO. w-z-h v0.3 is `done` within its bounded producer/gap-provenance scope after technical PASS and normative LIMITED GO exact-hash. The historical v0.1/v0.2 NO-GOs remain recorded. Domestic IT/ES binding gaps and the original integrated exit criteria remain unresolved; V4.14 is still blocked. No downstream increment is opened by this scoped closure.
 > Le due pre-review Sol/xhigh sul binding v11/v0.3 restano `PENDING` storiche, non GO e non NO-GO; non sono state riaperte.
 > w-z-c ha superato review tecnica indipendente sul diff corretto. w-z-d ha rilevato blocchi di autorità, freshness, versioni Knowledge e compatibilità consumer. Il PASS tecnico non chiude V4.14.
 > Le note storiche riportate sotto non definiscono il prossimo incremento: fanno fede le sezioni canoniche `## ID e titolo` e `## Stato` e il planner.
@@ -76,7 +76,7 @@ Il controllo completo della roadmap ha rilevato b-c `blocked`, predecessore piu 
 
 ## Incremento completato - V4.14b-e - Spanish Knowledge contract reconciliation after b-d NO-GO
 
-`in_progress`
+`done`
 
 ## Incremento completato - V4.14b-f - Spanish Knowledge temporal and source-provenance reconciliation
 
@@ -1516,13 +1516,13 @@ Il validator/builder deterministico `pension_entitlement_timeline.py` vincola le
 
 **Stato:** `done` nel solo perimetro evidence-only public consumer compatibility. Final technical review PASS sul diff exact-hash; reviewer confirmed all previous fail-closed boundaries and `not_assessed` output status. Hash: pro-rata `166cc5aa91e7d2a5d6fea8cee6f8db0be127419dab98d1ace42f35f8dc30f33a`, coordination `bd7fa6234cad20d695db6682ec575660524ce62a8f573396fa356262ca6b5484`, regression `a6ddb725d3eb86d07064487600bfbc3477d5dbfd6f38147fa9d92d305c0a33de`. Focused suite 106 passed +267 subtests; complete Engine 975 passed +480 subtests, 0 failure/error/skip. No CLI/default/latest activation or new legal output. V4.14 remains `blocked`.
 
-## ID e titolo
+## ID e titolo storico
 
 V4.14w-z-h - Source-bound timeline producer integration
 
-## Stato
+## Stato storico
 
-`blocked`
+`done`
 
 **Tipo:** `functional`
 **Dipendenza:** V4.14w-z-g is `done` as an audit with exact-hash NO-GO; w-z-h is the single authorized bounded remediation.
@@ -1533,16 +1533,21 @@ Can the deterministic producer connect source-bound IT/ES/EU evidence to the fiv
 
 ### Piano e task envelope
 
-- **Obiettivo:** implement one public source-bound producer that links existing source-gate and country/EU service outputs to timeline v2 without deriving event dates or amounts.
-- **Scope:** architecture review; all 15 event/jurisdiction paths; exact candidate ID, digest and period; half-open `valid_to` normalization; evidence-role separation; source drift/conflict/path/digest failure; downstream null propagation.
+- **Obiettivo:** correct the selector-provenance finding by binding explicit temporal inputs and executing the approved selector inside the public producer, then preserve the original fail-closed source-bound timeline behavior.
+- **Scope:** all 15 event/jurisdiction paths; exact candidate ID, digest and period derived from the internal selector call; half-open `valid_to` normalization; evidence-role separation; source drift/conflict/path/digest failure; downstream null propagation.
 - **Fuori scope:** Knowledge/Rules/schema changes, new legal interpretation, personal facts, individual legal outcomes, amounts, payments, personal workspace access and CLI activation.
 - **Test:** reachable positive synthetic setup before each adverse mutation; focused producer/source-gate/timeline/consumer/pension-income tests; full Engine suite with 0 failures/errors/skips; roadmap audit, planner schema, guardrails and diff-check.
-- **Review:** one independent technical review and one exact-new-version normative review, each at most 300 seconds; no retries on the same hash.
+- **Review:** one independent technical review and one exact-new-version normative review after technical PASS, each at most 300 seconds; no retries on the same hash.
 - **Stop condition:** semantic/rule/schema change required, unsupported result propagation, failed/skipped tests, or NO-GO/PENDING; keep V4.14 blocked and end the cycle.
 - **Architecture:** conditional GO for a standalone producer and internal 15-branch assessment aggregated to five v2 events. Preserve selector/service/builder ownership and schema. Current IT pack-version mismatch, absent ES loaded-time digest, jurisdiction aggregation and global pension-income path remain explicit limits.
-- **Esito tecnico:** NO-GO exact-hash; 53/53 files match at start/end. The producer trusts a caller-constructed selector mapping without proving selector execution or binding temporal inputs. Baseline tests repeated that shape and missed the boundary.
-- **Verifiche:** 984 Engine tests pass, 0 failures/errors/skips; focused producer 9, source gate 8, v2 contract 24, builder 16, consumer compatibility 9, income 4; governance green. These do not cure the provenance finding.
-- **Prossima azione:** await fresh authorization for a bounded selector-provenance correction and one new-version technical gate. The normative gate was not run because the technical gate returned NO-GO. No same-hash retry.
+- **Esito precedente:** technical NO-GO exact-hash; 53/53 files matched at start/end. The producer trusted a caller-constructed selector mapping without proving selector execution or binding temporal inputs. Baseline tests repeated that shape and missed the boundary.
+- **Autorizzazione precedente (2026-11-21):** ciclo v0.2 fermato sul NO-GO tecnico; finding e hash restano storici e immutabili.
+- **Candidato v0.2 esaminato:** manifest [`v4.14w-z-h-producer-review-manifest-v0.2.md`](roadmap/v4.14w-z-h-producer-review-manifest-v0.2.md), SHA-256 `8CA7E73B5A34B7EB55C3B4A4FCEA3A73B065B552EBBB26DA7BEA25E3DEE7D945`; technical NO-GO exact-hash, 15/15 hash iniziali/finali verificati. La provenienza del selector è corretta; resta il finding che i gap del selector per input mancanti/malformati/contraddittori vengono sovrascritti con `source_version_missing`. Il reviewer ha eseguito 11 test mirati; suite Engine 986/0/0/0.
+- **Autorizzazione corrente (2026-11-21):** l'utente autorizza un ciclo distinto per il solo finding di propagazione gap. Nessuna modifica normativa, a Rules, Knowledge o schema; un passaggio implementativo, test mirati e suite completa, una review tecnica exact-new-hash e solo dopo PASS una review normativa sullo stesso hash, una finestra da 300s ciascuna. Stop su failure/skip, hash drift, NO-GO/PENDING o ampliamento scope; V4.14 resta blocked.
+- **Candidato v0.3 congelato:** manifest [`v4.14w-z-h-producer-review-manifest-v0.3.md`](roadmap/v4.14w-z-h-producer-review-manifest-v0.3.md), SHA-256 `0705C886811EA812945F894397E61764D2F40145373A541B094A280675A6FA39`; 15/15 hash verificati. Producer 11/11 test mirati; Engine 986/0/0/0; audit roadmap, schema planner, guardrails, model routing e diff-check verdi.
+- **Review tecnica:** PASS exact-hash; reviewer ha verificato i 15 hash iniziali/finali e confermato la distinzione tra gap temporali e mismatch sorgente. Nessun finding bloccante.
+- **Review normativa:** LIMITED GO exact-hash sul solo perimetro di propagazione; 15/15 hash iniziali/finali, nessuna conclusione legale nuova.
+- **Stato finale:** `done` solo per w-z-h. Tutti gli eventi restano `not_assessed`, date/payer/importi null, data_gaps bloccanti e revisione umana richiesta. V4.14 rimane `blocked`; nessun downstream è stato selezionato.
 
 ## ID e titolo legacy
 
@@ -1566,10 +1571,10 @@ V4.15b — Source-bound RITA fund-stream intake and validation.
 
 `done`
 
-## ID e titolo
+## ID e titolo storico
 V4.14w-z-b - EU pension consumer compatibility with Rules v11 and Annex v0.3
 
-## Stato
+## Stato storico
 `done`
 
 **Esito w-z-b:** binding tecnico completato con loader exact-hash per Rules v11/Article 57 v0.29 e Annex VIII v0.3, finestra `[2019-08-01, 2026-11-15)`, output pubblico evidence-only e fail-closed. Test mirati 78/0/0/0 + 257 subtest; suite Engine 934/0/0/0 + 463 subtest; review tecnica indipendente PASS. Knowledge/Rules approvati invariati; nessun GO normativo o timeline individuale. V4.14 resta blocked. Il successivo lavoro documentato è w-z-c, non implementato o selezionato in questa sessione.
@@ -1734,3 +1739,152 @@ The exact candidate is frozen in [`v4.14w-z-e-review-manifest.md`](roadmap/v4.14
 ### w-z-h candidate verification checkpoint
 
 Manifest [`v4.14w-z-h-producer-review-manifest-v0.1.md`](roadmap/v4.14w-z-h-producer-review-manifest-v0.1.md), SHA-256 `9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF`, 53 files; 53/53 hashes match. Focused producer/source-gate/timeline/consumer/income tests passed; full Engine suite 984 tests, zero failures/errors/skips. Technical review is active on this exact candidate. Domestic IT/ES pack bindings remain fail-closed; V4.14 stays blocked.
+
+
+## ID e titolo storico
+V4.14w-z-i ? Italian v3 source and runtime readiness gate
+
+## Stato storico
+in_progress (increment 1 of up to 3 user-authorized increments); review-only prerequisite; no runtime change authorized before verdict.
+
+### Domanda familiare
+Possiamo collegare in modo verificabile il percorso di screening pensionistico italiano al timeline source-bound senza promuovere un rule pack non ancora approvato o colmare soglie non supportate?
+
+### Piano e task envelope
+- Audit roadmap gi? eseguito e PASS; V4.14 resta il predecessore pi? antico incompleto.
+- Sottoporre a review normativa indipendente exact-hash il pack it.inps-old-age-eligibility.2026-2028.v3, la matrice Knowledge v0.6, i ruoli/periodi delle fonti ufficiali e il confine con il consumer IT v2.
+- Mantenere esplicita la lacuna della soglia dell'assegno sociale 2027?2028; nessun risultato individuale o inferenza temporale.
+- Nessuna modifica runtime prima di un verdetto; dopo GO, rieseguire audit di sequenza e valutare un micro-incremento tecnico distinto.
+
+### Gate e verifica
+- Manifest esatto: roadmap/v4.14w-z-i-italian-source-runtime-review-manifest-v0.1.md.
+- Review-only: test runtime non applicabili prima del verdetto. Un eventuale incremento tecnico successivo richieder? mirati Italian/producer e suite Engine completa 0/0/0.
+- NO-GO/PENDING o hash drift arrestano il ciclo; V4.14 resta blocked. Nessun discendente selezionato.
+
+
+## V4.14w-z-i ? esito review (2026-11-21)
+**Stato:** done come audit exact-hash NO-GO; manifest SHA-256 E4260DA560297F315BFA17A9FC151A81B88412187DAE05855D6666A68048D596; 7/7 hash iniziali/finali coincidenti. Il reviewer ha confermato i requisiti 2026?2028 generali e la soglia sociale 2026, ma ha rilevato eccezioni 2027?2028 dei commi 186?190 non rappresentate in Rules v3, provenance incompleta per la pubblicazione Legge 199/2025 e record fonte senza provision_periods. Il loader v2 non pu? consumare v3 con un cambio ID. Nessun file ? stato modificato dal reviewer; V4.14 resta blocked.
+
+## ID e titolo storico
+V4.14w-z-j ? Italian adjustment-exception source contract in Knowledge
+
+## Stato storico
+in_progress (incremento 2 di massimo 3 autorizzati); candidato Knowledge-only in attesa di review normativa exact-hash. Rules e Engine invariati.
+
+### Domanda familiare
+Quali condizioni source-bound del biennio 2027?2028 possono cambiare il requisito anagrafico applicabile, e quali dati devono restare sconosciuti finch? non sono documentati?
+
+### Piano
+- Creare una nota Knowledge immutabile sulle fonti ufficiali e sui commi 185?190 della Legge 199/2025.
+- Distinguere legislazione primaria, guida INPS, pubblicazione, applicabilit? e consultazione.
+- Esplicitare gap per classificazione gravosa/usurante, APE Sociale, art. 24(7), soglia assegno sociale 2027?2028 e prova individuale.
+- Sottoporre solo il bundle Knowledge-only exact-hash a review normativa indipendente. Nessun Rules/Engine change senza GO e nuovo piano.
+
+### Verifica
+Manifest: family-office-engine/docs/roadmap/v4.14w-z-j-italian-exception-knowledge-review-manifest-v0.1.md; SHA-256 4b111274098862197b99b17afe48dde0b0dec76c825175621e1c3091de6f3813. Review-only; nessun test runtime applicabile prima di un eventuale incremento Rules/Engine. Audit roadmap, schema planner e guardrail richiesti a chiusura.
+
+## V4.14w-z-j ? esito review (2026-11-21)
+**Stato:** done, LIMITED GO solo per la nota Knowledge v0.1. Manifest SHA-256 4B111274098862197B99B17AFE48DDE0B0DEC76C825175621E1C3091DE6F3813; 5/5 hash iniziali/finali. La nota distingue legge primaria e guidance INPS, descrive l'incremento 2027?2028 e le esclusioni 186?190, e lascia art.24(7), soglia 2027?2028, prova individuale e timeline come gap. Nessun GO a Rules/Engine o V4.14.
+
+## ID e titolo storico
+V4.14w-z-k ? Source-attested Italian adjustment profile guard
+
+## Stato storico
+in_progress (incremento 3 di massimo 3 autorizzati); implementazione tecnica fail-closed.
+
+### Domanda familiare
+Possiamo evitare che uno screening pensionistico usi requisiti 2027?2028 solo perch? un flag booleano dichiara assente un profilo di eccezione?
+
+### Piano
+- Per candidati 2027?2028, richiedere un envelope di evidenza verificata, con classificazione esterna del profilo, data di riferimento, copertura che includa la data candidata e source refs.
+- Se evidenza mancante, contraddittoria o fuori copertura, restituire not_assessed + data_gaps; non calcolare le eccezioni.
+- Conservare pack Rules v2 e tutti i calcoli esistenti; nessuna attivazione del pack v3.
+- Aggiungere regressioni sintetiche pubbliche, eseguire mirati e suite Engine completa, poi review tecnica exact-hash.
+
+### Verifica
+Test mirati Italian old-age eligibility; suite Engine completa a 0 failure/errori/skipped; roadmap audit, schema planner, execution guardrails, routing e diff-check.
+
+### V4.14w-z-k ? verifica implementazione e bundle
+Il servizio richiede ora per i candidati 2027?2028 un envelope esterno verificato con classificazione no_qualifying_exception, as_of_date non futura, copertura della data candidata e source refs; il solo flag booleano produce not_assessed + adjustment_profile_evidence_missing_or_unverified. Le ricerche mensili passano la propria data as-of al controllo. Nessuna eccezione ? calcolata e Rules v2 resta invariato. La nota Knowledge ? stata aggiunta al citation catalog con la fonte primaria GU e la guidance INPS; la regressione corpus ora attende 34 documenti. Mirati: Italian 33/33, citation 7/7; suite Engine: 987 pass, 0 failure/error/skip. Manifest tecnico family-office-engine/docs/roadmap/v4.14w-z-k-italian-adjustment-profile-review-manifest-v0.1.md, SHA-256 1537b4837a8775257f5737b602f4fbb62057c793caca87dabbab097db8ddedf8 (6 file). Review tecnica exact-hash e governance di chiusura restano pendenti.
+
+### V4.14w-z-k correzione bounded v0.2 (2026-11-21)
+Il NO-GO tecnico v0.1 ha identificato una copertura insufficiente nei due consumer mensili: il profilo esterno era verificato solo alla data `search_as_of`, pur potendo essere riportato un primo mese osservato precedente. Una correzione circoscritta impone ora copertura dell'intera storia osservata dal 2026-01-01 e aggiunge regressioni su entrambi i consumer, per envelope valido solo all'ultimo giorno e per copertura che inizia dopo il primo mese osservato. Mirati: Italian 34/34 e citation index 7/7; suite Engine 988/0/0/0. Manifest nuovo v0.2, SHA-256 `a4ccee798e2cf66e4bad6a249699836b71d7a87194846ca0c569d60be1d32284`, 6 file; review tecnica exact-hash PASS. Stato w-z-k `done` nel solo scope tecnico; V4.14 resta `blocked`.
+
+**Esito finale w-z-k v0.2:** review tecnica exact-hash PASS, 6/6 hash iniziali/finali; entrambe le regressioni mensili confermate. Roadmap audit, schema planner, execution guardrails, model-routing validator e `git diff --check` passano. Incremento chiuso `done` solo nel proprio scope tecnico; autorizzazione utente per tre incrementi esaurita, nessun discendente selezionato, V4.14 ancora `blocked`.
+
+## V4.14w-z-l - Italian exception source-to-rule contract (incremento 1/3)
+
+**Stato:** `in_progress`; candidato Knowledge + Rules non attivo. V4.14 resta `blocked`.
+
+La candidate v0.2/v4 e il manifest exact-hash sono stati preparati; tutti i nove hash corrispondono. Il test del contratto Rules v4 passa (5 test). I test mirati combinati passano (12) solo con esecuzione elevata; la suite completa in tale contesto esegue 993 test ma fallisce `test_output_cannot_escape_workspace`, poich? il confine workspace cambia con i permessi elevati. In esecuzione sandbox i test citation-index non riescono a creare directory temporanee per ACL Windows. Inoltre `roadmap_audit` riporta w-z-h come incremento corrente, in contrasto con la selezione w-z-l.
+
+Per la stop rule non ? stata inviata la review normativa e non ? stato selezionato alcun discendente. Riprendere solo dopo aver risolto l'ambiente dei test e riconciliato il selettore della roadmap; nessuna attivazione Engine o chiusura V4.14.
+
+## ID e titolo storico
+V4.14w-z-l - Italian exception source-to-rule contract
+
+## Stato storico
+`in_progress`
+
+
+## V4.14w-z-m - Distinguere i requisiti amministrativi comma 187 (incremento 2/3)
+
+**Stato:** `in_progress`; Knowledge v0.3 + Rules v5 candidati, non attivi. V4.14 resta `blocked`.
+
+### Domanda familiare
+Quale requisito anagrafico 2027-2028 e' descritto per le diverse condizioni esterne del comma 187, e quali casi restano da verificare dall'INPS?
+
+### Piano e limiti
+- Registrare la distinzione amministrativa della Circolare INPS 28/2026: gravosi sette-su-dieci (66 anni e 7 mesi), gravosi sei-su-sette (67 anni), faticosi/pesanti secondo i periodi INPS (66 anni e 7 mesi).
+- Trasferire le condizioni a Knowledge v0.3 e Rules candidate v5, con fonte INPS esplicita e fonte primaria Legge 199/2025; non inferire condizioni personali o determinazioni.
+- Rimuovere il valore base unico dal blocco eccezioni e modellare le tre branche in modo separato; soglia e rami non supportati restano gap. Preservare v2/v3/v4.
+- Aggiornare citation index e test sintetici; freeze manifest nuovo e review normativa exact-hash prima di ogni consumer increment.
+
+### Gate
+La review w-z-l ha attestato 9/9 hash e restituito NO-GO per la soglia comune errata. La fonte INPS pubblica requisiti differenziati per il 2027-2028; nessun runtime change. Suite corrente: 12 mirati e 993 complete passati.
+
+## ID e titolo storico
+V4.14w-z-m - Distinguere i requisiti amministrativi comma 187
+
+## Stato storico
+`in_progress`
+
+
+## V4.14w-z-n - Correggere le alternative del D.Lgs. 67/2011 (incremento 3/3)
+
+**Stato:** `in_progress`; Knowledge v0.4 e Rules v6 candidati, non attivi. V4.14 resta `blocked`.
+
+### Domanda familiare
+Per i lavori faticosi e pesanti, quali periodi alternativi considera la fonte vigente e come restano da provare senza classificazione automatica?
+
+### Piano e limiti
+- Registrare la modifica primaria della legge 232/2016 art.1(206)(b) al D.Lgs. 67/2011 art.1(2): 7 anni negli ultimi 10 oppure almeno meta' della vita lavorativa complessiva; il comma 3 esclude periodi totalmente figurativi dal computo.
+- Creare Knowledge v0.4 e Rules candidate v6 con ramo `any_of`, fonte primaria della modifica e guidance INPS correttamente limitata al periodo 2027-2028.
+- Preservare candidati v2-v5 e service v2-only; nessun calcolo di anzianita', classificazione personale, esito o attivazione.
+- Testare branche, fonti/periodi, metadati del catalogo, gap e rifiuto runtime; congelare manifest e chiedere review normativa exact-hash.
+
+### Gate
+Review w-z-m: NO-GO exact-hash (12/12); la congiunzione dei due periodi era pi? restrittiva della fonte e mancava la legge primaria di modifica. Suite prima della correzione: mirati 12, Engine 998, tutti verdi. Nessun file ? stato modificato dal reviewer.
+
+## ID e titolo storico
+V4.14w-z-n - Correggere le alternative del D.Lgs. 67/2011
+
+## Stato storico
+`in_progress`
+
+
+## V4.14w-z-n - Correggere le alternative del D.Lgs. 67/2011 (incremento 3/3 autorizzato)
+
+**Stato:** `blocked`; il candidato Knowledge v0.4 / Rules v6 non e' attivabile. V4.14 resta `blocked`.
+
+Review normativa exact-hash NO-GO sul manifest `v4.14w-z-n-heavy-work-alternative-periods-review-manifest-v0.1.md`, hash `C6269E2845E09FD45AE018E5C15BF0A9CCF2FA10D05757AE4DFF89EA32259639`, 14/14 hash iniziali e finali. Il reviewer conferma la fonte primaria legge 232/2016, i periodi alternativi in Rules v6, la regola di computo del comma 3 e le et? amministrative INPS. Finding: Knowledge v0.4 ha una riga tabellare ancora cumulativa che contraddice la sezione corretta; il test v6 non asserisce la formulazione della tabella e non rileva il conflitto. Nessun file ? stato modificato dal reviewer.
+
+Il limite dei tre incrementi autorizzati ? raggiunto. Non si seleziona una nuova versione n? si attiva Engine senza una nuova autorizzazione. Se ripreso, correggere la tabella Knowledge e aggiungere una regressione che rigetti la congiunzione, quindi generare nuovi hash e richiedere una review indipendente.
+
+## ID e titolo
+V4.14w-z-n - Correggere le alternative del D.Lgs. 67/2011
+
+## Stato
+`blocked`
+
+Nota al gate: nel working tree e' presente un manifest w-z-n v0.2 non revisionato, con hash distinti e suite Linux non verde; resta draft non attivo e non modifica il NO-GO v0.1 o lo stato `blocked`.

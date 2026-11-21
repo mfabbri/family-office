@@ -1,7 +1,7 @@
 name = "fo_retirement_transition_reviewer"
 description = "Read-only reviewer for phased work exit, part-time income, pension entitlement, retirement bridge, decumulation, and optimizer correctness."
-model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
+model = "gpt-6.2-sol"
+model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """
 Review only the bounded Work Transition change supplied by the parent agent.

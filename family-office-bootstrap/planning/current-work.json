@@ -2,88 +2,97 @@
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
   "status": "blocked",
-  "selected_at": "2026-11-15T12:19:22Z",
-  "updated_at": "2026-11-15T21:18:12Z",
+  "selected_at": "2026-11-21T12:50:34Z",
+  "updated_at": "2026-11-21T17:10:00Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-index.md",
-      "section": "Sequence and predecessor rule",
-      "reason": "w-z-e and w-z-f are now done; w-z-g is the next integrated parent exit audit."
+      "section": "Predecessor rule",
+      "reason": "V4B is the sole active roadmap; all prior w-z items through k are documented closed, but parent V4.14 remains the oldest incomplete gate."
     },
     {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.14w-z-g",
-      "reason": "The current exact source-to-event bundle must re-evaluate the old w-z-d findings."
+      "section": "V4.14w-z-i NO-GO, w-z-j LIMITED GO, w-z-k technical PASS",
+      "reason": "The Italian source/rule contract remains the next actionable blocker: v3 omits statutory 2027-2028 exception terms and the runtime is v2-only. The reviewed Knowledge v0.1 is source input, not executable approval."
     },
     {
-      "path": "family-office-engine/docs/roadmap/v4.14-exit-contract.md",
-      "section": "Integrated exit requirements",
-      "reason": "A scoped GO alone does not close V4.14; all original exit criteria must pass."
+      "path": "family-office-bootstrap/docs/playbooks/07-normative-change.md",
+      "section": "Authoritative source to Knowledge to versioned Rules to tests to Engine",
+      "reason": "This increment introduces a versioned statutory rule contract and therefore requires independent exact-hash normative review before any consumer activation."
+    },
+    {
+      "path": "family-office-bootstrap/docs/playbooks/12-dual-gate-and-convergence.md",
+      "section": "T4 new rule workflow and bounded NO-GO correction",
+      "reason": "Keep ambiguous art.24(7), early-retirement paths and individual proof as explicit gaps; no output becomes positive in this candidate-only increment."
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "section": "V4.14w-z-l exact-hash NO-GO; w-z-m bounded correction",
+      "reason": "Independent normative review found that a single age baseline collapses different 2027-2028 administrative requirements; correct with three source-bound evidence branches and do not activate the consumer."
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "section": "V4.14w-z-m exact-hash NO-GO; w-z-n correction",
+      "reason": "Reviewer found the heavy/arduous-work periods must be alternatives under D.Lgs. 67/2011 art.1(2), as amended by Law 232/2016 art.1(206)(b); candidate also needs corrected Circular 28 validity metadata."
     }
   ],
   "increment": {
-    "id": "V4.14w-z-h-SOURCE-BOUND-TIMELINE-PRODUCER-INTEGRATION",
-    "title": "Source-bound timeline producer integration",
-    "objective": "Connect the reviewed source gate and deterministic IT/ES/EU services to the public timeline-v2 producer without deriving unsupported individual outcomes.",
+    "id": "V4.14w-z-n",
+    "title": "Correct D.Lgs. 67/2011 alternative periods",
+    "objective": "Create Knowledge v0.4 and Rules v6 with the primary amendment chain and explicit any-of heavy-work period alternatives, plus accurate INPS Circular 28/2026 metadata, without Engine activation.",
     "scope": [
-      "Read-only architecture recommendation for producer ownership/API and evidence contract.",
-      "Implement one deterministic producer integrating existing source-gate and country/EU service outputs into timeline v2.",
-      "Test all 15 event/jurisdiction paths, exact pack identity/digest/period, half-open boundaries, evidence-role separation, fail-closed mutations and downstream null propagation."
+      "Add Law 232/2016 art.1(206)(b) original publication as a primary source for the current D.Lgs. 67/2011 art.1(2) alternative periods.",
+      "Change heavy/arduous evidence period from a conjunction to any_of: seven-of-ten OR at least half of total working life; preserve comma 3 exclusion of fully figurative periods as external evidence rule.",
+      "Correct INPS Circular 28/2026 title and valid/coverage period metadata to 2027-01-01 through 2028-12-31.",
+      "Create Knowledge v0.4, Rules candidate v6, citation index updates, synthetic tests and a new exact-hash manifest. Preserve v2-v5 and v0.1-v0.3."
     ],
     "out_of_scope": [
-      "No Knowledge, Rules or timeline-v2 schema changes; no new legal interpretation.",
-      "No personal facts, eligibility/recognition/effective/payment conclusion, amount, CLI activation or personal workspace access."
+      "No Engine/runtime activation, personal classification, contribution computation, legal entitlement, age result, amount, timeline, payer or payment.",
+      "No changes to parent V4.14 status."
     ],
     "candidate_files": [
-      "family-office-engine/docs/roadmap/v4.14w-z-h-producer-review-manifest-v0.1.md",
-      "53-file exact-hash source/Knowledge/Rules/schema/service/test bundle listed in the frozen manifest",
-      "w-z-g NO-GO source-to-event findings and original V4.14 exit contract"
+      "family-office-knowledge/pensions/italian-pension-adjustment-2027-2028-exceptions-v0.4.md",
+      "family-office-rules/italy/2026/inps-old-age-eligibility-v6.json",
+      "family-office-engine/tests/unit/test_italian_old_age_rule_pack_v6.py",
+      "family-office-knowledge/sources/citation-catalog.json",
+      "family-office-engine/tests/unit/test_citation_index.py",
+      "family-office-rules/italy/2026/inps-old-age-eligibility-v5.json",
+      "family-office-engine/tests/unit/test_italian_old_age_rule_pack_v5.py",
+      "family-office-knowledge/pensions/italian-pension-adjustment-2027-2028-exceptions-v0.3.md",
+      "family-office-rules/italy/2026/inps-old-age-eligibility-v4.json",
+      "family-office-engine/tests/unit/test_italian_old_age_rule_pack_v4.py",
+      "family-office-rules/italy/2026/inps-old-age-eligibility-v3.json",
+      "family-office-rules/italy/2026/inps-old-age-eligibility.json",
+      "family-office-engine/src/family_office_engine/services/italian_old_age_eligibility.py",
+      "family-office-engine/docs/roadmap/v4.14w-z-n-heavy-work-alternative-periods-review-manifest-v0.1.md",
+      "family-office-engine/docs/roadmap/v4.14w-z-n-heavy-work-alternative-periods-review-manifest-v0.2.md"
     ],
-    "stop_condition": "Any need for legal/rule/schema change, unsupported result propagation, inability to exercise public paths, hash drift, failed/skipped tests, or technical/normative NO-GO/PENDING ends this single remediation cycle; keep V4.14 blocked."
+    "stop_condition": "Any combined/omitted alternative, incorrect source period, hash drift, failed/skipped test or normative NO-GO/PENDING stops w-z-n and descendants; no runtime activation."
   },
   "verification": {
     "tests": [
-      "Focused producer 9, source gate 8, timeline v2 contract 24, timeline builder 16, w-z-f consumer compatibility 9, pension-income 4; all pass.",
-      "Complete Engine unit suite: 984 tests, exit 0, 0 failures, 0 errors, 0 skipped.",
-      "Frozen w-z-h manifest v0.1: 53/53 file hashes verified; SHA-256 9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF. Roadmap audit, planner schema, execution guardrails, UTF-8 scan and diff-check pass."
+      "Focused Rules v6 + citation index: 12 passed, 0 failures/errors/skips.",
+      "Complete Engine unit suite: 1003 passed, 0 failures/errors/skips with TEMP/TMP outside Engine workspace.",
+      "Roadmap audit: OK, current=V4.14w-z-n, functional_since_audit=3, audit_due=false.",
+      "Execution guardrails and model-routing validator: OK.",
+      "git diff --check: OK.",
+      "Manifest SHA-256 C6269E2845E09FD45AE018E5C15BF0A9CCF2FA10D05757AE4DFF89EA32259639; all 14 listed file hashes match locally.",
+      "w-z-n normative exact-hash review: NO-GO, 14/14 initial/final hashes. One unresolved internal Knowledge v0.4 conflict remains in the heavy-work table; 5/5 v6 tests do not assert that cell.",
+      "A separate unreviewed proposal manifest v0.2 is present at commit preparation (SHA-256 16073C82BC20F0596E81B65BEDB9CDA65DC754807ED7C7F3ED2245674D4F65C3); its candidate hash set differs from reviewed v0.1. Manifest reports 6 Rules v6 + 7 citation-index tests passing, but full Linux suite has 4 environment failures; no normative review or GO. It remains a non-active draft and does not reopen w-z-n."
     ],
     "documentation_touchpoints": [
-      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
       "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
       "family-office-engine/docs/decision-log.md",
-      "family-office-bootstrap/planning/current-work.json"
+      "family-office-bootstrap/planning/current-work.json",
+      "family-office-knowledge/sources/citation-catalog.json"
     ],
     "result": "failed",
-    "notes": "Technical review returned NO-GO on frozen manifest 9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF after about 102 seconds. Reviewer verified 53/53 initial/final hashes and made no edits. High finding: producer accepts caller-constructed candidate_selected mappings without proving exact selector execution or binding temporal inputs; test fixtures fabricated this same shape. No normative review was run because the authorized cycle stops on NO-GO. 984 Engine tests pass and all outputs remain null+gaps, but provenance is unproven. w-z-h and V4.14 remain blocked; no same-hash retry and no further code change without a new scope-specific authorization.",
-    "task_envelope": {
-      "mode": "feature-slice",
-      "risk_domain": "pension",
-      "repositories": [
-        "family-office-engine"
-      ],
-      "read_set": [
-        "source gate and selector",
-        "timeline-v2 schema/builder",
-        "IT/ES/EU public services and their tests",
-        "w-z-g NO-GO finding and V4.14 exit contract"
-      ],
-      "write_set": [
-        "one deterministic public producer service or minimal existing-service integration",
-        "synthetic public-path tests",
-        "roadmap/current-next/decision log/planner"
-      ],
-      "test_command": "From family-office-engine: .venv/Scripts/python.exe -m unittest discover -s tests/unit -p \"test_*.py\"; focused tests first; full suite at the gate.",
-      "stop_conditions": [
-        "No legal/Rules/schema modifications or individual outcome inference.",
-        "All unsupported branches stay not_assessed/null with blocking data_gaps.",
-        "Any failed/skipped test or NO-GO/PENDING stops the cycle; no retry on the same hash."
-      ]
-    }
+    "notes": "The three-increment authorization is exhausted. w-z-n remains blocked despite full technical tests because Knowledge v0.4 contains a table row requiring both heavy-work periods cumulatively, contradicting the correctly modeled any_of branches in Rules v6 and the explanatory Knowledge section. Reviewer verified 14/14 hashes and made no edits. No further candidate correction or downstream work is authorized; no Engine activation. An unreviewed v0.2 correction proposal was found in the working tree during commit preparation. It is recorded as non-active/unapproved; the reviewed v0.1 NO-GO and blocked roadmap state remain authoritative."
   },
   "blockers": [
-    "EU selector result provenance is forgeable: the producer does not verify selector execution or bind/validate temporal inputs and result.",
-    "Current domestic IT/ES service source-version bindings remain unsupported and fail closed.",
-    "Timeline v2 only persists five aggregate events, and pension_income retains its separate domestic estimate path."
+    "V4.14 integrated parent gate remains blocked.",
+    "w-z-n normative NO-GO: Knowledge v0.4 table contradicts its alternative-period explanation and Rules v6; new correction requires another increment beyond the current authorization."
   ],
   "session_notes": [
     "User requested durable playbook updates from the long session; four workflow documents now include the corrections.",
@@ -150,63 +159,65 @@
     "2026-11-15: w-z-g exact-hash normative review returned NO-GO on manifest 6CA692F535154FBB2BBA3C7C341D42529A983C9A1784462CD1AF2C5306FD7F78; 48/48 hashes initial/final, 203.293s, reviewer made no edits. Resolved: historic source authority/currentness/Knowledge-Rules alignment and EU consumer compatibility. Unresolved oldest blocker: no integrated deterministic producer from source gate and IT/ES/EU services into timeline v2; 0/15 event dates supported, safely null+gaps. Also require explicit half-open normalization regression. The current w-z-g review cycle is exhausted. Proposed one bounded w-z-h remediation and exact-new-version gate is concrete in current-next; awaiting fresh scope-specific authorization before code edits.",
     "2026-11-15: user explicitly authorized w-z-h after w-z-g NO-GO with max three delegations and one 300-second window each for the technical and new-version normative gates. Started the single bounded remediation; archived prior w-z-g 48/48 hash verification and reviewer NO-GO in roadmap/decision log. Architecture review is delegation 1/3; no implementation edits made yet.",
     "2026-11-15: froze w-z-h candidate manifest v0.1 at SHA256 9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF; 53/53 entries match. Focused producer 9, source gate 8, timeline contract 24, timeline builder 16, w-z-f compatibility 9, pension income 4; full Engine 984, all zero failures/errors/skips. Roadmap/schema/guardrails/diff-check pass. Technical reviewer delegated (2/3 total events); normative review follows only on technical PASS and unchanged hashes.",
-    "2026-11-15: w-z-h exact-hash technical review NO-GO on manifest 9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF; 53/53 initial/final hashes, about 102 seconds, no reviewer edits. Finding: selector provenance is caller-forgeable, and baseline tests fabricate the same shape. 984 tests pass but do not prove selector-to-producer provenance. The user-authorized cycle stop condition is reached; no normative review and no further correction. w-z-h and V4.14 blocked pending a fresh scope-specific authorization."
+    "2026-11-15: w-z-h exact-hash technical review NO-GO on manifest 9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF; 53/53 initial/final hashes, about 102 seconds, no reviewer edits. Finding: selector provenance is caller-forgeable, and baseline tests fabricate the same shape. 984 tests pass but do not prove selector-to-producer provenance. The user-authorized cycle stop condition is reached; no normative review and no further correction. w-z-h and V4.14 blocked pending a fresh scope-specific authorization.",
+    "2026-11-21: user authorized a separate bounded w-z-h cycle for the v0.2 technical NO-GO. Scope is limited to preserving selector legal_applicability_unknown/transitional_branch_unknown codes/messages and distinguishing them from source_version_missing. One implementation pass and new-hash technical review; normative review only after PASS. Prior v0.2 NO-GO remains immutable.",
+    "2026-11-21: w-z-h v0.3 cycle completed within scope after technical exact-hash PASS and normative exact-hash LIMITED GO; producer 11 focused and Engine 986/0/0/0; 15/15 manifest hashes match. V4.14 remains blocked, no downstream increment selected.",
+    "2026-11-21: user authorized up to three increments in roadmap order. After fresh roadmap audit PASS, selected w-z-i as increment 1: source-bound exact-hash review of Italian v3, still explicitly pending normative review and not loaded by the existing IT service. No runtime changes until verdict.",
+    "2026-11-21: w-z-i exact-hash review returned NO-GO (7/7 hashes stable). User authorized up to three increments; selected w-z-j as increment 2, Knowledge-only source contract for Law 199/2025 art.1(185?190); Rules/Engine remain unchanged pending exact-hash normative review.",
+    "2026-11-21: w-z-j received normative LIMITED GO only for Knowledge note v0.1 (5/5 hashes). Selected w-z-k, increment 3/3: fail-closed source-attested profile evidence gate for existing IT 2027?2028 age screening; no Rules v3 activation or exemption calculation.",
+    "2026-11-21: w-z-k technical exact-hash review v0.1 returned NO-GO; manifest SHA-256 1537b4837a8775257f5737b602f4fbb62057c793caca87dabbab097db8ddedf8, 6/6 hashes stable at initial/final enumeration. Finding: month-search consumers accepted profile evidence covering only the final as-of date while reporting an earlier observed eligible month. One bounded corrective pass is authorized: require coverage of full observed history and add regressions for both monthly consumers; no second correction cycle.",
+    "2026-11-21: w-z-k corrective candidate v0.2 freezes the full-history adjustment-profile guard; focused Italian 34, citation index 7, complete Engine 988/0/0/0. Manifest SHA-256 a4ccee798e2cf66e4bad6a249699836b71d7a87194846ca0c569d60be1d32284, six candidate hashes. One new-hash technical review only; V4.14 remains blocked.",
+    "2026-11-21: w-z-k v0.2 technical exact-hash PASS. Reviewer confirmed full-history evidence coverage in both monthly paths, regression reachability for final-day-only and post-result-start envelopes, fail-closed null/gap behavior, unchanged Rules v2, and no normative calculations. Manifest a4ccee798e2cf66e4bad6a249699836b71d7a87194846ca0c569d60be1d32284; 6/6 hashes stable initial/final. Full Engine 988/0/0/0; close w-z-k only. V4.14 remains blocked and the three-increment authorization is exhausted.",
+    "2026-11-21: user authorized up to three further roadmap increments. Roadmap audit PASS; recalculated predecessor sequence and selected w-z-l as increment 1/3: source-to-rule normative candidate for Law 199/2025 exceptions, using only the reviewed Knowledge v0.1 and official sources. No Engine activation until exact-hash normative GO; V4.14 remains blocked.",
+    "2026-11-21: w-z-l implementation and exact-hash manifest prepared; all 9 candidate hashes match. Focused contract 5 passed; elevated combined focused suite 12 passed; elevated full suite 993 tests has 1 failure (test_output_cannot_escape_workspace). Non-elevated citation-index tests fail to create Windows temporary directories due ACL. Roadmap audit reports w-z-h as current, inconsistent with w-z-l selection. Execution guardrails pass. Per stop condition, no normative review and no next increment; w-z-l blocked pending test environment and audit-selector reconciliation.",
+    "2026-11-21: resumed w-z-l after user authorized three increments; prior test failure traced to TEMP incorrectly set inside Engine workspace, causing the escape test to permit the path by design. Prior roadmap selector mismatch traced to parser selecting the first canonical headings in historical current-next content. Corrected both and resuming required gates.",
+    "2026-11-21: w-z-l exact-hash review returned NO-GO (9/9 hashes stable): the single 67-year baseline obscures distinct INPS Circular 28/2026 2027-2028 requirements. Closed w-z-l only as a completed NO-GO audit; selected w-z-m, increment 2/3, to split three branches in new Knowledge v0.3/Rules v5. Prior v4 remains immutable and non-active.",
+    "2026-11-21: w-z-m candidate v0.1 frozen. Official INPS Circular 28/2026 distinctions are represented in Knowledge v0.3 and Rules v5 as external administrative references: 66y7 for seven-of-ten, 67y for six-of-seven, 66y7 for heavy/arduous with period conditions. Focused tests 12/0/0/0; Engine suite 998/0/0/0. Manifest SHA256 E5341C1DB0F93E412F4608DAB0ADE349934F9D11FA8E009542F92CD31B4A45C with 12 file hashes verified. Awaiting one independent normative review; no consumer/runtime activation.",
+    "2026-11-21: w-z-m exact-hash review returned NO-GO (12/12 hashes stable): v5 required both D.Lgs. 67/2011 c2 periods cumulatively; Law 232/2016 art.1(206)(b) establishes alternatives, and the circular citation metadata had null validity dates/inaccurate title. Closed w-z-m only as a completed NO-GO audit; selected w-z-n, increment 3/3, for new Knowledge v0.4/Rules v6, primary amendment source, any_of periods and corrected circular metadata. v5 remains immutable and non-active.",
+    "2026-11-21: w-z-n candidate v0.1 frozen: Knowledge v0.4 and Rules v6 distinguish D.Lgs. 67/2011 art.1(2) alternatives via Law 232/2016 art.1(206)(b), model any_of and include comma 3 computation exclusion; Circular 28 metadata has 2027-2028 validity. Focused 12/0/0/0 and full Engine 1003/0/0/0. Manifest C6269E2845E09FD45AE018E5C15BF0A9CCF2FA10D05757AE4DFF89EA32259639 with 14 file entries; local hashes match. One independent normative review requested; no runtime activation.",
+    "2026-11-21: w-z-n review returned NO-GO with 14/14 exact hashes stable. Reviewer confirmed Law 232 primary chain, any_of in Rules v6, comma 3 computation exclusion, branch age references, gap boundaries, immutable v2-v5 and v2-only rejection. Blocking finding: Knowledge v0.4 table row still states both heavy-work periods conjunctively; test only asserts correct alternative phrase elsewhere and misses the conflict. Three-increment authorization exhausted; w-z-n blocked, no fourth increment or runtime activation without new authorization.",
+    "2026-11-21: During commit preparation, found an additional unreviewed w-z-n manifest v0.2 (SHA-256 16073C82BC20F0596E81B65BEDB9CDA65DC754807ED7C7F3ED2245674D4F65C3) describing an editorial correction to Knowledge v0.4 and a negative test. Its own report records 6+7 focused tests and 4 Linux/environment failures in the full suite; no independent review/GO. Preserve as an unapproved draft only; w-z-n remains blocked and no fourth increment was selected."
   ],
   "next_action": {
     "mode": "none",
-    "description": "Await fresh scope-specific authorization for one bounded selector-provenance correction, public regression rejecting fabricated candidate_selected mappings, and a new-version technical review; no same-hash retry. Normative review was not run after the technical NO-GO."
+    "description": "Three authorized increments are exhausted. Await fresh user authorization before editing w-z-n, creating a new candidate version, requesting another review, or selecting a downstream increment."
   },
   "routing": {
     "policy_version": "3.1",
-    "tier": "review",
-    "task_class": "quality",
-    "agent": "fo_reviewer",
-    "model": "gpt-5.6-terra",
-    "reasoning_effort": "high",
-    "rationale": "T3 public producer integration is implemented and fully tested; independent exact-file technical review is the next gate before the authorized normative review.",
+    "tier": "critical",
+    "task_class": "normative",
+    "agent": "fo_normative_reviewer",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "rationale": "The candidate adds legal exception semantics and source periods; independent normative review is mandatory. Route after the exact candidate and tests are frozen.",
     "trace": [
       {
-        "at": "2026-11-15T20:47:18Z",
-        "event": "delegated",
-        "tier": "high",
-        "agent": "fo_architect",
+        "at": "2026-11-21T15:05:00Z",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
         "model": "gpt-5.6-sol",
-        "reasoning_effort": "high",
-        "reason": "User explicitly authorized one w-z-h remediation cycle, max three delegated events. Delegation 1/3 is a read-only architecture recommendation for deterministic source-gate and IT/ES/EU service integration into timeline v2; no rule/interpretation change."
+        "reasoning_effort": "xhigh",
+        "reason": "Selected w-z-n as increment 3/3 after w-z-m exact-hash NO-GO; bounded correction to statutory alternatives and source metadata, no runtime activation."
       },
       {
-        "at": "2026-11-15T20:52:00Z",
-        "event": "reviewed",
-        "tier": "high",
-        "agent": "fo_architect",
-        "model": "gpt-5.6-sol",
-        "reasoning_effort": "high",
-        "reason": "Conditional architecture GO for a standalone producer adapter; preserve selector/services/builder ownership and timeline-v2 schema. Hard gaps recorded: domestic outputs lack exact current bindings (IT engine remains v2 vs candidate v3; ES output lacks digest), schema aggregates jurisdiction branches, and pension_income global streams are out of scope."
-      },
-      {
-        "at": "2026-11-15T21:14:31Z",
+        "at": "2026-11-21T15:25:00Z",
         "event": "delegated",
-        "tier": "review",
-        "agent": "fo_reviewer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "high",
-        "reason": "User-authorized w-z-h cycle, delegation 2/3: one read-only technical review of frozen 53-file manifest SHA256 9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF, one 300-second window, no retry on this hash."
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Required exact-hash normative gate for amended primary-source chain, alternative period logic and citation metadata; all 1003 Engine tests pass."
       },
       {
-        "at": "2026-11-15T21:18:12Z",
+        "at": "2026-11-21T15:40:00Z",
         "event": "reviewed",
-        "tier": "review",
-        "agent": "fo_reviewer",
-        "model": "gpt-5.6-terra",
-        "reasoning_effort": "high",
-        "reason": "Technical exact-hash review returned NO-GO on manifest 9AD205F75923889EE5ACA70209DADA505D12674640BCE15DF877A80B2544AAEF; 53/53 initial/final hashes matched, no edits. Authorized cycle stop condition reached; normative review not run."
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "xhigh",
+        "reason": "Third authorized increment w-z-n returned exact-hash NO-GO; 14/14 hashes stable. Remaining contradiction in Knowledge v0.4 table requires a new version and fourth increment, beyond current authorization."
       }
-    ],
-    "delegation_budget": {
-      "max_events": 3,
-      "authorization": "User explicitly authorized one bounded w-z-h corrective cycle after the w-z-g exact-hash NO-GO; maximum three delegations total.",
-      "scope": "One read-only architecture review, one independent technical review, and one exact-new-version normative review; each review has one 300-second window; no same-hash retries.",
-      "blocker": "The w-z-g source gate and domestic/ES/EU services do not feed a deterministic public timeline-v2 producer; V4.14 cannot close."
-    }
+    ]
   }
 }

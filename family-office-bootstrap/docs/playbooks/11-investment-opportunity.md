@@ -124,11 +124,11 @@ Un buon IRR non supera automaticamente un vincolo di liquidita'.
 ## Model routing
 
 - Luna/low: inventario file, fixture, schema, mapping campi, test matrix meccanica.
-- Terra/medium: contratto, servizio deterministico, CLI/docs, integrazione ordinaria.
-- Terra/high reviewer: contract drift, edge cases, regression cross-module.
-- Sol/high financial reviewer: formule nuove, leverage, IRR/NPV/DSCR, scenario semantics.
-- Sol/high normative reviewer: nuova fiscalita'/classificazione attivita'.
-- Sol/xhigh: solo controversia normativa/architetturale materiale non risolta con fonti e test.
+- GPT-6.2 Sol/medium: contratto, servizio deterministico, CLI/docs, integrazione ordinaria.
+- GPT-6.2 Sol/medium reviewer indipendente: contract drift, edge cases, regression cross-module.
+- GPT-6.2 Sol/high financial reviewer: formule nuove, leverage, IRR/NPV/DSCR, scenario semantics.
+- GPT-6.2 Sol/high normative reviewer: nuova fiscalita'/classificazione attivita'.
+- GPT-6.2 Astra/high: solo controversia primaria materiale e circoscritta dopo una review Sol, con budget e autorizzazione.
 
 ## Done when
 

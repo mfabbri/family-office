@@ -88,3 +88,9 @@ Le risposte dei subagent devono essere brevi e strutturate per poter essere inco
 - Se il gate pendente riguarda solo una nuova interpretazione, bloccare quell'affermazione/feature; una modifica di binding **non semantica** può proseguire fino a `software_ready` con i suoi test, senza promuovere il risultato a `normative_ready`.
 - Un singolo reviewer indipendente mirato alla semantica alterata è preferibile a una catena di reviewer generici. Il parent non attende in polling oltre il budget.
 - Il budget già consumato resta nello storico: il planner di un **nuovo ciclo tecnico** può reimpostare `routing.trace` solo dopo che gli esiti storici siano conservati in `verification.notes` o decision log, e senza inventare nuovi GO.
+
+## Riduzione deleghe v4.0
+
+Prima di uno spawn richiedere tre elementi: quale dato manca, quale differenza rispetto al codice/Knowledge immutati, quale test dimostrera' il risultato. Se la stessa informazione e' gia' nel parent o nei test, non spawnare. Per controversie primarie non risolte, `fo_normative_escalation` usa Astra **una sola volta** con autorizzazione e budget espressi; non e' il reviewer predefinito.
+
+La concurrency massima 3 e' solo un limite di sicurezza, non un target. Scoperta, implementazione e review seriale di un medesimo file non vanno parallelizzate. Budget nominale default 2 eventi sostanziali complessivi; la suddivisione in finestre non ricrea il budget. Ogni review deve distinguere `document-only`, `software_ready`, `normative_ready` e `scenario_ready` per evitare NO-GO globali non necessari.

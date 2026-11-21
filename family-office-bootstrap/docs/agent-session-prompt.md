@@ -23,8 +23,8 @@ coerente con roadmap e repository; altrimenti usa l'algoritmo di roadmap-index.m
 per selezionare un solo micro-incremento.
 
 Produci il task envelope e registra nel planner tier, agent, modello, reasoning e
-motivazione prima di delegare. Il parent Luna/medium è il router/controller:
-Luna per discovery/docs, Terra per planning/implementazione/quality review, Sol per
+motivazione prima di delegare. Il parent GPT-6 Luna/low è il router/controller:
+GPT-6 Luna per discovery/docs, GPT-6.1 Terra per planning, GPT-6.2 Sol per implementazione/quality review e
 architettura e review finanziaria o normativa critica.
 
 Mantieni distinti fo_financial_reviewer e fo_normative_reviewer: il primo verifica

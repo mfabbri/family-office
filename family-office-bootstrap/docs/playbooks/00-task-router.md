@@ -73,3 +73,7 @@ Non escalare solo perché il repository è grande.
 ## Precedenza della policy anti-loop (dal 2026-11-14)
 
 La sezione storica su review PENDING descrive la conservazione delle evidenze, **non** autorizza retry indefiniti né un blocco totale del software. Applicare `12-dual-gate-and-convergence.md`: classificare il diff per impatto semantico, separare Software Ready da Normative Ready, attribuire PENDING al solo output giuridico interessato. Dopo due tentativi senza consegna sul medesimo hash e sulla stessa domanda non creare nuovi reviewer; registrare `human_review_required`, proseguire con l'implementazione tecnica fail-closed soltanto se non modifica regole, non esercita un GO mancante e non produce decisioni non supportate. Ogni rilascio di conclusioni giuridiche rimane soggetto ai gate di loro competenza.
+
+## Route v4.0 e consumo di token
+
+La matrice eseguibile corrente e' `02-model-routing.md` v4.0: preferire `gpt-6-luna/low` senza delega per modifiche locali, `gpt-6.1-terra` per planning, `gpt-6.2-sol` per coding e review, `gpt-6.2-astra` solo per escalation. Prima di un nuovo tentativo su V4.14 confrontare l'hash del candidato e la coppia `(scope, finding)`; un NO-GO documentale delimitato non consente una nuova review integrale delle leggi. Un ciclo non conforme al budget si ferma e rende visibile il blocker, senza generare automaticamente il suffisso successivo.

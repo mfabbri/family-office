@@ -651,7 +651,7 @@
     },
     {
       "citation_id": "it.inps.circular-28-2026",
-      "title": "INPS Circular No. 28 of 16 March 2026, administrative guidance on 2026 pension requirements",
+      "title": "INPS Circular No. 28 of 16 March 2026, administrative guidance on pension requirements for 2027-2028",
       "issuer": "INPS",
       "source_type": "official_guidance",
       "authority_level": "official_guidance",
@@ -665,10 +665,10 @@
         "eligibility",
         "retirement_age"
       ],
-      "valid_from": null,
-      "valid_to": null,
+      "valid_from": "2027-01-01",
+      "valid_to": "2028-12-31",
       "published_on": "2026-03-16",
-      "verified_at": "2026-11-14",
+      "verified_at": "2026-11-21",
       "source_status": "active"
     },
     {
@@ -786,6 +786,98 @@
       "verified_at": "2026-11-15",
       "source_status": "active",
       "published_on": "2026-10-27"
+    },
+    {
+      "citation_id": "it.l-199-2025.original",
+      "title": "Law 30 December 2025, No. 199, original Official Gazette publication",
+      "issuer": "Gazzetta Ufficiale della Repubblica Italiana",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.gazzettaufficiale.it/eli/gu/2025/12/30/301/so/42/sg/pdf",
+      "official_reference": "Law 199/2025, art. 1(185–190), GU Serie Generale No. 301, Supplemento Ordinario No. 42/L of 30-12-2025",
+      "jurisdictions": [
+        "IT"
+      ],
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age",
+        "temporal_application"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": "2025-12-30",
+      "verified_at": "2026-11-21",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "it.dlgs-67-2011.original",
+      "title": "Legislative Decree 21 April 2011, No. 67, original Official Gazette publication",
+      "issuer": "Gazzetta Ufficiale della Repubblica Italiana",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.gazzettaufficiale.it/eli/id/2011/05/11/11G0111/SG",
+      "official_reference": "Legislative Decree 67/2011, art. 1, paragraphs 1-4",
+      "jurisdictions": [
+        "IT"
+      ],
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age",
+        "temporal_application"
+      ],
+      "valid_from": "2011-05-26",
+      "valid_to": null,
+      "published_on": "2011-05-11",
+      "verified_at": "2026-11-21",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "it.l-205-2017.original",
+      "title": "Law 27 December 2017, No. 205, original Official Gazette publication",
+      "issuer": "Gazzetta Ufficiale della Repubblica Italiana",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.gazzettaufficiale.it/eli/id/2017/12/29/17G00222/SG",
+      "official_reference": "Law 205/2017, art. 1 and Annex B",
+      "jurisdictions": [
+        "IT"
+      ],
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age",
+        "temporal_application"
+      ],
+      "valid_from": "2018-01-01",
+      "valid_to": null,
+      "published_on": "2017-12-29",
+      "verified_at": "2026-11-21",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "it.l-232-2016.original",
+      "title": "Law 232/2016, original Gazzetta Ufficiale publication",
+      "issuer": "Gazzetta Ufficiale della Repubblica Italiana",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.gazzettaufficiale.it/eli/id/2016/12/21/16G00242/SG",
+      "official_reference": "Law 11 December 2016, No. 232 (16G00242), art. 1(206)(b)",
+      "jurisdictions": [
+        "IT"
+      ],
+      "topics": [
+        "pensions",
+        "eligibility",
+        "heavy_arduous_work",
+        "retirement_age"
+      ],
+      "valid_from": "2017-01-01",
+      "valid_to": null,
+      "published_on": "2016-12-21",
+      "verified_at": "2026-11-21",
+      "source_status": "active"
     }
   ],
   "documents": [
@@ -1403,6 +1495,89 @@
         "eu.regulation.2026-2359"
       ],
       "title": "Pension timeline source/support matrix v0.6"
+    },
+    {
+      "document_id": "knowledge.pensions.italian-adjustment-exceptions-v0.1",
+      "path": "pensions/italian-pension-adjustment-2027-2028-exceptions-v0.1.md",
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age",
+        "evidence_provenance",
+        "temporal_application"
+      ],
+      "jurisdictions": [
+        "IT"
+      ],
+      "citation_ids": [
+        "it.l-199-2025.original",
+        "it.inps.circular-28-2026"
+      ],
+      "title": "Italian 2027–2028 pension adjustment source and exceptions v0.1"
+    },
+    {
+      "document_id": "knowledge.pensions.italian-adjustment-exceptions-v0.2",
+      "path": "pensions/italian-pension-adjustment-2027-2028-exceptions-v0.2.md",
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age",
+        "evidence_provenance",
+        "temporal_application"
+      ],
+      "jurisdictions": [
+        "IT"
+      ],
+      "citation_ids": [
+        "it.l-199-2025.original",
+        "it.inps.circular-28-2026",
+        "it.dlgs-67-2011.original",
+        "it.l-205-2017.original"
+      ],
+      "title": "Italian 2027-2028 pension adjustment source-to-path mapping v0.2"
+    },
+    {
+      "document_id": "knowledge.pensions.italian-adjustment-exceptions-v0.3",
+      "path": "pensions/italian-pension-adjustment-2027-2028-exceptions-v0.3.md",
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age",
+        "evidence_provenance",
+        "temporal_application"
+      ],
+      "jurisdictions": [
+        "IT"
+      ],
+      "citation_ids": [
+        "it.l-199-2025.original",
+        "it.inps.circular-28-2026",
+        "it.dlgs-67-2011.original",
+        "it.l-205-2017.original"
+      ],
+      "title": "Italian 2027-2028 pension adjustment source-to-path mapping v0.3"
+    },
+    {
+      "document_id": "knowledge.pensions.italian-adjustment-exceptions-v0.4",
+      "path": "pensions/italian-pension-adjustment-2027-2028-exceptions-v0.4.md",
+      "topics": [
+        "pensions",
+        "eligibility",
+        "retirement_age",
+        "evidence_provenance",
+        "temporal_application"
+      ],
+      "jurisdictions": [
+        "IT"
+      ],
+      "citation_ids": [
+        "it.l-199-2025.original",
+        "it.inps.circular-28-2026",
+        "it.dlgs-67-2011.original",
+        "it.l-205-2017.original",
+        "it.l-232-2016.original"
+      ],
+      "title": "Italian 2027-2028 pension adjustment source-to-path mapping v0.4"
     }
   ]
 }

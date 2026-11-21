@@ -51,3 +51,22 @@ Per lavori che attraversano più moduli usare un ExecPlan leggero con `Progress`
 - Verificare versioni precedenti v9/v10 e invarianti di non inferenza dopo il binding.
 
 In caso di contrasto con un vecchio playbook, **questa policy prevale sul routing procedurale**, senza derogare ai requisiti sostanziali, privacy, hash, immutabilità, test e non-inferenza.
+
+## Guardrail convergence v4.0 — post V4.14w-z-n
+
+- Lavori su errore documentale con regola primaria già identificata: test di coerenza `narrativa ↔ tabella ↔ Rules`, hash esatto, **una** review bounded dell'unico finding. Non ripetere la ricognizione IT/ES/UE in assenza di modifica normativa materiale.
+- Quando un difetto editoriale ferma un parent, registrare `software_ready` ove tecnicamente verificato, `normative_pending` sulle sole conclusioni interessate e `scenario_ready` per proiezioni espressamente ipotetiche. Il parent V4.14 **non** diventa done se il gate integrato resta incompleto.
+- Proibita la generazione automatica di w-z-o, w-z-p ecc. per una nuova contestazione del medesimo scope. Alla seconda remediation che non converge, produrre una decisione architetturale sulla granularita' del gate oppure `human_review_required`, non un audit infinito.
+- Misurare progresso con tre output verificabili (`timeline`, `retirement bridge`, `work-transition comparison`) e con la semantica conservativa di `null+data_gaps`, non con il numero di manifest, reviewer e test eseguiti.
+- Una ripianificazione dei predecessori V4.15–V4.20 necessita un cambiamento esplicito, tracciato e testato della roadmap; questa patch **non** cambia stati o sblocca dipendenze.
+
+
+## Convergenza operativa v4.1 - lezioni di sessione (2026-11-21)
+
+- **Selettore roadmap:** `roadmap_audit.py` legge la prima coppia canonica `## ID e titolo` / `## Stato` in `current-next-increment.md`. Mantenerne una sola; le note storiche usano intestazioni `storico`/`legacy`. Dopo una ripianificazione verificare che l'audit riporti proprio l'ID corrente, non solo un generico `OK`.
+- **Confini dei test:** se un test controlla che un percorso non esca dal workspace e usa `Path('.')` come root, `TEMP`/`TMP` deve essere scrivibile ma fuori da quella root. Un temp interno rende legittimamente il percorso interno e invalida il controllo. Un errore ACL non e' un test fallito del prodotto ne' un esito verde; un runner elevato puo' cambiare la semantica dei path e richiede verifica esplicita dei confini.
+- **Coerenza prima del freeze:** confrontare ogni claim fra Knowledge narrativa, tabelle, Rules e test. Oltre ad asserire rami e valori corretti, aggiungere asserzioni negative contro formulazioni obsolete o contraddittorie. Per fonti amministrative, testare anche titolo, data di pubblicazione, data di verifica e intervallo applicativo/di copertura.
+- **Catena primaria e operatori:** per condizioni con piu' periodi verificare il connettivo della disposizione vigente (`all_of`/`any_of`) e la norma che ha introdotto eventuali modifiche; non basta citare il testo originario dell'atto modificato. La guidance amministrativa resta attribuita al proprio ruolo e periodo.
+- **Budget di roadmap:** il numero di incrementi esplicitamente autorizzati e' un limite anche quando un incremento termina con NO-GO. Un NO-GO esaurisce il gate di quella versione; una correzione con nuovo hash richiede un nuovo incremento entro il budget disponibile. Al termine del budget fermarsi e chiedere nuova autorizzazione, senza creare suffissi o review impliciti.
+- **Traccia deleghe:** `routing.trace` descrive l'incremento attivo. Prima di ripianificare, conservare finding, verdetto, hash ed esito storico nel decision log/planner; mantenere in trace solo selezione e deleghe dell'incremento corrente per rispettare il budget del guardrail.
+- **Pulizia temporanei:** prima di cancellare cartelle, produrre l'inventario e verificare percorsi assoluti, ambito, processi attivi e assenza di file di workspace. Escludere sempre `family-office-workspace`. Una review automatica negativa non si aggira con comandi alternativi; si restringe ai target verificati o si chiede conferma sul perimetro.

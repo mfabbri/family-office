@@ -65,3 +65,14 @@ Usare il flusso `Knowledge → Rules → Tests → Engine` solo quando **cambia 
 Una data futura non coperta da pack vigente produce `null/not_assessed + data_gaps`; una proiezione può usare regole correnti con scenario e ipotesi esplicite senza presentarsi come entitlement. `freshness/review_due` è controllo di ammissibilità della conclusione normativa, non un divieto di eseguire test sul software o scenari ipotetici chiaramente etichettati. Nessuna indeterminazione amministrativa viene sostituita da data inventata.
 
 Verificare trigger sostanziali: nuova norma, atto successivo rilevante, cambio fonte, nuovo periodo, modifica regola/calcolo, ampliamento verso output giuridico prima non autorizzato, dato individuale. Se il trigger esiste, riesame indipendente necessario. Se non esiste, registrare il motivo della decisione e la review tecnica. Ulteriore dettaglio: `12-dual-gate-and-convergence.md`.
+
+## Review delimitata e modello v4.0
+
+Il reviewer primario per **nuova semantica** e' `fo_normative_reviewer` su GPT-6.2 Sol/high; Astra/high e' riservato a `fo_normative_escalation` se esiste una specifica controversia irrisolta che cambia il diritto o il regime, con autorizzazione distinta. La fonte ufficiale immutata non si riapre su un mero errore tabellare quando basta fissare il claim e testare la contraddizione. Conservare comunque il NO-GO finche' il nuovo candidato non ottiene il gate indipendente applicabile: correggere un testo non approva automaticamente il diritto.
+
+
+## Coerenza di tabelle, rami e metadati
+
+Prima dell'hash freeze, costruire una matrice di riconciliazione tra fonte vigente, Knowledge narrativa, tabelle Knowledge, contratto Rules e test. Per ogni operatore logico (tutti/uno qualsiasi), categoria, soglia e intervallo, verificare che tutte le rappresentazioni concordino. I test devono rilevare una frase obsoleta che contraddice il testo corretto, non solo confermare la presenza della frase attesa.
+
+Per le guidance amministrative, mantenere distinta la data di pubblicazione dal periodo dei valori e dall'intervallo di copertura del pack. Titolo, `valid_from`/`valid_to`, periodi nel Rule pack e testo Knowledge devono essere coerenti. Dove il periodo applicativo e' esplicito, non lasciare metadati temporali null; una guidance non diventa fonte primaria per il solo fatto che sia ufficiale.

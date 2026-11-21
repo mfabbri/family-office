@@ -1,9 +1,9 @@
-# Family Office AI Codex model routing v3.1.
+# Family Office AI Codex model routing v4.0 (2026-11-21).
 # Project-local [profiles.*] are intentionally absent.
 # The parent is a low-cost router/controller; specialist agents perform substantive work.
 
-model = "gpt-5.6-luna"
-model_reasoning_effort = "medium"
+model = "gpt-6-luna"
+model_reasoning_effort = "low"
 plan_mode_reasoning_effort = "medium"
 
 sandbox_mode = "workspace-write"
@@ -12,7 +12,7 @@ approval_policy = "on-request"
 [agents]
 enabled = true
 max_concurrent_threads_per_session = 3
-default_subagent_model = "gpt-5.6-terra"
+default_subagent_model = "gpt-6.1-terra"
 default_subagent_reasoning_effort = "medium"
 interrupt_message = true
 
@@ -51,3 +51,7 @@ config_file = "agents/fo-financial-reviewer.toml"
 [agents.fo_normative_reviewer]
 description = "Review critica per fiscalità, pensioni, compliance e regole legali sensibili."
 config_file = "agents/fo-normative-reviewer.toml"
+
+[agents.fo_normative_escalation]
+description = "Escalation specialist for one unresolved material primary-law conflict; require explicit authorization."
+config_file = "agents/fo-normative-escalation.toml"
