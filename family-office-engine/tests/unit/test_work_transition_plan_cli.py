@@ -12,6 +12,53 @@ from family_office_engine.cli.main import main
 
 
 class WorkTransitionPlanCliTest(unittest.TestCase):
+    def test_plan_demo_runs_golden_scenario_and_writes_workspace_output(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            workspace = Path(tmp_dir)
+            stdout = io.StringIO()
+            with patch.dict(os.environ, {"FO_WORKSPACE_PATH": str(workspace)}), redirect_stdout(stdout):
+                code = main(["planning", "work-transition", "plan", "--demo"])
+
+            output = stdout.getvalue()
+            self.assertEqual(0, code, output)
+            self.assertIn("Bridge 100%/60%/0%:", output)
+            self.assertIn("scenario_projection", output)
+            self.assertIn("pension_entitlement resta not_assessed/null", output)
+            path = workspace / "snapshots" / "work-transition-plan.synthetic.snapshot.json"
+            self.assertTrue(path.is_file())
+            plan = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual("work-transition-plan/v1", plan["schema_version"])
+            self.assertIsNone(plan["pension_entitlement"]["verified_start_date"])
+
+    def test_plan_demo_rejects_output_outside_private_workspace(self):
+        with tempfile.TemporaryDirectory() as workspace_dir, tempfile.TemporaryDirectory() as outside_dir:
+            stdout = io.StringIO()
+            outside_output = Path(outside_dir) / "plan.json"
+            with patch.dict(os.environ, {"FO_WORKSPACE_PATH": workspace_dir}), redirect_stdout(stdout):
+                code = main(["planning", "work-transition", "plan", "--demo", "--plan-output", str(outside_output)])
+
+            self.assertEqual(1, code)
+            self.assertIn("must be inside workspace", stdout.getvalue())
+            self.assertFalse(outside_output.exists())
+
+    def test_plan_scenario_input_rejects_identical_input_and_output_paths(self):
+        with tempfile.TemporaryDirectory() as workspace_dir:
+            workspace = Path(workspace_dir)
+            plan_input = workspace / "planning" / "plan.json"
+            plan_input.parent.mkdir(parents=True)
+            plan_input.write_text('{"schema_version":"work-transition-plan-input/v1"}', encoding="utf-8")
+            before = plan_input.read_text(encoding="utf-8")
+            stdout = io.StringIO()
+            with patch.dict(os.environ, {"FO_WORKSPACE_PATH": workspace_dir}), redirect_stdout(stdout):
+                code = main([
+                    "planning", "work-transition", "plan", "--scenario-plan-input", str(plan_input),
+                    "--plan-output", str(plan_input),
+                ])
+
+            self.assertEqual(1, code)
+            self.assertIn("input and output paths must be different", stdout.getvalue())
+            self.assertEqual(before, plan_input.read_text(encoding="utf-8"))
+
     def test_projection_command_is_exposed_without_retirement_date_arguments(self):
         stdout = io.StringIO()
         with redirect_stdout(stdout):

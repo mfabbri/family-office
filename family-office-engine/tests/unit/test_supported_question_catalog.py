@@ -40,6 +40,26 @@ class SupportedQuestionCatalogTest(unittest.TestCase):
         self.assertIn("minimum_data_missing", {problem["code"] for problem in result["problems"]})
         self.assertEqual(["planning.investment_opportunity_comparison.build"], result["intent_results"][0]["required_tools"])
 
+    def test_phased_work_transition_is_scenario_only_and_requires_its_versioned_inputs(self):
+        intent = next(item for item in build_supported_question_catalog()["intents"]
+                      if item["intent_id"] == "phased_work_transition_scenario")
+        self.assertEqual("available", intent["capability_status"])
+        self.assertEqual(
+            ["planning.work_transition_simulation.build", "planning.work_transition_candidates.build",
+             "planning.work_transition_optimizer.build"],
+            intent["required_tools"],
+        )
+        self.assertIn("do not establish pension eligibility", intent["escalation"])
+
+        missing = assess_question_capability(["phased_work_transition_scenario"])
+        self.assertFalse(missing["executable"])
+        self.assertEqual({"minimum_data_missing"}, {item["code"] for item in missing["problems"]})
+
+        provided = ["work-transition-simulation/v1", "work-transition-candidate-set/v1", "work-transition-optimizer/v1"]
+        ready = assess_question_capability(["phased_work_transition_scenario"], provided)
+        self.assertTrue(ready["executable"])
+        self.assertEqual("available", ready["intent_results"][0]["capability_status"])
+
     def test_missing_data_is_explicit_for_available_capability(self):
         result = assess_question_capability(["liquidity_and_cashflow"], ["planning-goals/v1"])
 

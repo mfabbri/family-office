@@ -1885,14 +1885,31 @@ Il limite dei tre incrementi autorizzati ? raggiunto. Non si seleziona una nuova
 
 Windows gate 20261121-172042-e7ace2d1, 2026-11-21 17:20 UTC: Rules v6 6/6, citation index 7/7, Engine 1008/1008, zero failures/errors/skips. Service, golden tests and selector regression predate the run. The audit confirms the ADR scope and the non-promotion of hypothetical pensions. V4.15d and V4.15 are done within the financial projection scope.
 
-## ID e titolo
-V4.15e - Retirement bridge JSON CLI
+## V4.18a audit closure
 
-## Stato
-`in_progress`
+## Stato audit V4.18a
+`done`
 
-Compare work at 100%, 60% and 0% using the existing projection service. Accept JSON assumptions, provide a synthetic sample and write the scenario JSON. Run CLI and selector regressions, then the complete Windows gate on this revision.
+Audit V4.16-V4.18 determinism, seed reproducibility, pruning/budgets, metric basis, pension event separation, performance, privacy and regressions.
 
-V4.15e implements the JSON CLI using the existing projection service. Nine targeted tests and seven subtests passed. The fo.exe smoke run with the synthetic sample returned final available assets of 11000.00, 10200.00 and 9000.00 for 100%, 60% and 0% work. The complete Windows gate for the CLI revision is pending.
+V4.17 closed on Windows gate `20261121-191502-80c1e7e8`: Rules 6/6, citation 7/7, Engine 1028/1028, zero failure/error/skip.
+
+V4.15e closed on Windows gate `20261121-174220-30571681`: Rules 6/6, citation index 7/7, Engine 1013/1013, all 0 failure/error/skip. V4.16 depends on V4.15e, V4.15, V4.3 and V4.5. Pension entitlement evidence is optional and remains source-bound; financial assumptions cannot populate it.
 
 Windows full gate: `.\family-office-bootstrap\planning\run-v414-windows-gate.ps1 -RepoRoot (Get-Location).Path -FullSuite`.
+
+V4.18 is done after Windows gate `20261121-193328-d75b29e6`: Rules 6/6, citation 7/7, Engine 1036/1036, 0 failure/error/skip. Its bounded financial review passed on the exact six-file bundle.
+
+Audit checkpoint: baseline and seeded permutation stress are deterministic and tested; optimizer limits aggregate evaluation to 1,000,000 candidate-month-trial-variant steps and 20 sensitivity variants; candidate generation is capped at 500. Inputs and output remain scenario-only, net income/tax are separate declared cash-flow lines, and hypothetical pension streams require scenario tags and provenance. Caller contract: `monthly_net_income` and `monthly_net_amount` must exclude any tax amount supplied separately as `monthly_declared_tax`, avoiding double subtraction. Candidate grid exclusions and horizon gaps are explicit. Synthetic tests only; no personal data. No legal, tax, or entitlement rule changed.
+
+Scenario service regressions: 23 passed. The bounded selector regression accepts V4.18a with V4.18 done and rejects V4.18 blocked. Gate `20261121-195241-12d66ceb` passes preflight, Rules 6/6, citation 7/7 and Engine 1036/1036, with zero failures/errors/skips. V4.18a is closed.
+
+## ID e titolo
+V5.3 - Supported-question taxonomy
+
+## Stato
+`done`
+
+Checkpoint di handoff V4B->V5. V4.20 si e chiuso sul gate Windows `20261121-220726-8d7ef9ad`: preflight PASS, Rules 6/6, citation-index 7/7, Engine 1048/1048, zero failure/error/skip. V4B e `done`; V5 e la roadmap attiva come richiesto dal gate finale V4.20.
+
+V5.3 non viene riaperto: il catalogo tassonomico e i tre tool V4.19 sono stati integrati e testati; tutti gli incrementi V5, incluso V5.12a, sono gia `done`. La roadmap V6 resta `deferred` e i suoi incrementi elencati sono anch'essi gia completati. Non c'e un incremento funzionale aperto da selezionare; prima di proseguire serve una nuova voce di roadmap approvata con obiettivo e dipendenze esplicite.

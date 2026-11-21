@@ -11,4 +11,6 @@ Registra un task envelope minimale (`objective`, `scope`, `write_set`, `test_com
 
 Implementa la minima modifica autorizzata, prova prima i test pertinenti, quindi la suite completa al gate di incremento. Conserva `null+data_gaps` per contenuti giuridicamente non valutabili. Distingui software readiness e normative readiness in base a `12-dual-gate-and-convergence.md`. Un reviewer in timeout non va rieseguito sul medesimo hash senza evidenza nuova.
 
-Aggiorna roadmap, planner e decision log solo quando cambia la loro semantica; al gate esegui `validate-execution-guardrails.py`. Riporta done/blocked e prossima azione concreta. Non autoaprire l'incremento successivo prima di rispettare le dipendenze.
+Aggiorna roadmap, planner e decision log solo quando cambia la loro semantica; al gate esegui `validate-execution-guardrails.py`. Prima di chiudere una roadmap, verifica che il successore esplicito sia davvero selezionabile: se il puntatore porta a un item gia `done` o non resta lavoro `planned`, non riaprire item completati e non inventare un incremento. Registra il checkpoint richiesto e l'assenza di lavoro successivo autorizzato.
+
+Al handoff riconcilia ID/stato tra roadmap, `current-next-increment.md` e `current-work.json`, inclusi routing v4.0, blocker e `next_action`; i validator di schema non provano da soli la coerenza semantica. Un'autorizzazione per piu' incrementi non supera dipendenze o gate: lavora solo sul prossimo item eleggibile e ricalcola la selezione dopo ogni gate esterno. Riporta done/blocked e la prossima azione concreta.

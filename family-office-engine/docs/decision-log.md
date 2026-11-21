@@ -839,3 +839,63 @@ Windows gate 20261121-172042-e7ace2d1, 2026-11-21 17:20 UTC: Rules v6 6/6, citat
 Evidence: `family-office-bootstrap/planning/.runtime/test-gate/20261121-172042-e7ace2d1/summary.json`. V4.15e is selected under the explicit user authorization for a CLI adapter to the approved financial projection.
 
 V4.15e implements the JSON CLI using the existing projection service. Nine targeted tests and seven subtests passed. The fo.exe smoke run with the synthetic sample returned final available assets of 11000.00, 10200.00 and 9000.00 for 100%, 60% and 0% work. The complete Windows gate for the CLI revision is pending.
+
+## 2026-11-21 - V4.15e closed; V4.16 selected
+
+The full supported Windows gate `20261121-174220-30571681` covers the V4.15e CLI revision: Rules v6 6/6, citation index 7/7 and Engine 1013/1013, with zero failures, errors or skips. The CLI runs the existing deterministic projection for 100%, 60% and 0% work; its synthetic smoke outputs were 11000.00, 10200.00 and 9000.00 ending assets. V4.15e is done within this bounded scope. Roadmap audit passes. V4.16 is selected as the next functional increment for monthly decumulation and sequence-risk simulation; financial assumptions remain scenario projections, while pension entitlement remains separately `not_assessed` unless source-bound verified facts are supplied.
+
+## 2026-11-21 - V4.16 implementation checkpoint
+
+Added `work-transition-simulation/v1` with a deterministic monthly baseline and optional seeded permutations of a declared monthly return path. It reports per-month bucket balances, withdrawals, shortfall, reserve months/breach, first depletion/shortfall, terminal wealth, declared tax/cost totals, and conditional P05/P50/P95/success summaries. Restricted assets cannot fund spending. Temporary income streams require `scenario_assumption` status, inclusive month bounds and provenance. Pension entitlement output remains `not_assessed` with verified amount/date null. Focused tests: 11 passed. One bounded financial remediation corrected posted bucket growth, Decimal precision, stress memory and recorded the return path. Independent financial review PASS on the remediated exact hashes. The supported Windows full gate remains pending; V4.16 stays blocked.
+
+## 2026-11-21 - V4.16 full-gate blocker
+
+Focused service tests (11) and selector/service regressions (12) pass. Roadmap audit passes for V4.16 under the accepted scenario-only ADR exception. The supported full-suite runner could not start in this sandbox: PowerShell rejected it with `AuthorizationManager`; a combined roadmap unit run also hit Windows `TempDirectory` ACL errors. This is an environment block, not a suite result. V4.16 remains blocked/in progress for completion purposes; V4.17 is not selected. Exit criterion: run `.\family-office-bootstrap\planning\run-v414-windows-gate.ps1 -RepoRoot (Get-Location).Path -FullSuite` on supported Windows and obtain a current-tree summary with 0 failures/errors/skips.
+
+## 2026-11-21 - V4.16 closed; V4.17 selected
+
+Windows gate `20261121-185323-2f047424` confirms Rules 6/6, citation index 7/7 and Engine 1024/1024, with zero failures/errors/skips. V4.16 is done in the scenario-only decumulation/sequence-risk scope after the independent financial review PASS and governance checks. V4.14 remains blocked. V4.17 is selected as the third and final increment in the current user authorization; it depends on V4.16.
+
+## 2026-11-21 - V4.17 implementation checkpoint
+
+Added a bounded candidate grid (max 500) with stable content hashes, derived full-time/part-time scenario income streams, explicit compatibility/constraint exclusion reasons and no ranking. Hypothetical bridge streams remain tagged assumptions; verified pension fields stay null. Candidate tests: 4 passed; with selector regression: 5 passed. Full Windows gate and final governance remain pending; the three-increment authorization ends with V4.17, so V4.18 is not selected.
+
+## 2026-11-21 - V4.17 closed; V4.18 selected
+
+Windows gate `20261121-191502-80c1e7e8` confirms Rules 6/6, citation index 7/7 and Engine 1028/1028, with zero failures/errors/skips. V4.17 is done in its bounded candidate-generation scope. V4.18 is selected for constrained work-exit comparison; financial ranking semantics require an independent financial review. Pension entitlement remains separately source-bound.
+
+## 2026-11-21 - V4.18 implementation and bounded remediation
+
+The constrained optimizer is implemented. Its first exact-hash financial review found three material issues: candidate-set coverage could be altered without detection, non-finite thresholds could bypass hard feasibility, and post-stop dates could exceed observed horizon. One bounded remediation added a full candidate-set SHA-256 binding, ID/status/count/row-hash checks with no-date fail-closed output, finite/domain threshold validation, and explicit not_assessed post-stop coverage gaps requiring at least one observed month. Focused V4.16/V4.17/V4.18 plus selector tests: 24 passed, including stricter and looser sensitivity-specific post-stop coverage. Final exact-hash review and current-tree supported Windows gate remain pending; V4.18a is not selected.
+
+## 2026-11-21 - V4.18 financial review PASS; Windows gate pending
+
+Final bounded financial review PASS on the exact six-file remediation bundle; hashes matched initially/finally. The sensitivity regression verifies both stricter and looser post-stop coverage. Focused regression group: 24 passed. Roadmap audit, planner schema, routing, execution guardrails and diff checks pass. V4.18 remains blocked only on the current-tree supported Windows full-suite gate; V4.18a is not selected until that gate returns all components PASS and 0 failures/errors/skips.
+
+## 2026-11-21 - V4.18 closed; V4.18a audit blocked on current-tree gate
+
+The supplied supported Windows gate `20261121-193328-d75b29e6` passes Rules v6 6/6, citation index 7/7 and Engine 1036/1036 with zero failures/errors/skips. V4.18 is done within scenario-projection scope; V4.14 remains blocked. V4.18a audit reviewed V4.16-V4.18, recorded the explicit net-income/separate-tax cashflow contract and confirmed bounded work, deterministic seeded stress, synthetic-only data, and `pension_entitlement` separation. Scenario service regressions pass 23/23; the selector regression passes and checks V4.18 dependency. The broader cadence test run hit Windows TEMP ACL `WinError 5`. A narrow selector rule now authorizes only V4.18a audit under the accepted projection ADR and requires V4.18 done. Because this code changed after the supplied gate, V4.18a remains blocked until a fresh supported Windows full gate passes every component with 0 failures/errors/skips. V4.19 is not selected before then. No legal or tax rules changed.
+
+## 2026-11-21 - V4.18a gate passed; V4.19 registry adapters implemented
+
+Verified gate `20261121-195241-12d66ceb`: TEMP preflight PASS, Rules v6 6/6, citation index 7/7, Engine 1036/1036, zero failures/errors/skips. V4.18a is done. V4.19 was selected after verifying V5.1 done and extending the accepted scenario-projection ADR selector with exact dependencies V4.18a + V5.1. Three JSON path adapters register simulation, candidate generation and optimizer; the registry now exposes 21 tools. The existing `planning.work_exit_feasibility.build` ID, input/output schemas, parameters, prerequisites and policy remain unchanged. Added migration/API/CLI/testing documentation. Structural tests 2/2 and synthetic pipeline/negative smokes pass; `pension_entitlement` remains `not_assessed`. The selector fixture test hit the known sandbox TEMP ACL block; roadmap audit validates current V4.19. V4.19 is blocked only on a new supported Windows full gate for this exact tree (preflight and all suites PASS, zero failures/errors/skips). V4.20 is not selected before that gate.
+
+## 2026-11-21 - V4.19 gate finding: supported-question catalog coverage
+
+Windows gate `20261121-204013-a85a4f40` passed TEMP preflight, Rules v6 6/6 and citation index 7/7; Engine ran 1039 tests with zero failures, 42 errors and zero skipped. All 42 errors share one finding: `supported_question_catalog` does not classify the three newly registered V4.19 work-transition tools. V4.19 remains in progress. A bounded correction adds a distinct phased-work scenario intent, explicit versioned data requirements, lexical question routing without tool invocation, and clarification when mixed with pension/entitlement requests. Dependencies are explicitly extended to already-completed V5.3/V5.4 catalog/router contracts. No pension/tax law or financial formula changes.
+
+## 2026-11-21 - V4.19 catalog remediation complete; current-tree gate pending
+
+The gate `20261121-204013-a85a4f40` exposed 42 Engine errors because V5.3 did not classify the three V4.19 registered scenario tools. Remediation adds a separate `phased_work_transition_scenario` capability with explicit simulation/candidate/optimizer schemas, missing-input gaps and a question-first keyword route. Combining it with retirement/entitlement requires clarification; the router invokes no tools. V4.19 dependencies now explicitly include done V5.3 and V5.4. Ten targeted catalog/router tests pass; roadmap audit, execution guardrails, routing, planner schema and diff check pass. The prior full gate is not reused because it predates this correction. V4.19 remains blocked until a supported Windows full gate on the corrected tree passes preflight, Rules, citation index and complete Engine with zero failures/errors/skips. V4.20 remains unselected.
+
+## 2026-11-21 - V4.19 gate passed; V4.20 selected
+
+The supplied supported Windows gate `20261121-204752-081c336e` passes TEMP preflight, Rules v6 6/6, citation index 7/7 and complete Engine 1042/1042, with zero failures/errors/skips. V4.19 is closed on the corrected current tree. Roadmap audit confirms one functional increment since V4.18a and no audit cadence trigger. V4.20 is selected as the final V4B slice under the accepted projection ADR, depending on V4.19. Scope is a synthetic end-to-end planning workflow and readiness report; no personal data, new legal/tax rules, or entitlement inference. V4.14 remains blocked and is not altered.
+
+## 2026-11-21 - V4.20 implementation; Windows gate pending
+
+V4.20 implementation adds the deterministic `work-transition-plan/v1` composition and CLI synthetic golden. The workflow composes the existing retirement bridge, seeded stress simulation, candidate generator and optimizer; it reports phase plan, rejected candidates, risk metrics, blockers, `data_gaps`, assumptions/provenance and next action. RITA, Spanish pension and INPS streams remain `scenario_assumption`; `pension_entitlement` stays `not_assessed` with null verified dates/amounts. The linear bridge's exclusion of spouse income is surfaced as a data gap; spouse income is included in the monthly scenario simulation. Service unit tests: 3/3 pass; direct CLI `--demo` smoke and outside-workspace output rejection pass. The targeted CLI unittest module could not complete in the sandbox because Windows TEMP cleanup/write hits ACL WinError 5; no application failure was isolated in those cases. Service negative cases cover invalid schema/readiness/phase and untagged hypothetical pension. V4.20 remains blocked until a supported Windows current-tree full gate passes preflight, Rules, citation index and Engine with zero failures/errors/skips. No V4B/V5 roadmap handoff before that gate.
+
+## 2026-11-21 - V4.20 gate passed; V4B closed
+
+Supported Windows gate `20261121-220726-8d7ef9ad` is green on the V4.20 tree: TEMP preflight PASS, Rules 6/6, citation index 7/7, Engine 1048/1048, zero failures/errors/skips. V4.20 is done and the V4B roadmap is closed. The specified handoff marks V5 active and points `current-next-increment.md` to V5.3, which remains done; all V5 entries through V5.12a are already done. All listed V6 entries are also done while the V6 roadmap remains deferred. No increment was reopened or added and no further functional work is selected without a new approved roadmap scope. V4.14 remains blocked; the scenario projection gate does not alter any pension-entitlement or normative state.

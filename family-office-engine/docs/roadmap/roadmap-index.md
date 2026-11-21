@@ -11,11 +11,11 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 2 | `roadmap-v2.md` | Cashflow, fiscalità, RITA e successione V1 | `done` |
 | 3 | `roadmap-v3-decision-core.md` | Modello decisionale spiegabile | `done` |
 | 4 | `roadmap-v4-wealth-planning.md` | Pianificazione patrimoniale multi-obiettivo | `done` |
-| 5 | `roadmap-v4b-work-transition.md` | Transizione graduale dal lavoro e ponte pensionistico | `in_progress` |
-| 6 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `done` |
+| 5 | `roadmap-v4b-work-transition.md` | Transizione graduale dal lavoro e ponte pensionistico | `done` |
+| 6 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `in_progress` |
 | 7 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `deferred` |
 
-La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `done`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. V4B viene riattivata per completare il prerequisito deterministico della transizione lavoro-pensione; V5 resta `done` dopo V5.12a. V6 è differita durante il completamento del gate V4B e riprenderà dopo la transizione formalizzata nello stesso aggiornamento che chiuderà V4B.
+La roadmap V3 e' `done`: V3.10b-V3.10d collegano scenario, outcome deterministici, sensitivity, scoring e dossier con lineage verificabile. La roadmap V4 e' `done`: V4.1, V4.2, V4.2a, V4.3, V4.3a, V4.3b, V4.4, V4.5, V4.6a, V4.6b, V4.6c, V4.6d, V4.6e, V4.6f, V4.6g, V4.7, V4.8, V4.8a, V4.8b, V4.8c, V4.9 e V4.10 sono completati. V4B e' chiusa dopo il gate V4.20. La roadmap V5 e' riattivata come handoff formale previsto da V4.20, con il puntatore V5.3 che resta `done`; tutti gli incrementi V5 fino a V5.12a sono completati. V6 resta `deferred`; tutti i suoi incrementi elencati sono `done`, quindi non c'e' al momento un incremento pianificato selezionabile.
 
 Nota di governance: `roadmap_audit.py` richiede esattamente una roadmap con stato `in_progress`. Quando tutti gli incrementi della roadmap attiva sono `done`, mantenere quella roadmap `in_progress` fino a quando la transizione successiva non apre formalmente la nuova roadmap attiva nello stesso aggiornamento.
 
@@ -141,3 +141,6 @@ La roadmap V5 non può essere usata per colmare capacità deterministiche mancan
 ## Regola integrativa di convergenza V4.14 (2026-11-14)
 
 Per la roadmap V4B applicare `family-office-engine/docs/roadmap/v4.14-exit-contract.md` e `family-office-bootstrap/docs/playbooks/12-dual-gate-and-convergence.md`. Il controllo dei predecessori è invariato; il lavoro tecnico interno al predecessore bloccato può procedere se non amplia conclusioni normative, non dichiara `done` il parent e non seleziona discendenti. Distinguere l'esito software del consumer dalla validità di ciascuna conclusione giuridica. Un reviewer che non produce un verdetto su due tentativi equivalenti richiede una decisione mirata, non un loop. Il gate V4.20 non deve riaprire implicitamente V5.3, perché questa roadmap risulta già `done`; eventuali nuovi incrementi V5 devono essere motivati come nuova roadmap/estensione.
+
+
+Handoff V4B completato il 2026-11-21 sul gate V4.20 `20261121-220726-8d7ef9ad`. V5 e riattivata come roadmap attiva secondo il criterio V4.20; V5.3 resta `done` e funge da checkpoint perche tutti gli incrementi V5 elencati sono gia completati. V6 resta `deferred`; i suoi incrementi elencati risultano gia `done`. Non esiste al momento un incremento funzionale `planned` selezionabile.

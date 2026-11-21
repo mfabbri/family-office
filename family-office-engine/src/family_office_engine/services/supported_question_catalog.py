@@ -118,6 +118,7 @@ def _intents() -> list[dict[str, Any]]:
         _intent("compliance_and_guardrails", "Compliance guardrails and answer confidence", "available", ["orchestration.guardrails.evaluate"], ["advisory-response/v1", "versioned guardrail policy"], ["answer-confidence/v1"], "high", "Refuses circumvention; legal and compliance review remains required."),
         _intent("liquidity_and_cashflow", "Liquidity and cash-flow planning", "available", ["planning.liquidity_plan.build"], ["planning-goals/v1", "net-worth/v1", "asset-availability/v1"], ["liquidity-plan/v1"], "medium", "Professional review required before an action recommendation."),
         _intent("retirement_and_work_exit", "Retirement, pension and work-exit planning", "available", ["planning.pension_scenario.build", "planning.spanish_eu_theoretical_pension.build", "planning.it_es_eu_pension_pro_rata.build", "planning.work_exit_feasibility.build"], ["pension-scenario/v1", "work-exit-feasibility-input/v1", "versioned pension rule pack"], ["pension-scenario/v1", "spanish-eu-theoretical-pension/v1", "it-es-eu-pension-pro-rata/v1", "work-exit-feasibility/v1"], "high", "Use registered pension tools and rule packs; professional review is required."),
+        _intent("phased_work_transition_scenario", "Phased work-transition scenario comparison", "available", ["planning.work_transition_simulation.build", "planning.work_transition_candidates.build", "planning.work_transition_optimizer.build"], ["work-transition-simulation/v1", "work-transition-candidate-set/v1", "work-transition-optimizer/v1"], ["work-transition-simulation/v1", "work-transition-candidate-set/v1", "work-transition-optimizer/v1"], "high", "Scenario projection only: declared assumptions do not establish pension eligibility, start dates, recognition or payments; no tax is calculated."),
         _intent("cross_border_tax_and_reporting", "Italy-Spain tax and reporting", "available", ["planning.it_es_pension_tax_classification.classify", "planning.spanish_pension_net_it_resident.build", "planning.it_es_foreign_assets.build", "planning.cross_border_it_es.build"], ["declared residence", "source snapshots", "versioned rule pack"], ["it-es-pension-tax-classification/v1", "spanish-pension-net-it-resident/v1", "it-es-foreign-assets/v1", "cross-border-it-es/v1"], "high", "No filing or binding legal/tax advice; professional review is required."),
         _intent("portfolio_and_contributions", "Portfolio and pension-contribution options", "available", ["planning.tax_aware_portfolio.build", "planning.pension_contribution_options.build"], ["declared options", "versioned rule pack"], ["tax-aware-portfolio/v1", "pension-contribution-options/v1"], "high", "Declared alternatives only; professional review is required."),
         _intent("wealth_protection_and_estate", "Wealth strategy, protection and estate planning", "available", ["planning.wealth_strategy.build", "planning.protection_gap.build", "planning.estate_plan.build"], ["wealth-strategy-input/v1", "protection-gap/v1", "estate-plan/v2"], ["wealth-strategy/v1", "protection-gap/v1", "estate-plan/v2"], "high", "Does not create legal instruments; professional review is required."),
@@ -152,7 +153,10 @@ def _validate_intents(intents: list[dict[str, Any]], registered_tool_ids: set[st
 
 def _collisions(selected: list[dict[str, Any]]) -> list[list[str]]:
     selected_ids = {intent["intent_id"] for intent in selected}
-    pairs = [{"retirement_and_work_exit", "cross_border_tax_and_reporting"}]
+    pairs = [
+        {"retirement_and_work_exit", "cross_border_tax_and_reporting"},
+        {"retirement_and_work_exit", "phased_work_transition_scenario"},
+    ]
     return [sorted(pair) for pair in pairs if pair <= selected_ids]
 
 

@@ -1,87 +1,92 @@
 {
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
-  "status": "in_progress",
-  "selected_at": "2026-11-21T12:50:34Z",
-  "updated_at": "2026-11-21T17:23:33.178951+00:00",
+  "status": "completed",
+  "selected_at": "2026-11-21T21:07:19Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.15e - Retirement bridge JSON CLI",
-      "reason": "V4.15d and V4.15 done after the external Windows gate."
+      "section": "V4.20 - Golden use case and V5 resume gate",
+      "reason": "V4.19 closed on supported Windows gate 20261121-204752-081c336e; V4.20 is the final explicit V4B increment and depends on V4.19."
     }
   ],
   "increment": {
-    "id": "V4.15e",
-    "title": "Retirement bridge JSON CLI",
-    "objective": "Run the 100%, 60% and 0% scenario projection from fo with JSON input and output.",
+    "id": "V4.20",
+    "title": "Golden use case and V5 resume gate",
+    "objective": "Complete the deterministic work-transition plan workflow and synthetic readiness report using approved V4.16-V4.19 services.",
     "scope": [
-      "CLI adapter, synthetic JSON sample and end-to-end tests",
-      "Explicit V4.15e selector route requiring V4.15 and V4.15d done"
+      "Integrate work phases, bridge inputs and existing simulation/candidate/optimizer tools into fo planning work-transition plan",
+      "Produce work-transition-plan/v1 with assumptions, provenance, phase plan, bridge/risk outputs, rejected-candidate reasons, blockers and next action",
+      "Add the synthetic full-time to part-time to stop, RITA/assets, Spain pension and INPS golden path with spouse income and adverse stress",
+      "Keep unverified pension entitlement null with data_gaps and all projected pension flows in scenario_projection",
+      "Document the V4B to V5 governance handoff contract without marking the roadmap transition complete before the full gate"
     ],
     "out_of_scope": [
-      "Pension entitlement, pension Rules and V4.16"
+      "No personal data or real family workspace access",
+      "No new legal, tax, pension entitlement or investment rules",
+      "No change to approved V4.16-V4.19 formulas or tool contracts",
+      "No V6 work before the V4B full gate"
     ],
     "candidate_files": [
       "family-office-engine/src/family_office_engine/cli/main.py",
-      "family-office-engine/src/family_office_engine/governance/roadmap_audit.py",
-      "family-office-engine/examples/retirement-bridge-projection-input-sample.json",
-      "family-office-engine/tests/unit/test_retirement_bridge_projection_cli.py",
-      "family-office-engine/tests/unit/test_roadmap_audit_cadence.py"
-    ],
-    "stop_condition": "Invalid inputs, pension hypothesis promotion or incomplete Windows gate keep V4.15e open."
-  },
-  "verification": {
-    "tests": [
-      "Windows gate 20261121-172042-e7ace2d1, 2026-11-21 17:20 UTC: Rules v6 6/6, citation index 7/7, Engine 1008/1008, zero failures/errors/skips. Service, golden tests and selector regression predate the run. The audit confirms the ADR scope and the non-promotion of hypothetical pensions. V4.15d and V4.15 are done within the financial projection scope.",
-      "V4.15e implements the JSON CLI using the existing projection service. Nine targeted tests and seven subtests passed. The fo.exe smoke run with the synthetic sample returned final available assets of 11000.00, 10200.00 and 9000.00 for 100%, 60% and 0% work. The complete Windows gate for the CLI revision is pending."
-    ],
-    "documentation_touchpoints": [
-      "family-office-engine/docs/adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md",
+      "family-office-engine/src/family_office_engine/services/work_transition_plan.py",
+      "family-office-engine/tests/unit/test_work_transition_plan_cli.py",
+      "family-office-engine/tests/unit/test_work_transition_plan.py",
       "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
       "family-office-engine/docs/current-next-increment.md",
       "family-office-engine/docs/decision-log.md",
-      "family-office-bootstrap/planning/current-work.json"
+      "family-office-bootstrap/planning/current-work.json",
+      "family-office-engine/docs/api.md",
+      "family-office-engine/docs/cli.md",
+      "family-office-engine/docs/testing.md"
     ],
-    "result": "partial",
-    "notes": "V4.15e requires a new complete Windows gate after the CLI and selector changes.",
+    "stop_condition": "Stop on any missing declared input, schema/lineage mismatch, nondeterministic output, financial projection promoted into pension_entitlement, or current-tree Windows full gate failure. Close V4B and resume V5 only after the supported Windows gate passes preflight and all suites with zero failures/errors/skips."
+  },
+  "verification": {
+    "tests": [
+      "V4.20 Windows full gate 20261121-220726-8d7ef9ad: TEMP preflight PASS; Rules 6/6, citation-index 7/7, Engine 1048/1048; zero failures/errors/skips.",
+      "V4.20 service golden/negative unit tests: 3/3 PASS; CLI --demo/input JSON and path-boundary smoke checks PASS.",
+      "Roadmap audit, execution guardrails, routing v4.0, planner JSON schema, py_compile and git diff --check PASS."
+    ],
+    "documentation_touchpoints": [
+      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/decision-log.md"
+    ],
+    "result": "passed",
+    "notes": "V4.20 closed using the exact current-tree supported Windows gate. V4B->V5 handoff is recorded. V5.3 remains done as the named checkpoint; all V5 and listed V6 increments are done, so no further planned functional increment is available.",
     "task_envelope": {
       "mode": "feature-slice",
-      "risk_domain": "general",
-      "objective": "Run the 100%, 60% and 0% scenario projection from fo with JSON input and output.",
+      "risk_domain": "financial",
+      "objective": "Compose approved scenario services into an explainable synthetic work-transition planning workflow without determining legal entitlement.",
       "repositories": [
-        "engine",
-        "bootstrap"
+        "engine"
       ],
       "read_set": [
-        "Windows summary 20261121-172042-e7ace2d1",
-        "ADR",
-        "retirement_bridge_projection.py"
+        "V4.20 roadmap contract",
+        "existing work-transition CLI wizard",
+        "V4.16-V4.19 schemas and services",
+        "accepted scenario_projection ADR"
       ],
       "write_set": [
         "family-office-engine/src/family_office_engine/cli/main.py",
-        "family-office-engine/src/family_office_engine/governance/roadmap_audit.py",
-        "family-office-engine/examples/retirement-bridge-projection-input-sample.json",
-        "family-office-engine/tests/unit/test_retirement_bridge_projection_cli.py",
-        "family-office-engine/tests/unit/test_roadmap_audit_cadence.py",
-        "family-office-engine/docs/adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md",
-        "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-        "family-office-engine/docs/current-next-increment.md",
-        "family-office-engine/docs/decision-log.md",
-        "family-office-bootstrap/planning/current-work.json",
-        "family-office-engine/docs/roadmap/roadmap-index.md",
-        "family-office-bootstrap/docs/playbooks/12-dual-gate-and-convergence.md"
+        "family-office-engine/src/family_office_engine/services/work_transition_plan.py",
+        "family-office-engine/tests/unit/test_work_transition_plan_cli.py",
+        "family-office-engine/tests/unit/test_work_transition_plan.py",
+        "family-office-engine/docs/api.md",
+        "family-office-engine/docs/cli.md",
+        "family-office-engine/docs/testing.md"
       ],
-      "test_command": ".\\family-office-bootstrap\\planning\\run-v414-windows-gate.ps1 -RepoRoot (Get-Location).Path -FullSuite",
+      "test_command": ".\\family-office-engine\\.venv\\Scripts\\python.exe -m unittest tests.unit.test_work_transition_plan_cli tests.unit.test_work_transition_plan",
       "stop_conditions": [
-        "Incomplete Windows evidence for CLI revision",
-        "Hypothetical pension promoted to entitlement"
+        "Any unverified pension entitlement is populated or inferred.",
+        "The golden path lacks explicit assumptions, lineage, data_gaps or blocker reasons.",
+        "Targeted golden or negative regressions fail.",
+        "Current-tree supported Windows full gate is not green."
       ]
     }
   },
-  "blockers": [
-    "V4.15e complete Windows gate pending."
-  ],
+  "blockers": [],
   "session_notes": [
     "User requested durable playbook updates from the long session; four workflow documents now include the corrections.",
     "b-c and b-d are done Knowledge-only on their own exact-hash reviews; no GO transfers to other increments.",
@@ -168,11 +173,19 @@
     "2026-11-21: explicit fresh user authorization for one bounded w-z-n remediation using existing v0.2 candidate, one limited independent normative review and technical verification; separate from exhausted prior three-increment authorization. No downstream increments authorized.",
     "2026-11-21: reused existing w-z-n v0.2 candidate; manifest hash 16073C82BC20F0596E81B65BEDB9CDA65DC754807ED7C7F3ED2245674D4F65C3, 14/14 hashes. Limited independent normative review GO on changed table finding only. Rules v6 tests 6 passed. Citation tests 1 pass/6 WinError 5 ACL failures; complete Windows Engine suite 348 passed/763 failed/16 errors, extensive temp ACL errors. No status closure due technical gate not green; V4.14 remains blocked; no further review/retry/new increment authorized.",
     "2026-11-21: verified Windows gate evidence 6/6 Rules v6, 7/7 citation, 1004/1004 Engine, 0/0/0; v0.2 manifest and limited normative GO already recorded. w-z-n marked done in own scope; V4.14 remains blocked. User authorized one architecture/dependency realignment and one functional increment. Accepted ADR separates pension_entitlement from scenario_projection; V4.15 selected for deterministic synthetic bridge comparison 100/60/0.",
-    "2026-11-21: Accepted ADR separates pension_entitlement from scenario_projection; V4.15 dependencies narrowed to V4.2/V4.3/V4.5 and V4.16 returned to planned pending V4.15. Implemented deterministic synthetic 100/60/0 bridge projection with optional explicitly hypothetical pension, null entitlement output and gaps. Targeted tests 3/3. Full Windows gate attempt stopped after two environment failures (runner AuthorizationManager, direct temp preflight WinError 5); current-tree full suite not certified. V4.15 remains in_progress; V4.14 remains blocked."
+    "2026-11-21: Accepted ADR separates pension_entitlement from scenario_projection; V4.15 dependencies narrowed to V4.2/V4.3/V4.5 and V4.16 returned to planned pending V4.15. Implemented deterministic synthetic 100/60/0 bridge projection with optional explicitly hypothetical pension, null entitlement output and gaps. Targeted tests 3/3. Full Windows gate attempt stopped after two environment failures (runner AuthorizationManager, direct temp preflight WinError 5); current-tree full suite not certified. V4.15 remains in_progress; V4.14 remains blocked.",
+    "2026-11-21: V4.18 closed on supplied full Windows gate 20261121-193328-d75b29e6. V4.18a audit selected with accepted projection ADR because the audit covers only scenario projection contracts; V4.14 remains blocked and no legal entitlement is inferred. Static review recorded the requirement that separate declared tax cashflows not already be included in net income inputs.",
+    "2026-11-21: verified V4.18a gate summary 20261121-195241-12d66ceb and preflight PASS. Audit closed. V4.19 selected as next authorized increment; V5.1 verified done. Scope is registry exposure/coexistence only, with no formula or legal change.",
+    "2026-11-21: Verified V4.18a gate 20261121-195241-12d66ceb; audit closed. V4.19 registry integration adds three JSON path adapters; 21 tools total, synthetic pipeline smoke and negative checks pass; legacy work-exit registry contract preserved. Full gate remains required on this exact V4.19 tree; no V4.20 selection until it passes.",
+    "2026-11-21: V4.19 gate 20261121-204013-a85a4f40 identified 42 Engine errors from supported_question_catalog not classifying three registered scenario tools. Remediation is bounded: add one explicit scenario-only capability and non-executable question-intent routing; formally require completed V5.3/V5.4. V4.20 remains unselected until retest.",
+    "2026-11-21: bounded gate remediation added `phased_work_transition_scenario` to supported-question catalog and deterministic question-intent routing. Ten catalog/router regressions pass; missing inputs and mixed pension entitlement requests remain clarification; no tools invoked. Current-tree full Windows gate is still required.",
+    "2026-11-21: verified V4.19 gate 20261121-204752-081c336e (preflight, Rules 6/6, citation 7/7, Engine 1042/1042; zero failures/errors/skips); roadmap audit passed. Closed V4.19 and selected V4.20, final V4B increment. V4.14 remains blocked; no entitlement or normative gate changes.",
+    "2026-11-21: V4.20 plan service/CLI golden implemented; targeted tests 9/9 PASS. External gate pending on the exact current tree; V4.20 blocked pending zero failures/errors/skips. No V4B/V5 handoff; V4.14 remains blocked.",
+    "2026-11-21: closed V4.20 on Windows gate 20261121-220726-8d7ef9ad (preflight; Rules 6/6; citation 7/7; Engine 1048/1048; zero failures/errors/skips). Applied V4B done / V5 in_progress handoff and pointed current-next at already-done V5.3 per V4.20 criteria. All listed V5 and V6 items are done; V6 remains deferred and no planned functional increment is selectable."
   ],
   "next_action": {
-    "mode": "resume",
-    "description": "Run once in supported Windows PowerShell and acquire the new summary: .\\family-office-bootstrap\\planning\\run-v414-windows-gate.ps1 -RepoRoot (Get-Location).Path -FullSuite"
+    "mode": "none",
+    "description": "No planned functional increment remains in the active V5 roadmap, and V6 is deferred with all listed increments done. Define and authorize a new roadmap scope before further implementation."
   },
   "routing": {
     "policy_version": "4.0",
@@ -181,17 +194,18 @@
     "agent": "fo_implementer",
     "model": "gpt-6.2-sol",
     "reasoning_effort": "medium",
-    "rationale": "T2 CLI adapter and bounded roadmap integration under Routing v4.0. Parent implementation, zero delegations.",
+    "rationale": "V4.20 was a bounded deterministic composition over already-approved services; no new formulas, legal semantics, or architecture changes were introduced.",
     "trace": [
       {
-        "at": "2026-11-21T17:23:33.178951+00:00",
+        "at": "2026-11-21T21:07:19Z",
         "event": "selected",
         "tier": "medium",
-        "agent": "parent",
+        "agent": "fo_implementer",
         "model": "gpt-6.2-sol",
         "reasoning_effort": "medium",
-        "reason": "V4.15e after supported Windows gate and predecessor closure."
+        "reason": "V4.20: bounded deterministic composition of the approved work-transition services; no formula or legal-semantics changes."
       }
     ]
-  }
+  },
+  "updated_at": "2026-11-21T23:15:00Z"
 }

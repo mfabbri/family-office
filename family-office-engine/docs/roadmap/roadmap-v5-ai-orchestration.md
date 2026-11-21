@@ -36,6 +36,10 @@ Registrare tool disponibili, schema input/output, prerequisiti, livello di risch
 
 Esito: completato con contratto `tool-registry/v1`, servizio deterministico `family_office_engine.services.tool_registry`, adapter locale `invoke_registered_tool`, CLI `orchestration tool-registry build/list`, documentazione API/CLI/testing e test. Il registry espone 15 tool decisionali con schema input/output, parametri richiesti/opzionali, prerequisiti, rischio, policy di autorizzazione e note di perimetro; l'adapter rifiuta tool non registrati, versioni output incompatibili, parametri mancanti o sconosciuti. Non abilita discovery dinamica delle funzioni interne e non usa LLM per calcoli fiscali, previdenziali o finanziari. Verifiche: 7 test mirati OK, smoke CLI build/list OK (`complete 15 tools`), regression unit engine 464 test OK, `roadmap_audit.py` OK.
 
+V4.19 estende il registry V5.1 aggiungendo tre contratti scenario: `work-transition-simulation/v1`, `work-transition-candidate-set/v1` e `work-transition-optimizer/v1`. Il registry risultante espone 21 tool. Questa estensione non modifica né rimuove il tool `work-exit-feasibility/v1` storico e non cambia la semantica V5.1 per le altre capability.
+
+Nel catalogo V5.3 i tre tool V4.19 sono raggruppati nell'intento `phased_work_transition_scenario`, con requisiti di input espliciti, chiarimento se mescolati alle richieste pensionistiche e nessuna tool invocation dal router question-first.
+
 ### V5.2 — Knowledge corpus and citation index
 
 **Stato:** `done`

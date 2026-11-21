@@ -32,10 +32,98 @@ class RoadmapAuditCadenceTest(unittest.TestCase):
                     ]
                     with self.assertRaisesRegex(RoadmapAuditCadenceError, "must be done"):
                         validate_predecessor_order(items, current, roadmap_path=roadmap_path)
-        with self.assertRaisesRegex(RoadmapAuditCadenceError, "not authorized"):
-            validate_predecessor_order(
-                increments, replace(current, increment_id="V4.16"), roadmap_path=roadmap_path
+        current_416 = replace(
+            next(item for item in increments if item.increment_id == "V4.16"),
+            status="in_progress",
+        )
+        validate_predecessor_order(increments, current_416, roadmap_path=roadmap_path)
+        for prerequisite in ("V4.15", "V4.15e"):
+            items = [replace(item, status="blocked") if item.increment_id == prerequisite else item for item in increments]
+            with self.subTest(v416_prerequisite=prerequisite):
+                with self.assertRaisesRegex(RoadmapAuditCadenceError, "declared financial prerequisite"):
+                    validate_predecessor_order(items, current_416, roadmap_path=roadmap_path)
+        current_417 = replace(
+            next(item for item in increments if item.increment_id == "V4.17"),
+            status="in_progress",
+        )
+        validate_predecessor_order(increments, current_417, roadmap_path=roadmap_path)
+        incomplete_416 = [
+            replace(item, status="blocked") if item.increment_id == "V4.16" else item
+            for item in increments
+        ]
+        with self.assertRaisesRegex(RoadmapAuditCadenceError, "declared financial prerequisite"):
+            validate_predecessor_order(incomplete_416, current_417, roadmap_path=roadmap_path)
+        current_418 = replace(
+            next(item for item in increments if item.increment_id == "V4.18"),
+            status="in_progress",
+        )
+        validate_predecessor_order(increments, current_418, roadmap_path=roadmap_path)
+        incomplete_417 = [
+            replace(item, status="blocked") if item.increment_id == "V4.17" else item
+            for item in increments
+        ]
+        with self.assertRaisesRegex(RoadmapAuditCadenceError, "declared financial prerequisite"):
+            validate_predecessor_order(incomplete_417, current_418, roadmap_path=roadmap_path)
+        current_418a = replace(
+            next(item for item in increments if item.increment_id == "V4.18a"),
+            status="in_progress",
+        )
+        validate_predecessor_order(increments, current_418a, roadmap_path=roadmap_path)
+        incomplete_418 = [
+            replace(item, status="blocked") if item.increment_id == "V4.18" else item
+            for item in increments
+        ]
+        with self.assertRaisesRegex(RoadmapAuditCadenceError, "declared financial prerequisite"):
+            validate_predecessor_order(incomplete_418, current_418a, roadmap_path=roadmap_path)
+        current_419 = replace(
+            next(item for item in increments if item.increment_id == "V4.19"),
+            status="in_progress",
+        )
+        validate_predecessor_order(increments, current_419, roadmap_path=roadmap_path)
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            docs = root / "docs"
+            roadmap_dir = docs / "roadmap"
+            roadmap_dir.mkdir(parents=True)
+            (docs / "adr").mkdir()
+            active_path = roadmap_dir / "roadmap-v4b-work-transition.md"
+            v5_path = roadmap_dir / "roadmap-v5-ai-orchestration.md"
+            index_path = roadmap_dir / "roadmap-index.md"
+            active_path.write_text(
+                "# V4B\n\n### V4.14 - Legal parent\n\n**Stato:** `blocked`\n**Tipo:** `functional`\n\n"
+                "### V4.18a - Scenario audit\n\n**Stato:** `done`\n**Tipo:** `audit`\n\n"
+                "### V4.19 - Registry migration\n\n**Stato:** `in_progress`\n**Tipo:** `functional`\n"
+                "**Dipende da:** V4.18a, V5.1, V5.3, V5.4.\n"
+                "**Percorso finanziario indipendente:** `../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md`\n",
+                encoding="utf-8",
             )
+            v5_path.write_text(
+                "# V5\n\n### V5.1 - Tool registry\n\n**Stato:** `done`\n**Tipo:** `functional`\n\n"
+                "### V5.3 - Supported-question catalog\n\n**Stato:** `done`\n**Tipo:** `functional`\n\n"
+                "### V5.4 - Intent router\n\n**Stato:** `done`\n**Tipo:** `functional`\n",
+                encoding="utf-8",
+            )
+            index_path.write_text(
+                "| Ordine | Roadmap | Obiettivo | Stato |\n|---:|---|---|---|\n"
+                "| 5 | `roadmap-v4b-work-transition.md` | V4B | `in_progress` |\n"
+                "| 6 | `roadmap-v5-ai-orchestration.md` | V5 | `done` |\n",
+                encoding="utf-8",
+            )
+            (docs / "adr" / "ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md").write_text(
+                "Accepted projection ADR\n", encoding="utf-8"
+            )
+            temp_increments = parse_roadmap(active_path)
+            temp_current = next(item for item in temp_increments if item.increment_id == "V4.19")
+            validate_predecessor_order(temp_increments, temp_current, roadmap_path=active_path)
+            v5_original = v5_path.read_text(encoding="utf-8")
+            for prerequisite, title in (("V5.1", "Tool registry"), ("V5.3", "Supported-question catalog"),
+                                        ("V5.4", "Intent router")):
+                with self.subTest(prerequisite=prerequisite):
+                    marker = f"### {prerequisite} - {title}\n\n**Stato:** `done`"
+                    v5_path.write_text(v5_original.replace(marker, marker.replace("`done`", "`blocked`")), encoding="utf-8")
+                    with self.assertRaisesRegex(RoadmapAuditCadenceError, f"financial prerequisite {prerequisite} is 'blocked'"):
+                        validate_predecessor_order(temp_increments, temp_current, roadmap_path=active_path)
+            v5_path.write_text(v5_original, encoding="utf-8")
 
     def test_repository_roadmap_and_current_increment_are_consistent(self) -> None:
         roadmap_path, current_path = default_paths()

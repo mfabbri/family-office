@@ -836,6 +836,8 @@ Funzioni principali:
 
 `tool-registry/v1` espone identificativo tool, schema input/output, parametri richiesti/opzionali, prerequisiti, rischio, policy di autorizzazione e note di perimetro. Il registry e' esplicito: non abilita discovery dinamica delle funzioni interne e non consente all'LLM di calcolare imposte, pensioni, rendimenti o valori finanziari.
 
+V4.19 aggiunge `planning.work_transition_simulation.build`, `planning.work_transition_candidates.build` e `planning.work_transition_optimizer.build`. Sono adapter JSON con `input_path` e `output_path` espliciti e mantengono i rispettivi schema v1. Il tool `planning.work_exit_feasibility.build` e i suoi schemi restano registrati senza modifiche: vedere `work-transition-tool-migration.md` per scegliere il contratto corretto.
+
 ## Citation Index
 
 Modulo:
@@ -869,6 +871,8 @@ Funzioni principali:
 - `assess_question_capability(intent_ids, provided_data=None)`: valuta intenti gia' selezionati e restituisce `question-capability-assessment/v1`, senza classificare testo libero ne' invocare tool.
 
 Il catalogo copre ogni tool del registry una sola volta nella capability disponibile. Le domande su investimenti a reddito o asset mobili noleggiabili richiedono ora un confronto deterministico e gap dichiarati; il routing da linguaggio naturale e' fornito da `question-intent/v1` (V5.4), ma non invoca tool. Dati minimi mancanti, intenti sovrapposti, sconosciuti o che richiedono consulenza professionale producono problemi espliciti.
+
+`phased_work_transition_scenario` classifica i tool di simulazione, candidate generation e optimizer solo come `scenario_projection`. Richiede gli input versionati per ogni fase; senza questi dati restituisce `minimum_data_missing`. Se la richiesta combina questo intento con pension entitlement/work-exit, il catalogo chiede chiarimento. Il router non invoca nessuno dei tool e non trasforma ipotesi in date pensionistiche verificate.
 
 ## Operator analysis
 
@@ -965,3 +969,7 @@ Il manifest viene sostituito atomicamente soltanto dopo un run completo; `Pipeli
 `build_compliance_calendar(policy_path, workspace_root, as_of_date, output_path=None)` legge un rule pack `compliance-calendar-policy/v1` e produce il calendario locale con scadenza timezone-aware, fonte, responsabile, azione richiesta e alert deduplicati. Supporta ricorrenze annuali, date una tantum e ultimo giorno lavorativo del mese; la data di controllo è sempre esplicita. `setup_workspace_compliance_event(workspace_root, ask)` salva progressivamente una scadenza workspace-local senza richiedere JSON manuale.
 
 Il servizio non contiene date normative hard-coded, non determina obblighi individuali e non calcola importi. Fonti mancanti nelle scadenze locali diventano `source_not_verified`; output e configurazione locale restano confinati al workspace.
+
+## Work-transition plan V4.20
+
+`family_office_engine.services.work_transition_plan.build_work_transition_plan(data)` compone la proiezione bridge, la simulazione deterministica/stress, la generazione candidate e l'optimizer gi? approvati in `work-transition-plan/v1`. L'input `work-transition-plan-input/v1` include readiness/data gaps, fasi dichiarate, provenance e gli input versionati dei servizi; l'output conserva le componenti, i motivi di esclusione, metriche, blocker e prossima azione. `synthetic_work_transition_plan_input()` alimenta il comando CLI `fo planning work-transition plan --demo`. Il servizio forza `pension_entitlement` a `not_assessed` con date/importi null e rifiuta componenti che non restano `scenario_projection`.

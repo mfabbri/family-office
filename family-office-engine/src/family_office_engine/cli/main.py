@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from family_office_engine.services.rita_fund_stream import FIELDS as RITA_STREAM_FIELDS, build_rita_fund_stream
+from family_office_engine.services.work_transition_plan import (
+    WorkTransitionPlanError,
+    build_work_transition_plan,
+    synthetic_work_transition_plan_input,
+)
 
 from family_office_engine.ingestion.manual_assumptions import (
     AssumptionsImportError,
@@ -699,6 +704,14 @@ def default_work_transition_plan_readiness_input() -> Path:
 
 def default_work_transition_scenario_demo_output() -> Path:
     return resolve_repo("workspace") / "snapshots" / "cli-check-work-transition-scenario.synthetic.snapshot.json"
+
+
+def default_work_transition_plan_demo_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "work-transition-plan.synthetic.snapshot.json"
+
+
+def default_work_transition_plan_output() -> Path:
+    return resolve_repo("workspace") / "snapshots" / "work-transition-plan.snapshot.json"
 
 
 def default_employment_income_projection_input() -> Path:
@@ -6432,7 +6445,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     planning_work_transition_plan_parser = planning_work_transition_subparsers.add_parser(
         "plan",
-        help="Question-first local readiness; stops before unavailable timeline, bridge and optimizer stages",
+        help="Build a question-first readiness report or run the composed scenario-only transition plan",
     )
     planning_work_transition_plan_parser.add_argument(
         "--input", type=Path, default=default_work_transition_plan_readiness_input(), help="Workspace-local readiness manifest path"
@@ -6442,6 +6455,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     planning_work_transition_plan_parser.add_argument(
         "--overwrite", action="store_true", help="Revise the local readiness manifest and source bindings"
+    )
+    planning_work_transition_plan_parser.add_argument(
+        "--scenario-plan-input", type=Path, help="Workspace-local work-transition-plan-input/v1 JSON (runs the composed scenario pipeline)"
+    )
+    planning_work_transition_plan_parser.add_argument(
+        "--plan-output", type=Path, help="Workspace-local output path for work-transition-plan/v1"
+    )
+    planning_work_transition_plan_parser.add_argument(
+        "--demo", action="store_true", help="Run the deterministic synthetic full-time/part-time/stop golden scenario"
     )
     planning_work_transition_readiness_parser = planning_work_transition_subparsers.add_parser(
         "readiness",
@@ -9303,6 +9325,51 @@ def main(argv: list[str] | None = None) -> int:
         and args.planning_command == "work-transition"
         and args.planning_work_transition_command == "plan"
     ):
+        if args.demo and args.scenario_plan_input is not None:
+            print("planning work-transition plan: usa --demo oppure --scenario-plan-input, non entrambi.")
+            return 2
+        if args.plan_output is not None and not args.demo and args.scenario_plan_input is None:
+            print("planning work-transition plan: --plan-output richiede --demo o --scenario-plan-input.")
+            return 2
+        if args.demo or args.scenario_plan_input is not None:
+            try:
+                output_path = _validate_v66a_input_path(
+                    args.plan_output or (
+                        default_work_transition_plan_demo_output() if args.demo else default_work_transition_plan_output()
+                    ), WorkTransitionPlanError
+                )
+                if args.demo:
+                    plan_input = synthetic_work_transition_plan_input()
+                else:
+                    input_path = _validate_v66a_input_path(args.scenario_plan_input, WorkTransitionPlanError)
+                    if input_path == output_path:
+                        raise WorkTransitionPlanError("plan input and output paths must be different")
+                    plan_input = _read_optional_wizard_json(input_path, WorkTransitionPlanError, "work-transition plan input")
+                    if plan_input is None:
+                        raise WorkTransitionPlanError(f"plan input not found: {input_path}")
+                plan = build_work_transition_plan(plan_input)
+                _write_wizard_json(output_path, plan, True, WorkTransitionPlanError, "work-transition plan output")
+            except (WorkTransitionPlanError, OSError) as exc:
+                print(f"planning work-transition plan: ERROR ({exc})")
+                return 1
+            bridge_options = plan["bridge_projection"]["scenarios"]
+            option_text = ", ".join(
+                f"{int(float(item['work_fraction']) * 100)}%={item['summary']['ending_available_assets']} EUR"
+                for item in bridge_options
+            )
+            print(f"planning work-transition plan: scenario_projection ({output_path}).")
+            print("Fatti: nessun entitlement pensionistico verificato nel piano; input sintetici/declarati distinti dalle proiezioni.")
+            print("Assunzioni: " + str(plan["assumptions"]["origin"]) + "; spouse, ES e INPS restano flussi scenario_assumption.")
+            print("Bridge 100%/60%/0%: " + option_text + ".")
+            print("Transizione ottimizzata: earliest=" + str(plan["risk_metrics"]["optimizer_earliest_full_time_exit_date"])
+                  + ", recommended=" + str(plan["risk_metrics"]["optimizer_recommended_full_time_exit_date"])
+                  + ", full_stop=" + str(plan["risk_metrics"]["optimizer_full_work_exit_date"]) + ".")
+            print("Candidate escluse/rifiutate: " + str(len(plan["rejected_candidates"])) + ".")
+            print("Data gaps: " + (", ".join(sorted({str(item.get("code", "unknown_gap")) for item in plan["data_gaps"]})) or "nessuno."))
+            print("Blocker: " + (", ".join(plan["blockers"]) if plan["blockers"] else "nessuno."))
+            print("Limiti: date e flussi sono scenario_projection; pension_entitlement resta not_assessed/null.")
+            print("Prossima azione: " + plan["next_action"])
+            return 0
         try:
             result = run_work_transition_plan_wizard(args.input, args.readiness_output, overwrite=args.overwrite)
         except (EOFError, KeyboardInterrupt):
@@ -9313,6 +9380,7 @@ def main(argv: list[str] | None = None) -> int:
             WorkTransitionSourceBindingError,
             WorkTransitionScenarioError,
             EmploymentIncomeProjectionError,
+            WorkTransitionPlanError,
         ) as exc:
             print(f"planning work-transition plan: ERROR ({exc})")
             return 1

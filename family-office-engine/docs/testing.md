@@ -1127,7 +1127,9 @@ Output personale previsto:
 ..\family-office-workspace\snapshots\tool-registry.snapshot.json
 ```
 
-Il contratto `tool-registry/v1` registra i tool deterministici invocabili da V5 con schema input/output, prerequisiti, rischio e policy. I test coprono snapshot registry, scrittura, tool inesistente, versione incompatibile, parametri mancanti e invocazione controllata di un tool registrato.
+Il contratto `tool-registry/v1` registra i tool deterministici invocabili da V5 con schema input/output, prerequisiti, rischio e policy. I test coprono snapshot registry, scrittura, tool inesistente, versione incompatibile, parametri mancanti e invocazione controllata di un tool registrato. V4.19 verifica inoltre il flusso registrato simulation → candidates → optimizer, rifiuta JSON malformato e path input/output identici e conferma la conservazione del tool legacy e dello stato pensionistico `not_assessed`.
+
+La catalog taxonomy deve classificare una sola volta ciascun tool registrato. V4.19 aggiunge test per gli input richiesti della proiezione graduale, il chiarimento quando si sovrappone a retirement/entitlement e l'assenza di invocazioni automatiche dal router question-first.
 
 ## Execution executor
 
@@ -1358,3 +1360,13 @@ I test usano esclusivamente risposte sintetiche e verificano draft workspace-loc
 `test_release_governance.py` verifica il contratto `release-gate/v1`, version matrix/hash, evaluation sintetica, rollback non automatico, incompatibilità di schema, regressione rispetto al baseline e il percorso CLI `fo release check`. Il gate reale usa solo comandi locali allowlistati (`unittest`, `compileall`, `pip check` e audit roadmap), non rete o workspace reale.
 
 Il release gate esegue inoltre sempre `fo planning pension-sources audit`, anche se `run_tests=False`: fonti pensionistiche senza provenance o con review scaduta bloccano il rilascio. Il report dichiara espressamente che l'audit non usa la rete; i test coprono sia la chiamata sia il failure path.
+
+### V4.20 work-transition plan golden
+
+Test mirati (fixture esclusivamente sintetiche):
+
+```text
+.\.venv\Scripts\python.exe -m unittest tests.unit.test_work_transition_plan tests.unit.test_work_transition_plan_cli
+```
+
+Il golden verifica 100%/60%/0%, fasi, simulazione avversa seedata, 16 candidate, output deterministico, gap su entitlement e limite del bridge lineare rispetto al reddito del coniuge, oltre a entitlement `not_assessed/null`. Le verifiche negative rifiutano schema readiness/phase incompleto, flussi pensionistici ipotetici senza tag `scenario_assumption` e path di output fuori dal workspace.

@@ -23,6 +23,9 @@ from family_office_engine.services.tax_aware_portfolio import build_tax_aware_po
 from family_office_engine.services.wealth_strategy import build_wealth_strategy
 from family_office_engine.services.investment_opportunity_comparison import build_investment_opportunity_comparison
 from family_office_engine.services.work_exit_feasibility import build_work_exit_feasibility
+from family_office_engine.services.work_transition_candidates import build_work_transition_candidates
+from family_office_engine.services.work_transition_optimizer import build_work_transition_optimizer
+from family_office_engine.services.work_transition_simulation import build_work_transition_simulation
 from family_office_engine.services.guardrails import build_guardrail_assessment
 
 SCHEMA_VERSION = "tool-registry/v1"
@@ -49,6 +52,28 @@ class RegisteredTool:
     risk_level: str
     authorization_policy: tuple[str, ...]
     notes: str
+
+
+def _json_path_adapter(builder: Callable[[dict[str, Any]], dict[str, Any]]) -> Callable[..., dict[str, Any]]:
+    def invoke(input_path: Path, output_path: Path) -> dict[str, Any]:
+        source = Path(input_path)
+        destination = Path(output_path)
+        if source.resolve() == destination.resolve():
+            raise ToolRegistryError("input_path and output_path must be different files")
+        try:
+            payload = json.loads(source.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            raise ToolRegistryError(f"Cannot read valid JSON input: {source}") from exc
+        if not isinstance(payload, dict):
+            raise ToolRegistryError("registered scenario input must be a JSON object")
+        result = builder(payload)
+        try:
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        except OSError as exc:
+            raise ToolRegistryError(f"Cannot write registered scenario output: {destination}") from exc
+        return result
+    return invoke
 
 
 TOOL_REGISTRY: tuple[RegisteredTool, ...] = (
@@ -266,6 +291,45 @@ TOOL_REGISTRY: tuple[RegisteredTool, ...] = (
         risk_level="high",
         authorization_policy=("workspace_write", "rule_pack_required", "professional_review_required"),
         notes="Finds feasible exit dates from deterministic pension and spending evidence; no LLM calculations.",
+    ),
+    RegisteredTool(
+        tool_id="planning.work_transition_simulation.build",
+        title="Build work-transition-simulation/v1",
+        callable_ref=_json_path_adapter(build_work_transition_simulation),
+        input_schema_version="work-transition-simulation/v1",
+        output_schema_version="work-transition-simulation/v1",
+        required_parameters=("input_path", "output_path"),
+        optional_parameters=(),
+        prerequisites=(),
+        risk_level="medium",
+        authorization_policy=("workspace_write", "professional_review_required"),
+        notes="Runs only declared scenario assumptions; pension_entitlement remains not_assessed unless independently source-bound.",
+    ),
+    RegisteredTool(
+        tool_id="planning.work_transition_candidates.build",
+        title="Build work-transition-candidate-set/v1",
+        callable_ref=_json_path_adapter(build_work_transition_candidates),
+        input_schema_version="work-transition-candidate-set/v1",
+        output_schema_version="work-transition-candidate-set/v1",
+        required_parameters=("input_path", "output_path"),
+        optional_parameters=(),
+        prerequisites=("work-transition-simulation/v1",),
+        risk_level="medium",
+        authorization_policy=("workspace_write", "professional_review_required"),
+        notes="Generates bounded scenario candidates without ranking; pension entitlement is not inferred.",
+    ),
+    RegisteredTool(
+        tool_id="planning.work_transition_optimizer.build",
+        title="Build work-transition-optimizer/v1",
+        callable_ref=_json_path_adapter(build_work_transition_optimizer),
+        input_schema_version="work-transition-optimizer/v1",
+        output_schema_version="work-transition-optimizer/v1",
+        required_parameters=("input_path", "output_path"),
+        optional_parameters=(),
+        prerequisites=("work-transition-candidate-set/v1", "work-transition-simulation/v1"),
+        risk_level="high",
+        authorization_policy=("workspace_write", "professional_review_required"),
+        notes="Compares only declared scenario assumptions; output is not a pension eligibility, start-date or payment determination.",
     ),
     RegisteredTool(
         tool_id="planning.investment_opportunity_comparison.build",

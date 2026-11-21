@@ -1630,6 +1630,8 @@ Default principali:
 
 Il comando produce `tool-registry/v1` con tool id, schema input/output, prerequisiti, rischio, policy di autorizzazione e note di perimetro. Non esegue tool di pianificazione e non abilita calcoli LLM.
 
+Il registry include anche i tool scenario V4.16-V4.18 per simulazione, candidate set e optimizer. Non aggiungono sottocomandi CLI in V4.19; gli adapter sono invocabili solo attraverso `invoke_registered_tool` con schema v1 richiesto e path JSON espliciti. Il contratto legacy `planning.work_exit_feasibility.build` resta disponibile.
+
 ## `fo orchestration question-intent route`
 
 Classifica una domanda in intenti supportati senza invocare tool, scrivere facts o calcolare valori.
@@ -1640,6 +1642,8 @@ fo orchestration question-intent demo
 ```
 
 L'output `question-intent/v1` conserva soltanto fingerprint della domanda, intenti candidati, entita' proposte, dati minimi mancanti e problemi: il testo non viene persistito. Istruzioni di invocazione, prompt injection, richieste non supportate e combinazioni ambigue restano `needs_clarification` con zero tool invocati. Anche un intento riconosciuto non autorizza esecuzioni: il planner V5.5 resta il solo componente destinato a produrre piani ispezionabili.
+
+Le richieste su passaggi graduali o part-time sono classificate come `phased_work_transition_scenario`. Senza i contratti v1 richiesti, il router restituisce `minimum_data_missing`; se la stessa richiesta include pension entitlement/work-exit, richiede chiarimento. Non invoca simulazione, candidate generator o optimizer.
 
 ## `fo orchestration scenario-draft build`
 
@@ -1805,3 +1809,13 @@ fo audit replay
 ```
 
 Gli eventi `audit-event/v1` contengono solo riferimenti, non contenuti personali. Sequenza, hash dell'evento precedente e SHA-256 rilevano modifica, inserimento, cancellazione o riordinamento; approvazioni e revoche restano eventi distinti. `replay` ricostruisce lo stato delle approvazioni e fallisce se la catena e' alterata. Il log e' confinato al workspace e non usa rete.
+
+### Scenario pipeline V4.20
+
+Per eseguire il golden sintetico end-to-end senza dati reali:
+
+```text
+fo planning work-transition plan --demo
+```
+
+Il comando produce `work-transition-plan/v1` sotto `family-office-workspace/snapshots/`, mostrando le tre opzioni bridge 100%/60%/0%, il piano full-time?part-time?stop, metriche di rischio, candidate scartate, blocker, `data_gaps` e prossima azione. Per input dichiarati versionati usare `--scenario-plan-input <workspace-path> --plan-output <workspace-path>`; entrambi i path devono restare nel workspace privato. Il bridge, la simulazione e le date restano `scenario_projection`; flussi RITA/ES/INPS e reddito coniuge sono ipotesi con provenance. Il demo non determina entitlement, imposte o decisioni amministrative.

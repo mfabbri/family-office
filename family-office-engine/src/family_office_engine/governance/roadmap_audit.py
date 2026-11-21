@@ -207,7 +207,17 @@ def validate_predecessor_order(
         # bypasses unrelated earlier blockers after validating the explicit ADR
         # and every declared prerequisite. Entitlement outputs retain their
         # own legal gates and cannot use this path.
-        allowed_kinds = {"V4.15": "functional", "V4.15d": "audit", "V4.15e": "functional"}
+        allowed_kinds = {
+            "V4.15": "functional",
+            "V4.15d": "audit",
+            "V4.15e": "functional",
+            "V4.16": "functional",
+            "V4.17": "functional",
+            "V4.18": "functional",
+            "V4.18a": "audit",
+            "V4.19": "functional",
+            "V4.20": "functional",
+        }
         if allowed_kinds.get(current.increment_id) != current.kind:
             raise RoadmapAuditCadenceError(
                 f"Independent financial path is not authorized for {current.increment_id}."
@@ -230,11 +240,56 @@ def validate_predecessor_order(
                 if prerequisite not in by_id or by_id[prerequisite].status != "done":
                     raise RoadmapAuditCadenceError(f"Cannot select V4.15e: {prerequisite} must be done.")
             return
+        if current.increment_id == "V4.16" and (
+            current.independent_financial_adr != (
+                "../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md"
+            )
+            or set(current.dependencies) != {"V4.15", "V4.15e", "V4.3", "V4.5"}
+        ):
+            raise RoadmapAuditCadenceError("V4.16 requires the projection ADR and its declared financial prerequisites.")
+        if current.increment_id == "V4.17" and (
+            current.independent_financial_adr != (
+                "../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md"
+            )
+            or set(current.dependencies) != {"V4.16"}
+        ):
+            raise RoadmapAuditCadenceError("V4.17 requires the projection ADR and its declared scenario prerequisite.")
+        if current.increment_id == "V4.18" and (
+            current.independent_financial_adr != (
+                "../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md"
+            )
+            or set(current.dependencies) != {"V4.17"}
+        ):
+            raise RoadmapAuditCadenceError("V4.18 requires the projection ADR and its declared candidate prerequisite.")
+        if current.increment_id == "V4.18a" and (
+            current.independent_financial_adr != (
+                "../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md"
+            )
+            or set(current.dependencies) != {"V4.18"}
+        ):
+            raise RoadmapAuditCadenceError("V4.18a requires the projection ADR and completed optimizer prerequisite.")
+        if current.increment_id == "V4.19" and (
+            current.independent_financial_adr != (
+                "../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md"
+            )
+            or set(current.dependencies) != {"V4.18a", "V5.1", "V5.3", "V5.4"}
+        ):
+            raise RoadmapAuditCadenceError("V4.19 requires the projection ADR, completed audit, V5.1 registry and V5.3/V5.4 routing contracts.")
+        if current.increment_id == "V4.20" and (
+            current.independent_financial_adr != (
+                "../adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md"
+            )
+            or set(current.dependencies) != {"V4.19"}
+        ):
+            raise RoadmapAuditCadenceError("V4.20 requires the projection ADR and completed V4.19 integration.")
         if roadmap_path is not None:
             prior_roadmap_name = "roadmap-v4-wealth-planning.md"
             prior_roadmap_path = roadmap_path.parent / prior_roadmap_name
             if _indexed_roadmap_is_done(roadmap_path.parent / "roadmap-index.md", prior_roadmap_name) and prior_roadmap_path.is_file():
                 by_id.update({item.increment_id: item for item in parse_roadmap(prior_roadmap_path)})
+            v5_roadmap_path = roadmap_path.parent / "roadmap-v5-ai-orchestration.md"
+            if _indexed_roadmap_is_done(roadmap_path.parent / "roadmap-index.md", "roadmap-v5-ai-orchestration.md") and v5_roadmap_path.is_file():
+                by_id.update({item.increment_id: item for item in parse_roadmap(v5_roadmap_path)})
         for dependency_id in current.dependencies:
             dependency = by_id.get(dependency_id)
             if dependency is None or dependency.status not in {"done", "deferred"}:
