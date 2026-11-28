@@ -19,10 +19,11 @@ class ItalianOldAgeEligibilityError(ValueError):
 
 
 def assess_italian_old_age_eligibility(
-    facts: dict[str, Any], rule_pack_path: Path, as_of_date: str | date | None = None
+    facts: dict[str, Any], rule_pack_path: Path, as_of_date: str | date | None = None,
+    *, rule_pack_bytes: bytes | None = None,
 ) -> dict[str, Any]:
     """Assess only ordinary FPLD/AGO employee paths; never calculate amounts or a timeline."""
-    pack = _load_pack(rule_pack_path, as_of_date)
+    pack = _load_pack(rule_pack_path, as_of_date, rule_pack_bytes=rule_pack_bytes)
     candidate = _date(facts.get("candidate_date"))
     gaps = _scope_gaps(facts, pack["supported_scope"], candidate_date=candidate)
     birth = _date(facts.get("date_of_birth"))
@@ -147,6 +148,7 @@ def assess_italian_old_age_eligibility(
 def search_first_post_1996_alternative_eligibility_month(
     facts: dict[str, Any], monthly_history: list[dict[str, Any]],
     rule_pack_path: Path, as_of_date: str | date | None = None,
+    *, rule_pack_bytes: bytes | None = None,
 ) -> dict[str, Any]:
     """Find only the first supported month on the post-1995 five-effective-year path.
 
@@ -164,7 +166,7 @@ def search_first_post_1996_alternative_eligibility_month(
             "data_gaps": [_gap("as_of_date_missing_or_invalid", "An explicit ISO as_of_date is required for a reproducible month search.")],
             "limitations": ["First eligible month within observed history and the 2026-2028 pack only; no future contribution is projected."],
         }
-    pack = _load_pack(rule_pack_path, search_as_of)
+    pack = _load_pack(rule_pack_path, search_as_of, rule_pack_bytes=rule_pack_bytes)
     gaps = _scope_gaps(
         facts, pack["supported_scope"], candidate_date=search_as_of,
         require_full_scope_coverage=True,
@@ -294,6 +296,7 @@ def search_first_post_1996_alternative_eligibility_month(
 def search_first_post_1996_ordinary_threshold_eligibility_month(
     facts: dict[str, Any], monthly_history: list[dict[str, Any]],
     rule_pack_path: Path, as_of_date: str | date | None = None,
+    *, rule_pack_bytes: bytes | None = None,
 ) -> dict[str, Any]:
     """Find the first observed month for the approved post-1995 20-year path.
 
@@ -306,7 +309,7 @@ def search_first_post_1996_ordinary_threshold_eligibility_month(
         return _ordinary_month_search_not_assessed(None, [_gap(
             "as_of_date_missing_or_invalid", "An explicit ISO as_of_date is required for a reproducible month search."
         )])
-    pack = _load_pack(rule_pack_path, search_as_of)
+    pack = _load_pack(rule_pack_path, search_as_of, rule_pack_bytes=rule_pack_bytes)
     gaps = _monthly_search_common_gaps(facts, pack, search_as_of)
     birth = _date(facts.get("date_of_birth"))
     evidence = facts.get("contribution_evidence")
@@ -379,6 +382,7 @@ def search_first_post_1996_ordinary_threshold_eligibility_month(
 def search_first_pre_1996_ordinary_eligibility_month(
     facts: dict[str, Any], monthly_history: list[dict[str, Any]],
     rule_pack_path: Path, as_of_date: str | date | None = None,
+    *, rule_pack_bytes: bytes | None = None,
 ) -> dict[str, Any]:
     """Find only the first observed month for the approved pre-1996 FPLD path.
 
@@ -396,7 +400,7 @@ def search_first_pre_1996_ordinary_eligibility_month(
             "rule_pack_period_unsupported", "The search as-of date is outside the supported 2026-2028 rule-pack period."
         )], search_as_of)
     try:
-        pack = _load_pack(rule_pack_path, search_as_of)
+        pack = _load_pack(rule_pack_path, search_as_of, rule_pack_bytes=rule_pack_bytes)
     except ItalianOldAgeEligibilityError:
         return _pre_1996_month_search_not_assessed(None, [_gap(
             "rule_pack_unavailable_or_stale", "A fresh, exact supported rule pack is required for this month search."
@@ -698,10 +702,14 @@ def _month_search_not_assessed(
     }
 
 
-def _load_pack(path: Path, as_of_date: str | date | None) -> dict[str, Any]:
+def _load_pack(path: Path, as_of_date: str | date | None, *, rule_pack_bytes: bytes | None = None) -> dict[str, Any]:
     try:
-        require_fresh_pension_rule_pack(path, as_of_date)
-        pack = json.loads(path.read_text(encoding="utf-8"))
+        if rule_pack_bytes is None:
+            require_fresh_pension_rule_pack(path, as_of_date)
+            pack = json.loads(path.read_text(encoding="utf-8"))
+        else:
+            require_fresh_pension_rule_pack(path, as_of_date, rule_pack_bytes=rule_pack_bytes)
+            pack = json.loads(rule_pack_bytes.decode("utf-8"))
     except (OSError, ValueError, PensionSourceFreshnessError) as exc:
         raise ItalianOldAgeEligibilityError(str(exc)) from exc
     if not isinstance(pack, dict) or not all(key in pack for key in ("schema_version", "rule_pack_id", "jurisdiction", "valid_from", "valid_to", "requirements_by_year", "paths", "supported_scope", "post_1996_cohort_start", "source_refs")):

@@ -1,5 +1,6 @@
 import hashlib
 import json
+from datetime import date
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
@@ -26,9 +27,26 @@ def build_spanish_eu_theoretical_pension(
     rule_pack_path: Path,
     output_path: Path,
 ) -> dict[str, Any]:
-    pro_rata_input = _read_json(pro_rata_input_path, "IT-ES EU pension pro-rata input")
-    reconciliation = _read_json(reconciliation_snapshot_path, "Spanish contribution reconciliation snapshot")
-    rule_pack = load_spanish_eu_theoretical_rule_pack(rule_pack_path)
+    snapshot = calculate_spanish_eu_theoretical_pension(
+        pro_rata_input_path, reconciliation_snapshot_path, rule_pack_path, output_name=output_path.name,
+    )
+    return _write_snapshot(snapshot, output_path)
+
+
+def calculate_spanish_eu_theoretical_pension(
+    pro_rata_input_path: Path,
+    reconciliation_snapshot_path: Path,
+    rule_pack_path: Path,
+    *,
+    output_name: str = "spanish-eu-theoretical-pension",
+    pro_rata_input_bytes: bytes | None = None,
+    reconciliation_bytes: bytes | None = None,
+    rule_pack_bytes: bytes | None = None,
+    as_of_date: date | None = None,
+) -> dict[str, Any]:
+    pro_rata_input = _read_json(pro_rata_input_path, "IT-ES EU pension pro-rata input", payload=pro_rata_input_bytes)
+    reconciliation = _read_json(reconciliation_snapshot_path, "Spanish contribution reconciliation snapshot", payload=reconciliation_bytes)
+    rule_pack = load_spanish_eu_theoretical_rule_pack(rule_pack_path, rule_pack_bytes=rule_pack_bytes, as_of_date=as_of_date)
     _validate_inputs(pro_rata_input, reconciliation)
 
     retirement_date = _retirement_date(pro_rata_input)
@@ -44,7 +62,10 @@ def build_spanish_eu_theoretical_pension(
     data_gaps.extend(rule_gaps)
     data_gaps.extend(base_inputs["data_gaps"])
 
-    snapshot = _base_snapshot(pro_rata_input_path, reconciliation_snapshot_path, rule_pack_path, rule_pack, effective_rules, retirement_date)
+    snapshot = _base_snapshot(
+        pro_rata_input_path, reconciliation_snapshot_path, rule_pack_path, rule_pack, effective_rules, retirement_date,
+        rule_pack_bytes=rule_pack_bytes,
+    )
     snapshot.update(
         {
             "status": "complete" if not data_gaps else "blocked_missing_inputs",
@@ -79,20 +100,22 @@ def build_spanish_eu_theoretical_pension(
             "annual_gross_amount": _money(annual),
             "currency": rule_pack["currency"],
             "payments_per_year": payments,
-            "source": f"{SCHEMA_VERSION}:{output_path.name}",
+            "source": f"{SCHEMA_VERSION}:{output_name}",
             "source_country": "ES",
             "basis": "spanish_only_bases",
             "method": rule_pack["theoretical_amount_method"],
         }
-    return _write_snapshot(snapshot, output_path)
+    return snapshot
 
 
-def load_spanish_eu_theoretical_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
+def load_spanish_eu_theoretical_rule_pack(
+    rule_pack_path: Path, *, rule_pack_bytes: bytes | None = None, as_of_date: date | None = None,
+) -> dict[str, Any]:
     try:
-        require_fresh_pension_rule_pack(rule_pack_path)
+        require_fresh_pension_rule_pack(rule_pack_path, as_of_date, rule_pack_bytes=rule_pack_bytes)
     except PensionSourceFreshnessError as exc:
         raise SpanishEuTheoreticalPensionError(str(exc)) from exc
-    data = _read_json(rule_pack_path, "Spanish EU theoretical pension rule pack")
+    data = _read_json(rule_pack_path, "Spanish EU theoretical pension rule pack", payload=rule_pack_bytes)
     required = (
         "schema_version",
         "rule_pack_id",
@@ -314,6 +337,8 @@ def _base_snapshot(
     rule_pack: dict[str, Any],
     effective_rules: dict[str, Any],
     retirement_date: str,
+    *,
+    rule_pack_bytes: bytes | None = None,
 ) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
@@ -327,7 +352,7 @@ def _base_snapshot(
             "path": str(rule_pack_path),
             "rule_pack_id": rule_pack["rule_pack_id"],
             "schema_version": rule_pack["schema_version"],
-            "sha256": _file_sha256(rule_pack_path),
+            "sha256": _file_sha256(rule_pack_path) if rule_pack_bytes is None else hashlib.sha256(rule_pack_bytes).hexdigest(),
             "valid_from": rule_pack["valid_from"],
             "valid_to": rule_pack["valid_to"],
             "source_refs": rule_pack["source_refs"],
@@ -481,12 +506,12 @@ def _validate_source_refs(source_refs: Any) -> None:
             raise SpanishEuTheoreticalPensionError("Rule pack source_ref must use official EU, BOE or Seguridad Social URL")
 
 
-def _read_json(path: Path, label: str) -> dict[str, Any]:
+def _read_json(path: Path, label: str, *, payload: bytes | None = None) -> dict[str, Any]:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8") if payload is None else payload.decode("utf-8"))
     except FileNotFoundError as exc:
         raise SpanishEuTheoreticalPensionError(f"Missing {label}: {path}") from exc
-    except json.JSONDecodeError as exc:
+    except (UnicodeError, json.JSONDecodeError) as exc:
         raise SpanishEuTheoreticalPensionError(f"Invalid {label} JSON: {path}") from exc
 
 

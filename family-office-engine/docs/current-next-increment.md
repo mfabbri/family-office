@@ -1,6 +1,8 @@
 # Current Next Increment
 
-> V4.15d and V4.15 are done after Windows gate 20261121-172042-e7ace2d1. V4.15e is current for the JSON CLI. V4.14 is blocked and V4.16 is planned.
+> Checkpoint commit 2026-11-28: review tecnica v0.5 PASS sui due finding transitori; V4.14 resta `blocked` per il percorso numerico UE di produzione. Il tentativo di authoring UE e interrotto senza nuovi artefatti o approvazione. Ripresa delimitata: `roadmap/v4.14-eu-production-path.md`.
+
+> Recupero autorizzato 2026-11-22: V4B attiva per V4.14, ancora `blocked` al gate integrato; V5 `done`, V6 `deferred`. Le chiusure V4.15-V4.20 restano valide per scenario_projection. Contratti, versioni runtime e finding residui: `roadmap/v4.14-recovery-plan.md`.
 > Le due pre-review Sol/xhigh sul binding v11/v0.3 restano `PENDING` storiche, non GO e non NO-GO; non sono state riaperte.
 > w-z-c ha superato review tecnica indipendente sul diff corretto. w-z-d ha rilevato blocchi di autorità, freshness, versioni Knowledge e compatibilità consumer. Il PASS tecnico non chiude V4.14.
 > Le note storiche riportate sotto non definiscono il prossimo incremento: fanno fede le sezioni canoniche `## ID e titolo` e `## Stato` e il planner.
@@ -1904,12 +1906,32 @@ Audit checkpoint: baseline and seeded permutation stress are deterministic and t
 
 Scenario service regressions: 23 passed. The bounded selector regression accepts V4.18a with V4.18 done and rejects V4.18 blocked. Gate `20261121-195241-12d66ceb` passes preflight, Rules 6/6, citation 7/7 and Engine 1036/1036, with zero failures/errors/skips. V4.18a is closed.
 
-## ID e titolo
+## ID e titolo storico
 V5.3 - Supported-question taxonomy
 
-## Stato
+## Stato storico
 `done`
 
 Checkpoint di handoff V4B->V5. V4.20 si e chiuso sul gate Windows `20261121-220726-8d7ef9ad`: preflight PASS, Rules 6/6, citation-index 7/7, Engine 1048/1048, zero failure/error/skip. V4B e `done`; V5 e la roadmap attiva come richiesto dal gate finale V4.20.
 
 V5.3 non viene riaperto: il catalogo tassonomico e i tre tool V4.19 sono stati integrati e testati; tutti gli incrementi V5, incluso V5.12a, sono gia `done`. La roadmap V6 resta `deferred` e i suoi incrementi elencati sono anch'essi gia completati. Non c'e un incremento funzionale aperto da selezionare; prima di proseguire serve una nuova voce di roadmap approvata con obiettivo e dipendenze esplicite.
+
+## ID e titolo
+V4.14 - Entitlement-driven pension timeline IT/ES/EU
+
+## Stato
+`blocked`
+
+Recupero attivo autorizzato il 2026-11-22: riconciliare contratti e runtime, implementare i percorsi supportati, verificare evidenze positive/negative e ottenere il gate integrato. V4.14 resta blocked durante la remediation; planner in_progress. Non riaprire questioni chiuse senza trigger sostanziale. Piano e acceptance matrix: `roadmap/v4.14-recovery-plan.md`.
+
+### Checkpoint recupero 2026-11-22
+
+V4.14 resta blocked e il recupero non e' concluso. V4B attiva, V5 done nel proprio scope, V6 deferred. La review integrata v0.1 ha restituito NO-GO tecnico e parent. La terza review autorizzata ha restituito NO-GO tecnico sul candidato v0.2 (21/21 hash stabili). I finding sono corretti localmente in v0.3; gate Windows corrente: Engine 1064/1064, Rules 6/6, citazioni 7/7, zero failure/error/skip. Il candidato v0.3 non ha approvazione indipendente; budget esplicito 3/3 esaurito, nessuna quarta review automatica. Restano i requisiti originali scenario-driven e il mapping Paese/membro/prestazione. Esito e acceptance test: [v4.14-recovery-gate-result.md](roadmap/v4.14-recovery-gate-result.md).
+
+### Checkpoint ripresa 2026-11-24
+
+La nuova autorizzazione supersede lo stop storico a3eventi. Integrazioni per persona/Paese/prestazione e wizard completati nel candidato integrato v0.4. Gate Windows 20261124-210244-e66ff89c: Engine1090, Rules6,citazioni7, zero failure/error/skip. Review finanziaria PASS sui quattro finding e review tecnica finale PASS sui quattro residui. Ultimo gate originale del parent in corso, evento11/11: nessuna chiusura o ulteriore review automatica senza verdetto. Il pro-rata non supportato resta null+gap, non viene approvato tramite fixture sintetiche.
+
+### Esito finale ripresa 2026-11-24
+
+V4.14 resta `blocked`, V4B attiva. Gate finale originale **NO-GO**: il pro-rata UE richiede un percorso numerico di produzione esatto e approvato per fonte/periodo/predicati; la fixture numerica sintetica non soddisfa il requisito. I finding di transizione sono corretti localmente in v0.5, non ancora approvato indipendentemente. Suite corrente: Engine1091,Rules6,citazioni7,tutti0failure/error/skip. Undici deleghe finite, nessun altro ciclo automatico. Prossima azione specifica e hash: [v4.14-integration-gate-result.md](roadmap/v4.14-integration-gate-result.md).

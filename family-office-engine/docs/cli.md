@@ -1819,3 +1819,35 @@ fo planning work-transition plan --demo
 ```
 
 Il comando produce `work-transition-plan/v1` sotto `family-office-workspace/snapshots/`, mostrando le tre opzioni bridge 100%/60%/0%, il piano full-time?part-time?stop, metriche di rischio, candidate scartate, blocker, `data_gaps` e prossima azione. Per input dichiarati versionati usare `--scenario-plan-input <workspace-path> --plan-output <workspace-path>`; entrambi i path devono restare nel workspace privato. Il bridge, la simulazione e le date restano `scenario_projection`; flussi RITA/ES/INPS e reddito coniuge sono ipotesi con provenance. Il demo non determina entitlement, imposte o decisioni amministrative.
+# V4.14 recovery: optional approved screening in the plan journey
+
+Advanced integration: `fo planning work-transition plan --italian-screening-input <workspace-local-path>`.
+
+The normal plan wizard remains the question-first entry point. This optional input is a machine integration contract for already source-attested facts; it is not a request for ordinary users to compose pension JSON. It exists because the current importers cannot infer the required verified profile or contribution-evidence attestations. An upstream integration supplies `household_id`, `member_id`, `facts` in the existing Italian v2 service format, and optionally `search_path` and `monthly_history`. The selected readiness manifest supplies `as_of_date`; household/member must match. Paths remain within the private workspace. The per-stream guided pension intake is available through `fo planning work-transition pension-timeline`, described below; the optional Italian screening input remains an advanced integration for its separate path-specific contract.
+
+The CLI invokes the real approved screening service and reports its status, candidate-day or observed-month precision, limits and gaps without saving a new screening snapshot. It rejects combining observed screening with `--demo` or `--scenario-plan-input`. A supported screening does not remove the V4.14 timeline blocker: no exact entitlement, recognition, economic-effect or payment date is inferred. Rules v3-v6 are not activated by this option.
+
+
+## `fo planning work-transition pension-timeline`
+
+Percorso guidato senza compilazione manuale di JSON:
+
+```text
+fo planning work-transition pension-timeline
+fo planning work-transition pension-timeline --revise
+fo planning work-transition pension-timeline --prepare-only
+```
+
+Il wizard salva progressivamente nucleo, membri e prestazioni nel workspace. Ogni prestazione conserva Paese, membro e identificativo separati. Per gli scenari si selezionano input gia' preparati dai wizard/import esistenti, un benchmark documentale INPS e le fonti spagnole riconciliate. Si possono dichiarare basi imponibili annue diverse per le fasi di lavoro: vengono salvate in una nuova copia privata dello scenario, senza modificare il file sorgente o moltiplicare redditi per l'FTE. La granularita' di questa proiezione INPS e' annuale, non una simulazione mensile di diritto pensionistico.
+
+Per gli eventi osservati il wizard richiede data, fonte individuale, fonte primaria distinta per la copertura, versione, periodo e conferma della verifica esterna per la persona/prestazione selezionata. Una fonte generale da sola non determina eligibility individuale. Il motore verifica i legami dichiarati e i byte: non autentica l'ente o il contenuto di una dichiarazione umana. In assenza di prova o copertura, le date restano sconosciute con gap. Il wizard lascia la retroattivita' incerta come gap; la relativa evidenza completa e' ammessa dall'integrazione avanzata con il contratto v2 esistente.
+
+Il rapporto espone separatamente stima INPS, benchmark documentale, teorica spagnola e pro-rata UE. I pack distribuiti possono bloccare il pro-rata per copertura Annex VIII non sufficiente: il comando mantiene importo nullo e causa esplicita. Le fixture numeriche sintetiche non sono un'approvazione di importi di produzione. Riconoscimento, decorrenza economica e primo accredito non sono ricavati dalla cessazione o dalle proiezioni.
+
+Default: `planning/pension-timeline-integration.json` e `snapshots/pension-timeline-integration.snapshot.json` nel workspace privato. `--input` e `--output` sono integrazioni avanzate confinate al workspace; input, fonti e output devono restare distinti. Per comporre il rapporto nel journey di readiness: `fo planning work-transition plan --pension-timeline-input <prepared-workspace-input>`, con nucleo e data coerenti. Il rapporto conserva le cinque date in v2 e una vista compatibile v1 per ciascuna prestazione, senza aggregare date di Paesi o prestazioni differenti.
+
+Nel percorso integrato gli input spagnoli devono dichiarare l'identita' esatta di nucleo, persona, Paese e prestazione. Il wizard puo' preparare copie private attribuite solo dopo conferma esplicita; conserva fonti originali e relativi hash, e rifiuta identita' gia' dichiarate differenti. Senza attribuzione gli importi restano nulli. `--revise` conserva le prestazioni esistenti anche se interrotto. Il ramo `plan` verifica anche l'intero nucleo e usa una sola copia acquisita della richiesta. La scrittura del rapporto protegge tutte le fonti dichiarate, comprese quelle che un ramo incompleto non legge.
+
+Per un giorno candidato che non sia il 31 dicembre, il percorso INPS integrato richiede totali annui espliciti, incluso l'ultimo anno parziale. Non usa automaticamente un'intera annualita' flat e non effettua proporzioni temporali implicite. Servono una base temporale dichiarata, anni storici distinti da quelli prospettici e aliquote finite non negative nel campo ammesso; input ambigui producono gap.
+
+La raccolta guidata dello stato transitorio richiede una scelta esterna esplicita `applicable`, `not_applicable` o `unknown`, legata a persona/prestazione/evento e alla fonte primaria identificata. Lo stato sconosciuto mantiene data nulla e gap nelle due viste. Il merge confronta ogni identita canonica di scope (fonte risolta, digest, atto, articolo, versione, evento) fra tutte le attestazioni; una contraddizione non e risolta confrontando soltanto insiemi di etichette. Queste due correzioni hanno superato la review tecnica indipendente v0.5 (27 test mirati, quattro hash iniziali/finali invariati). Il NO-GO parent resta aperto per il percorso numerico UE di produzione.

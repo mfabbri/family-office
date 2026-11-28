@@ -17,6 +17,13 @@ from typing import Any, Mapping
 from family_office_engine.services.pension_entitlement_timeline import (
     validate_pension_entitlement_timeline,
 )
+from family_office_engine.services.italian_old_age_eligibility import (
+    ItalianOldAgeEligibilityError,
+    assess_italian_old_age_eligibility,
+    search_first_post_1996_alternative_eligibility_month,
+    search_first_post_1996_ordinary_threshold_eligibility_month,
+    search_first_pre_1996_ordinary_eligibility_month,
+)
 from family_office_engine.services.pension_timeline_source_gate import (
     EVENTS,
     JURISDICTIONS,
@@ -30,6 +37,131 @@ from family_office_engine.services.pension_timeline_source_gate import (
 REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 FAMILY_RULES_ROOT = REPOSITORY_ROOT / "family-office-rules"
 EU_SERVICE_KEYS = ("EU_COORDINATION", "EU_PRO_RATA")
+
+# Separate from candidate source bindings below: approval covers screening only.
+# Exact bytes recorded by the w-z-k v0.2 six-file technical review.
+ITALIAN_SCREENING_PACK = {
+    "path": "italy/2026/inps-old-age-eligibility.json",
+    "rule_pack_id": "it.inps-old-age-eligibility.2026-2028.v2",
+    "schema_version": "inps-old-age-eligibility-rule-pack/v2",
+    "sha256": "2b824d7ca46b4faaa38a83a7cd2d53769bcda6713251e17146a6244a1b0edee9",
+    "valid_from": "2026-01-01",
+    "valid_to_inclusive": "2028-12-31",
+}
+
+
+def assess_italian_timeline_screening(
+    *, facts: dict[str, Any], as_of_date: str,
+    search_path: str | None = None,
+    monthly_history: list[dict[str, Any]] | None = None,
+    rules_root: Path = FAMILY_RULES_ROOT,
+) -> dict[str, Any]:
+    """Invoke approved v2 screening; never populate an individual event date.
+
+    Candidate assessment and first observed month retain their existing service
+    contracts. This adapter does not accept caller-constructed service results or
+    activate candidate v3-v6. Facts and history stay in the caller's workspace.
+    """
+    as_of = _parse_iso_date(as_of_date, "as_of_date")
+    if not isinstance(facts, dict):
+        raise TypeError("facts must be a mapping")
+    searches = {
+        "pre_1996_ordinary": search_first_pre_1996_ordinary_eligibility_month,
+        "post_1996_ordinary_threshold": search_first_post_1996_ordinary_threshold_eligibility_month,
+        "post_1996_alternative": search_first_post_1996_alternative_eligibility_month,
+    }
+    if search_path is not None and search_path not in searches:
+        raise ValueError("Unsupported approved Italian screening path")
+    if search_path is None and monthly_history is not None:
+        raise ValueError("monthly_history requires an explicit search_path")
+    root = rules_root.resolve()
+    pack_path = _resolve_under_rules_root(root / ITALIAN_SCREENING_PACK["path"], root)
+    try:
+        if pack_path is None:
+            payload = None
+            binding = _missing_binding("Approved screening pack path escapes the Rules root.")
+        else:
+            payload = _read_rule_pack_bytes(pack_path)
+            binding = _verify_pack_file(pack_path, ITALIAN_SCREENING_PACK, root, payload=payload)
+    except OSError:
+        payload = None
+        binding = _missing_binding("Approved screening pack is unavailable.")
+    result = None
+    gaps = []
+    if not binding["verified"]:
+        gaps.append({"code": "source_version_missing", "message": binding["reason"], "severity": "blocking"})
+    elif search_path is None and (
+        not isinstance(facts.get("candidate_date"), str)
+        or _screening_candidate_after_as_of(facts["candidate_date"], as_of)
+    ):
+        gaps.append({"code": "candidate_date_missing_or_invalid", "message": "An observed candidate date no later than as_of_date is required.", "severity": "blocking"})
+    else:
+        try:
+            evidence_gaps = _candidate_screening_evidence_gaps(facts, as_of) if search_path is None else []
+            if evidence_gaps:
+                gaps.extend(evidence_gaps)
+            elif search_path is None:
+                result = assess_italian_old_age_eligibility(facts, pack_path, as_of_date, rule_pack_bytes=payload)
+            else:
+                result = searches[search_path](facts, monthly_history, pack_path, as_of_date, rule_pack_bytes=payload)
+            # Detect bytes changing during execution; never expose an unbound result.
+            after = _verify_pack_file(pack_path, ITALIAN_SCREENING_PACK, root)
+            if not after["verified"]:
+                binding = after
+                result = None
+                gaps.append({"code": "source_version_missing", "message": "Screening pack changed during execution.", "severity": "blocking"})
+            else:
+                gaps.extend(result.get("data_gaps", []) if result is not None else [])
+        except ItalianOldAgeEligibilityError as exc:
+            gaps.append({"code": "rule_pack_unavailable_or_stale", "message": str(exc), "severity": "blocking"})
+    return {
+        "schema_version": "italian-timeline-screening/v1",
+        "status": "assessed" if result is not None and result.get("status") == "assessed" else "not_assessed",
+        "as_of_date": as_of_date,
+        "evidence_role": "path_specific_screening_only",
+        "precision": "observed_month" if search_path else "candidate_day_check",
+        "rule_pack": binding,
+        "screening": result,
+        "pension_entitlement": {"status": "not_assessed", **{event: None for event in EVENTS}},
+        "data_gaps": gaps,
+        "limitations": [
+            "A candidate-day check is not a first eligibility date; an observed month is not an exact legal day.",
+            "Screening never establishes overall entitlement, recognition, economic effect, amount or payment.",
+            "Candidate source bindings and the integrated IT/ES/EU parent gate remain separate.",
+        ],
+    }
+
+
+def _screening_candidate_after_as_of(candidate: str, as_of: date) -> bool:
+    try:
+        return _parse_iso_date(candidate, "candidate_date") > as_of
+    except (TypeError, ValueError):
+        return True
+
+
+def _candidate_screening_evidence_gaps(facts: dict[str, Any], as_of: date) -> list[dict[str, str]]:
+    """Bind observed evidence to the candidate and report dates, without inference."""
+    gaps = []
+    candidate = _parse_iso_date(facts["candidate_date"], "candidate_date")
+    for key in ("scope_evidence", "cessation_evidence"):
+        evidence = facts.get(key)
+        try:
+            if not isinstance(evidence, dict):
+                raise ValueError("missing evidence")
+            attested = _parse_iso_date(evidence.get("as_of_date"), "as_of_date")
+            if attested > as_of:
+                raise ValueError("future evidence")
+            if key == "scope_evidence":
+                start = _parse_iso_date(evidence.get("coverage_from"), "coverage_from")
+                end = _parse_iso_date(evidence.get("coverage_to"), "coverage_to")
+                if not start <= candidate <= end <= attested:
+                    raise ValueError("profile does not cover candidate")
+            elif _parse_iso_date(evidence.get("cessation_date"), "cessation_date") > attested:
+                raise ValueError("cessation not yet observed")
+        except (TypeError, ValueError):
+            gaps.append({"code": "scope_evidence_coverage_missing_or_invalid" if key == "scope_evidence" else "employee_cessation_evidence_missing",
+                         "message": f"{key} must be dated, observed by as_of_date and cover the relevant candidate/event.", "severity": "blocking"})
+    return gaps
 
 # These are source/version bindings, not entitlement rules. Inclusive valid_to
 # values are retained in the source packs and normalized only by this adapter.
@@ -362,12 +494,13 @@ def _eu_binding(
     return _verify_pack_file(expected_path, domestic_spec, rules_root)
 
 
-def _verify_pack_file(path: Path, spec: Mapping[str, str], rules_root: Path) -> dict[str, Any]:
+def _verify_pack_file(path: Path, spec: Mapping[str, str], rules_root: Path,
+                      *, payload: bytes | None = None) -> dict[str, Any]:
     raw_path = _resolve_under_rules_root(path, rules_root)
     if raw_path is None:
         return _missing_binding("rule-pack path escapes the approved Rules root")
     try:
-        payload = _read_rule_pack_bytes(raw_path)
+        payload = _read_rule_pack_bytes(raw_path) if payload is None else payload
         actual_digest = hashlib.sha256(payload).hexdigest()
         pack = json.loads(payload.decode("utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):

@@ -1,0 +1,93 @@
+{
+  "schema_version": "v414-recovery-review-manifest/v1",
+  "status": "candidate_not_approved",
+  "created_at": "2026-11-22T15:38:34.467373+00:00",
+  "scope": "One bounded correction of v0.1 technical findings: dated candidate evidence coverage and same immutable payload for freshness/assessment; preserve v0.1 parent NO-GO and original remaining requirements.",
+  "technical_gate": "family-office-bootstrap/planning/.runtime/test-gate/20261122-153742-388d406d/summary.json",
+  "files": [
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_entitlement_timeline_producer.py",
+      "sha256": "15eaf199754ad4e450f000f45b234f084eb87f10727c4aa526fd2dffd2d82335"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/main.py",
+      "sha256": "11a11cbcf5a84664b529c8ce5cf0db84f16cf98ce698c1a6514159647ac4d161"
+    },
+    {
+      "path": "family-office-engine/schemas/italian-timeline-screening.schema.json",
+      "sha256": "35820a4380b469c2c371d72592317c9a559e996797dc6d77de08b40d294289d7"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_italian_timeline_screening.py",
+      "sha256": "37ed989182890badc1c7c4431b5647f94bd4bd3036b9a2982348f15a866c1ee2"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_work_transition_pension_screening_cli.py",
+      "sha256": "74934c26d4d63f26294dd9f8a6ec3d1419c0a23b56c7a7e456861bf166744098"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/italian_old_age_eligibility.py",
+      "sha256": "0c92a3cacaf8a8af7ced20e2177da930e02f801f23ab738a9e5652410be2beb1"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_entitlement_timeline.py",
+      "sha256": "63d20a228f597e6e72b265729858f2edd46c31915002b1c60b3e99072ad319ed"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_timeline_source_gate.py",
+      "sha256": "13e3251566a366c92ca8cd6b5ec3fb70ded95b9659b332b5a96d0561fee4226b"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-entitlement-timeline-v2.schema.json",
+      "sha256": "2ad6f2d23acc04f1a6697c81969d9496d8ef52dbf052779959ba14afe9dd7a7f"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility.json",
+      "sha256": "2b824d7ca46b4faaa38a83a7cd2d53769bcda6713251e17146a6244a1b0edee9"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility-v3.json",
+      "sha256": "2f1e5d07d43f6c5af2ac6e6a645a5ae46c13bfbfe691de5eec1c85e6e06e7e32"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility-v6.json",
+      "sha256": "861391022c7181ba07c4c2fb260f9d2bb9d046c6f0479244c0baba6f5580c494"
+    },
+    {
+      "path": "family-office-rules/spain/statutory-retirement-general-v3.json",
+      "sha256": "9b5d0acbadb2b49d7f314c3739f447fb7d6397cf3cbeb390e4e8dd89c2b2b99c"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es-v11.1.1.json",
+      "sha256": "1d002510a168ce11c2f508cb9102498b9624ddf9a7a221e24b05843da5a82d66"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es-v12.1.1.json",
+      "sha256": "05f888e8dd59dc548198ebfd3ccaf84c0d1c79f5c4be85f2b32586150fd7fb0a"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14w-z-k-italian-adjustment-profile-review-manifest-v0.2.md",
+      "sha256": "a4ccee798e2cf66e4bad6a249699836b71d7a87194846ca0c569d60be1d32284"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14w-z-n-heavy-work-alternative-periods-review-manifest-v0.2.md",
+      "sha256": "16073c82bc20f0596e81b65bedb9cda65dc754807ed7c7f3ed2245674d4f65c3"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-recovery-plan.md",
+      "sha256": "ee07ef2edb924cb7294598740a80b17ea6415f79b686fb06d25a2527ef0e0406"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "sha256": "3ed96a07609f1549a73f6b243d3744a7fc6acf57e7fab47fac21594a228018ef"
+    },
+    {
+      "path": "family-office-engine/docs/adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md",
+      "sha256": "24b0c9a33cbe9a2a7c6acd2f68682def03418f88d92f55033158d73bdc0904f0"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/governance/pension_source_freshness.py",
+      "sha256": "e27a94826d48360893af5c3834f17efc60b5432d2aa714f4d35648633b28d81b"
+    }
+  ]
+}

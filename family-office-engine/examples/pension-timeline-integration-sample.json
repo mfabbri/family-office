@@ -1,0 +1,33 @@
+{
+  "schema_version": "pension-timeline-integration-input/v1",
+  "household_id": "synthetic_it_es_household",
+  "as_of_date": "2026-11-22",
+  "household_members": [
+    "primary",
+    "spouse"
+  ],
+  "streams": [
+    {
+      "member_id": "primary",
+      "jurisdiction": "IT",
+      "stream_id": "synthetic-it-old-age",
+      "inps": {
+        "rule_pack": "inps-theoretical-pension.json",
+        "work_exit_input_ref": "workspace-ref:pension-timeline-inps-input-sample.json",
+        "candidate_date": "2039-01-01",
+        "documentary_ref": "workspace-ref:work-exit-inps-snapshot-sample.json"
+      }
+    },
+    {
+      "member_id": "primary",
+      "jurisdiction": "ES",
+      "stream_id": "synthetic-es-old-age",
+      "spanish": {
+        "pro_rata_input_ref": "workspace-ref:spanish-eu-theoretical-pension-pro-rata-input-sample.json",
+        "reconciliation_ref": "workspace-ref:spanish-eu-theoretical-pension-reconciliation-sample.json",
+        "theoretical_rule_pack": "spanish-eu-theoretical-pension.json",
+        "pro_rata_rule_pack": "eu-pension-coordination-it-es.json"
+      }
+    }
+  ]
+}

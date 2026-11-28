@@ -9,7 +9,7 @@ import hashlib
 from datetime import date
 from pathlib import Path
 from pathlib import PureWindowsPath
-from typing import Any
+from typing import Any, Mapping
 
 from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 
@@ -30,7 +30,12 @@ class PensionEntitlementTimelineError(ValueError):
     """Raised when a candidate timeline violates its fail-closed contract."""
 
 
-def validate_pension_entitlement_timeline(value: dict[str, Any]) -> dict[str, Any]:
+def validate_pension_entitlement_timeline(
+    value: dict[str, Any],
+    *,
+    workspace_root: Path | None = None,
+    source_bytes: Mapping[str, bytes] | None = None,
+) -> dict[str, Any]:
     """Validate and return a v2 snapshot without changing its declared values."""
     if not isinstance(value, dict):
         raise PensionEntitlementTimelineError("Timeline snapshot must be a JSON object")
@@ -41,18 +46,18 @@ def validate_pension_entitlement_timeline(value: dict[str, Any]) -> dict[str, An
 
     if value.get("schema_version") != SCHEMA_VERSION:
         raise PensionEntitlementTimelineError("Unsupported pension timeline schema")
-    workspace = _workspace_root()
+    workspace = _workspace_root() if workspace_root is None else workspace_root.resolve(strict=True)
     as_of = date.fromisoformat(value["as_of_date"])
     if value["status"] == "not_assessed" and not any(gap["severity"] == "blocking" for gap in value["data_gaps"]):
         raise PensionEntitlementTimelineError("not_assessed timeline requires a blocking data gap")
     for provenance in value["pension_amount_basis"]["source_evidence"]:
-        _verify_provenance(provenance, workspace, as_of)
+        _verify_provenance(provenance, workspace, as_of, source_bytes)
         _require_snapshot_coverage(
             provenance["coverage_assessment"], value["as_of_date"], "pension amount basis"
         )
     events = value["events"]
     for event_name in EVENT_NAMES:
-        _validate_event(event_name, events[event_name], value["as_of_date"], as_of, workspace)
+        _validate_event(event_name, events[event_name], value["as_of_date"], as_of, workspace, source_bytes)
     return value
 
 
@@ -74,7 +79,10 @@ def build_pension_entitlement_timeline(input_path: Path, output_path: Path) -> d
     return validated
 
 
-def _validate_event(event_name: str, event: dict[str, Any], as_of_date: str, as_of: date, workspace: Path) -> None:
+def _validate_event(
+    event_name: str, event: dict[str, Any], as_of_date: str, as_of: date,
+    workspace: Path, source_bytes: Mapping[str, bytes] | None,
+) -> None:
     if event.get("event_kind") != event_name:
         raise PensionEntitlementTimelineError(f"{event_name} event_kind must match its event key")
     status = event["status"]
@@ -86,7 +94,7 @@ def _validate_event(event_name: str, event: dict[str, Any], as_of_date: str, as_
             raise PensionEntitlementTimelineError(f"{event_name} not_applicable requires scoped evidence and null date")
         for proof in event["evidence"]:
             provenance = proof["source_provenance"]
-            _verify_provenance(provenance, workspace, as_of)
+            _verify_provenance(provenance, workspace, as_of, source_bytes)
             _require_snapshot_coverage(
                 provenance["coverage_assessment"], as_of_date, f"{event_name} non-applicability"
             )
@@ -117,7 +125,7 @@ def _validate_event(event_name: str, event: dict[str, Any], as_of_date: str, as_
             if event_date < valid_from or (valid_to is not None and event_date >= date.fromisoformat(valid_to)):
                 raise PensionEntitlementTimelineError(f"{event_name} evidence is outside [valid_from, valid_to)")
     for proof in event["evidence"]:
-        _verify_provenance(proof["source_provenance"], workspace, as_of)
+        _verify_provenance(proof["source_provenance"], workspace, as_of, source_bytes)
         transition = proof["transition_scope"]
         inner_statuses = [item["scope"]["transition_status"] for item in transition["scope_evidence"]]
         gap_codes = {item["code"] for item in transition.get("data_gaps", [])}
@@ -130,7 +138,7 @@ def _validate_event(event_name: str, event: dict[str, Any], as_of_date: str, as_
         elif not inner_statuses or any(status != transition["status"] for status in inner_statuses) or "transitional_branch_unknown" in gap_codes:
             raise PensionEntitlementTimelineError(f"{event_name} resolved transition scope conflicts with its evidence")
         for scope_proof in transition["scope_evidence"]:
-            _verify_provenance(scope_proof["source_provenance"], workspace, as_of)
+            _verify_provenance(scope_proof["source_provenance"], workspace, as_of, source_bytes)
             if scope_proof["scope"]["applies_to_event"] != event_name:
                 raise PensionEntitlementTimelineError(f"{event_name} transition evidence is bound to another event")
             scope_coverage = scope_proof["source_provenance"]["coverage_assessment"]
@@ -164,7 +172,9 @@ def _require_snapshot_coverage(coverage: dict[str, Any], as_of_date: str, label:
         raise PensionEntitlementTimelineError(f"{label} evidence must be fully covered with no data gaps")
 
 
-def _verify_provenance(provenance: dict[str, Any], workspace: Path, as_of: date) -> None:
+def _verify_provenance(
+    provenance: dict[str, Any], workspace: Path, as_of: date, source_bytes: Mapping[str, bytes] | None = None,
+) -> None:
     for field in ("retrieved_on", "reviewed_on"):
         if date.fromisoformat(provenance[field]) > as_of:
             raise PensionEntitlementTimelineError(f"source {field} cannot be later than as_of_date")
@@ -173,9 +183,15 @@ def _verify_provenance(provenance: dict[str, Any], workspace: Path, as_of: date)
         if date.fromisoformat(coverage[field]) > as_of:
             raise PensionEntitlementTimelineError(f"source coverage {field} cannot be later than as_of_date")
     source_path = _workspace_path(workspace, provenance["source_ref"])
-    if not source_path.is_file():
-        raise PensionEntitlementTimelineError("source_ref does not resolve to a file inside family-office-workspace")
-    digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+    if source_bytes is None:
+        if not source_path.is_file():
+            raise PensionEntitlementTimelineError("source_ref does not resolve to a file inside family-office-workspace")
+        payload = source_path.read_bytes()
+    else:
+        payload = source_bytes.get(provenance["source_ref"])
+        if payload is None:
+            raise PensionEntitlementTimelineError("source_ref has no captured workspace content")
+    digest = hashlib.sha256(payload).hexdigest()
     if digest.lower() != provenance["digest_sha256"].lower():
         raise PensionEntitlementTimelineError("source_ref digest_sha256 does not match source content")
 

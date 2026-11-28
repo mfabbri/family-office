@@ -1,0 +1,166 @@
+{
+  "schema_version": "v414-integrated-review-manifest/v1",
+  "status": "local_correction_not_independently_approved",
+  "created_at": "2026-11-24T21:11:13.017015+00:00",
+  "scope": "Existing-service scenario composition; per-person/country/benefit observed five-event mapping; conservative v1/v2 transport and guided intake. Immutable Rules/Knowledge unchanged; no candidate activation. Shipped EU pro-rata catalogue gaps remain null; synthetic numeric positive is not production approval.",
+  "files": [
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_entitlement_timeline_producer.py",
+      "sha256": "244b9ef41b7ae4edbce359b348dddadd3253397570ad5b1be093b4991d6b315f"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/main.py",
+      "sha256": "8fb62bff5cd5ff376a274e4cf7ded6b9f8342de7d10f33a97ca11ec51f566e0c"
+    },
+    {
+      "path": "family-office-engine/schemas/italian-timeline-screening.schema.json",
+      "sha256": "35820a4380b469c2c371d72592317c9a559e996797dc6d77de08b40d294289d7"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_italian_timeline_screening.py",
+      "sha256": "e0356adf010e724215d7c62019272ae16394d857245b7137e1fb3bc72d6cbb87"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_work_transition_pension_screening_cli.py",
+      "sha256": "74934c26d4d63f26294dd9f8a6ec3d1419c0a23b56c7a7e456861bf166744098"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/italian_old_age_eligibility.py",
+      "sha256": "0c92a3cacaf8a8af7ced20e2177da930e02f801f23ab738a9e5652410be2beb1"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_entitlement_timeline.py",
+      "sha256": "dfe569e58deaf4f781d90cda77e2d431c028bbb9b2a7fe5c448f8c2c6778becc"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_timeline_source_gate.py",
+      "sha256": "13e3251566a366c92ca8cd6b5ec3fb70ded95b9659b332b5a96d0561fee4226b"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-entitlement-timeline-v2.schema.json",
+      "sha256": "2ad6f2d23acc04f1a6697c81969d9496d8ef52dbf052779959ba14afe9dd7a7f"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility.json",
+      "sha256": "2b824d7ca46b4faaa38a83a7cd2d53769bcda6713251e17146a6244a1b0edee9"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility-v3.json",
+      "sha256": "2f1e5d07d43f6c5af2ac6e6a645a5ae46c13bfbfe691de5eec1c85e6e06e7e32"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility-v6.json",
+      "sha256": "861391022c7181ba07c4c2fb260f9d2bb9d046c6f0479244c0baba6f5580c494"
+    },
+    {
+      "path": "family-office-rules/spain/statutory-retirement-general-v3.json",
+      "sha256": "9b5d0acbadb2b49d7f314c3739f447fb7d6397cf3cbeb390e4e8dd89c2b2b99c"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es-v11.1.1.json",
+      "sha256": "1d002510a168ce11c2f508cb9102498b9624ddf9a7a221e24b05843da5a82d66"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es-v12.1.1.json",
+      "sha256": "05f888e8dd59dc548198ebfd3ccaf84c0d1c79f5c4be85f2b32586150fd7fb0a"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14w-z-k-italian-adjustment-profile-review-manifest-v0.2.md",
+      "sha256": "a4ccee798e2cf66e4bad6a249699836b71d7a87194846ca0c569d60be1d32284"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14w-z-n-heavy-work-alternative-periods-review-manifest-v0.2.md",
+      "sha256": "16073c82bc20f0596e81b65bedb9cda65dc754807ed7c7f3ed2245674d4f65c3"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-recovery-plan.md",
+      "sha256": "ee07ef2edb924cb7294598740a80b17ea6415f79b686fb06d25a2527ef0e0406"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "sha256": "7a047c8e60cbe840b8bb74ff26bfcfdf254be8de4889f1e95b0d7a4bb61cc73b"
+    },
+    {
+      "path": "family-office-engine/docs/adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md",
+      "sha256": "24b0c9a33cbe9a2a7c6acd2f68682def03418f88d92f55033158d73bdc0904f0"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/governance/pension_source_freshness.py",
+      "sha256": "e27a94826d48360893af5c3834f17efc60b5432d2aa714f4d35648633b28d81b"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_timeline_integration.py",
+      "sha256": "3d76fb04af12f0f6eeddac1eefa02dce091852143a77c846694a444a4fb19d8a"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/pension_timeline_wizard.py",
+      "sha256": "0e230e9a59d25c0105928bdb72a73857be10ee0c838886b162b486e0bbd9c54d"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/work_exit_feasibility.py",
+      "sha256": "2edf1988d6d6f57b8f17ec665ba28ff0eb2bd8007ab46fae7ca382123663a594"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/spanish_eu_theoretical_pension.py",
+      "sha256": "8c9020e0782914d71459428127b563acdbfb289e0f1c81f92cf760e269cb24ad"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
+      "sha256": "c08eebbe98308c2fda3baf84e20e95678c26e4590a17f0381e6eb0ab598bd163"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-timeline-integration-input.schema.json",
+      "sha256": "4362e40732bafb476d0af77d206d8f60ad9ba29ac5a65dcf8de240940198ec83"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-timeline-integration.schema.json",
+      "sha256": "b354654ff767adbff3f213ea6b039daa3405e3fb568f2691559ba96f668e22f6"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_pension_timeline_integration.py",
+      "sha256": "ddfd68aa3a00e6aa50544dcd2b203cbe994f66415f6e8606d3434678a8006c8b"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_pension_timeline_wizard.py",
+      "sha256": "66a7e12f3840ec72d784f1ad221c1bea4fdc71477a3120468a8d1e10023e32f5"
+    },
+    {
+      "path": "family-office-engine/examples/pension-timeline-integration-sample.json",
+      "sha256": "ed9286f9e0bc479c5740a9d07ef9efc0e88bf0e31c08389c6e0eaf73764f12e7"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-integration-contract.md",
+      "sha256": "c6cfb146ae6fa03ef419dd9ecf312f4547386d63aba4904ba5a0e8439599e869"
+    },
+    {
+      "path": "family-office-engine/docs/api.md",
+      "sha256": "b3125857158677a22e6d860c6fd5770b0d36cc84c81b5afc87770a7df467e9ba"
+    },
+    {
+      "path": "family-office-engine/docs/cli.md",
+      "sha256": "55834a289864e529c8670ac0faaccd5d64b83fc289307d642a2368a5e9d0873c"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-theoretical-pension.json",
+      "sha256": "2871733495bbe4389d7cecacd585201a9427e10f56f36f52ba432bebc96bd65d"
+    },
+    {
+      "path": "family-office-rules/cross-border/spanish-eu-theoretical-pension.json",
+      "sha256": "293e0861e68673d789e899b8cd5a5173a0017d2b67d1bea9d05a1b67039e1e77"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es.json",
+      "sha256": "79db4ca34217c9a4f454e13eb80abd457c099b8f1e205974e1246fbb93ac673b"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es-v8.json",
+      "sha256": "0d3d4b3b87f805e279b5707daca17662b86a7bc20c4d31df0ae440ce8021b55e"
+    },
+    {
+      "path": "family-office-engine/examples/pension-timeline-inps-input-sample.json",
+      "sha256": "c854ebb06bfd6a12c2e9c228115c2a2d9e6f3bcef78d0924b4846c57dc492b86"
+    }
+  ],
+  "previous_candidate_note": "Final parent v0.4 NO-GO,39/39 start/end hashes stable. Local v0.5 corrects explicit transition choice/unknown propagation and source-identity scope-swap detection; actual production EU numeric path remains absent. No further automatic review.",
+  "checkpoint_note": "Final blocked-status document synchronization after parent NO-GO; runtime bytes are unchanged from the1091-test successful gate. This local candidate has no independent approval."
+}

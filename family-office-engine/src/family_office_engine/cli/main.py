@@ -15,6 +15,12 @@ from family_office_engine.services.work_transition_plan import (
     build_work_transition_plan,
     synthetic_work_transition_plan_input,
 )
+from family_office_engine.services.pension_entitlement_timeline_producer import assess_italian_timeline_screening
+from family_office_engine.cli.pension_timeline_wizard import (
+    PensionTimelineWizardError,
+    prepare_pension_timeline_request,
+    render_pension_timeline_report,
+)
 
 from family_office_engine.ingestion.manual_assumptions import (
     AssumptionsImportError,
@@ -2618,7 +2624,9 @@ def run_work_transition_source_setup(manifest_path: Path, output_path: Path, ove
     return {"bound_count": bound_count, "discovery_gap_count": len(discovery["data_gaps"]), "readiness": readiness, "manifest_path": str(manifest_path), "output_path": str(output_path)}
 
 
-def run_work_transition_plan_wizard(manifest_path: Path, readiness_output_path: Path, overwrite: bool = False) -> dict[str, Any]:
+def run_work_transition_plan_wizard(manifest_path: Path, readiness_output_path: Path, overwrite: bool = False,
+                                    italian_screening_input: Path | None = None,
+                                    pension_timeline_input: Path | None = None) -> dict[str, Any]:
     """Run the currently supported, question-first readiness stage of `plan`."""
     manifest_path = _validate_v66a_input_path(manifest_path, WorkTransitionReadinessError)
     readiness_output_path = _validate_v66a_input_path(readiness_output_path, WorkTransitionReadinessError)
@@ -2652,16 +2660,64 @@ def run_work_transition_plan_wizard(manifest_path: Path, readiness_output_path: 
 
     setup = run_work_transition_source_setup(manifest_path, readiness_output_path, overwrite=overwrite)
     scenario_result = _run_work_transition_scenario_wizard(setup["readiness"], overwrite)
+    screening = None
+    screening_member = None
+    integrated_timeline = None
+    if pension_timeline_input is not None:
+        from family_office_engine.services.pension_timeline_integration import build_pension_timeline_integration
+        integration_input = _validate_v66a_input_path(pension_timeline_input, WorkTransitionReadinessError)
+        integration_output = resolve_repo("workspace") / "snapshots/pension-timeline-integration.snapshot.json"
+        try:
+            current_manifest = _read_optional_wizard_json(manifest_path, WorkTransitionReadinessError, "readiness manifest")
+            integration_payload = integration_input.read_bytes()
+            integration_request = json.loads(integration_payload.decode("utf-8"))
+            if (not isinstance(current_manifest, dict)
+                    or not isinstance(integration_request, dict)
+                    or integration_request.get("household_id") != current_manifest.get("household_id")
+                    or integration_request.get("as_of_date") != current_manifest.get("as_of_date")):
+                raise WorkTransitionReadinessError("Timeline household/as_of_date must match the selected plan manifest.")
+            roster = current_manifest.get("household_members", [])
+            if (set(integration_request.get("household_members", [])) != set(roster)
+                    or any(stream.get("member_id") not in roster for stream in integration_request.get("streams", []))):
+                raise WorkTransitionReadinessError("Timeline members must match the selected plan household roster.")
+            integrated_timeline = build_pension_timeline_integration(
+                integration_input, integration_output, workspace_root=resolve_repo("workspace"),
+                request_bytes=integration_payload,
+            )
+        except ValueError as exc:
+            raise WorkTransitionReadinessError(str(exc)) from exc
+    if italian_screening_input is not None:
+        screening_path = _validate_v66a_input_path(italian_screening_input, WorkTransitionReadinessError)
+        request = _read_optional_wizard_json(screening_path, WorkTransitionReadinessError, "Italian screening integration input")
+        manifest = _read_optional_wizard_json(manifest_path, WorkTransitionReadinessError, "work-transition readiness manifest")
+        if (not isinstance(request, dict) or not isinstance(manifest, dict)
+                or set(request) - {"household_id", "member_id", "facts", "search_path", "monthly_history"}
+                or request.get("household_id") != manifest.get("household_id")
+                or request.get("member_id") not in manifest.get("household_members", [])
+                or not isinstance(request.get("facts"), dict)):
+            raise WorkTransitionReadinessError("Screening input must match the selected household/member and contain explicit facts.")
+        screening_member = request["member_id"]
+        try:
+            screening = assess_italian_timeline_screening(
+                facts=request["facts"], as_of_date=manifest["as_of_date"],
+                search_path=request.get("search_path"), monthly_history=request.get("monthly_history"),
+            )
+        except (ValueError, TypeError) as exc:
+            raise WorkTransitionReadinessError(f"Invalid Italian screening integration input: {exc}") from exc
     return {
         "manifest_path": str(manifest_path),
         "readiness_output_path": str(readiness_output_path),
         "readiness": setup["readiness"],
         "bound_count": setup["bound_count"],
         **scenario_result,
+        "italian_pension_screening": screening,
+        "italian_pension_screening_member": screening_member,
+        "pension_timeline_integration": integrated_timeline,
         "blockers": [
             "employment_income_projection_blocked: V4.13 still has material unsupported payroll/contribution components.",
             *scenario_result["blockers"],
-            "pension_entitlement_timeline_not_implemented: V4.14 is required before pension dates or streams.",
+            ("pension_entitlement_timeline_not_implemented: V4.14 is required before pension dates or streams."
+             if integrated_timeline is None else "pension_entitlement_timeline_review_required: inspect per-stream documented events, scenario assumptions and remaining source gaps."),
             "retirement_bridge_not_implemented: V4.15 is required before bridge cash flows.",
             "work_transition_optimizer_not_implemented: V4.17-V4.18 are required before candidate or sustainable dates.",
         ],
@@ -6454,6 +6510,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--readiness-output", type=Path, default=default_work_transition_readiness_output(), help="Workspace-local readiness snapshot path"
     )
     planning_work_transition_plan_parser.add_argument(
+        "--italian-screening-input", type=Path,
+        help="Advanced workspace-local source-attested screening facts; candidate or observed-month screening only",
+    )
+    planning_work_transition_plan_parser.add_argument(
+        "--pension-timeline-input", type=Path,
+        help="Prepared workspace-local per-stream pension timeline integration input",
+    )
+    planning_work_transition_plan_parser.add_argument(
         "--overwrite", action="store_true", help="Revise the local readiness manifest and source bindings"
     )
     planning_work_transition_plan_parser.add_argument(
@@ -6465,6 +6529,13 @@ def build_parser() -> argparse.ArgumentParser:
     planning_work_transition_plan_parser.add_argument(
         "--demo", action="store_true", help="Run the deterministic synthetic full-time/part-time/stop golden scenario"
     )
+    pension_timeline_parser = planning_work_transition_subparsers.add_parser(
+        "pension-timeline", help="Prepare and build pension scenarios and documented events per person/benefit",
+    )
+    pension_timeline_parser.add_argument("--input", type=Path, help="Prepared input; default planning/pension-timeline-integration.json")
+    pension_timeline_parser.add_argument("--output", type=Path, help="Report inside the private workspace")
+    pension_timeline_parser.add_argument("--revise", action="store_true", help="Revise the saved guided input")
+    pension_timeline_parser.add_argument("--prepare-only", action="store_true", help="Save guided inputs without executing scenario services")
     planning_work_transition_readiness_parser = planning_work_transition_subparsers.add_parser(
         "readiness",
         help="Build work-transition-readiness/v1 with source lineage and blocking gaps",
@@ -9230,6 +9301,30 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
 
+    if (args.command == "planning" and args.planning_command == "work-transition"
+            and args.planning_work_transition_command == "pension-timeline"):
+        from family_office_engine.services.pension_timeline_integration import build_pension_timeline_integration
+        workspace = resolve_repo("workspace")
+        try:
+            input_path = _validate_v66a_input_path(args.input or workspace / "planning/pension-timeline-integration.json", PensionTimelineWizardError)
+            output_path = _validate_v66a_input_path(args.output or workspace / "snapshots/pension-timeline-integration.snapshot.json", PensionTimelineWizardError)
+            if input_path == output_path:
+                raise PensionTimelineWizardError("Input e output devono avere percorsi diversi.")
+            prepare_pension_timeline_request(input_path, workspace_root=workspace, revise=args.revise)
+            if args.prepare_only:
+                print(f"Input pensionistico guidato salvato: {input_path}. Nessun calcolo eseguito.")
+                return 0
+            report = build_pension_timeline_integration(input_path, output_path, workspace_root=workspace)
+        except (EOFError, KeyboardInterrupt):
+            print("Preparazione interrotta: gli input gia' salvati restano nel workspace per la ripresa.")
+            return 1
+        except (ValueError, OSError) as exc:
+            print(f"planning work-transition pension-timeline: ERROR ({exc})")
+            return 1
+        render_pension_timeline_report(report)
+        print(f"Rapporto pensionistico per prestazione: {output_path}.")
+        return 0
+
     if args.command == "planning" and args.planning_command == "retirement-bridge":
         return _simulate_retirement_bridge(args.input, args.output)
 
@@ -9328,6 +9423,12 @@ def main(argv: list[str] | None = None) -> int:
         if args.demo and args.scenario_plan_input is not None:
             print("planning work-transition plan: usa --demo oppure --scenario-plan-input, non entrambi.")
             return 2
+        if args.italian_screening_input is not None and (args.demo or args.scenario_plan_input is not None):
+            print("planning work-transition plan: lo screening osservato richiede il percorso readiness, separato dalla proiezione di scenario.")
+            return 2
+        if args.pension_timeline_input is not None and (args.demo or args.scenario_plan_input is not None):
+            print("planning work-transition plan: integra gli eventi osservati nel percorso readiness; lo scenario sintetico resta separato.")
+            return 2
         if args.plan_output is not None and not args.demo and args.scenario_plan_input is None:
             print("planning work-transition plan: --plan-output richiede --demo o --scenario-plan-input.")
             return 2
@@ -9371,7 +9472,11 @@ def main(argv: list[str] | None = None) -> int:
             print("Prossima azione: " + plan["next_action"])
             return 0
         try:
-            result = run_work_transition_plan_wizard(args.input, args.readiness_output, overwrite=args.overwrite)
+            result = run_work_transition_plan_wizard(
+                args.input, args.readiness_output, overwrite=args.overwrite,
+                italian_screening_input=args.italian_screening_input,
+                pension_timeline_input=args.pension_timeline_input,
+            )
         except (EOFError, KeyboardInterrupt):
             print("planning work-transition plan: interrupted; rerun to continue the workspace-local readiness setup.")
             return 1
@@ -9393,6 +9498,19 @@ def main(argv: list[str] | None = None) -> int:
         )
         print("Fatti: fonti locali visualizzate e associate solo con scelta esplicita; fasi FTE e basi mensili dichiarate sono separate dalle osservazioni documentali.")
         print("Assunzioni: FTE e periodi inseriti sono dichiarazioni dell'utente; nessun reddito o contributo viene derivato dal FTE.")
+        if result.get("pension_timeline_integration") is not None:
+            render_pension_timeline_report(result["pension_timeline_integration"])
+        screening = result.get("italian_pension_screening")
+        if screening is not None:
+            detail = screening.get("screening") or {}
+            print(
+                f"Screening pensionistico IT ({result['italian_pension_screening_member']}): "
+                f"{screening['status']}, precisione={screening['precision']}, "
+                f"esito={detail.get('result', detail.get('status', 'not_assessed'))}, "
+                f"primo mese osservato={detail.get('first_observed_eligible_month', detail.get('first_eligible_month'))}."
+            )
+            print("Limiti screening: verifica del solo percorso; nessuna data di diritto, riconoscimento o pagamento e' stabilita.")
+            print("Data gaps screening: " + (", ".join(gap["code"] for gap in screening["data_gaps"]) or "nessuno nel solo screening."))
         scenario = result.get("scenario")
         projection = result.get("projection")
         if scenario is not None:

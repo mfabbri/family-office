@@ -66,12 +66,13 @@ def audit_active_pension_rule_packs(
     }
 
 
-def audit_pension_rule_pack(rule_pack_path: Path, as_of_date: str | date) -> dict[str, Any]:
+def audit_pension_rule_pack(rule_pack_path: Path, as_of_date: str | date,
+                            *, rule_pack_bytes: bytes | None = None) -> dict[str, Any]:
     as_of = _parse_date(as_of_date, "as_of_date")
     gaps: list[dict[str, Any]] = []
     try:
-        pack = json.loads(rule_pack_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+        pack = json.loads(rule_pack_path.read_text(encoding="utf-8") if rule_pack_bytes is None else rule_pack_bytes.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return _blocked_pack(rule_pack_path, as_of, [
             _gap("normative_source_provenance_missing", "Rule pack is missing or is not valid JSON.")
         ])
@@ -115,11 +116,11 @@ def audit_pension_rule_pack(rule_pack_path: Path, as_of_date: str | date) -> dic
     }
 
 
-def require_fresh_pension_rule_pack(rule_pack_path: Path, as_of_date: str | date | None = None) -> dict[str, Any]:
-    report = audit_pension_rule_pack(
-        rule_pack_path,
-        date.today() if as_of_date is None else as_of_date,
-    )
+def require_fresh_pension_rule_pack(rule_pack_path: Path, as_of_date: str | date | None = None,
+                                    *, rule_pack_bytes: bytes | None = None) -> dict[str, Any]:
+    as_of = date.today() if as_of_date is None else as_of_date
+    report = (audit_pension_rule_pack(rule_pack_path, as_of) if rule_pack_bytes is None
+              else audit_pension_rule_pack(rule_pack_path, as_of, rule_pack_bytes=rule_pack_bytes))
     if report["status"] != "fresh":
         codes = sorted({gap["code"] for gap in report["data_gaps"]})
         raise PensionSourceFreshnessError(

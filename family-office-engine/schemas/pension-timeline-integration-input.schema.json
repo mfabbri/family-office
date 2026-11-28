@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pension timeline integration input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "household_id", "as_of_date", "streams"],
+  "properties": {
+    "schema_version": {"const": "pension-timeline-integration-input/v1"},
+    "household_id": {"$ref": "#/$defs/id"},
+    "as_of_date": {"type": "string", "format": "date"},
+    "household_members": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "streams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["member_id", "jurisdiction", "stream_id"],
+        "properties": {
+          "member_id": {"$ref": "#/$defs/id"},
+          "jurisdiction": {"enum": ["IT", "ES"]},
+          "stream_id": {"$ref": "#/$defs/id"},
+          "cessation_date": {"type": "string", "format": "date"},
+          "observed_event_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/ref"}},
+          "inps": {"$ref": "#/$defs/inps"},
+          "spanish": {"$ref": "#/$defs/spanish"}
+        },
+        "allOf": [
+          {"if": {"required": ["inps"]}, "then": {"properties": {"jurisdiction": {"const": "IT"}}}},
+          {"if": {"required": ["spanish"]}, "then": {"properties": {"jurisdiction": {"const": "ES"}}}}
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "pattern": "^\\S(?:.*\\S)?$"},
+    "ref": {"type": "string", "pattern": "^workspace-ref:.+"},
+    "rule_name": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*\\.json$"},
+    "inps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rule_pack": {"$ref": "#/$defs/rule_name"},
+        "work_exit_input_ref": {"$ref": "#/$defs/ref"},
+        "candidate_date": {"type": "string", "format": "date"},
+        "documentary_ref": {"$ref": "#/$defs/ref"}
+      }
+    },
+    "spanish": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "theoretical_rule_pack": {"$ref": "#/$defs/rule_name"},
+        "pro_rata_rule_pack": {"$ref": "#/$defs/rule_name"},
+        "pro_rata_input_ref": {"$ref": "#/$defs/ref"},
+        "reconciliation_ref": {"$ref": "#/$defs/ref"}
+      }
+    }
+  }
+}

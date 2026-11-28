@@ -1,5 +1,7 @@
 # V4B Roadmap — Work Transition & Retirement Bridge
 
+> Stato operativo 2026-11-22: roadmap riattivata per il recupero V4.14, ancora blocked al gate integrato. V4.15-V4.20 restano done nel solo perimetro scenario_projection. Le note di sessione precedenti sono storiche; piano corrente: [v4.14-recovery-plan.md](v4.14-recovery-plan.md).
+
 Audit ricorrente eseguito dopo quattro incrementi funzionali completati. Verificati confini del servizio RITA, allineamento contratto/builder/test, regressioni, data gaps, provenance, privacy delle fixture e compatibilità dei path. Nessun blocker nel corrective pass V4.15b; follow-up non bloccante sul riesame end-to-end del timing del chiamante CLI. Suite Engine 797/0/0/0 e guardrail superati; V4.14/V4.15 restano bloccate dai prerequisiti già dichiarati.
 
 ## Obiettivo
@@ -126,7 +128,7 @@ Calcolare per fase il cashflow da lavoro e l'accumulo previdenziale usando rule 
 ### V4.14 — Entitlement-driven pension timeline IT/ES/EU
 
 **Stato:** `blocked`
-**Motivo blocco:** the 2026-10-11 independent normative gate is NO-GO and the integrated contract/timeline is incomplete. b-i and b-j are bounded remediations; their local GO results do not close the parent.
+**Motivo blocco attuale (2026-11-24):** gate originale integrato NO-GO sul candidato v0.4: manca un percorso numerico pro-rata UE di produzione approvato per periodo e predicati. I due finding sul mapping transitorio hanno superato la review tecnica indipendente v0.5 (27 test mirati, quattro hash stabili); non sono piu blocchi residui. Il gate tecnico completo corrente e verde (1091/0/0/0); non chiude il parent. Vedere `v4.14-integration-gate-result.md`. Il NO-GO storico 2026-10-11 e i GO locali restano documentati nel proprio scope.
 **Tipo:** `functional`
 
 **Gate normativo indipendente (2026-10-11): NO-GO.** Il contratto completo non è implementabile finché non sono corretti il perimetro italiano per gestione e periodo, la versione delle fonti/rules spagnole, il coordinamento UE per gli artt. 50, 52, 56 e 57 del Reg. 883/2004 e la distinzione tra eleggibilità, requisiti computazionalmente soddisfatti, riconoscimento amministrativo, decorrenza economica e primo pagamento. V4.14b e V4.14c sono prerequisiti abilitanti; l'assenza di regole supportate deve restare `null` con `data_gaps`.
@@ -1663,3 +1665,11 @@ V4.15e implements the JSON CLI using the existing projection service. Nine targe
 ### V4.15e closure and V4.16 selection (2026-11-21)
 
 The complete supported Windows gate for the CLI revision passed. Roadmap audit cadence passes with V4.15e current and no audit due. V4.16 is the next eligible functional increment; its declared dependencies V4.15e, V4.15, V4.3 and V4.5 are satisfied for this financial projection scope. V4.14 source-bound legal conclusions remain independently blocked and are not inferred by scenario outputs.
+
+## Recupero parent V4.14 - 2026-11-22
+
+Nuova autorizzazione utente fino al gate finale, con preservazione dei finding risolti e dei verdetti storici. V4B torna attiva per il parent V4.14 blocked; nessun suffisso ciclico viene aperto. V4.15-V4.20 e V5 conservano i propri completamenti nello scope scenario. Piano operativo: [v4.14-recovery-plan.md](v4.14-recovery-plan.md). Il GO limitato w-z-n non attiva il candidato Rules v6.
+
+## Esito recupero integrato 2026-11-24
+
+Codice di composizione INPS/benchmark/ES/UE, eventi per membro/Paese/prestazione, viste v1/v2 e wizard presenti. Gate Windows corrente 1091 Engine,6 Rules,7citazioni,zero failure/error/skip. PASS tecnico e finanziario scoped; gate originale parent NO-GO,39/39hashstabili. Restano il percorso numerico UE realmente supportato e la review della correzione transitoria locale v0.5. Nessuna modifica Rules/Knowledge, nessun importo di produzione autorizzato da fixture sintetiche, nessuna chiusura V4.14 o riattivazione di audit generali. Esito completo: [v4.14-integration-gate-result.md](v4.14-integration-gate-result.md).

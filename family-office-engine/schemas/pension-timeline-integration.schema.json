@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Per-stream pension timeline integration report",
+  "description": "Transport contract: observed externally confirmed events stay separate from scenario projections. Inner event semantics are validated by the existing v2 validator and conservative v1 mapper.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "record_type", "status", "household_id", "household_members", "as_of_date", "human_review_required", "streams", "data_gaps", "limitations"],
+  "properties": {
+    "schema_version": {"const": "pension-timeline-integration/v1"},
+    "record_type": {"const": "PensionTimelineIntegration"},
+    "status": {"enum": ["partial", "not_assessed"]},
+    "household_id": {"type": "string", "minLength": 1},
+    "household_members": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "as_of_date": {"type": "string", "format": "date"},
+    "human_review_required": {"const": true},
+    "streams": {"type": "array", "items": {"$ref": "#/$defs/stream"}},
+    "data_gaps": {"type": "array", "items": {"$ref": "#/$defs/gap"}},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "gap": {
+      "type": "object", "required": ["code", "message", "severity"],
+      "properties": {"code": {"type": "string", "minLength": 1}, "message": {"type": "string", "minLength": 1}, "severity": {"enum": ["blocking", "warning", "info"]}}
+    },
+    "projection": {
+      "type": ["object", "null"],
+      "properties": {"classification": {"const": "scenario_projection"}},
+      "required": ["classification", "status"]
+    },
+    "stream": {
+      "type": "object", "additionalProperties": false,
+      "required": ["household_id", "member_id", "jurisdiction", "stream_id", "timeline_v2", "compatibility_v1", "observed_event_bindings", "scenario_projection", "documentary_benchmark", "data_gaps"],
+      "properties": {
+        "household_id": {"type": "string", "minLength": 1},
+        "member_id": {"type": "string", "minLength": 1},
+        "jurisdiction": {"enum": ["IT", "ES"]},
+        "stream_id": {"type": "string", "minLength": 1},
+        "timeline_v2": {"type": "object", "required": ["schema_version", "events"], "properties": {"schema_version": {"const": "pension-entitlement-timeline/v2"}}},
+        "compatibility_v1": {"type": "object", "required": ["schema_version", "events"], "properties": {"schema_version": {"const": "pension-entitlement-timeline/v1"}}},
+        "observed_event_bindings": {"type": "object"},
+        "scenario_projection": {
+          "type": "object", "additionalProperties": false,
+          "required": ["status", "cessation_date", "inps", "spanish_theoretical", "spanish_pro_rata"],
+          "properties": {
+            "status": {"const": "scenario_projection"},
+            "cessation_date": {"type": ["string", "null"], "format": "date"},
+            "inps": {"$ref": "#/$defs/projection"},
+            "spanish_theoretical": {"$ref": "#/$defs/projection"},
+            "spanish_pro_rata": {"$ref": "#/$defs/projection"}
+          }
+        },
+        "documentary_benchmark": {"type": ["object", "null"], "properties": {"classification": {"const": "documentary_projection_benchmark"}}},
+        "data_gaps": {"type": "array", "items": {"$ref": "#/$defs/gap"}}
+      }
+    }
+  }
+}

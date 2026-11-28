@@ -1,92 +1,109 @@
 {
   "$schema": "./current-work.schema.json",
   "schema_version": "1.0",
-  "status": "completed",
-  "selected_at": "2026-11-21T21:07:19Z",
+  "status": "blocked",
+  "selected_at": "2026-11-22T00:00:00Z",
   "roadmap_basis": [
     {
       "path": "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "section": "V4.20 - Golden use case and V5 resume gate",
-      "reason": "V4.19 closed on supported Windows gate 20261121-204752-081c336e; V4.20 is the final explicit V4B increment and depends on V4.19."
+      "section": "V4.14 recovery 2026-11-22",
+      "reason": "User explicitly authorizes unresolved parent recovery; completed independent scenario and V5 increments remain done."
     }
   ],
   "increment": {
-    "id": "V4.20",
-    "title": "Golden use case and V5 resume gate",
-    "objective": "Complete the deterministic work-transition plan workflow and synthetic readiness report using approved V4.16-V4.19 services.",
+    "id": "V4.14",
+    "title": "Entitlement-driven pension timeline IT/ES/EU - recovery",
+    "objective": "Produce supported source-bound timeline outputs and pass the original integrated parent gate without reopening resolved questions.",
     "scope": [
-      "Integrate work phases, bridge inputs and existing simulation/candidate/optimizer tools into fo planning work-transition plan",
-      "Produce work-transition-plan/v1 with assumptions, provenance, phase plan, bridge/risk outputs, rejected-candidate reasons, blockers and next action",
-      "Add the synthetic full-time to part-time to stop, RITA/assets, Spain pension and INPS golden path with spouse income and adverse stress",
-      "Keep unverified pension entitlement null with data_gaps and all projected pension flows in scenario_projection",
-      "Document the V4B to V5 governance handoff contract without marking the roadmap transition complete before the full gate"
+      "Explicit governance realignment",
+      "Exact approved contract/runtime reconciliation",
+      "Bounded implementation and integrated verification"
     ],
     "out_of_scope": [
-      "No personal data or real family workspace access",
-      "No new legal, tax, pension entitlement or investment rules",
-      "No change to approved V4.16-V4.19 formulas or tool contracts",
-      "No V6 work before the V4B full gate"
+      "Personal workspace data",
+      "Unverified future entitlement",
+      "Changing historical verdicts",
+      "Commit/push"
     ],
     "candidate_files": [
+      "family-office-engine/docs/roadmap/v4.14-recovery-plan.md",
+      "family-office-engine/src/family_office_engine/services/pension_entitlement_timeline_producer.py",
+      "family-office-engine/tests/unit/test_pension_entitlement_timeline_producer.py",
+      "family-office-engine/src/family_office_engine/services/pension_timeline_integration.py",
+      "family-office-engine/src/family_office_engine/cli/pension_timeline_wizard.py",
       "family-office-engine/src/family_office_engine/cli/main.py",
-      "family-office-engine/src/family_office_engine/services/work_transition_plan.py",
-      "family-office-engine/tests/unit/test_work_transition_plan_cli.py",
-      "family-office-engine/tests/unit/test_work_transition_plan.py",
-      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
-      "family-office-engine/docs/current-next-increment.md",
-      "family-office-engine/docs/decision-log.md",
-      "family-office-bootstrap/planning/current-work.json",
-      "family-office-engine/docs/api.md",
-      "family-office-engine/docs/cli.md",
-      "family-office-engine/docs/testing.md"
+      "family-office-engine/tests/unit/test_pension_timeline_integration.py"
     ],
-    "stop_condition": "Stop on any missing declared input, schema/lineage mismatch, nondeterministic output, financial projection promoted into pension_entitlement, or current-tree Windows full gate failure. Close V4B and resume V5 only after the supported Windows gate passes preflight and all suites with zero failures/errors/skips."
+    "stop_condition": "No unsupported legal output; unresolved material approval or failed final gate keeps V4.14 blocked."
   },
   "verification": {
     "tests": [
-      "V4.20 Windows full gate 20261121-220726-8d7ef9ad: TEMP preflight PASS; Rules 6/6, citation-index 7/7, Engine 1048/1048; zero failures/errors/skips.",
-      "V4.20 service golden/negative unit tests: 3/3 PASS; CLI --demo/input JSON and path-boundary smoke checks PASS.",
-      "Roadmap audit, execution guardrails, routing v4.0, planner JSON schema, py_compile and git diff --check PASS."
+      "Baseline gate 20261122-152448-d3572a61: Engine 1048/1048, Rules 6/6, citation 7/7; zero failures/errors/skips.",
+      "Current runtime gate 20261122-153212-1a4be166: Engine 1061/1061, Rules 6/6, citation 7/7; zero failures/errors/skips.",
+      "Targeted screening/schema 9/9; public plan CLI 4/4.",
+      "Roadmap audit PASS current=V4.14; routing/schema and execution guardrails PASS.",
+      "v0.1 independent integrated review: technical NO-GO and parent NO-GO; 20/20 initial/final hashes stable.",
+      "Bounded v0.2 remediation: targeted 11 screening/schema + 4 CLI; existing Italian 34 tests PASS.",
+      "Current gate 20261122-153742-388d406d: preflight PASS, Rules 6/6, citation 7/7, Engine 1063/1063; 0 failure/error/skip.",
+      "Authorized third review v0.2: scoped technical NO-GO (containment before read; freshness-specific regression); 21/21 initial/final hashes stable.",
+      "Current local v0.3: adapter/schema 12 tests PASS; full Windows gate 20261122-154241-80f58919 preflight/Rules6/citation7/Engine1064 PASS, 0 failure/error/skip.",
+      "v0.3 manifest ec5de5da5951583022d4cf6b20269da88e39de008a4959b29df912a05a7edb12: 21 current file hashes; candidate unapproved.",
+      "Recovery v0.3 independent scoped technical PASS P2/P3; manifest and 21/21 initial/final hashes stable; 12 targeted PASS; reuse prior full 1064/0/0/0 gate.",
+      "Integration candidate targeted: integration9 + wizard5 + screeningCLI4 PASS; current full gate 20261124-204817-7e612c5c running once.",
+      "Full integration gate 20261124-204817-7e612c5c: Rules6/citation7 PASS; Engine1078 0 failures/1 error/0 skip (legacy mocked loader rejects new payload=None keyword). Default call restored; focused consumer compatibility9 PASS. Candidate v0.2 additionally labels unattested benchmark subject explicitly.",
+      "Integrated v0.2: technical5 and financial4 concrete NO-GO findings; both exact38/38 start/end hashes. One bounded correction v0.3; targeted integration14/wizard8 PASS. Full corrected gate 20261124-205856-87b267ef running once.",
+      "Integrated v0.3 full gate 20261124-205856-87b267ef: Engine1086/Rules6/citation7 all0/0/0. FinancialPASS; technical residualNO-GO. v0.4 focused integration17/wizard9 PASS; final full current gate running on changed code, not unchanged repetition.",
+      "Current full supported Windows gate 20261124-210244-e66ff89c PASS: preflight, Engine1090, Rules6,citation7;0fail/error/skip. Integrated v0.4 technical PASS; financial v0.3 PASS with unchanged monetary kernels in v0.4.",
+      "Final original-parent exact-hash NO-GO v0.4:39/39 stable; technical/financial scoped PASS are not parent closure.",
+      "Local v0.5 transition corrections: targeted integration18/wizard9 PASS, explicit3-state guided output and canonical scope-swap regression.",
+      "Current supported Windows gate20261124-211041-d7ecb241: preflightPASS, Engine1091/Rules6/citations7;0failure/0error/0skip.",
+      "Current local v0.5 manifest 39f06f53feb8cb31342c5da7516f1fb0250a0a2a3ae508a9ed686b4e75784675,39files; no independent approval.",
+      "v0.5 independent residual transition review PASS;27 focused tests;4/4 scoped hashes stable;manifest39f06f53 unchanged. Existing full1091/6/7 gate reused after verifying all39 candidate hashes unchanged before documentation checkpoint."
     ],
     "documentation_touchpoints": [
-      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
+      "family-office-engine/docs/roadmap/roadmap-index.md",
       "family-office-engine/docs/current-next-increment.md",
+      "family-office-engine/docs/roadmap/roadmap-v4b-work-transition.md",
       "family-office-engine/docs/decision-log.md"
     ],
-    "result": "passed",
-    "notes": "V4.20 closed using the exact current-tree supported Windows gate. V4B->V5 handoff is recorded. V5.3 remains done as the named checkpoint; all V5 and listed V6 increments are done, so no further planned functional increment is available.",
+    "result": "partial",
+    "notes": "Recovery authorization supersedes exhausted historical increment budgets for new scoped work, without retrying historical hashes or altering verdicts. Two delegation events maximum for this bounded recovery phase: architecture resolution and integrated independent gate. Architecture resolution delivered: separate actual approved v2 screening, preserve event/stream granularity and original scenario integration requirements. Manifest v0.1 SHA256 32dc1b5346545630138721b579e3de0d10b063bca4daa3e8d6b63f44ba512f9a. v0.1 technical findings corrected locally in v0.2 (dated evidence coverage; identical payload through freshness/service). v0.2 manifest 19656b03bce35485bc98c5bc4f2f93bafb2b0f7845a173d7b6d6ff120bbf488a, 21 files; no independent approval yet. Original parent functional mapping/scenario paths remain missing. Third-event permission requested; no unauthorized retry. User-authorized third review delivered technical NO-GO (not timeout). Both reported points corrected locally in v0.3, full suite green; no independent approval transferred. Budget 3/3 exhausted; stop automatic review loop. Parent functional integration and event-stream mapping remain incomplete. New 2026-11-22 user authorization supersedes prior 3-event stop; bounded extension max8 additional/11 total. Do not rerun unchanged full suite for v0.3. Reuse existing 1064/0/0/0 gate and review only two residual fixes. One bounded remediation addresses published-source preservation, roster/single-buffer checks, Spanish subject binding, transition conflicts, wizard revision retention and annual financial input frame/rate/final-year guards. Old Rules/Knowledge and old verdicts unchanged. Final original-parent gate delivered NO-GO, not PENDING. Two transition mapping issues fixed locally and tested in v0.5; no new independent GO. Remaining production EU source/period/predicate numeric path requires new exact approved contract, not repeating existing law audits. All11 delegated events used. Stop automatic review/test loop; no new suffix or source activation. Fresh authorization extended budget18total. Event13 delivered scoped PASS on both transition corrections. Event12 authoring reported an IPC synthetic-only dependency and proposed an institutional theoretical/duration extract; interrupted without candidate files or approval. 2026-11-28 user requests commit/push checkpoint, no release closure.",
     "task_envelope": {
       "mode": "feature-slice",
-      "risk_domain": "financial",
-      "objective": "Compose approved scenario services into an explainable synthetic work-transition planning workflow without determining legal entitlement.",
+      "risk_domain": "pension",
+      "objective": "Produce supported source-bound timeline outputs and pass the original integrated parent gate without reopening resolved questions.",
       "repositories": [
-        "engine"
+        "engine",
+        "bootstrap",
+        "rules",
+        "knowledge"
       ],
       "read_set": [
-        "V4.20 roadmap contract",
-        "existing work-transition CLI wizard",
-        "V4.16-V4.19 schemas and services",
-        "accepted scenario_projection ADR"
+        "V4.14 original exit contract",
+        "w-z-h through w-z-n exact findings",
+        "timeline v2 contracts and public services",
+        "accepted projection ADR"
       ],
       "write_set": [
-        "family-office-engine/src/family_office_engine/cli/main.py",
-        "family-office-engine/src/family_office_engine/services/work_transition_plan.py",
-        "family-office-engine/tests/unit/test_work_transition_plan_cli.py",
-        "family-office-engine/tests/unit/test_work_transition_plan.py",
-        "family-office-engine/docs/api.md",
-        "family-office-engine/docs/cli.md",
-        "family-office-engine/docs/testing.md"
+        "roadmap/planner/decision-log",
+        "runtime timeline adapters and contract tests as justified by reconciliation",
+        "new integrated per-stream service/schema/tests",
+        "existing scenario kernels only for declared yearly schedule and immutable payload reuse",
+        "guided CLI intake and source/event/subject bindings",
+        "New source-bound Knowledge/Rules ordinary Article52 path and narrowly dispatched consumer/public regressions; immutable old versions preserved"
       ],
-      "test_command": ".\\family-office-engine\\.venv\\Scripts\\python.exe -m unittest tests.unit.test_work_transition_plan_cli tests.unit.test_work_transition_plan",
+      "test_command": ".\\family-office-bootstrap\\planning\\run-v414-windows-gate.ps1 -RepoRoot (Get-Location).Path -FullSuite",
       "stop_conditions": [
-        "Any unverified pension entitlement is populated or inferred.",
-        "The golden path lacks explicit assumptions, lineage, data_gaps or blocker reasons.",
-        "Targeted golden or negative regressions fail.",
-        "Current-tree supported Windows full gate is not green."
+        "Unsupported conclusion or mutation of immutable approved packs",
+        "Nonconvergent gate: record finding and preserve blocked parent",
+        "Suite failures/errors/skips prevent closure"
       ]
     }
   },
-  "blockers": [],
+  "blockers": [
+    "No independently approved shipped EU numeric production path for exact source/period/conditions; original parent NO-GO remains.",
+    "Event12 authoring interrupted without a concrete Knowledge/Rules/Engine candidate or final report. Institutional theoretical/duration extract proposal is unapproved."
+  ],
   "session_notes": [
     "User requested durable playbook updates from the long session; four workflow documents now include the corrections.",
     "b-c and b-d are done Knowledge-only on their own exact-hash reviews; no GO transfers to other increments.",
@@ -181,31 +198,228 @@
     "2026-11-21: bounded gate remediation added `phased_work_transition_scenario` to supported-question catalog and deterministic question-intent routing. Ten catalog/router regressions pass; missing inputs and mixed pension entitlement requests remain clarification; no tools invoked. Current-tree full Windows gate is still required.",
     "2026-11-21: verified V4.19 gate 20261121-204752-081c336e (preflight, Rules 6/6, citation 7/7, Engine 1042/1042; zero failures/errors/skips); roadmap audit passed. Closed V4.19 and selected V4.20, final V4B increment. V4.14 remains blocked; no entitlement or normative gate changes.",
     "2026-11-21: V4.20 plan service/CLI golden implemented; targeted tests 9/9 PASS. External gate pending on the exact current tree; V4.20 blocked pending zero failures/errors/skips. No V4B/V5 handoff; V4.14 remains blocked.",
-    "2026-11-21: closed V4.20 on Windows gate 20261121-220726-8d7ef9ad (preflight; Rules 6/6; citation 7/7; Engine 1048/1048; zero failures/errors/skips). Applied V4B done / V5 in_progress handoff and pointed current-next at already-done V5.3 per V4.20 criteria. All listed V5 and V6 items are done; V6 remains deferred and no planned functional increment is selectable."
+    "2026-11-21: closed V4.20 on Windows gate 20261121-220726-8d7ef9ad (preflight; Rules 6/6; citation 7/7; Engine 1048/1048; zero failures/errors/skips). Applied V4B done / V5 in_progress handoff and pointed current-next at already-done V5.3 per V4.20 criteria. All listed V5 and V6 items are done; V6 remains deferred and no planned functional increment is selectable.",
+    "2026-11-22: user authorizes recovery of V4.14 through integrated final gate, preserving resolved findings. Previous V5.3/no-eligible-work checkpoint superseded; historical V4.20 route retained in prior session notes and decision log.",
+    "2026-11-22: recovery completed governance alignment and exposed actual approved v2 screening in the plan journey. Independent gate NO-GO: two technical findings corrected locally; current Windows Engine 1063/1063 zero failure/error/skip. Parent remains blocked for original scenario/event-stream mapping requirements; v0.2 review pending third-event authorization, not a timeout. Details: docs/roadmap/v4.14-recovery-gate-result.md.",
+    "2026-11-22: user explicitly authorizes event 3/3, one technical review of v0.2 manifest 19656b03bce35485bc98c5bc4f2f93bafb2b0f7845a173d7b6d6ff120bbf488a within 300 seconds. This does not authorize a fourth review or close original functional gaps.",
+    "2026-11-22: explicit event3/3 completed, v0.2 technical NO-GO with 21/21 stable hashes. Corrected root-containment-before-read and freshness-specific substitution regression locally; v0.3 full Engine1064/Rules6/citation7 all 0 failure/error/skip. Current candidate unapproved; no automatic fourth review, no new suffix, original V4.14 parent NO-GO retained.",
+    "2026-11-22: fresh user authorization for further delegations through V4.14 final gate, explicitly avoid endless test loops. Bound controller to 8 additional events/11 total; no unchanged-artifact reviews or full-suite reruns.",
+    "2026-11-24: resumed after implementer platform usage limit, not a review verdict. Parent completed interrupted snapshot-byte wiring and corrected synthetic ratio expectation to unchanged upstream six decimals. Focused integration9/wizard5/CLI4 PASS; integration candidate manifest d52f1fd76ff361ca0e3a9378c4a8ef1b3b50f3d65dd0c3d6299e605bb179b10f. One full current gate running, not repeated unchanged.",
+    "2026-11-24: recovered interrupted implementation and reached FINAL original-parent gate. Technicalv0.4 and financialv0.3 scoped PASS; parent NO-GO exact39/39 stable. Locally corrected explicit transition state and cross-claim source-scope mapping in v0.5; current full Windows1091/Rules6/citation7 zeros. Production EU numeric predicate path remains unapproved; no synthetic promotion, no source/rule edits, no parent closure, no additional review/test loop beyond11events.",
+    "2026-11-24: fresh explicit authorization for source/period/conditions-bound EU pro-rata production path and necessary residual reviews. Budget max18 total (11 historical,7 new); one bounded remediation, no repeated unchanged full suite or broad law audit. New source interpretation needs independent exact-hash normative gate before production approval.",
+    "2026-11-28: user explicitly authorizes commit and push. Preserve blocked V4.14, record received v0.5 transition PASS and incomplete event12; no live agent or new EU candidate found. Software39/39 candidate hashes match successful1091/6/7 gate. Stage only software/governance/synthetic examples and required TEMP preflight, excluding private workspace and local logs."
   ],
   "next_action": {
-    "mode": "none",
-    "description": "No planned functional increment remains in the active V5 roadmap, and V6 is deferred with all listed increments done. Define and authorize a new roadmap scope before further implementation."
+    "mode": "resume",
+    "description": "Resume exact EU production source/period/predicate candidate from the documented institutional theoretical/duration extract proposal; it has no delivered artifacts or approval. Then scoped normative/technical reviews and original-parent gate. Both v0.5 transition findings already passed; do not reopen them or repeat unchanged full suite."
   },
   "routing": {
     "policy_version": "4.0",
-    "tier": "medium",
-    "task_class": "implementation",
-    "agent": "fo_implementer",
+    "tier": "critical",
+    "task_class": "normative",
+    "agent": "fo_normative_reviewer",
     "model": "gpt-6.2-sol",
-    "reasoning_effort": "medium",
-    "rationale": "V4.20 was a bounded deterministic composition over already-approved services; no new formulas, legal semantics, or architecture changes were introduced.",
+    "reasoning_effort": "high",
+    "rationale": "Original-parent integrated gate on existing source/rule/output mapping, not a fresh law audit; no new tax/pension formula or source interpretation.",
     "trace": [
       {
-        "at": "2026-11-21T21:07:19Z",
+        "at": "2026-11-22T00:00:00Z",
         "event": "selected",
+        "tier": "high",
+        "agent": "fo_architect",
+        "model": "gpt-6.2-astra",
+        "reasoning_effort": "medium",
+        "reason": "Bounded V4.14 recovery; retain exact historic verdicts, resolve supported output architecture."
+      },
+      {
+        "at": "2026-11-22T15:25:18.523295+00:00",
+        "event": "delegated",
+        "tier": "high",
+        "agent": "fo_architect",
+        "model": "gpt-6.2-astra",
+        "reasoning_effort": "medium",
+        "reason": "v414_architecture: one 300-second read-only request; resolve approved output paths and runtime identities before implementation; no historic source re-audit."
+      },
+      {
+        "at": "2026-11-22T15:34:21.358912+00:00",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v414_integrated_gate; one 300-second exact-hash request on manifest 32dc1b5346545630138721b579e3de0d10b063bca4daa3e8d6b63f44ba512f9a; changed-code safety plus original parent exit; no reopening resolved sources."
+      },
+      {
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v414_integrated_gate v0.1: technical and parent NO-GO, 20/20 exact start/end hashes. Bounded local remediation frozen as v0.2; no GO transfer or new delegated event."
+      },
+      {
+        "at": "2026-11-22T15:40:29.648038+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_v02_technical_gate event3/3; explicit user authorization; manifest 19656b03bce35485bc98c5bc4f2f93bafb2b0f7845a173d7b6d6ff120bbf488a, 21 files, two technical fixes only, single 300-second window."
+      },
+      {
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event3/3 v414_v02_technical_gate NO-GO, 21/21 exact start/end hashes. Current local v0.3 corrects path preflight/test scope; no new review or approval."
+      },
+      {
+        "at": "2026-11-22T15:48:08.047725+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Fresh user authorization: v414_v02_technical_gate review of v0.3, one 300s request on ec5de5da5951583022d4cf6b20269da88e39de008a4959b29df912a05a7edb12."
+      },
+      {
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v0.3 PASS scoped P2/P3, 21/21 initial/final hashes and manifest stable; 12 focused tests. Prior 1064-test full gate reused, not rerun."
+      },
+      {
+        "at": "2026-11-22T15:56:07.374480+00:00",
+        "event": "delegated",
         "tier": "medium",
         "agent": "fo_implementer",
         "model": "gpt-6.2-sol",
         "reasoning_effort": "medium",
-        "reason": "V4.20: bounded deterministic composition of the approved work-transition services; no formula or legal-semantics changes."
+        "reason": "v414_integration_runtime: finite service composition, per-stream observed event mapping and focused tests under v4.14-integration-contract.md. Parent owns CLI, docs and final gate; no full-suite loop."
+      },
+      {
+        "at": "2026-11-24T20:50:55.489191+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_v02_technical_gate: one 300-second read-only review of manifest a98c5a361c80d5d04690b4e34bbb3d2f51827db8401b1be46a156cd165960180 (38 files); Integrated candidate technical safety only. No immutable-source re-audit or full-suite loop."
+      },
+      {
+        "at": "2026-11-24T20:50:55.489212+00:00",
+        "event": "delegated",
+        "tier": "high",
+        "agent": "fo_financial_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v414_integration_financial: one 300-second read-only review of manifest a98c5a361c80d5d04690b4e34bbb3d2f51827db8401b1be46a156cd165960180 (38 files); Declared yearly schedule and scenario/benchmark financial semantics only. No immutable-source re-audit or full-suite loop."
+      },
+      {
+        "at": "2026-11-24T20:59:49.509915+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_v02_technical_gate: one corrected-version 300s review ONLY of prior concrete findings; manifest 2ab8a68c14302fed578b58949b7a7679016384fac9404abca9d93a6a4bf5ce9a,39 files. No broad re-audit or repeated full-suite run."
+      },
+      {
+        "at": "2026-11-24T20:59:49.509952+00:00",
+        "event": "delegated",
+        "tier": "high",
+        "agent": "fo_financial_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v414_integration_financial: one corrected-version 300s review ONLY of prior concrete findings; manifest 2ab8a68c14302fed578b58949b7a7679016384fac9404abca9d93a6a4bf5ce9a,39 files. No broad re-audit or repeated full-suite run."
+      },
+      {
+        "event": "reviewed",
+        "tier": "high",
+        "agent": "fo_financial_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Financial scoped PASS, four findings closed;39/39 hashes stable;exact31820.25/567537.25 reproduced."
+      },
+      {
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Technical scoped NO-GO: four residual variants of source protection/revision/conflict isolation;39/39 stable. One final formal guard correction, no broad re-audit."
+      },
+      {
+        "at": "2026-11-24T21:03:25.565662+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event10/11, v414_v02_technical_gate final residual-four check only,300s,manifest3326fd559319c96cffea686a3e7f9a4f1d72815d67a2f820410a4f8345079f44 (39 files). No more automatic technical rounds."
+      },
+      {
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Integrated v0.4 final residual technical PASS;39/39 exact start/end hashes,26 targeted tests; no residual within scope."
+      },
+      {
+        "at": "2026-11-24T21:04:47.945733+00:00",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Event11/11 v414_final_parent_gate; one300s original-parent gate, manifest3326fd559319c96cffea686a3e7f9a4f1d72815d67a2f820410a4f8345079f44,39files; no immutable-source re-audit, no retry."
+      },
+      {
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Event11/11 v414_final_parent_gate: original-parent NO-GO,39/39 exact initial/final hashes on3326fd559319c96cffea686a3e7f9a4f1d72815d67a2f820410a4f8345079f44. Three findings: guided transition inference, cross-binding canonical scope swap, no approved production EU numeric path. Not a timeout."
+      },
+      {
+        "at": "2026-11-24T21:19:57.235231+00:00",
+        "event": "delegated",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_eu_production_path: Event12/18 new ordinary Article52 source-bound production candidate; new KB/Rules/consumer/tests;900s authoring; no full suite or self-approval."
+      },
+      {
+        "at": "2026-11-24T21:19:57.235255+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_v02_technical_gate: Event13/18 v0.5 two residual transition findings only; exact4file hashes from39f06f53 manifest;300s read-only; prior1091 full gate reused."
+      },
+      {
+        "at": "2026-11-24T21:22:00Z",
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event13/18 v414_v02_technical_gate: scoped technical PASS for both v0.5 transition findings;27 targeted tests;manifest39f06f53feb8cb31342c5da7516f1fb0250a0a2a3ae508a9ed686b4e75784675 stable;4/4 scoped initial/final hashes stable. No parent closure."
       }
-    ]
+    ],
+    "delegation_budget": {
+      "max_events": 18,
+      "authorization": "2026-11-24 user explicitly authorizes necessary delegations for one source/period/conditions-bound EU pro-rata production path and residual reviews, avoiding loops and resolved questions. Controller allows at most7 additional events/18 total; one bounded remediation, no unchanged-hash retries.",
+      "scope": "New ordinary Article52 Spanish RG IT/ES path, exact-source Knowledge/Rules/consumer; residual v0.5 transition safety; technical and original-parent final reviews.",
+      "blocker": "Only EU production path remains; transition findings have scoped technical PASS. Authoring interrupted without deliverable; no new delegation during commit checkpoint."
+    }
   },
-  "updated_at": "2026-11-21T23:15:00Z"
+  "updated_at": "2026-11-28T00:00:00Z"
 }

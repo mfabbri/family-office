@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Approved path-specific Italian timeline screening adapter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "as_of_date", "evidence_role", "precision", "rule_pack", "screening", "pension_entitlement", "data_gaps", "limitations"],
+  "properties": {
+    "schema_version": {"const": "italian-timeline-screening/v1"},
+    "status": {"enum": ["assessed", "not_assessed"]},
+    "as_of_date": {"type": "string", "format": "date"},
+    "evidence_role": {"const": "path_specific_screening_only"},
+    "precision": {"enum": ["observed_month", "candidate_day_check"]},
+    "rule_pack": {
+      "type": "object",
+      "required": ["verified", "reason", "rule_pack_id", "digest_sha256", "valid_from", "valid_to_exclusive"],
+      "additionalProperties": false,
+      "properties": {
+        "verified": {"type": "boolean"},
+        "reason": {"type": "string"},
+        "rule_pack_id": {"enum": [null, "it.inps-old-age-eligibility.2026-2028.v2"]},
+        "digest_sha256": {"type": ["string", "null"]},
+        "valid_from": {"type": ["string", "null"], "format": "date"},
+        "valid_to_exclusive": {"type": ["string", "null"], "format": "date"}
+      }
+    },
+    "screening": {"type": ["object", "null"]},
+    "pension_entitlement": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "eligibility_date", "requirements_met_date", "official_recognition_date", "economic_effective_date", "first_cash_payment_date"],
+      "properties": {
+        "status": {"const": "not_assessed"},
+        "eligibility_date": {"type": "null"},
+        "requirements_met_date": {"type": "null"},
+        "official_recognition_date": {"type": "null"},
+        "economic_effective_date": {"type": "null"},
+        "first_cash_payment_date": {"type": "null"}
+      }
+    },
+    "data_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["code", "message", "severity"],
+        "properties": {
+          "code": {"type": "string", "minLength": 1},
+          "message": {"type": "string", "minLength": 1},
+          "severity": {"enum": ["blocking", "warning", "info"]}
+        }
+      }
+    },
+    "limitations": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "assessed"}}},
+      "then": {
+        "properties": {
+          "rule_pack": {"properties": {"verified": {"const": true}}},
+          "screening": {"type": "object", "required": ["status"], "properties": {"status": {"const": "assessed"}}},
+          "data_gaps": {"maxItems": 0}
+        }
+      },
+      "else": {"properties": {"data_gaps": {"minItems": 1}}}
+    }
+  ]
+}

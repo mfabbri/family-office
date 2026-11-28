@@ -48,7 +48,25 @@ def build_it_es_eu_pension_pro_rata(
     *,
     eu_rule_selection: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    rule_pack = load_rule_pack(rule_pack_path)
+    snapshot = calculate_it_es_eu_pension_pro_rata(
+        input_path, rule_pack_path, spanish_theoretical_snapshot_path, eu_rule_selection=eu_rule_selection,
+    )
+    return _write_snapshot(snapshot, output_path)
+
+
+def calculate_it_es_eu_pension_pro_rata(
+    input_path: Path,
+    rule_pack_path: Path,
+    spanish_theoretical_snapshot_path: Path | None = None,
+    *,
+    eu_rule_selection: dict[str, Any] | None = None,
+    input_bytes: bytes | None = None,
+    rule_pack_bytes: bytes | None = None,
+    as_of_date: date | None = None,
+    spanish_theoretical_snapshot: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    rule_pack = load_rule_pack(rule_pack_path, rule_pack_bytes=rule_pack_bytes, as_of_date=as_of_date)
+    pack_digest = None if rule_pack_bytes is None else hashlib.sha256(rule_pack_bytes).hexdigest()
     if rule_pack["rule_pack_id"] in TIMELINE_PACK_REGISTRY:
         selection = None
         if isinstance(eu_rule_selection, dict):
@@ -61,19 +79,21 @@ def build_it_es_eu_pension_pro_rata(
                 pre_application_periods=eu_rule_selection.get("pre_application_periods"),
                 rules_root=rule_pack_path.parent,
             )
-        snapshot = _candidate_pack_evidence_only_snapshot(rule_pack, rule_pack_path, selection)
-        return _write_snapshot(snapshot, output_path)
+        return _candidate_pack_evidence_only_snapshot(rule_pack, rule_pack_path, selection)
 
-    data = _read_json(input_path, "IT-ES EU pension pro-rata input")
+    data = _read_json(input_path, "IT-ES EU pension pro-rata input", payload=input_bytes)
     if data.get("schema_version") != INPUT_SCHEMA_VERSION:
         raise ItEsEuPensionProRataError(f"Unsupported IT-ES EU pension pro-rata input schema: {data.get('schema_version')}")
     if rule_pack["rule_pack_id"] in {"eu.it-es.pension-coordination.2026.v10", "eu.it-es.pension-coordination.2026.v11"}:
-        return _write_snapshot(_applicability_evidence_only_snapshot(data, rule_pack, rule_pack_path), output_path)
+        return _applicability_evidence_only_snapshot(data, rule_pack, rule_pack_path, pack_digest=pack_digest)
     if _article_57_contract_mismatch(data, rule_pack):
-        return _write_snapshot(_article_57_contract_mismatch_snapshot(data, rule_pack, rule_pack_path), output_path)
+        return _article_57_contract_mismatch_snapshot(data, rule_pack, rule_pack_path, pack_digest=pack_digest)
     if spanish_theoretical_snapshot_path is not None:
         data = dict(data)
         data["spanish_theoretical_pension"] = _theoretical_from_snapshot(spanish_theoretical_snapshot_path)
+    elif spanish_theoretical_snapshot is not None:
+        data = dict(data)
+        data["spanish_theoretical_pension"] = _theoretical_from_data(spanish_theoretical_snapshot, "integrated-spanish-theoretical")
 
     retirement_date = _retirement_date(data)
     date_of_birth = data.get("date_of_birth")
@@ -117,7 +137,7 @@ def build_it_es_eu_pension_pro_rata(
             "path": str(rule_pack_path),
             "rule_pack_id": rule_pack["rule_pack_id"],
             "schema_version": rule_pack["schema_version"],
-            "sha256": _file_sha256(rule_pack_path),
+            "sha256": pack_digest or _file_sha256(rule_pack_path),
             "valid_from": rule_pack["spanish_ordinary_entitlement"]["valid_from"],
             "valid_to": rule_pack["spanish_ordinary_entitlement"]["valid_to"],
             "source_refs": rule_pack["source_refs"],
@@ -140,7 +160,7 @@ def build_it_es_eu_pension_pro_rata(
     }
     if title_ii_transition is not None:
         snapshot["title_ii_transition"] = title_ii_transition["result"]
-    return _write_snapshot(snapshot, output_path)
+    return snapshot
 
 
 def _article_57_contract_mismatch(data: dict[str, Any], rule_pack: dict[str, Any]) -> bool:
@@ -157,7 +177,7 @@ def _article_57_contract_mismatch(data: dict[str, Any], rule_pack: dict[str, Any
 
 
 def _article_57_contract_mismatch_snapshot(
-    data: dict[str, Any], rule_pack: dict[str, Any], rule_pack_path: Path
+    data: dict[str, Any], rule_pack: dict[str, Any], rule_pack_path: Path, *, pack_digest: str | None = None,
 ) -> dict[str, Any]:
     policy = rule_pack["pro_rata_method"]["article_57_source_bound"]
     assessment = data["article_57_assessment"]
@@ -196,7 +216,7 @@ def _article_57_contract_mismatch_snapshot(
             "path": str(rule_pack_path),
             "rule_pack_id": rule_pack["rule_pack_id"],
             "schema_version": rule_pack["schema_version"],
-            "sha256": _file_sha256(rule_pack_path),
+            "sha256": pack_digest or _file_sha256(rule_pack_path),
             "valid_from": rule_pack["spanish_ordinary_entitlement"]["valid_from"],
             "valid_to": rule_pack["spanish_ordinary_entitlement"]["valid_to"],
             "source_refs": rule_pack["source_refs"],
@@ -221,7 +241,7 @@ def _article_57_contract_mismatch_snapshot(
 
 
 def _applicability_evidence_only_snapshot(
-    data: dict[str, Any], rule_pack: dict[str, Any], rule_pack_path: Path
+    data: dict[str, Any], rule_pack: dict[str, Any], rule_pack_path: Path, *, pack_digest: str | None = None,
 ) -> dict[str, Any]:
     assessment = data.get("article_57_assessment")
     assessment_date = assessment.get("assessment_date") if isinstance(assessment, dict) else None
@@ -256,7 +276,7 @@ def _applicability_evidence_only_snapshot(
             "path": str(rule_pack_path),
             "rule_pack_id": rule_pack["rule_pack_id"],
             "schema_version": rule_pack["schema_version"],
-            "sha256": _file_sha256(rule_pack_path),
+            "sha256": pack_digest or _file_sha256(rule_pack_path),
             "valid_from": rule_pack["spanish_ordinary_entitlement"]["valid_from"],
             "valid_to": rule_pack["spanish_ordinary_entitlement"]["valid_to"],
             "source_refs": rule_pack["source_refs"],
@@ -341,8 +361,11 @@ def _declared_data_gaps(data: dict[str, Any], theoretical: dict[str, Any]) -> li
     return [gap for gap in gaps if gap.get("code") not in resolved_by_theoretical_snapshot]
 
 
-def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
-    data = _read_json(rule_pack_path, "EU pension coordination rule pack")
+def load_rule_pack(
+    rule_pack_path: Path, *, rule_pack_bytes: bytes | None = None, as_of_date: date | None = None,
+) -> dict[str, Any]:
+    data = (_read_json(rule_pack_path, "EU pension coordination rule pack") if rule_pack_bytes is None
+            else _read_json(rule_pack_path, "EU pension coordination rule pack", payload=rule_pack_bytes))
     required = (
         "schema_version",
         "rule_pack_id",
@@ -362,7 +385,8 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
         raise ItEsEuPensionProRataError("EU pension coordination jurisdictions must be IT, ES and EU")
     candidate_spec = TIMELINE_PACK_REGISTRY.get(data["rule_pack_id"])
     if candidate_spec is not None:
-        if _file_sha256(rule_pack_path) != candidate_spec["sha256"]:
+        digest = _file_sha256(rule_pack_path) if rule_pack_bytes is None else hashlib.sha256(rule_pack_bytes).hexdigest()
+        if digest != candidate_spec["sha256"]:
             raise ItEsEuPensionProRataError("Candidate EU rule pack digest does not match the reviewed selector registry.")
         if (
             data.get("valid_from") != candidate_spec["valid_from"].isoformat()
@@ -371,7 +395,7 @@ def load_rule_pack(rule_pack_path: Path) -> dict[str, Any]:
             raise ItEsEuPensionProRataError("Candidate EU rule pack period does not match the reviewed selector registry.")
     _validate_source_refs(data["source_refs"])
     try:
-        require_fresh_pension_rule_pack(rule_pack_path)
+        require_fresh_pension_rule_pack(rule_pack_path, as_of_date, rule_pack_bytes=rule_pack_bytes)
     except PensionSourceFreshnessError as exc:
         raise ItEsEuPensionProRataError(str(exc)) from exc
     if data["coordination_principles"].get("no_transfer_or_merger_of_contributions") is not True:
@@ -937,14 +961,17 @@ def _spanish_theoretical_amount(value: Any) -> dict[str, Any]:
 
 
 def _theoretical_from_snapshot(snapshot_path: Path) -> dict[str, Any]:
-    snapshot = _read_json(snapshot_path, "Spanish EU theoretical pension snapshot")
+    return _theoretical_from_data(_read_json(snapshot_path, "Spanish EU theoretical pension snapshot"), str(snapshot_path))
+
+
+def _theoretical_from_data(snapshot: dict[str, Any], source: str) -> dict[str, Any]:
     if snapshot.get("schema_version") != "spanish-eu-theoretical-pension/v1":
         raise ItEsEuPensionProRataError(f"Unsupported Spanish theoretical pension snapshot schema: {snapshot.get('schema_version')}")
     theoretical = snapshot.get("spanish_theoretical_pension")
     if snapshot.get("status") == "complete" and isinstance(theoretical, dict):
         return dict(theoretical)
     return {
-        "source": str(snapshot_path),
+        "source": source,
         "source_country": "ES",
         "basis": "spanish_only_bases",
         "data_gaps": [
@@ -2521,12 +2548,12 @@ def _validate_source_refs(source_refs: Any) -> None:
             raise ItEsEuPensionProRataError("EU pension coordination source_ref must use an official EU or Spanish URL")
 
 
-def _read_json(path: Path, label: str) -> dict[str, Any]:
+def _read_json(path: Path, label: str, *, payload: bytes | None = None) -> dict[str, Any]:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8") if payload is None else payload.decode("utf-8"))
     except FileNotFoundError as exc:
         raise ItEsEuPensionProRataError(f"Missing {label}: {path}") from exc
-    except json.JSONDecodeError as exc:
+    except (UnicodeError, json.JSONDecodeError) as exc:
         raise ItEsEuPensionProRataError(f"Invalid {label} JSON: {path}") from exc
 
 

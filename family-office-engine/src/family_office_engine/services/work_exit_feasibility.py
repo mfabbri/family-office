@@ -173,7 +173,57 @@ def _evaluate_candidate(
     }
 
 
-def _inps_estimate_for_adult(adult: dict[str, Any], candidate: date, rule_pack: dict[str, Any]) -> dict[str, Any]:
+def project_inps_for_adult(adult: dict[str, Any], candidate: date, rule_pack: dict[str, Any]) -> dict[str, Any]:
+    """Apply the work-exit contribution kernel to a declared planning candidate."""
+    if candidate.isoformat() < rule_pack["valid_from"]:
+        return _blocked_inps(adult["person_id"], candidate, [
+            {"code": "candidate_date_not_covered_by_inps_rule_pack", "blocking": True},
+        ])
+    if not _valid_declared_projection_frame(adult.get("inps_contributory_estimate"), candidate.year, rule_pack):
+        return _blocked_inps(adult["person_id"], candidate, [
+            {"code": "inps_projection_frame_or_rate_invalid", "person_id": adult["person_id"], "blocking": True},
+        ])
+    return _inps_estimate_for_adult(adult, candidate, rule_pack, publish_montante=True)
+
+
+def _valid_declared_projection_frame(inps: Any, candidate_year: int, rule_pack: dict[str, Any]) -> bool:
+    if not isinstance(inps, dict):
+        return False
+    year = inps.get("as_of_year")
+    if not isinstance(year, int) or isinstance(year, bool) or not 1900 <= year <= candidate_year:
+        return False
+    try:
+        future = inps.get("future_contributions") or {}
+        if not isinstance(future, dict):
+            return False
+        rate = _decimal(future.get("computation_rate", rule_pack["contributory_method"]["default_employee_computation_rate"]), "computation_rate")
+        revaluation = _revaluation_rate(inps, rule_pack)
+        if not rate.is_finite() or not Decimal("0") <= rate <= Decimal("1") or not revaluation.is_finite() or revaluation <= -1:
+            return False
+        if inps.get("historical_montante") not in (None, ""):
+            amount = _decimal(inps["historical_montante"], "historical_montante")
+            return amount.is_finite() and amount >= 0
+        bases = inps.get("annual_bases")
+        if not isinstance(bases, list) or not bases:
+            return False
+        seen = set()
+        for item in bases:
+            base_year = item.get("year")
+            if not isinstance(base_year, int) or isinstance(base_year, bool) or base_year > year or base_year in seen:
+                return False
+            seen.add(base_year)
+            base = _decimal(item["taxable_income"], "historical base")
+            base_rate = _decimal(item.get("computation_rate", "0.33"), "historical computation rate")
+            if not base.is_finite() or base < 0 or not base_rate.is_finite() or not 0 <= base_rate <= 1:
+                return False
+        return True
+    except (ValueError, TypeError, KeyError, ArithmeticError):
+        return False
+
+
+def _inps_estimate_for_adult(
+    adult: dict[str, Any], candidate: date, rule_pack: dict[str, Any], *, publish_montante: bool = False,
+) -> dict[str, Any]:
     gaps: list[dict[str, Any]] = []
     person_id = _required_string(adult, "person_id")
     dob = _required_date(adult.get("date_of_birth"), f"{person_id}.date_of_birth")
@@ -185,6 +235,8 @@ def _inps_estimate_for_adult(adult: dict[str, Any], candidate: date, rule_pack: 
 
     montante = _historical_montante(inps, gaps, person_id)
     projected = _projected_contributions(inps, candidate, rule_pack, gaps, person_id)
+    if any(gap["code"] == "unsupported_annual_contribution_schedule" for gap in gaps):
+        return _blocked_inps(person_id, candidate, gaps)
     revaluation = _revaluation_rate(inps, rule_pack)
     years = max(candidate.year - _as_of_year(inps, candidate), 0)
     montante_at_exit = (montante * ((Decimal("1") + revaluation) ** years)) + projected
@@ -206,6 +258,7 @@ def _inps_estimate_for_adult(adult: dict[str, Any], candidate: date, rule_pack: 
         "inputs": {
             "historical_montante": _money(montante),
             "projected_contributions": _money(projected),
+            **({"montante_at_candidate": _money(montante_at_exit)} if publish_montante and status == "complete" else {}),
             "annual_revaluation_rate": _ratio(revaluation),
             "age_at_candidate": age,
             "transformation_coefficient": _ratio(coefficient) if coefficient is not None else None,
@@ -258,22 +311,48 @@ def _projected_contributions(
     person_id: str,
 ) -> Decimal:
     future = inps.get("future_contributions") if isinstance(inps.get("future_contributions"), dict) else {}
-    if future.get("annual_taxable_income") in (None, ""):
+    from_year = _as_of_year(inps, candidate) + 1
+    if "annual_taxable_income_by_year" in future:
+        if not _valid_declared_projection_frame(inps, candidate.year, rule_pack):
+            gaps.append({"code": "unsupported_annual_contribution_schedule", "person_id": person_id, "blocking": True})
+            return Decimal("0")
+        income_by_year = _declared_annual_bases(future, from_year, candidate.year)
+        if income_by_year is None:
+            gaps.append({"code": "unsupported_annual_contribution_schedule", "person_id": person_id, "blocking": True})
+            return Decimal("0")
+    elif future.get("annual_taxable_income") in (None, ""):
         gaps.append({"code": "missing_future_annual_taxable_income", "person_id": person_id, "blocking": True})
         return Decimal("0")
-    from_year = _as_of_year(inps, candidate) + 1
-    to_year = min(int(future.get("through_year", candidate.year)), candidate.year)
-    if to_year < from_year:
-        return Decimal("0")
-    income = _decimal(future["annual_taxable_income"], f"{person_id}.future_contributions.annual_taxable_income")
+    else:
+        to_year = min(int(future.get("through_year", candidate.year)), candidate.year)
+        if to_year < from_year:
+            return Decimal("0")
+        income = _decimal(future["annual_taxable_income"], f"{person_id}.future_contributions.annual_taxable_income")
+        income_by_year = dict.fromkeys(range(from_year, to_year + 1), income)
     rate = _decimal(future.get("computation_rate", rule_pack["contributory_method"]["default_employee_computation_rate"]), "future computation_rate")
     revaluation = _revaluation_rate(inps, rule_pack)
     total = Decimal("0")
-    for year in range(from_year, to_year + 1):
+    for year, income in income_by_year.items():
         contribution = income * rate
         years_to_exit = max(candidate.year - year, 0)
         total += contribution * ((Decimal("1") + revaluation) ** years_to_exit)
     return total
+
+
+def _declared_annual_bases(future: dict[str, Any], from_year: int, to_year: int) -> dict[int, Decimal] | None:
+    schedule = future["annual_taxable_income_by_year"]
+    expected_years = range(from_year, to_year + 1)
+    if (
+        not isinstance(schedule, dict)
+        or future.keys() - {"annual_taxable_income_by_year", "computation_rate"}
+        or set(schedule) != {str(year) for year in expected_years}
+    ):
+        return None
+    try:
+        amounts = {year: _decimal(schedule[str(year)], f"annual_taxable_income_by_year.{year}") for year in expected_years}
+    except WorkExitFeasibilityError:
+        return None
+    return amounts if all(amount.is_finite() and amount >= 0 for amount in amounts.values()) else None
 
 
 def _simulate_sustainability(
@@ -410,7 +489,7 @@ def _inps_documentary_benchmark(
 ) -> list[dict[str, Any]]:
     if not snapshot:
         return []
-    projection = snapshot.get("projection") if isinstance(snapshot.get("projection"), dict) else {}
+    projection = inps_documentary_projection(snapshot)
     monthly = projection.get("monthly_gross_pension")
     if monthly in (None, ""):
         return []
@@ -432,6 +511,12 @@ def _inps_documentary_benchmark(
             "benchmark_difference_vs_internal_estimate": _money(difference) if difference is not None else None,
         }
     ]
+
+
+def inps_documentary_projection(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Return the recorded projection without altering its date or amounts."""
+    projection = snapshot.get("projection")
+    return projection if isinstance(projection, dict) else {}
 
 
 def _stream(adult: dict[str, Any], country: str, payer: str, source_type: str, start_date: date | str, annual: Any) -> dict[str, Any]:
@@ -528,18 +613,24 @@ def _candidate_dates(data: dict[str, Any]) -> list[date]:
     return [date(year, month, day) for year in range(start_year, end_year + 1, step)]
 
 
-def _load_rule_pack(path: Path) -> dict[str, Any]:
+def load_inps_projection_rule_pack(
+    path: Path, *, rule_pack_bytes: bytes | None = None, as_of_date: date | None = None,
+) -> dict[str, Any]:
     try:
-        require_fresh_pension_rule_pack(path)
+        require_fresh_pension_rule_pack(path, as_of_date, rule_pack_bytes=rule_pack_bytes)
     except PensionSourceFreshnessError as exc:
         raise WorkExitFeasibilityError(str(exc)) from exc
-    data = _read_json(path, "INPS theoretical pension rule pack")
+    data = _read_json(path, "INPS theoretical pension rule pack", payload=rule_pack_bytes)
     if data.get("schema_version") != RULE_PACK_SCHEMA_VERSION:
         raise WorkExitFeasibilityError(f"Unsupported INPS rule pack schema: {data.get('schema_version')}")
     for field in ("rule_pack_id", "contributory_method", "transformation_coefficients", "planning_projection", "source_refs"):
         if field not in data:
             raise WorkExitFeasibilityError(f"INPS rule pack missing field: {field}")
     return data
+
+
+def _load_rule_pack(path: Path) -> dict[str, Any]:
+    return load_inps_projection_rule_pack(path)
 
 
 def _coefficient(rule_pack: dict[str, Any], age: int, candidate: date, gaps: list[dict[str, Any]], person_id: str) -> Decimal | None:
@@ -593,10 +684,10 @@ def _load_optional_snapshot(path: Path | None, expected_schema: str, sources: di
     return data
 
 
-def _read_json(path: Path, label: str) -> dict[str, Any]:
+def _read_json(path: Path, label: str, *, payload: bytes | None = None) -> dict[str, Any]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        data = json.loads(path.read_text(encoding="utf-8") if payload is None else payload.decode("utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise WorkExitFeasibilityError(f"Cannot read {label}: {path}") from exc
     if not isinstance(data, dict):
         raise WorkExitFeasibilityError(f"{label} must be a JSON object: {path}")
