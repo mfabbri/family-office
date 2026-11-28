@@ -127,8 +127,8 @@ Calcolare per fase il cashflow da lavoro e l'accumulo previdenziale usando rule 
 
 ### V4.14 — Entitlement-driven pension timeline IT/ES/EU
 
-**Stato:** `blocked`
-**Motivo blocco attuale (2026-11-24):** gate originale integrato NO-GO sul candidato v0.4: manca un percorso numerico pro-rata UE di produzione approvato per periodo e predicati. I due finding sul mapping transitorio hanno superato la review tecnica indipendente v0.5 (27 test mirati, quattro hash stabili); non sono piu blocchi residui. Il gate tecnico completo corrente e verde (1091/0/0/0); non chiude il parent. Vedere `v4.14-integration-gate-result.md`. Il NO-GO storico 2026-10-11 e i GO locali restano documentati nel proprio scope.
+**Stato:** `done`
+**Chiusura (2026-11-28):** GO indipendente al gate integrato originale,58/58hashiniziali/finali sul manifest858022291aaa6c68ba817905060371748fb7c028a5b57f01bfb3bc36ffccd49a. RunnerWindows20261128-134901-3b653088:preflightPASS,Engine1102/Rules6/citazioni7,0failure/error/skip. Tutti i6criteri originali riconciliati entro i perimetri approvati;nessuna riapertura dei PASS storici o modifica a fonti/Rules/runtime per chiudere. Limiti e storico in `v4.14-integration-gate-result.md`.
 **Tipo:** `functional`
 
 **Gate normativo indipendente (2026-10-11): NO-GO.** Il contratto completo non è implementabile finché non sono corretti il perimetro italiano per gestione e periodo, la versione delle fonti/rules spagnole, il coordinamento UE per gli artt. 50, 52, 56 e 57 del Reg. 883/2004 e la distinzione tra eleggibilità, requisiti computazionalmente soddisfatti, riconoscimento amministrativo, decorrenza economica e primo pagamento. V4.14b e V4.14c sono prerequisiti abilitanti; l'assenza di regole supportate deve restare `null` con `data_gaps`.
@@ -1673,3 +1673,19 @@ Nuova autorizzazione utente fino al gate finale, con preservazione dei finding r
 ## Esito recupero integrato 2026-11-24
 
 Codice di composizione INPS/benchmark/ES/UE, eventi per membro/Paese/prestazione, viste v1/v2 e wizard presenti. Gate Windows corrente 1091 Engine,6 Rules,7citazioni,zero failure/error/skip. PASS tecnico e finanziario scoped; gate originale parent NO-GO,39/39hashstabili. Restano il percorso numerico UE realmente supportato e la review della correzione transitoria locale v0.5. Nessuna modifica Rules/Knowledge, nessun importo di produzione autorizzato da fixture sintetiche, nessuna chiusura V4.14 o riattivazione di audit generali. Esito completo: [v4.14-integration-gate-result.md](v4.14-integration-gate-result.md).
+
+### Ripresa residuo V4.14 - 2026-11-28
+
+V4.14 resta `blocked`; la correzione transitoria v0.5 ha ricevuto PASS tecnico scoped (evento13). Residuo: percorso numerico UE di produzione supportato e approvato, poi gate originale. La ripresa autonoma lavora solo su quel residuo: un authoring bounded (evento14/18,600s), nessun suffisso o cambiamento dipendenze, nessuna riapertura di finding chiusi. Audit cadenza PASS, audit_due=false.
+
+**Esito evento14/18:** diagnosi tecnica source-bound e riproduzione sintetica,98test/261subtest PASS,nessun candidato o nuovo GO normativo. Un cambio IPC/catalogo da solo non risolve il percorso: serve contratto/calcolo teorico ES da scenario con basi/rami/ancoraggio riconciliati e predicati UE delimitati. V4.14 resta `blocked`; prossimo lavoro autorizzato nello stesso parent,nessun suffisso o dipendenza modificata. Criterio d'uscita e hash in `v4.14-integration-gate-result.md`; gate Windows storico verificato senza ripetere la suite. Budget14/18,non esaurito.
+
+**Ripresa implementativa 2026-11-28:** utente richiede remediation concreta ES/UE oltre la diagnosi:event15authoring1200s,event16review600s,entro18eventi. Preparare nuovo contratto/versioni/kernel e test pubblici prima del gate esatto;nessun suffisso,dipendenza o verdetto storico modificato.V4.14resta blocked durante il lavoro.
+
+### Esito remediation ES/UE v0.3
+
+Review tecnica v0.2PASS,15/15iniziali/finali;141test/293subtest. Review normativa v0.2NO-GO solo art50(2),preservata;un'unica correzione contrattuale v0.3 ottiene LIMITED GO con15/15hashstabili. Mirati correnti141test/294subtest,0failure/error/skip;kernel/guard tecnici invariati salvo nome/hash Rules. Teorico2075,67 e quota1923,79 distinti,cinque date amministrative null senza prove. V4.14 resta blocked per suite Windows corrente e gate parent;nessun successore selezionato.
+
+## Gate originale V4.14 - chiusura2026-11-28
+
+V4.14 `done` dopo GO indipendente sul bundle finale e suite Windows corrente,non per trasferimento automatico del LIMITED GO ES/UE. Tutti i6criteri originali coperti:fonti/periodi supportati,integrazione deterministica e cinque eventi distinti,non-inferenza e gap,regressioni sintetiche,verdetto integrato esatto e suite completa0/0/0. Fonte,Rules e runtime restano identici a quelli verificati. Tutti i97incrementi della roadmap sono ora done;nessun successore aperto autorizzato.V4B resta soltanto checkpoint operativo attivo secondo indice.

@@ -1,0 +1,296 @@
+{
+  "schema_version": "v414-original-parent-exit/v1",
+  "created_at": "2026-11-28T13:52:00.150510+00:00",
+  "scope": "Independent completion of ORIGINAL six V4.14exitcriteria on unchangedapprovedsource/runtime and currentfullsupportedWindows1102/6/7. No new law/source/math audit;allhistoricalverdicts remainexactlimited. Operationalroadmap/planner/status/API-guidedocs excluded from immutablecandidate becauseclosurewillchangeonlythese. CandidateRulesv3/v6presentinlegacybundle remainunactivated;theirpresenceisnotapproval.",
+  "readiness": "proposed_parent_closure_pending_independent_verdict",
+  "scope_limits": [
+    "ESnewnumericpathonlyordinaryDecember2026RegimenGeneral/IT-AGO-FPLDwithcaseevidenceandexternalbothlegislationsbasis;notindividualrights",
+    "actualINEhistoric6factorsandINSS/INPSevidencecase-specific;syntheticpositiveisconditionalcontractexercise,notproofindividualeligibility",
+    "legacycandidateselectorsevidence-only,uncoveredperiods/null+gaps remain;all5eventsneedseparateproof;no cessation/projection=>verifiedevent"
+  ],
+  "prior_verdicts": [
+    {
+      "scope": "OriginalparentlastNO-GO",
+      "identity": "3326fd559319c96cffea686a3e7f9a4f1d72815d67a2f820410a4f8345079f44",
+      "findings": "guidedtransitioninference,canonicalswap,noapprovedproductionEUnumericpath;firsttwo subsequentlyscopedPASSv0.5,third addressednewv0.3LIMITEDGO,notautomaticallyparentGO"
+    },
+    {
+      "scope": "v0.2technicalPASS",
+      "identity": "4efd4f3e408c5a443b274e8111f8fc94a18ba26fefa930015dfec08d636d2d5b",
+      "finding_closure": "allfiveknownsoftwarefindingsfixed;v0.3onlypackname/hash service2literals change;otherAPI/schema/wizardexactsamebytes"
+    },
+    {
+      "scope": "v0.3normativeLIMITEDGO",
+      "identity": "c8e451c974409ea017b0a42037cb99bf9bc99c4197beafed86fa3afa4a52333d",
+      "scope_note": "exactES/ITordinary2026scenariocontractandArticle50predicate;notindividualentitlement,parentorallfutureperiodapproval"
+    }
+  ],
+  "original_acceptance_matrix": [
+    {
+      "criterion": 1,
+      "requirement": "Independently reviewed Knowledge/Rules establish supportedIT/ES/EUscopes,sources,periods",
+      "evidence": "RetainedexactclosedIT/ES/EUselectedcontractreviews,newv0.3LIMITEDGO;unsupportedlegacycandidateandperiodpathsstaynot_assessed;noneactivatedbymerelyversionnumber",
+      "reviewer_action": "Confirmcurrentcompositionsupportedboundariesfromexistingexactapprovals,withoutrecertifyingunchangedlaw"
+    },
+    {
+      "criterion": 2,
+      "requirement": "Five distinctevents and per-household/member/country/benefit mapping",
+      "evidence": "integrate_pension_timeline,v2schema,v1compatibility,test_benefit_identity_and_five_events_are_preserved_in_both_views;source/event/subject binding,transitionv0.5PASS"
+    },
+    {
+      "criterion": 3,
+      "requirement": "Unsupportedfactsnull+gaps;no workcessation=>event/date",
+      "evidence": "cessation/spouse/missing/conflicting/foreignidentity tests;newnumericbranchallfiveeventsnull;scenario_projectionseparatefrompension_entitlement"
+    },
+    {
+      "criterion": 4,
+      "requirement": "Syntheticcountry/period/EU/absence/conflict/eventseparation regressions",
+      "evidence": "Existingpublicintegration/wizard/producer/negative suites plusnew11candidatecases;141focused/294subtestsPASS;allincludedincurrentcompleteunittests"
+    },
+    {
+      "criterion": 5,
+      "requirement": "IndependentnormativeGO exact integratedsource/Rules/outputcontract",
+      "evidence": "THIS requestedoriginalparentexitverdict;existinglimitedGOsarenotsilentlypromoted",
+      "reviewer_action": "GOonlyiforiginalcriteriaactuallysatisfied,otherwiseconcreteNO-GO/PENDING.No broaderfutureentitlementrequirementsinvented"
+    },
+    {
+      "criterion": 6,
+      "requirement": "SupportedfullEngine0failures/errors/skips plusgovernance",
+      "evidence": "ExternalWindows20261128-134901-3b653088 preflightPASS,Engine1102/Rules6/citation7all0/0/0;currentv0.3hashes15/15beforeafter;finalgovernanceauditrequiredatclosure"
+    }
+  ],
+  "files": [
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_entitlement_timeline_producer.py",
+      "sha256": "244b9ef41b7ae4edbce359b348dddadd3253397570ad5b1be093b4991d6b315f"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/main.py",
+      "sha256": "8fb62bff5cd5ff376a274e4cf7ded6b9f8342de7d10f33a97ca11ec51f566e0c"
+    },
+    {
+      "path": "family-office-engine/schemas/italian-timeline-screening.schema.json",
+      "sha256": "35820a4380b469c2c371d72592317c9a559e996797dc6d77de08b40d294289d7"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_italian_timeline_screening.py",
+      "sha256": "e0356adf010e724215d7c62019272ae16394d857245b7137e1fb3bc72d6cbb87"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_work_transition_pension_screening_cli.py",
+      "sha256": "74934c26d4d63f26294dd9f8a6ec3d1419c0a23b56c7a7e456861bf166744098"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/italian_old_age_eligibility.py",
+      "sha256": "0c92a3cacaf8a8af7ced20e2177da930e02f801f23ab738a9e5652410be2beb1"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_entitlement_timeline.py",
+      "sha256": "dfe569e58deaf4f781d90cda77e2d431c028bbb9b2a7fe5c448f8c2c6778becc"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_timeline_source_gate.py",
+      "sha256": "13e3251566a366c92ca8cd6b5ec3fb70ded95b9659b332b5a96d0561fee4226b"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-entitlement-timeline-v2.schema.json",
+      "sha256": "2ad6f2d23acc04f1a6697c81969d9496d8ef52dbf052779959ba14afe9dd7a7f"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility.json",
+      "sha256": "2b824d7ca46b4faaa38a83a7cd2d53769bcda6713251e17146a6244a1b0edee9"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility-v3.json",
+      "sha256": "2f1e5d07d43f6c5af2ac6e6a645a5ae46c13bfbfe691de5eec1c85e6e06e7e32"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-old-age-eligibility-v6.json",
+      "sha256": "861391022c7181ba07c4c2fb260f9d2bb9d046c6f0479244c0baba6f5580c494"
+    },
+    {
+      "path": "family-office-rules/spain/statutory-retirement-general-v3.json",
+      "sha256": "9b5d0acbadb2b49d7f314c3739f447fb7d6397cf3cbeb390e4e8dd89c2b2b99c"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es-v11.1.1.json",
+      "sha256": "1d002510a168ce11c2f508cb9102498b9624ddf9a7a221e24b05843da5a82d66"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es-v12.1.1.json",
+      "sha256": "05f888e8dd59dc548198ebfd3ccaf84c0d1c79f5c4be85f2b32586150fd7fb0a"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14w-z-k-italian-adjustment-profile-review-manifest-v0.2.md",
+      "sha256": "a4ccee798e2cf66e4bad6a249699836b71d7a87194846ca0c569d60be1d32284"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14w-z-n-heavy-work-alternative-periods-review-manifest-v0.2.md",
+      "sha256": "16073c82bc20f0596e81b65bedb9cda65dc754807ed7c7f3ed2245674d4f65c3"
+    },
+    {
+      "path": "family-office-engine/docs/adr/ADR-2026-11-21-separate-pension-entitlement-from-scenario-projection.md",
+      "sha256": "24b0c9a33cbe9a2a7c6acd2f68682def03418f88d92f55033158d73bdc0904f0"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/governance/pension_source_freshness.py",
+      "sha256": "e27a94826d48360893af5c3834f17efc60b5432d2aa714f4d35648633b28d81b"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_timeline_integration.py",
+      "sha256": "ee8b743f73616798b46d1db6b1fef6b51187cfcb8c6292c36ffaa1410a2fcb58"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/pension_timeline_wizard.py",
+      "sha256": "81da8952065297c4fb86f5734a3616a79935368ae21b118efbb613b866674ade"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/work_exit_feasibility.py",
+      "sha256": "2edf1988d6d6f57b8f17ec665ba28ff0eb2bd8007ab46fae7ca382123663a594"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/spanish_eu_theoretical_pension.py",
+      "sha256": "8c9020e0782914d71459428127b563acdbfb289e0f1c81f92cf760e269cb24ad"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/it_es_eu_pension_pro_rata.py",
+      "sha256": "c08eebbe98308c2fda3baf84e20e95678c26e4590a17f0381e6eb0ab598bd163"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-timeline-integration-input.schema.json",
+      "sha256": "06e04bb076757d844d93d3c8425063f0bf64ce293a55a811e39e378fc915582b"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-timeline-integration.schema.json",
+      "sha256": "b354654ff767adbff3f213ea6b039daa3405e3fb568f2691559ba96f668e22f6"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_pension_timeline_integration.py",
+      "sha256": "ddfd68aa3a00e6aa50544dcd2b203cbe994f66415f6e8606d3434678a8006c8b"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_pension_timeline_wizard.py",
+      "sha256": "66a7e12f3840ec72d784f1ad221c1bea4fdc71477a3120468a8d1e10023e32f5"
+    },
+    {
+      "path": "family-office-engine/examples/pension-timeline-integration-sample.json",
+      "sha256": "ed9286f9e0bc479c5740a9d07ef9efc0e88bf0e31c08389c6e0eaf73764f12e7"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-integration-contract.md",
+      "sha256": "c6cfb146ae6fa03ef419dd9ecf312f4547386d63aba4904ba5a0e8439599e869"
+    },
+    {
+      "path": "family-office-rules/italy/2026/inps-theoretical-pension.json",
+      "sha256": "2871733495bbe4389d7cecacd585201a9427e10f56f36f52ba432bebc96bd65d"
+    },
+    {
+      "path": "family-office-rules/cross-border/spanish-eu-theoretical-pension.json",
+      "sha256": "293e0861e68673d789e899b8cd5a5173a0017d2b67d1bea9d05a1b67039e1e77"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es.json",
+      "sha256": "79db4ca34217c9a4f454e13eb80abd457c099b8f1e205974e1246fbb93ac673b"
+    },
+    {
+      "path": "family-office-rules/cross-border/eu-pension-coordination-it-es-v8.json",
+      "sha256": "0d3d4b3b87f805e279b5707daca17662b86a7bc20c4d31df0ae440ce8021b55e"
+    },
+    {
+      "path": "family-office-engine/examples/pension-timeline-inps-input-sample.json",
+      "sha256": "c854ebb06bfd6a12c2e9c228115c2a2d9e6f3bcef78d0924b4846c57dc492b86"
+    },
+    {
+      "path": "family-office-knowledge/international/spanish-eu-ordinary-pension-2026-amounts-v0.3.md",
+      "sha256": "dc70edf7bac88c4d8d65169bebe7465fa73f4aea2740d773f59276d0bfb54527"
+    },
+    {
+      "path": "family-office-rules/cross-border/spanish-eu-ordinary-pension-2026-amounts-v0.3.json",
+      "sha256": "61bfa3b6f9d67471c1b59d474076ab9cc83cc91e757762a1d454acff0f3080ad"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/spanish_eu_ordinary_pension.py",
+      "sha256": "6d0211c3ca929a3e6ac3c40787011a73205b5171c5600c71fc63f63ec68dbdc1"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_spanish_eu_ordinary_pension_candidate.py",
+      "sha256": "a85ff02115b89593b5d33c01358523f2c9cf542a06156afc8222f64026235de5"
+    },
+    {
+      "path": "family-office-knowledge/sources/citation-catalog.json",
+      "sha256": "6f8c94363622a9edef16a162beb9e61d1ec58c831aab8bf2bcb9a424cde48089"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_citation_index.py",
+      "sha256": "cf8a18100d60b5b574a3d5aeb3cbd49df688b1f8bd69d59e59d87b6d513887c6"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/ine-24077-web-response.txt",
+      "sha256": "670815e1e357a2412c3d6f26866cbdd5e15167481f0cfa6d599a2434ae01df8e"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/verify_ine_snapshot-v0.3.py",
+      "sha256": "852dc9f4d8140b7bf3f89b75a7fac46b3b01699687574a874f753574183ec0d8"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/ine-24077-verification-v0.3.json",
+      "sha256": "75fe002a0e859d418b9bd2cea52232cf159a217126140bb8bd972f8ae07194c5"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/focused-v0.3-pytest.log",
+      "sha256": "5f15bb041b18b6d8b36b0f35ff4c3c688bef843dd1468d90a57ccb7fc48f488d"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-integrated-review-manifest-v0.5.json",
+      "sha256": "39f06f53feb8cb31342c5da7516f1fb0250a0a2a3ae508a9ed686b4e75784675"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-entitlement-timeline.schema.json",
+      "sha256": "0c0298f8cdf45e28eacab26755f7b385757718cb440a66fd7a69cfe57ac2aeec"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-eu-remediation-review-manifest-v0.3.json",
+      "sha256": "c8e451c974409ea017b0a42037cb99bf9bc99c4197beafed86fa3afa4a52333d"
+    },
+    {
+      "path": "family-office-bootstrap/planning/run-v414-windows-gate.ps1",
+      "sha256": "74be3c22eaae011e43f9acf39d146deb4ecba89c356ea405cf4806ad9737866b"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/summary.json",
+      "sha256": "2dd20cea37d8952e51ebb46422318fe3b1902e973b20dd21f178a56a02f57e36"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/preflight.json",
+      "sha256": "672b250fc1f7b9ec4e0e2dfab28e79b86ee70eef113a04c583674c80279be985"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/preflight.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/rules-v6.stderr.log",
+      "sha256": "689312b8fc34eb63c0bdd343069c57816ee2fde5d3a3a2e719ea8e2b73103e1e"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/rules-v6.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/citation-index.stderr.log",
+      "sha256": "821c8a732d7394dd197a4d926b715e5bbfa1bc6f79e15186a8a043cbca0fecd8"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/citation-index.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/complete-engine.stderr.log",
+      "sha256": "c77baeaf3b3f7adedaea6be6b508a627806b95c9d5758fda3d21949de0cd2f05"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/test-gate/20261128-134901-3b653088/complete-engine.stdout.log",
+      "sha256": "28c97896613cde633f70430a61d5d1807e74c0acdd4440faf949b853743d2608"
+    }
+  ]
+}

@@ -52,7 +52,34 @@
         "theoretical_rule_pack": {"$ref": "#/$defs/rule_name"},
         "pro_rata_rule_pack": {"$ref": "#/$defs/rule_name"},
         "pro_rata_input_ref": {"$ref": "#/$defs/ref"},
-        "reconciliation_ref": {"$ref": "#/$defs/ref"}
+        "reconciliation_ref": {"$ref": "#/$defs/ref"},
+        "ordinary_2026": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["evidence", "documents"],
+          "properties": {
+            "evidence": {"$ref": "#/$defs/digested_ref"},
+            "documents": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["coordination", "italian_periods", "historical_ipc"],
+              "properties": {
+                "coordination": {"$ref": "#/$defs/digested_ref"},
+                "italian_periods": {"$ref": "#/$defs/digested_ref"},
+                "historical_ipc": {"$ref": "#/$defs/digested_ref"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "digested_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_ref", "digest_sha256"],
+      "properties": {
+        "source_ref": {"$ref": "#/$defs/ref"},
+        "digest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
       }
     }
   }

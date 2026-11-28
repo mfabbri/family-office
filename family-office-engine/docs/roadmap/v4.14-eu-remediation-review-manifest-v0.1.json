@@ -1,0 +1,72 @@
+{
+  "schema_version": "v414-eu-remediation-review/v1",
+  "status": "candidate_pending_independent_review",
+  "created_at": "2026-11-28T08:39:24.208477+00:00",
+  "scope": "One new bounded ordinary ES RegimenGeneral/IT-AGO-FPLD December2026 scenario numeric path; source-bound CPI/branch/anchor/duration conditions; public opt-in composition and verified-evidence import; no entitlement/event inference. Existing transition/Italian/financial PASS preserved; original parent remains blocked. Operational state docs excluded from immutable candidate. Last item is historical reference, not reopened approval. .runtime entries are synthetic logs/public INE acquisition evidence only.",
+  "acceptance": [
+    "Official current provisions and primary amending acts support exact2026period and predicates,including AnnexXI window/payment-vs-credited-month distinction",
+    "274shippedCPI values equal captured official INE source; six historical cross-base factors require exact-byte externally verified INE evidence,not invented defaults",
+    "Public scenario input computes theory2075.67 and distinct pro-rata1923.79; each branch and CPI sensitivity tested",
+    "Missing/unresolved source/hash/date/scheme/duration/coordination data stays null+attributedgaps; no not_matched=>eligibility/payment",
+    "New path keeps pension_entitlement and all5events null without independent event evidence; no synthetic catalogue grants production legal authority",
+    "Independent exact-version normative verdict is required; original parent and complete current supported Windows gate remain independent"
+  ],
+  "files": [
+    {
+      "path": "family-office-knowledge/international/spanish-eu-ordinary-pension-2026-amounts-v0.1.md",
+      "sha256": "c8a656826fe79890c307733b5875a69232ff5d68cc45f9b670d1a94baf39fd67"
+    },
+    {
+      "path": "family-office-rules/cross-border/spanish-eu-ordinary-pension-2026-amounts-v0.1.json",
+      "sha256": "5d14d38608b76253febf43b96d167c3f19a6d25a58225e8b6b1b83f9c6f530ea"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-timeline-integration-input.schema.json",
+      "sha256": "06e04bb076757d844d93d3c8425063f0bf64ce293a55a811e39e378fc915582b"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/pension_timeline_wizard.py",
+      "sha256": "e760ee7f35224a9c85c066e40afb8615c416d358951677c8cc72dbb182001f8e"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_timeline_integration.py",
+      "sha256": "4e45f39545ebcbbe0037cb892815250fa5821f464cb48e519e7d64c8ba9cb200"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/spanish_eu_ordinary_pension.py",
+      "sha256": "d65d69d69d72a1594745e110d9c56236a61885d43afbd814d262324660347bd5"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_spanish_eu_ordinary_pension_candidate.py",
+      "sha256": "7087ac1bde6adafdc5c2f26d910896ce6f3aa5e2bd94ec4c5c2129eb79266e0c"
+    },
+    {
+      "path": "family-office-knowledge/sources/citation-catalog.json",
+      "sha256": "9a5d7188016d447999c3126573e7eba805515932ef4027140baec38af59cf030"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_citation_index.py",
+      "sha256": "63ac479d755b6ec6254c551a50bcc644002e977c53d6a519063b9f2b1c1af34d"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/ine-24077-web-response.txt",
+      "sha256": "670815e1e357a2412c3d6f26866cbdd5e15167481f0cfa6d599a2434ae01df8e"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/verify_ine_snapshot.py",
+      "sha256": "087937da74c98e05fd009c94f840c14c78a56daca8af42c536db81d9137dee44"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/ine-24077-verification.json",
+      "sha256": "a7d3cd1835eb36ac5fe065d0b4f37d29a62a35cfd98aae064ce8ee063bf6183f"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/focused-pytest.log",
+      "sha256": "b78c51732fa679233c743eb43a2ba90522122575c015009b0bfa80497ce1a116"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-integrated-review-manifest-v0.5.json",
+      "sha256": "39f06f53feb8cb31342c5da7516f1fb0250a0a2a3ae508a9ed686b4e75784675"
+    }
+  ]
+}

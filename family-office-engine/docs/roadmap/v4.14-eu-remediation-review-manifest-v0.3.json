@@ -1,0 +1,75 @@
+{
+  "schema_version": "v414-eu-remediation-review/v1",
+  "status": "candidate_pending_independent_review",
+  "created_at": "2026-11-28T13:40:54.645563+00:00",
+  "scope": "One final bounded Article50(2)residual correction only after scopednormativev0.2NO-GO. Require externally attested noexclusionrequired based on bothlegislationsconditionsmet atcontingency;adverse/unknown=>null. Allv0.2technicalguard/mathcode unchanged;only service packname/hashconstants change. v0.2technicalPASS remains exactv0.2scoped evidence,not blanketnewGO.",
+  "previous_candidate_manifest_sha256": "4efd4f3e408c5a443b274e8111f8fc94a18ba26fefa930015dfec08d636d2d5b",
+  "acceptance": [
+    "No unconditional comparator test:explicit noexclusionrequired and bothcountryconditionsbasis authenticated byINSSreceipt",
+    "Samecontributionspositive2075.67theory/1923.79EU;ITconditionsunmet+inclusiondetrimental ormissingbasis=>nullgap;fiveadministrativedatesstaynull",
+    "No numeric/API/receipt/date/provenance/wizardcode change beyond sourcepackpin;141tests/294subtests0failure/error/skip",
+    "ExistingIT/transition/financialgate decisions remainclosed;externalWindowsfullgate required forparentdone"
+  ],
+  "files": [
+    {
+      "path": "family-office-knowledge/international/spanish-eu-ordinary-pension-2026-amounts-v0.3.md",
+      "sha256": "dc70edf7bac88c4d8d65169bebe7465fa73f4aea2740d773f59276d0bfb54527"
+    },
+    {
+      "path": "family-office-rules/cross-border/spanish-eu-ordinary-pension-2026-amounts-v0.3.json",
+      "sha256": "61bfa3b6f9d67471c1b59d474076ab9cc83cc91e757762a1d454acff0f3080ad"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-timeline-integration-input.schema.json",
+      "sha256": "06e04bb076757d844d93d3c8425063f0bf64ce293a55a811e39e378fc915582b"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/pension_timeline_wizard.py",
+      "sha256": "81da8952065297c4fb86f5734a3616a79935368ae21b118efbb613b866674ade"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_timeline_integration.py",
+      "sha256": "ee8b743f73616798b46d1db6b1fef6b51187cfcb8c6292c36ffaa1410a2fcb58"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/spanish_eu_ordinary_pension.py",
+      "sha256": "6d0211c3ca929a3e6ac3c40787011a73205b5171c5600c71fc63f63ec68dbdc1"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_spanish_eu_ordinary_pension_candidate.py",
+      "sha256": "a85ff02115b89593b5d33c01358523f2c9cf542a06156afc8222f64026235de5"
+    },
+    {
+      "path": "family-office-knowledge/sources/citation-catalog.json",
+      "sha256": "6f8c94363622a9edef16a162beb9e61d1ec58c831aab8bf2bcb9a424cde48089"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_citation_index.py",
+      "sha256": "cf8a18100d60b5b574a3d5aeb3cbd49df688b1f8bd69d59e59d87b6d513887c6"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/ine-24077-web-response.txt",
+      "sha256": "670815e1e357a2412c3d6f26866cbdd5e15167481f0cfa6d599a2434ae01df8e"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/verify_ine_snapshot-v0.3.py",
+      "sha256": "852dc9f4d8140b7bf3f89b75a7fac46b3b01699687574a874f753574183ec0d8"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/ine-24077-verification-v0.3.json",
+      "sha256": "75fe002a0e859d418b9bd2cea52232cf159a217126140bb8bd972f8ae07194c5"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/focused-v0.3-pytest.log",
+      "sha256": "5f15bb041b18b6d8b36b0f35ff4c3c688bef843dd1468d90a57ccb7fc48f488d"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-integrated-review-manifest-v0.5.json",
+      "sha256": "39f06f53feb8cb31342c5da7516f1fb0250a0a2a3ae508a9ed686b4e75784675"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/main.py",
+      "sha256": "8fb62bff5cd5ff376a274e4cf7ded6b9f8342de7d10f33a97ca11ec51f566e0c"
+    }
+  ]
+}

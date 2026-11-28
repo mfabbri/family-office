@@ -1,0 +1,16 @@
+# Preserve the exact reviewed V4.14 bytes across Git checkout conversions.
+.gitattributes text eol=lf
+family-office-engine/schemas/pension-timeline-integration-input.schema.json text eol=lf
+family-office-engine/src/family_office_engine/cli/pension_timeline_wizard.py text eol=lf
+family-office-engine/src/family_office_engine/services/pension_timeline_integration.py text eol=lf
+family-office-engine/tests/unit/test_citation_index.py text eol=crlf
+family-office-knowledge/sources/citation-catalog.json text eol=crlf
+
+# Immutable review payloads and newly introduced hash-bound sources.
+family-office-engine/docs/roadmap/v4.14-eu-remediation-review-manifest-v*.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+family-office-engine/docs/roadmap/v4.14-original-parent-exit-manifest-20261128.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+family-office-engine/docs/roadmap/v4.14-routing-history-*.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+family-office-engine/src/family_office_engine/services/spanish_eu_ordinary_pension.py -text whitespace=trailing-space,space-before-tab,cr-at-eol
+family-office-engine/tests/unit/test_spanish_eu_ordinary_pension_candidate.py -text whitespace=trailing-space,space-before-tab,cr-at-eol
+family-office-knowledge/international/spanish-eu-ordinary-pension-2026-amounts-v*.md -text whitespace=trailing-space,space-before-tab,cr-at-eol
+family-office-rules/cross-border/spanish-eu-ordinary-pension-2026-amounts-v*.json -text whitespace=trailing-space,space-before-tab,cr-at-eol

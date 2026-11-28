@@ -1920,9 +1920,9 @@ V5.3 non viene riaperto: il catalogo tassonomico e i tre tool V4.19 sono stati i
 V4.14 - Entitlement-driven pension timeline IT/ES/EU
 
 ## Stato
-`blocked`
+`done`
 
-Recupero attivo autorizzato il 2026-11-22: riconciliare contratti e runtime, implementare i percorsi supportati, verificare evidenze positive/negative e ottenere il gate integrato. V4.14 resta blocked durante la remediation; planner in_progress. Non riaprire questioni chiuse senza trigger sostanziale. Piano e acceptance matrix: `roadmap/v4.14-recovery-plan.md`.
+Chiusura2026-11-28: gate integrato originale V4.14 GO indipendente sul manifest858022291aaa6c68ba817905060371748fb7c028a5b57f01bfb3bc36ffccd49a,58/58hashiniziali/finali;runnerWindowscorrente20261128-134901-3b653088:Engine1102/Rules6/citazioni7,zero failure/error/skip. Nessuna fonte,Rules o runtime modificati per chiudere. I checkpoint datati seguenti restano storico.
 
 ### Checkpoint recupero 2026-11-22
 
@@ -1935,3 +1935,42 @@ La nuova autorizzazione supersede lo stop storico a3eventi. Integrazioni per per
 ### Esito finale ripresa 2026-11-24
 
 V4.14 resta `blocked`, V4B attiva. Gate finale originale **NO-GO**: il pro-rata UE richiede un percorso numerico di produzione esatto e approvato per fonte/periodo/predicati; la fixture numerica sintetica non soddisfa il requisito. I finding di transizione sono corretti localmente in v0.5, non ancora approvato indipendentemente. Suite corrente: Engine1091,Rules6,citazioni7,tutti0failure/error/skip. Undici deleghe finite, nessun altro ciclo automatico. Prossima azione specifica e hash: [v4.14-integration-gate-result.md](roadmap/v4.14-integration-gate-result.md).
+
+### Ripresa autonoma 2026-11-28
+
+Selezione audit: V4.14, functional_since_audit=1, audit_due=false. Unico scope: percorso numerico UE source/period/predicate di produzione. Event14/18: continuazione authoring bounded 600s del tentativo interrotto, senza subdeleghe; candidato concreto con test e manifest prima della review normativa esatta (300s). Nessuna attivazione basata sulla proposta istituzionale non approvata. Conservare PASS transizioni v0.5, NO-GO parent e separazione pension_entitlement/scenario_projection. Suite sandbox non ripetuta per blocco Windows noto; runner esterno solo su codice cambiato. Stop su fonte/contratto insufficiente o gate pendente.
+
+### Esito ripresa autonoma 2026-11-28
+
+V4.14 `blocked`; evento14/18 concluso con diagnosi tecnica riproducibile, non un candidato approvato o un nuovo verdetto normativo.98 test/261 subtest mirati PASS,0failure/error/skip. Nel caso sintetico2026 il teorico ES resta2038.90 con IPC100/200: manca il contratto esatto source-bound per aggiornamento basi/confronto rami/ancoraggio e per i predicati numerici UE. Dettagli, hash e criterio di uscita in `roadmap/v4.14-integration-gate-result.md`, sezione evento14. Nessuna modifica runtime/Rules/Knowledge o attivazione, nessuna ripetizione della suite completa sandbox. Prossimo lavoro autorizzato: remediation di quel contratto/calcolo nello stesso V4.14, poi review indipendente esatta, integrazione e gate originale; nessun discendente selezionato. Il runner Windows non sostituisce l'approvazione normativa mancante. Budget usato14/18, non esaurito.
+
+### Remediation eseguibile autorizzata 2026-11-28
+
+Un solo ciclo sul residuo V4.14: fonti ufficiali -> nuova Knowledge/Rules -> kernel ES/UE candidato e integrazione pubblica -> golden/negativi -> manifest exact -> review normativa indipendente scoped -> review tecnica/gate originale -> suite Windows su candidato stabile. Event15/18 authoring1200s;event16/18 review600s;massimo18eventi totali. Il contratto mancante va preparato, non usato come stop prima del candidato. Nessuna riapertura dei PASS transitori o attivazione non approvata; il parent resta blocked fino ai gate effettivi.
+
+### Ripresa dei finding e delle review interrotte
+
+Nuova richiesta esplicita utente: una remediation bounded del candidato ES/UE e ripresa degli stessi due reviewer sul nuovo hash,600s ciascuno,default2eventi per questo ciclo. La fase precedente17/18eventi e le review PENDING per limiteuso sono conservate in `roadmap/v4.14-routing-history-through-event17.json`;nessun GO/NO-GO finale attribuito. Correggere LGSS209(2)-(5),applicabilita art50(2)2026/2359,receipt su originali+claims,wizard senza importo fittizio,provenance,dateINPS e validazione prepare. Il parent resta blocked;nessuna riapertura di gate passati o suite sandbox completa.
+
+### Handoff storico: remediation concreta completata, gate parent allora aperto
+
+V4.14 `blocked`. Candidato v0.3:LIMITED GO normativo scoped,15/15hashiniziali/finali;controlli tecnici v0.2PASS con delta di soli nome/hash pack dimostrato byte per byte. Mirati141test/294subtest,0failure/error/skip;274indici INE verificati. Teorico2075,67 e quota1923,79 distinti;nessuna data/diritto amministrativo inferito. Dettagli,limiti,hash e risultati in `roadmap/v4.14-integration-gate-result.md`. I gate già superati restano chiusi;v0.2NO-GOart50 resta storico e risolto nella nuova versione.
+
+Prossima azione autorizzata: eseguire sul runner Windows esterno il comando sotto e fornire `planning/.runtime/test-gate/<run>/summary.json` con log,poi gate originale integrato V4.14. Il full1091storico non copre il codice cambiato. Nessun discendente o nuovo incremento funzionale selezionato.
+
+```powershell
+Set-Location 'D:\codeprojects\family-office-ai-project'
+.\family-office-bootstrap\planning\run-v414-windows-gate.ps1 -RepoRoot (Get-Location).Path -FullSuite
+```
+
+### Checkpoint storico: gate originale V4.14 in verifica
+
+Richiesta utente:verificare evidenze Windows e completare il gate integrato originale. Runner esterno20261128-134901-3b653088 verificato:preflightPASS,Engine1102/Rules6/citazioni7,0failure/error/skip;15/15hashv0.3stabili prima/dopo. Una sola review indipendente di riconciliazione dei6criteri originali,600s,sugli artefatti correnti e sui PASS esistenti;nessuna ricertificazione di fonti o gate gia passati. Stato parent resta blocked fino al verdetto. Manifest `roadmap/v4.14-original-parent-exit-manifest-20261128.json`,SHA256858022291aaa6c68ba817905060371748fb7c028a5b57f01bfb3bc36ffccd49a.
+
+### Handoff corrente: V4.14 done, nessun successore autorizzato
+
+Il gate originale indipendente e la suite completa corrente sono superati. Manifest finale `roadmap/v4.14-original-parent-exit-manifest-20261128.json`,SHA256858022291aaa6c68ba817905060371748fb7c028a5b57f01bfb3bc36ffccd49a;58/58hashstabili. Runner20261128-134901-3b653088:preflightPASS,Engine1102/Rules6/citazioni7,0failure/error/skip. Le approvazioni storiche restano nei rispettivi scope;la certezza individuale non e inferita da una proiezione.
+
+Tutti i97incrementi V4B sono done. V5 e gia done per tutti i23item;V6 resta deferred e tutti i33item elencati sono done. Nessun incremento nuovo e selezionabile:V4B rimane in_progress soltanto come checkpoint operativo completato per l'invariante del selettore di una sola roadmap attiva. Serve una nuova voce o transizione esplicita con obiettivo e dipendenze,senza riaprire item completati.
+
+Limiti conservati:percorso numerico ES/IT ordinario di dicembre2026 come scenario_projection,con prove INSS/INPS e fattori INE storici verificati;date e diritti amministrativi richiedono prova distinta. La scelta CANDIDATO e il messaggio legacy not_implemented nel plan senza input preparato conservano le etichette storiche;il comando guidato e il plan con input preparato raggiungono il rapporto integrato verificato.

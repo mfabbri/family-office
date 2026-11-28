@@ -1,0 +1,79 @@
+{
+  "schema_version": "v414-eu-remediation-review/v1",
+  "status": "candidate_pending_independent_review",
+  "created_at": "2026-11-28T13:35:05.250431+00:00",
+  "scope": "Bounded v0.2 correction of findings from usage-interrupted reviews16/17. New source-bound LGSS209(2)-(5)admissibility and applicable2026/2359Article50(2)predicates;receipt binds original+claims+verifiermetadata;realwizard input computes theory;strictprovenance/date/import checks. Existing transition/IT/financial approvals are not reopened. Operational state docs excluded. cli/main.py is unchanged reference for actualwizard helper.",
+  "previous_candidate_manifest_sha256": "0401ef8ce8923957d74cc6f55297c27e1040c1b39927352b72418a2faf03d68a",
+  "acceptance": [
+    "Official current provisions and primary amending acts support exact2026period and predicates,including AnnexXI window/payment-vs-credited-month distinction",
+    "274shippedCPI values equal captured official INE source; six historical cross-base factors require exact-byte externally verified INE evidence,not invented defaults",
+    "Public scenario input computes theory2075.67 and distinct pro-rata1923.79; each branch and CPI sensitivity tested",
+    "Missing/unresolved source/hash/date/scheme/duration/coordination data stays null+attributedgaps; no not_matched=>eligibility/payment",
+    "New path keeps pension_entitlement and all5events null without independent event evidence; no synthetic catalogue grants production legal authority",
+    "Independent exact-version normative verdict is required; original parent and complete current supported Windows gate remain independent",
+    "Knownnormative findings:unassessed/noncomputablebases orArticle50fullperioddetriment=>null+gap evenfullyreattested",
+    "Knowntechnical findings:original+pointerrepin doesnotrenewreceipt;realwizardwithoutdummy reachesnumericgolden;malformedprovenance,preperiodINPSdatesandinvalidprepare rejected"
+  ],
+  "files": [
+    {
+      "path": "family-office-knowledge/international/spanish-eu-ordinary-pension-2026-amounts-v0.2.md",
+      "sha256": "a7d552f58e7d42b28a61f9623784a3c20d38ae9b05120ceb51c21c86db656285"
+    },
+    {
+      "path": "family-office-rules/cross-border/spanish-eu-ordinary-pension-2026-amounts-v0.2.json",
+      "sha256": "b0742f38897dbb7b40a7197da0ff5da3506ea989d309ce926649f1c9f7a6690e"
+    },
+    {
+      "path": "family-office-engine/schemas/pension-timeline-integration-input.schema.json",
+      "sha256": "06e04bb076757d844d93d3c8425063f0bf64ce293a55a811e39e378fc915582b"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/pension_timeline_wizard.py",
+      "sha256": "81da8952065297c4fb86f5734a3616a79935368ae21b118efbb613b866674ade"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/pension_timeline_integration.py",
+      "sha256": "ee8b743f73616798b46d1db6b1fef6b51187cfcb8c6292c36ffaa1410a2fcb58"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/services/spanish_eu_ordinary_pension.py",
+      "sha256": "df41cf24e4cc8080e37ad5eca94e1c387ef6a657cc2db966ce23cb4b05e9b605"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_spanish_eu_ordinary_pension_candidate.py",
+      "sha256": "d55d29d72391067e13323dbc78d99792394aa79e5d3117c41c8309373ccbce9a"
+    },
+    {
+      "path": "family-office-knowledge/sources/citation-catalog.json",
+      "sha256": "ded89bfbc6d9c68c04a1e71a6f27e7f03d824808fb47e7cc4b48c868c48eaf81"
+    },
+    {
+      "path": "family-office-engine/tests/unit/test_citation_index.py",
+      "sha256": "aaf261446b6837ea5f21714965db5f46bc8327f3b8de672258829c895c18a92d"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/ine-24077-web-response.txt",
+      "sha256": "670815e1e357a2412c3d6f26866cbdd5e15167481f0cfa6d599a2434ae01df8e"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/verify_ine_snapshot-v0.2.py",
+      "sha256": "2a706b3340bd58c06f1078315c4edd50e71de149cbe60eba1ba6cf95f3f7f924"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/ine-24077-verification-v0.2.json",
+      "sha256": "6c617c73234910b56ec5e0725a7d4c42d98f3e7d4f6ba3f973c5ffeab3c522f6"
+    },
+    {
+      "path": "family-office-bootstrap/planning/.runtime/v414-remediation-20261128/focused-v0.2-pytest.log",
+      "sha256": "3d5567ec3d081169bfd7a0bc24368fc5668fd954a94b7001719f4e54275e20eb"
+    },
+    {
+      "path": "family-office-engine/docs/roadmap/v4.14-integrated-review-manifest-v0.5.json",
+      "sha256": "39f06f53feb8cb31342c5da7516f1fb0250a0a2a3ae508a9ed686b4e75784675"
+    },
+    {
+      "path": "family-office-engine/src/family_office_engine/cli/main.py",
+      "sha256": "8fb62bff5cd5ff376a274e4cf7ded6b9f8342de7d10f33a97ca11ec51f566e0c"
+    }
+  ]
+}

@@ -33,7 +33,7 @@ class CitationIndexTest(unittest.TestCase):
         self.assertEqual(first["schema_version"], "citation-index/v1")
         self.assertEqual(first["status"], "complete_with_gaps")
         self.assertGreaterEqual(first["summary"]["citation_count"], 10)
-        self.assertEqual(first["summary"]["knowledge_document_count"], 37)
+        self.assertEqual(first["summary"]["knowledge_document_count"], 40)
         self.assertGreaterEqual(first["summary"]["contract_count"], 15)
         self.assertEqual(
             first["reproducibility"]["content_hash"],
@@ -65,6 +65,9 @@ class CitationIndexTest(unittest.TestCase):
         self.assertIn("knowledge.pensions.italian-adjustment-exceptions-v0.2", document_ids)
         self.assertIn("knowledge.pensions.italian-adjustment-exceptions-v0.3", document_ids)
         self.assertIn("knowledge.pensions.italian-adjustment-exceptions-v0.4", document_ids)
+        self.assertIn("knowledge.international.spanish-eu-ordinary-pension-2026-amounts-v0.1", document_ids)
+        self.assertIn("knowledge.international.spanish-eu-ordinary-pension-2026-amounts-v0.2", document_ids)
+        self.assertIn("knowledge.international.spanish-eu-ordinary-pension-2026-amounts-v0.3", document_ids)
         eu_act = next(item for item in first["citations"] if item["citation_id"] == "eu.regulation.2026-2359")
         self.assertIn("eu.regulation.2026-2359.annex-viii-part-i", eu_act["alias_citation_ids"])
 

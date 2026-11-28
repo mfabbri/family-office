@@ -878,6 +878,206 @@
       "published_on": "2016-12-21",
       "verified_at": "2026-11-21",
       "source_status": "active"
+    },
+    {
+      "citation_id": "es.rdl-2-2023.original",
+      "title": "Real Decreto-ley2/2023,original BOE publication",
+      "issuer": "Agencia Estatal Boletín Oficial del Estado",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2023-6967&lang=es",
+      "official_reference": "RDL2/2023,artículo único23,36,40;disposición final10;provision-specific applicability must be reconciled separately",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "base_reguladora",
+        "scenario_projection",
+        "eu_coordination"
+      ],
+      "valid_from": "2023-04-01",
+      "valid_to": null,
+      "published_on": "2023-03-17",
+      "verified_at": "2026-11-28",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.rdl-5-2023.original",
+      "title": "Real Decreto-ley5/2023,original BOE publication amending RDL2/2023 entry provisions",
+      "issuer": "Agencia Estatal Boletín Oficial del Estado",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2023-15135",
+      "official_reference": "RDL 2/2023 disposición final décima as amended",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": "2023-06-29",
+      "verified_at": "2026-11-28",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.lgss.rdl-8-2015.consolidated-2023-01-01",
+      "title": "Informational BOE LGSS snapshot at2023-01-01,baseline branch only",
+      "issuer": "Agencia Estatal Boletín Oficial del Estado",
+      "source_type": "consolidated_informational_text",
+      "authority_level": "institutional_guidance",
+      "url": "https://www.boe.es/eli/es/rdlg/2015/10/30/8/con/20230101",
+      "official_reference": "LGSS artículo 209.1; snapshot 2023-01-01",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": null,
+      "verified_at": "2026-11-28",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.rdl-3-2026.original",
+      "title": "Real Decreto-ley3/2026,original BOE publication,initial pension limit",
+      "issuer": "Agencia Estatal Boletín Oficial del Estado",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-2548",
+      "official_reference": "artículo 1",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": "2026-02-04",
+      "verified_at": "2026-11-28",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.ine.ipc-national-24077-base-2025",
+      "title": "INE national CPI statistical table24077,base2025,snapshot2026-11-28",
+      "issuer": "Instituto Nacional de Estadística",
+      "source_type": "official_statistical_data",
+      "authority_level": "institutional_guidance",
+      "url": "https://www.ine.es/jaxiT3/files/t/es/csv_bdsc/24077.csv",
+      "official_reference": "Índice general;Índice, 2002M01 through 2024M10 inclusive; snapshot 2026-11-28",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": null,
+      "verified_at": "2026-11-28",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.ine.ipc-2001-bridge.methodology",
+      "title": "INE methodology for variation across the2001base change",
+      "issuer": "Instituto Nacional de Estadística",
+      "source_type": "official_statistical_data",
+      "authority_level": "institutional_guidance",
+      "url": "https://www.ine.es/ipc01/rebajas02.htm",
+      "official_reference": "Cálculo de tasas de variación entre periodos pertenecientes a distintas bases",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": null,
+      "verified_at": "2026-11-28",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.lgss.rdl-8-2015.consolidated-2026-11-25",
+      "title": "Informational BOE LGSS snapshot at2026-11-25,ordinary profile and percentage provisions",
+      "issuer": "Agencia Estatal Boletín Oficial del Estado",
+      "source_type": "consolidated_informational_text",
+      "authority_level": "institutional_guidance",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724&p=20261125&tn=1",
+      "official_reference": "LGSS artículo 205; LGSS artículo 210; disposición transitoria novena; snapshot 2026-11-25",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": null,
+      "verified_at": "2026-11-28",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "es.rd-1415-2004.original",
+      "title": "Real Decreto1415/2004,original BOE publication,ordinary contribution remittance",
+      "issuer": "Agencia Estatal Boletín Oficial del Estado",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://www.boe.es/eli/es/rd/2004/06/11/1415/dof/spa/html",
+      "official_reference": "artículo 56.1",
+      "jurisdictions": [
+        "ES"
+      ],
+      "topics": [
+        "pensions",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "valid_from": null,
+      "valid_to": null,
+      "published_on": "2004-06-25",
+      "verified_at": "2026-11-28",
+      "source_status": "active"
+    },
+    {
+      "citation_id": "eu.regulation.2026-2359.ordinary-2026",
+      "title": "Regulation2026/2359,Article50(2),transitional application and scoped AnnexVIII/XI amendments",
+      "issuer": "European Parliament and Council of the European Union",
+      "source_type": "legislation",
+      "authority_level": "primary_law",
+      "url": "https://boe.es/buscar/doc.php?id=DOUE-L-2026-81651",
+      "official_reference": "OJ L2026/2359,2026-10-27;Article1(23),(36),(39),AnnexI(6),(9);Article91(3)(1)applicable2026-11-01",
+      "jurisdictions": [
+        "EU"
+      ],
+      "topics": [
+        "pensions",
+        "eu_coordination",
+        "article_50",
+        "scenario_projection"
+      ],
+      "valid_from": "2026-11-01",
+      "valid_to": null,
+      "published_on": "2026-10-27",
+      "verified_at": "2026-11-28",
+      "source_status": "active"
     }
   ],
   "documents": [
@@ -1578,6 +1778,101 @@
         "it.l-232-2016.original"
       ],
       "title": "Italian 2027-2028 pension adjustment source-to-path mapping v0.4"
+    },
+    {
+      "document_id": "knowledge.international.spanish-eu-ordinary-pension-2026-amounts-v0.1",
+      "path": "international/spanish-eu-ordinary-pension-2026-amounts-v0.1.md",
+      "topics": [
+        "pensions",
+        "base_reguladora",
+        "eu_coordination",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "jurisdictions": [
+        "ES",
+        "IT",
+        "EU"
+      ],
+      "citation_ids": [
+        "es.rdl-2-2023.original",
+        "es.lgss.rdl-8-2015.original",
+        "eu.regulation.988-2009.annex-viii",
+        "es.rdl-5-2023.original",
+        "es.lgss.rdl-8-2015.consolidated-2023-01-01",
+        "es.rdl-3-2026.original",
+        "es.ine.ipc-national-24077-base-2025",
+        "es.ine.ipc-2001-bridge.methodology",
+        "eu.regulation.883-2004.art57-annex-viii",
+        "eu.regulation.987-2009.art47",
+        "es.lgss.rdl-8-2015.consolidated-2026-11-25",
+        "es.rd-1415-2004.original"
+      ],
+      "title": "Spanish ordinary2026 EU scenario amounts candidate contract v0.1"
+    },
+    {
+      "document_id": "knowledge.international.spanish-eu-ordinary-pension-2026-amounts-v0.2",
+      "path": "international/spanish-eu-ordinary-pension-2026-amounts-v0.2.md",
+      "topics": [
+        "pensions",
+        "base_reguladora",
+        "eu_coordination",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "jurisdictions": [
+        "ES",
+        "IT",
+        "EU"
+      ],
+      "citation_ids": [
+        "es.rdl-2-2023.original",
+        "es.lgss.rdl-8-2015.original",
+        "eu.regulation.988-2009.annex-viii",
+        "es.rdl-5-2023.original",
+        "es.lgss.rdl-8-2015.consolidated-2023-01-01",
+        "es.rdl-3-2026.original",
+        "es.ine.ipc-national-24077-base-2025",
+        "es.ine.ipc-2001-bridge.methodology",
+        "eu.regulation.883-2004.art57-annex-viii",
+        "eu.regulation.987-2009.art47",
+        "es.lgss.rdl-8-2015.consolidated-2026-11-25",
+        "es.rd-1415-2004.original",
+        "eu.regulation.2026-2359.ordinary-2026"
+      ],
+      "title": "Spanish ordinary2026 EU scenario amounts candidate contract v0.2"
+    },
+    {
+      "document_id": "knowledge.international.spanish-eu-ordinary-pension-2026-amounts-v0.3",
+      "path": "international/spanish-eu-ordinary-pension-2026-amounts-v0.3.md",
+      "topics": [
+        "pensions",
+        "base_reguladora",
+        "eu_coordination",
+        "scenario_projection",
+        "evidence_provenance"
+      ],
+      "jurisdictions": [
+        "ES",
+        "IT",
+        "EU"
+      ],
+      "citation_ids": [
+        "es.rdl-2-2023.original",
+        "es.lgss.rdl-8-2015.original",
+        "eu.regulation.988-2009.annex-viii",
+        "es.rdl-5-2023.original",
+        "es.lgss.rdl-8-2015.consolidated-2023-01-01",
+        "es.rdl-3-2026.original",
+        "es.ine.ipc-national-24077-base-2025",
+        "es.ine.ipc-2001-bridge.methodology",
+        "eu.regulation.883-2004.art57-annex-viii",
+        "eu.regulation.987-2009.art47",
+        "es.lgss.rdl-8-2015.consolidated-2026-11-25",
+        "es.rd-1415-2004.original",
+        "eu.regulation.2026-2359.ordinary-2026"
+      ],
+      "title": "Spanish ordinary2026 EU scenario amounts candidate contract v0.3"
     }
   ]
 }

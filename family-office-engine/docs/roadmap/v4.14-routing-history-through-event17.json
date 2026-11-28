@@ -1,0 +1,285 @@
+{
+  "schema_version": "v414-routing-history/v1",
+  "archived_at": "2026-11-28T13:29:11.058721+00:00",
+  "reason": "Fresh explicit user resumption requests bounded remediation and completion of interrupted reviews; old phase used17of18events. Both16/17failed due usage limit after initial14/14hash verification; no final verdict or reviewer final hashes. Parent14/14finalhashcheck stable before remediation. New phase is one bounded correction plus the same two independent reviewer roles, no prior GO reopening.",
+  "routing": {
+    "policy_version": "4.0",
+    "tier": "critical",
+    "task_class": "normative",
+    "agent": "fo_normative_reviewer",
+    "model": "gpt-6.2-sol",
+    "reasoning_effort": "high",
+    "rationale": "Independent exact-version legal/calculation gate on new ordinary2026 ES/EU source-bound numeric candidate;existing transition/IT/oldscope approvals stay closed.",
+    "trace": [
+      {
+        "at": "2026-11-22T00:00:00Z",
+        "event": "selected",
+        "tier": "high",
+        "agent": "fo_architect",
+        "model": "gpt-6.2-astra",
+        "reasoning_effort": "medium",
+        "reason": "Bounded V4.14 recovery; retain exact historic verdicts, resolve supported output architecture."
+      },
+      {
+        "at": "2026-11-22T15:25:18.523295+00:00",
+        "event": "delegated",
+        "tier": "high",
+        "agent": "fo_architect",
+        "model": "gpt-6.2-astra",
+        "reasoning_effort": "medium",
+        "reason": "v414_architecture: one 300-second read-only request; resolve approved output paths and runtime identities before implementation; no historic source re-audit."
+      },
+      {
+        "at": "2026-11-22T15:34:21.358912+00:00",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v414_integrated_gate; one 300-second exact-hash request on manifest 32dc1b5346545630138721b579e3de0d10b063bca4daa3e8d6b63f44ba512f9a; changed-code safety plus original parent exit; no reopening resolved sources."
+      },
+      {
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v414_integrated_gate v0.1: technical and parent NO-GO, 20/20 exact start/end hashes. Bounded local remediation frozen as v0.2; no GO transfer or new delegated event."
+      },
+      {
+        "at": "2026-11-22T15:40:29.648038+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_v02_technical_gate event3/3; explicit user authorization; manifest 19656b03bce35485bc98c5bc4f2f93bafb2b0f7845a173d7b6d6ff120bbf488a, 21 files, two technical fixes only, single 300-second window."
+      },
+      {
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event3/3 v414_v02_technical_gate NO-GO, 21/21 exact start/end hashes. Current local v0.3 corrects path preflight/test scope; no new review or approval."
+      },
+      {
+        "at": "2026-11-22T15:48:08.047725+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Fresh user authorization: v414_v02_technical_gate review of v0.3, one 300s request on ec5de5da5951583022d4cf6b20269da88e39de008a4959b29df912a05a7edb12."
+      },
+      {
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v0.3 PASS scoped P2/P3, 21/21 initial/final hashes and manifest stable; 12 focused tests. Prior 1064-test full gate reused, not rerun."
+      },
+      {
+        "at": "2026-11-22T15:56:07.374480+00:00",
+        "event": "delegated",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_integration_runtime: finite service composition, per-stream observed event mapping and focused tests under v4.14-integration-contract.md. Parent owns CLI, docs and final gate; no full-suite loop."
+      },
+      {
+        "at": "2026-11-24T20:50:55.489191+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_v02_technical_gate: one 300-second read-only review of manifest a98c5a361c80d5d04690b4e34bbb3d2f51827db8401b1be46a156cd165960180 (38 files); Integrated candidate technical safety only. No immutable-source re-audit or full-suite loop."
+      },
+      {
+        "at": "2026-11-24T20:50:55.489212+00:00",
+        "event": "delegated",
+        "tier": "high",
+        "agent": "fo_financial_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v414_integration_financial: one 300-second read-only review of manifest a98c5a361c80d5d04690b4e34bbb3d2f51827db8401b1be46a156cd165960180 (38 files); Declared yearly schedule and scenario/benchmark financial semantics only. No immutable-source re-audit or full-suite loop."
+      },
+      {
+        "at": "2026-11-24T20:59:49.509915+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_v02_technical_gate: one corrected-version 300s review ONLY of prior concrete findings; manifest 2ab8a68c14302fed578b58949b7a7679016384fac9404abca9d93a6a4bf5ce9a,39 files. No broad re-audit or repeated full-suite run."
+      },
+      {
+        "at": "2026-11-24T20:59:49.509952+00:00",
+        "event": "delegated",
+        "tier": "high",
+        "agent": "fo_financial_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v414_integration_financial: one corrected-version 300s review ONLY of prior concrete findings; manifest 2ab8a68c14302fed578b58949b7a7679016384fac9404abca9d93a6a4bf5ce9a,39 files. No broad re-audit or repeated full-suite run."
+      },
+      {
+        "event": "reviewed",
+        "tier": "high",
+        "agent": "fo_financial_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Financial scoped PASS, four findings closed;39/39 hashes stable;exact31820.25/567537.25 reproduced."
+      },
+      {
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Technical scoped NO-GO: four residual variants of source protection/revision/conflict isolation;39/39 stable. One final formal guard correction, no broad re-audit."
+      },
+      {
+        "at": "2026-11-24T21:03:25.565662+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event10/11, v414_v02_technical_gate final residual-four check only,300s,manifest3326fd559319c96cffea686a3e7f9a4f1d72815d67a2f820410a4f8345079f44 (39 files). No more automatic technical rounds."
+      },
+      {
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Integrated v0.4 final residual technical PASS;39/39 exact start/end hashes,26 targeted tests; no residual within scope."
+      },
+      {
+        "at": "2026-11-24T21:04:47.945733+00:00",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Event11/11 v414_final_parent_gate; one300s original-parent gate, manifest3326fd559319c96cffea686a3e7f9a4f1d72815d67a2f820410a4f8345079f44,39files; no immutable-source re-audit, no retry."
+      },
+      {
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Event11/11 v414_final_parent_gate: original-parent NO-GO,39/39 exact initial/final hashes on3326fd559319c96cffea686a3e7f9a4f1d72815d67a2f820410a4f8345079f44. Three findings: guided transition inference, cross-binding canonical scope swap, no approved production EU numeric path. Not a timeout."
+      },
+      {
+        "at": "2026-11-24T21:19:57.235231+00:00",
+        "event": "delegated",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_eu_production_path: Event12/18 new ordinary Article52 source-bound production candidate; new KB/Rules/consumer/tests;900s authoring; no full suite or self-approval."
+      },
+      {
+        "at": "2026-11-24T21:19:57.235255+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v414_v02_technical_gate: Event13/18 v0.5 two residual transition findings only; exact4file hashes from39f06f53 manifest;300s read-only; prior1091 full gate reused."
+      },
+      {
+        "at": "2026-11-24T21:22:00Z",
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event13/18 v414_v02_technical_gate: scoped technical PASS for both v0.5 transition findings;27 targeted tests;manifest39f06f53feb8cb31342c5da7516f1fb0250a0a2a3ae508a9ed686b4e75784675 stable;4/4 scoped initial/final hashes stable. No parent closure."
+      },
+      {
+        "at": "2026-11-28T08:00:41.864658+00:00",
+        "event": "selected",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event14/18 planned: one 600s authoring continuation of interrupted event12; new concrete candidate or precise blocker, no implicit legal approval; no subdelegation."
+      },
+      {
+        "at": "2026-11-28T08:01:01.556297+00:00",
+        "event": "delegated",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event14/18 accepted by /root/v414_eu_candidate:600s bounded Knowledge/Rules/candidate tests authoring; no activation/subdelegation/full suite."
+      },
+      {
+        "at": "2026-11-28T08:24:49.927532+00:00",
+        "event": "selected",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event15/18 concrete ES/EU remediation,1200s authoring;new KB/Rules/runtime/public golden+negatives;no selfapproval or full sandbox suite. Event14 diagnosis preserved."
+      },
+      {
+        "at": "2026-11-28T08:25:12.614779+00:00",
+        "event": "delegated",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event15/18 accepted by /root/v414_eu_candidate:concrete contract+runtime authoring1200s,new scope beyond14diagnosis;no subdelegation/selfapproval/full sandbox suite."
+      },
+      {
+        "at": "2026-11-28T08:39:24.211709+00:00",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Event16/18 planned:one600s read-only source/period/predicate/formula review,manifest0401ef8ce8923957d74cc6f55297c27e1040c1b39927352b72418a2faf03d68a,14files.No broadre-audit;onebounded concrete remediation only."
+      },
+      {
+        "at": "2026-11-28T08:40:02.201507+00:00",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Event16/18 accepted by /root/v414_eu_normative_gate:one600s exact14file source/period/predicate/formula review;manifest0401ef8ce8923957d74cc6f55297c27e1040c1b39927352b72418a2faf03d68a;no oldgate re-audit."
+      },
+      {
+        "at": "2026-11-28T08:40:02.201507+00:00",
+        "event": "selected",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event17/18 planned:one600s independent technical exactcandidate review;different scope from16normative;no mutations until both verdicts;boundsource/identity/hash/schema/wizard/publicnegative/runtime correctness."
+      },
+      {
+        "at": "2026-11-28T08:40:33.173942+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Event17/18 accepted by /root/v414_eu_technical_gate:one600s independenttechnical read-only;exact14file0401ef8c manifest,sources/provenance/type/schema/wizard/newpublicnegative only,distinctfrom16normative."
+      }
+    ],
+    "delegation_budget": {
+      "max_events": 18,
+      "authorization": "2026-11-24 user explicitly authorizes necessary delegations for one source/period/conditions-bound EU pro-rata production path and residual reviews, avoiding loops and resolved questions. Controller allows at most7 additional events/18 total; one bounded remediation, no unchanged-hash retries. 2026-11-28 user explicitly authorizes ES/EU contract and calculation remediation including independent review/test/state; current cycle remains within18total.",
+      "scope": "New ordinary Article52 Spanish RG IT/ES path, exact-source Knowledge/Rules/consumer; residual v0.5 transition safety; technical and original-parent final reviews.",
+      "blocker": "Concrete source-bound scenario numeric candidate must be authored and reviewed; prior diagnosis is not a stop condition.14events used before new cycle."
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schema_version": "v414-routing-history/v1",
+  "archived_at": "2026-11-28T13:50:50.702169+00:00",
+  "reason": "Source/ES-EUremediationphase finished withtechnicalPASSv0.2andnormativeLIMITEDGOv0.3;newexplicituserrequestauthorizesonlycurrentWindows-evidenceandoriginalparentgateclosure,withoutreopeningpassedgates.",
+  "routing": {
+    "policy_version": "4.0",
+    "tier": "critical",
+    "task_class": "normative",
+    "agent": "fo_normative_reviewer",
+    "model": "gpt-6.2-sol",
+    "reasoning_effort": "high",
+    "rationale": "Resume interrupted independent review on concrete bounded-correction v0.2,exacthash/source/period/predicates;second independent technical review covers only known software findings.",
+    "trace": [
+      {
+        "at": "2026-11-28T13:29:11.058721+00:00",
+        "event": "selected",
+        "tier": "medium",
+        "agent": "fo_implementer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Parent applies one bounded collected-finding correction;no new implementer delegation. New phase resumes two interrupted reviewer roles once on new exactv0.2candidate,600s each. Historical17events preserved inhashbound archive,not discarded."
+      },
+      {
+        "at": "2026-11-28T13:35:05.277074+00:00",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v0.2manifest4efd4f3e408c5a443b274e8111f8fc94a18ba26fefa930015dfec08d636d2d5b,15files;resume /root/v414_eu_normative_gate once600s onknown legal findings and unresolvednewpath checks;historical16PENDING preserved."
+      },
+      {
+        "at": "2026-11-28T13:35:54.906964+00:00",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Same reviewer /root/v414_eu_normative_gate accepted one600s v0.2resume:residuallegal/findings+unfinishednewpathchecks;15filemanifest4efd4f3e408c5a443b274e8111f8fc94a18ba26fefa930015dfec08d636d2d5b. HistoricalusageinterruptionPENDINGpreserved;newcycledefault2events."
+      },
+      {
+        "at": "2026-11-28T13:35:54.906964+00:00",
+        "event": "delegated",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "Same reviewer /root/v414_eu_technical_gate accepted one600s v0.2resume:fiveknownsoftwarefindings+unfinishedtechnicalchecks;15filemanifest4efd4f3e408c5a443b274e8111f8fc94a18ba26fefa930015dfec08d636d2d5b. HistoricalusageinterruptionPENDINGpreserved;newcycledefault2events."
+      },
+      {
+        "at": "2026-11-28T13:39:18.927974+00:00",
+        "event": "reviewed",
+        "tier": "review",
+        "agent": "fo_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "medium",
+        "reason": "v0.2technicalPASS;initial/final15/15hashesstable;141tests/293subtests0/0/0;allfiveknownfindingscured;sourcebyte-single-read/output-protection/escape/revisionchecksPASS."
+      },
+      {
+        "at": "2026-11-28T13:39:18.927974+00:00",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v0.2scopedNO-GO solelyArticle50(2)unconditionalnonreductionpredicate;15/15initial/finalstable. Othernewsource/formula/LGSS209/INEchecksconfirmed. Acceptance:institutionconfirmednoexclusionrequired+basisbothstatesconditionsmet,pairedsameinputsadverseorunknown=>nullgap."
+      },
+      {
+        "at": "2026-11-28T13:40:54.649535+00:00",
+        "event": "selected",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Finalone300sArticle50(2)residualgate;newv0.3manifestc8e451c974409ea017b0a42037cb99bf9bc99c4197beafed86fa3afa4a52333d,15files;Rules61bfa3b6f9d67471c1b59d474076ab9cc83cc91e757762a1d454acff0f3080ad;141/294PASS;no reopenedclosedgates/no furthercycle."
+      },
+      {
+        "at": "2026-11-28T13:41:30.272830+00:00",
+        "event": "delegated",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "Samev414_eu_normative_gateaccepted finalone300sArticle50residualexactv0.3;c8e451c974409ea017b0a42037cb99bf9bc99c4197beafed86fa3afa4a52333d,15files.No moreautomaticreviewcycles."
+      },
+      {
+        "at": "2026-11-28T13:44:24.417515+00:00",
+        "event": "reviewed",
+        "tier": "critical",
+        "agent": "fo_normative_reviewer",
+        "model": "gpt-6.2-sol",
+        "reasoning_effort": "high",
+        "reason": "v0.3LIMITEDGOnormative forDecember2026ES/ITscenario numericcontract,externallyconfirmedbothlegislationsconditionsbasis;soleArticle50residualresolved.Initial/final15/15stablemanifestc8e451c974409ea017b0a42037cb99bf9bc99c4197beafed86fa3afa4a52333d,pack61bfa3b6f9d67471c1b59d474076ab9cc83cc91e757762a1d454acff0f3080ad.141tests/294subtests;no individualright or parentapproval."
+      }
+    ],
+    "delegation_budget": {
+      "max_events": 3,
+      "authorization": "User explicitly requests V4.14 named-candidate finding remediation and completion of independent interrupted reviews. Under playbook07/12 first concrete NO-GO -> one bounded correction and exact changed-version gate; controller records a finite one-event exception to the default2 to complete that already-authorized correction/review,not a broad or unchanged-hash retry. Historical17of18phase remains archived unchanged.",
+      "scope": "Current bounded v0.2 knownfindingscycle plus onlyv0.3Article50(2)residualpredicate correction and one final300s normative exact-hash acceptance gate;no additionaltechnical/source/parentaudit spawn.",
+      "blocker": "Currentphase3eventsfinished:technicalPASSv0.2;residualnormativeLIMITEDGOv0.3. No more automaticreviews;onlyexternalcurrentWindowsfullgate andoriginalparentexitremain."
+    }
+  }
+}

@@ -15,7 +15,9 @@ Questo documento è il punto di ingresso unico per la pianificazione del progett
 | 6 | `roadmap-v5-ai-orchestration.md` | Orchestrazione AI sopra strumenti deterministici | `done` |
 | 7 | `roadmap-v6-operations-compliance.md` | Esercizio continuo, sicurezza e compliance | `deferred` |
 
-Recupero autorizzato 2026-11-22: V4B torna `in_progress` per completare V4.14, ancora `blocked`. Il precedente handoff del 2026-11-21 resta valido soltanto per le proiezioni finanziarie indipendenti V4.15-V4.20 secondo ADR; i loro stati `done` e i gate storici restano validi nel proprio scope. V3 e V4 sono `done`; tutti gli incrementi V5 fino a V5.12a sono completati e V5 passa a `done`. V6 resta `deferred`. Il lavoro residuo corrente e' il recupero V4.14, non l'assenza di lavoro pianificato.
+Checkpoint finale2026-11-28: V4.14 e `done` dopo gate originale integrato GO e suite Windows corrente1102Engine/6Rules/7citazioni,tutti0failure/error/skip. Tutti i97incrementi V4B sono `done`;V4B rimane `in_progress` soltanto come checkpoint operativo completato,per mantenere l'invariante di una sola roadmap attiva. Non resta un incremento funzionale autorizzato da selezionare. V5 resta `done` con tutti i23item completati;V6 resta `deferred` con tutti i33item elencati gia completati. Non riaprire item done o inventare un successore:serve una nuova voce o transizione esplicita con obiettivo e dipendenze.
+
+Storico:il recupero autorizzato2026-11-22 aveva riattivato V4B per V4.14,allora blocked. Il precedente handoff2026-11-21 e i completamenti indipendenti V4.15-V4.20 rimangono validi nel proprio scope scenario_projection. I NO-GO storici e le approvazioni limitate non vengono riscritti dalla chiusura attuale.
 
 Nota di governance: `roadmap_audit.py` richiede esattamente una roadmap con stato `in_progress`. Quando tutti gli incrementi della roadmap attiva sono `done`, mantenere quella roadmap `in_progress` fino a quando la transizione successiva non apre formalmente la nuova roadmap attiva nello stesso aggiornamento.
 

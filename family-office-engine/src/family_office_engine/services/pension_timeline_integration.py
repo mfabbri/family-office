@@ -19,6 +19,7 @@ from family_office_engine.services.pension_entitlement_timeline import (
     validate_pension_entitlement_timeline,
 )
 from family_office_engine.services.spanish_eu_theoretical_pension import calculate_spanish_eu_theoretical_pension
+from family_office_engine.services import spanish_eu_ordinary_pension
 from family_office_engine.services.work_exit_feasibility import (
     INPUT_SCHEMA_VERSION as WORK_EXIT_INPUT_VERSION,
     inps_documentary_projection,
@@ -536,6 +537,8 @@ def _documentary_benchmark(
 def _spanish_projections(
     identity: dict[str, str], declarations: dict[str, Any], as_of: date, captures: _CapturedSources,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None, list[dict[str, Any]]]:
+    if "ordinary_2026" in declarations:
+        return _ordinary_2026_projections(identity, declarations, as_of, captures)
     if not {"pro_rata_input_ref", "reconciliation_ref", "theoretical_rule_pack"} <= declarations.keys():
         return None, None, [_gap("spanish_scenario_inputs_missing", "Spanish scenario input, reconciliation or theoretical rule pack is missing.")]
     try:
@@ -587,6 +590,125 @@ def _spanish_projections(
         }, gaps + _service_gaps(snapshot["data_gaps"], "spanish_pro_rata")
     except _SOURCE_ERRORS:
         return theoretical, None, gaps + [_gap("eu_pro_rata_input_or_rule_invalid", "EU pro-rata scope, provenance or freshness could not be validated.")]
+
+
+def _ordinary_2026_projections(
+    identity: dict[str, str], declarations: dict[str, Any], as_of: date, captures: _CapturedSources,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None, list[dict[str, Any]]]:
+    candidate = spanish_eu_ordinary_pension
+    try:
+        _, rules_bytes, rule_ref = captures.rule("cross-border", candidate.RULE_PACK_NAME)
+        rules = candidate.load_candidate_rules(rules_bytes)
+        intake = declarations["ordinary_2026"]
+        evidence = _json_object(_verified_candidate_document(intake["evidence"], captures))
+        scenario_ref = declarations["pro_rata_input_ref"]
+        reconciliation_ref = declarations["reconciliation_ref"]
+        scenario_path, scenario_bytes = captures.local(scenario_ref)
+        reconciliation_path, reconciliation_bytes = captures.local(reconciliation_ref)
+        scenario = _json_object(scenario_bytes)
+        reconciliation = _json_object(reconciliation_bytes)
+        _check_declared_identity(scenario, identity)
+        _check_declared_identity(reconciliation, identity)
+        input_digests = {"scenario": _digest(scenario_bytes), "reconciliation": _digest(reconciliation_bytes)}
+        if evidence.get("subject") != identity or evidence.get("input_sha256") != input_digests:
+            raise candidate.OrdinaryPensionEvidenceError(
+                "ordinary_2026_evidence_subject_or_input_mismatch", "Candidate evidence must identify the benefit stream and both captured scenario inputs."
+            )
+        reserved = {
+            scenario_path, reconciliation_path,
+            _workspace_path(captures.workspace, intake["evidence"]["source_ref"]),
+        }
+        _verify_candidate_attestations(evidence, intake["documents"], rules, as_of, captures, reserved, scenario)
+        result = candidate.calculate_ordinary_pension(scenario, reconciliation, evidence, rules, as_of)
+    except candidate.OrdinaryPensionEvidenceError as exc:
+        return None, None, [_gap(exc.code, str(exc), service="spanish_ordinary_2026")]
+    except _SOURCE_ERRORS:
+        return None, None, [_gap("ordinary_2026_candidate_evidence_invalid", "Candidate sources, byte bindings or scope could not be validated.", service="spanish_ordinary_2026")]
+
+    provenance = [
+        _reference(scenario_ref, scenario_bytes),
+        _reference(reconciliation_ref, reconciliation_bytes),
+        intake["evidence"],
+        *({"role": role, **document} for role, document in intake["documents"].items()),
+    ]
+    report = {
+        "classification": "scenario_projection",
+        "service_schema_version": candidate.SCHEMA_VERSION,
+        "status": rules["status"],
+        "candidate_month": result["candidate_month"],
+        "source_inputs": provenance,
+        "rule_pack": _rule_metadata(rule_ref, rules),
+        "calculation": result["calculation"],
+    }
+    return (
+        {**report, "amount": result["theoretical"]},
+        {**report, "amount": result["pro_rata"], "ratio": result["ratio"]},
+        [],
+    )
+
+
+def _verified_candidate_document(reference: dict[str, str], captures: _CapturedSources) -> bytes:
+    _, contents = captures.local(reference["source_ref"])
+    if not contents or _digest(contents) != reference["digest_sha256"]:
+        raise spanish_eu_ordinary_pension.OrdinaryPensionEvidenceError(
+            "ordinary_2026_evidence_hash_mismatch", "The captured candidate evidence document must match its pinned SHA-256."
+        )
+    return contents
+
+
+def _verify_candidate_attestations(
+    evidence: dict[str, Any],
+    documents: dict[str, dict[str, str]],
+    rules: dict[str, Any],
+    as_of: date,
+    captures: _CapturedSources,
+    reserved_sources: set[Path],
+    scenario: dict[str, Any],
+) -> None:
+    error = spanish_eu_ordinary_pension.OrdinaryPensionEvidenceError(
+        "ordinary_2026_source_attestation_unproved", "External verification of the institutional and INE records is required."
+    )
+    attestations = evidence.get("attestations")
+    authorities = rules["evidence"]["required_document_authorities"]
+    if not isinstance(attestations, dict) or attestations.keys() != authorities.keys():
+        raise error
+    distinct_paths = set(reserved_sources)
+    distinct_digests = {_digest(captures.payloads[path]) for path in reserved_sources}
+    for role, authority in authorities.items():
+        reference = documents[role]
+        attestation = attestations[role]
+        if (
+            not isinstance(attestation, dict)
+            or attestation.get("document") != reference
+            or attestation.get("verified_original_sha256") != reference["digest_sha256"]
+            or attestation.get("authority") != authority
+            or attestation.get("status") != "externally_verified"
+            or not isinstance(attestation.get("verifier_ref"), str)
+            or not attestation["verifier_ref"].strip()
+            or not isinstance(attestation.get("document_locator"), str)
+            or not attestation["document_locator"].strip()
+        ):
+            raise error
+        try:
+            issued = _date(attestation["issued_on"])
+            verified = _date(attestation["verified_on"])
+            if attestation["claims_sha256"] != spanish_eu_ordinary_pension.attested_claims_digest(evidence, role):
+                raise ValueError("The extraction claims differ from the external verification receipt.")
+            earliest = (
+                _date(evidence["last_spanish_payment_date"]) if role == "coordination"
+                else date.fromisoformat(rules["cpi"]["index_reference_month"] + "-01") if role == "historical_ipc"
+                else max(_date(period["end_date"]) for period in scenario["insurance_periods"] if period["country"] == "IT")
+            )
+        except (TypeError, ValueError, KeyError):
+            raise error from None
+        if not issued <= verified <= as_of or (earliest is not None and issued < earliest):
+            raise error
+        path = _workspace_path(captures.workspace, reference["source_ref"])
+        if path in distinct_paths or reference["digest_sha256"] in distinct_digests:
+            raise error
+        _verified_candidate_document(reference, captures)
+        distinct_paths.add(path)
+        distinct_digests.add(reference["digest_sha256"])
 
 
 def _service_gaps(gaps: list[dict[str, Any]], service: str) -> list[dict[str, Any]]:

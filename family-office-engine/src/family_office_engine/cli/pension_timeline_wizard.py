@@ -69,6 +69,53 @@ def _write(root: Path, path: Path, value: dict[str, Any]) -> None:
     temporary.replace(target)
 
 
+def _ordinary_2026_intake(root: Path, identity: dict[str, str], sources: dict[str, str], as_of: str) -> dict[str, Any]:
+    print("Candidato di stima ES/UE per dicembre 2026, con review normativa pendente.")
+    ref = _ref(root, _text("Percorso dell'estrazione verificata, con i tre documenti originali INSS, INPS e INE"))
+    try:
+        raw = _within(root, root / ref.removeprefix("workspace-ref:")).read_bytes()
+        evidence = json.loads(raw)
+        input_hashes = {
+            name: hashlib.sha256(_within(root, root / sources[field].removeprefix("workspace-ref:")).read_bytes()).hexdigest()
+            for name, field in (("scenario", "pro_rata_input_ref"), ("reconciliation", "reconciliation_ref"))
+        }
+        if (
+            evidence.get("schema_version") != "spanish-eu-ordinary-pension-evidence/v2"
+            or evidence.get("subject") != identity or evidence.get("input_sha256") != input_hashes
+        ):
+            raise ValueError("Source identity mismatch.")
+        documents = {}
+        for role in ("coordination", "italian_periods", "historical_ipc"):
+            document = evidence["attestations"][role]["document"]
+            local_ref = _ref(root, document["source_ref"])
+            payload = _within(root, root / local_ref.removeprefix("workspace-ref:")).read_bytes()
+            if document != {"source_ref": local_ref, "digest_sha256": hashlib.sha256(payload).hexdigest()} or not payload:
+                raise ValueError("Source digest mismatch.")
+            documents[role] = document
+    except (OSError, ValueError, TypeError, KeyError, AttributeError) as exc:
+        raise PensionTimelineWizardError("L'estrazione e gli originali devono corrispondere alla prestazione e alle fonti di scenario.") from exc
+    declaration = {**sources, "ordinary_2026": {
+        "evidence": {"source_ref": ref, "digest_sha256": hashlib.sha256(raw).hexdigest()},
+        "documents": documents,
+    }}
+    # Prepare-only must apply the same complete checks as the public calculator.
+    # It must not persist a ready declaration which the runtime will reject.
+    from family_office_engine.services.pension_timeline_integration import integrate_pension_timeline
+
+    request = {
+        "schema_version": "pension-timeline-integration-input/v1",
+        "household_id": identity["household_id"], "household_members": [identity["member_id"]],
+        "as_of_date": as_of,
+        "streams": [{"member_id": identity["member_id"], "jurisdiction": identity["jurisdiction"],
+                     "stream_id": identity["stream_id"], "spanish": declaration}],
+    }
+    report = integrate_pension_timeline(request, workspace_root=root)["streams"][0]
+    if not report["scenario_projection"]["spanish_pro_rata"]:
+        gaps = ", ".join(gap["code"] for gap in report["data_gaps"])
+        raise PensionTimelineWizardError("L'evidenza importata non consente il calcolo: " + gaps)
+    return declaration
+
+
 def _proof(root: Path, *, event: str, event_date: str, as_of: str,
            jurisdiction: str, role: str, authority: str) -> dict[str, Any] | None:
     print(f"Fonte per {role}; ruolo dichiarato: {authority}. Se non verificabile, lascia vuoto: restera' un gap.")
@@ -253,11 +300,15 @@ def prepare_pension_timeline_request(input_path: Path, *, workspace_root: Path, 
             if source:
                 reconciliation = _text("Riconciliazione contributiva spagnola importata (percorso relativo)")
                 if reconciliation:
+                    sources = {"pro_rata_input_ref": _ref(root, source), "reconciliation_ref": _ref(root, reconciliation)}
                     stream["spanish"] = {"theoretical_rule_pack": "spanish-eu-theoretical-pension.json",
                         "pro_rata_rule_pack": "eu-pension-coordination-it-es-v8.json",
-                        "pro_rata_input_ref": _ref(root, source), "reconciliation_ref": _ref(root, reconciliation)}
-                    if _text("Le due fonti di scenario appartengono a questa persona/prestazione? Scrivi CONFERMO; altrimenti gli importi resteranno sconosciuti").upper() == "CONFERMO":
-                        identity = {"household_id": household, "member_id": member, "jurisdiction": country, "stream_id": stream_id}
+                        **sources}
+                    identity = {"household_id": household, "member_id": member, "jurisdiction": country, "stream_id": stream_id}
+                    choice = _text("Fonti della stessa prestazione: CONFERMO per lo scenario disponibile, CANDIDATO per la stima ES/UE di dicembre 2026 con documenti verificati").upper()
+                    if choice == "CANDIDATO":
+                        stream["spanish"] = _ordinary_2026_intake(root, identity, sources, request["as_of_date"])
+                    elif choice == "CONFERMO":
                         for field in ("pro_rata_input_ref", "reconciliation_ref"):
                             original_ref = stream["spanish"][field]
                             original_path = _within(root, root / original_ref.removeprefix("workspace-ref:"))
@@ -295,6 +346,9 @@ def render_pension_timeline_report(report: dict[str, Any]) -> None:
             item = projection.get(name)
             if item is not None:
                 print(f"  Scenario {name}: {item.get('status', 'partial')}; scenario_projection, mai diritto verificato.")
+                if item.get("service_schema_version") == "spanish-eu-ordinary-pension-scenario/v1" and item.get("amount"):
+                    value = item["amount"]
+                    print(f"    {value['monthly_gross_amount']} EUR lordi mensili; ramo {item['calculation']['winning_branch']}.")
         if stream.get("documentary_benchmark") is not None:
             print("  Benchmark documentale INPS: separato dalla stima di scenario; non ricalcolato.")
     gaps = report.get("data_gaps", [])
